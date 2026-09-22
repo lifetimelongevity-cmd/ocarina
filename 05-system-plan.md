@@ -137,7 +137,7 @@ Reine Funktion, beide Sichten rechnen sie selbst aus demselben Dokument. Das Dok
 | Items | alle mit Status | alle mit Status (grau = nicht, Kreuz = verloren) |
 | Quests | alle, mit Buttons „bestanden" / „verloren" | alle mit Status, die nächste hervorgehoben, mit Ort und Beschreibung |
 | Ziffern | alle vier Werte | nur bekannte, Rest `?` |
-| Ereignisse | Liste, „Rückgängig", „Korrektur" | nichts |
+| Buchungen | Liste mit Grund, löschbar | nichts |
 
 Dennis schreibt in v0 nichts. Er wählt Items nur zum Ansehen. Alles, was er im Spiel tut, sagt er dem Quest Master, der es bucht. Eigene Aktionen für Dennis sind Stufe 2.
 
@@ -189,12 +189,12 @@ Wenn `derive` genau das liefert, ist v0 fertig. Der Test zeigt auch die Reihenfo
 |---|---|---|
 | **1 · Inhalte** | Sidequests konkret, Beschreibungen, Icons, Orte | Nur Konfiguration |
 | **1b · Startitems** | Ring der Rieke, Proviant, Log-Pose zurück, sobald Dennis Aktionen hat | Konfiguration plus Stufe 2 |
-| **2 · Aktionen von Dennis** | Items einsetzen, Packs ausgeben, als Anfrage mit Bestätigung | Ereignisse `anfrage` und `antwort` |
+| **2 · Aktionen von Dennis** | Items einsetzen, Packs ausgeben, als Anfrage mit Bestätigung | Liste `anfragen` im Dokument, jede mit Status offen / bestätigt / abgelehnt |
 | **3 · Ergebnisse mit Zahlen** | Treffer 0 bis 5, Umschläge 1 bis 3, Siege 0 bis 3, Raten am Kästchen | `quest` bekommt `wert`, Konfiguration bekommt `wert -> Effekt` |
-| **4 · Stufen bei Items** | Kleine und große Pistole als Linie mit „ausgerüstet" | `linie`, `stufe`, Ereignis `ausruesten` |
+| **4 · Stufen bei Items** | Kleine und große Pistole als Linie mit „ausgerüstet" | `linie`, `stufe`, Feld `ausgeruestet` im Dokument |
 | **5 · Flüche** | Negative Effekte nach verlorener Quest, erlösbar | Status-Typ `fluch`, `lose.fluch` |
 | **6 · Verwahrung** | Token beim Bund, Riekes Botschaft | Item-Status `beim_bund` |
-| **7 · Karte und Chronik** | Position, öffentliche Chronik im Menü | Ereignis `position`, Projektion |
+| **7 · Karte und Chronik** | Position, öffentliche Chronik im Menü | Feld `position` im Dokument, Projektion |
 | **8 · Funkloch** | QR-Übergabe des Zustands | Nur Transport |
 
 Detailideen zu Stufe 2 bis 8 stehen in der Git-Historie dieser Datei (Commit „Add system plan") und in `00-spielanleitung.md`.
