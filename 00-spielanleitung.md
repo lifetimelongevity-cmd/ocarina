@@ -256,11 +256,7 @@ Flüche sind die Kehrseite der Fähigkeiten: ein negativer Regel-Effekt, der nac
 
 ## 10. Rollen, Zustände und Menü
 
-Wie das Spiel am Handy läuft, steht in `05-system-plan.md`. Kurzfassung:
-
-- **Quest Master** erfasst auf seinem Handy Ergebnisse, Buchungen, Flüche und Korrekturen. Er ist die einzige Quelle der Wahrheit.
-- **Dennis** sieht in seinem Menü nur die Folgen: Inventar, Berry, bekannte Ziffern, Status der Prüfungen, die nächste Prüfung, Flüche, Karte. Er wählt Items (ausrüsten) und stellt Anfragen (kaufen, einsetzen, erlösen), die der Quest Master bestätigt.
-- Zustände werden nie direkt umgeschaltet, sondern aus einer Ereignis-Chronik abgeleitet. Die Statuswerte pro Entität stehen in `05-system-plan.md` §3.
+Wie das Spiel am Handy läuft, steht in `05-system-plan.md`. Kurzfassung: Der Quest Master bucht Ergebnisse auf seinem Handy, Dennis' Menü zeigt nur die Folgen. In der ersten Version (v0) gibt es genau vier Begriffe (Quest, Item, Berry, Ziffer) und drei Ereignisse (quest, korrektur, undo). Flüche, Anfragen, Stufen und Verwahrung aus diesem Regelwerk kommen als Ausbaustufen dazu.
 
 ---
 

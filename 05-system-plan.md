@@ -1,261 +1,143 @@
-# System-Plan: Quest Master, Held und der Zustand des Spiels
+# System-Plan: Kernlogik v0 und Ausbaustufen
 
-Plan für die App hinter dem Game-Menü. Kein Code, nur die Struktur, auf die Code und Menü aufgesetzt werden. Regeln des Spiels stehen in `00-spielanleitung.md`, dieses Dokument beschreibt, **wer** im Spiel **was** am Handy tut und **wie** der Zustand entsteht.
-
-Kernentscheidung: **Der Zustand wird nie direkt umgeschaltet.** Er ist immer die Folge von Ereignissen, die der Quest Master erfasst (Prüfung abgeschlossen, Berry bezahlt, Fluch ausgesprochen). Das Menü von Dennis zeigt nur, was daraus folgt.
+Ziel: eine kleine, in sich geschlossene Logik, auf der das Menü und die Quest-Master-Konsole aufsetzen. Erst wenn v0 mit zwei Handys rund läuft, kommen Aufgaben, konkrete Items und weitere Regeln dazu (Teil B). Nichts in Teil B darf v0 umbauen, es kommt nur obendrauf.
 
 ---
 
-## 1. Rollen und Geräte
+## Teil A: Kernlogik v0
 
-| Rolle | Gerät | Darf | Sieht |
-|---|---|---|---|
-| **Quest Master (QM)** | eigenes Handy, geschützter Link | Alles erfassen und korrigieren: Prüfungen starten und abschließen, Encounter ziehen, Berry buchen, Items geben und nehmen, Flüche aussprechen und erlösen, Anfragen von Dennis bestätigen oder ablehnen, Position setzen, rückgängig machen | Alles, auch Geheimes: die vier Code-Ziffern, Umschlag-Inhalte, Steckbrief-Texte, Rieke-Antworten, Regel-Spickzettel, Zeitplan, komplette Chronik |
-| **Held (Dennis)** | eigenes Handy, Spieler-Link | Nur Spieler-Aktionen: Items wählen (ausrüsten), Fähigkeiten einsetzen, Berry ausgeben (Steckbrief, Fluch erlösen, Hinweis), Proviant und Ring der Rieke einsetzen. Jede Aktion mit Wirkung ist eine **Anfrage**, die der QM bestätigt. | Sein Inventar, Berry-Stand, bekannte Ziffern, Status aller Prüfungen, die **nächste Prüfung** (Name, Ort, öffentliche Beschreibung), aktive Flüche, Karte, öffentliche Chronik |
-| **Bund (Zuschauer)** | beliebig, offener Link | Nichts | Dasselbe wie Dennis, ohne Aktionen. Optional. |
+### A1. Vier Begriffe, mehr nicht
 
-Warum Anfrage statt Direktwirkung: Jede Spieler-Aktion hat ein physisches Gegenstück (QM übergibt den Steckbrief, nimmt die Berry-Münze, nimmt das Fluch-Band ab). Die Bestätigung am Handy des QM ist derselbe Handgriff. So kann Dennis nicht versehentlich oder heimlich etwas auslösen, und es gibt genau eine Quelle der Wahrheit.
+| Begriff | Was es ist | Zustand |
+|---|---|---|
+| **Quest** | Eine Aufgabe in fester Reihenfolge (Kernprüfung oder kleine Aufgabe, in v0 kein Unterschied) | `offen`, `aktiv`, `bestanden`, `verloren` |
+| **Item** | Ein Gegenstand oder eine Fähigkeit mit einem Satz Wirkung. In v0 kein Unterschied zwischen Ausrüstung, Fähigkeit, Startitem. | `nicht`, `besitz`, `verloren` |
+| **Berry** | Dennis' Anteil an den 10 Packs | Zahl 0 bis 10, Rest gehört dem Bund |
+| **Ziffer** | Eine der vier Stellen des Kästchen-Codes | `unbekannt` oder `bekannt` (mit Wert) |
 
-Ausnahme ohne Bestätigung: **Ausrüsten** (z. B. welche Wasserpistole er in der Hand hält, wenn er beide besitzt). Das ändert keine Ressource und wird sofort übernommen, aber für den QM sichtbar protokolliert.
+Abgeleitet, nicht gespeichert: **nächste Quest** = die erste Quest mit Status `offen`. Es gibt höchstens eine `aktiv`.
 
----
-
-## 2. Drei Schichten: Konfiguration, Ereignisse, Zustand
+### A2. Konfiguration (vor dem Tag, ändert sich am Spieltag nicht)
 
 ```
-Konfiguration (statisch, vor dem Tag)     Ereignisse (append-only, am Tag)       Zustand (abgeleitet)
-game-data.json                             events[]                               state = reduce(config, events)
-  Prüfungen + Ergebnisregeln                 trial.result {auge, treffer: 4}        berry, digits, trials,
-  Encounter-Karten                           berry.transfer {-1, "Steckbrief"}      equipment, abilities,
-  Ausrüstungslinien, Fähigkeiten, Flüche     curse.apply {schwere}                  curses, custody, requests,
-  Preisliste, Stationen, Zeitplan            revert {eventId}                       nextQuest, log
-  Geheimnisse (Code, Umschläge, ...)
+config = {
+  start:  { berry: 3, items: ["ring_rieke", "proviant", "logpose"] },
+  code:   [7, 4, 2, 9],                       // geheim, nur der Quest Master sieht es
+  items:  [ { id, name, wirkung, icon } ],     // Liste aller Items, die es im Spiel gibt
+  quests: [                                    // in Spielreihenfolge
+    { id, name, ort, beschreibung,             // beschreibung ist öffentlich (Dennis sieht sie)
+      win:  { berry: +1, items: ["token"], ziffer: 2 },
+      lose: { berry: -1, items: ["token"] }    // items bei lose = werden ihm abgenommen
+    }
+  ]
+}
 ```
 
-- **Konfiguration** ändert sich am Spieltag nicht. Sie enthält auch die Regel „welches Ergebnis führt zu welchen Effekten" (§4).
-- **Ereignisse** sind die einzige Schreiboperation. Nichts wird gelöscht, ein Fehler wird durch ein `revert`-Ereignis aufgehoben. Daraus folgen: Undo, nachvollziehbare Chronik für den Abend, und Offline-Betrieb (Ereignisse können lokal gepuffert und später zusammengeführt werden).
-- **Zustand** wird bei jeder Änderung neu berechnet. Beide Views (QM, Held) rendern denselben Zustand, nur mit unterschiedlicher **Projektion** (§5): der Held bekommt keine Geheimnisse.
+Regel: Alles, was eine Quest bewirken kann, steht in `win` und `lose`. Drei Felder: `berry` (Zahl), `items` (Liste), `ziffer` (Index 1 bis 4, nur bei win). Keine anderen Effekte in v0.
 
----
+### A3. Drei Ereignisse
 
-## 3. Zustände pro Entität (durchdacht)
+Der Quest Master schreibt, sonst niemand. Ereignisse werden nur angehängt, nie geändert.
 
-Nur diese Werte gibt es. Übergänge passieren ausschließlich durch Ereignisse.
-
-### 3.1 Prüfung
-
-| Status | Bedeutung | Wer setzt |
+| Ereignis | Payload | Wirkung |
 |---|---|---|
-| `offen` | Noch nicht dran | Standard |
-| `naechste` | Die nächste im Ablauf, im Menü hervorgehoben | abgeleitet: erste `offen` in Reihenfolge des Zeitplans |
-| `aktiv` | QM hat sie gestartet, läuft gerade | `trial.start` |
-| `bestanden` | Abgeschlossen mit Gewinn-Bedingung | `trial.result` |
-| `verloren` | Abgeschlossen mit Verlust-Bedingung | `trial.result` |
+| `quest` | `{ id, outcome: "bestanden" \| "verloren" }` | Quest bekommt den Status. Effekte aus `win` bzw. `lose` werden angewendet: Berry addieren (Deckel 0 bis 10), Items auf `besitz` bzw. `verloren`, Ziffer auf `bekannt`. |
+| `korrektur` | `{ berry?: ±n, item?: {id, status}, grund }` | Freie Buchung: Käufe, Strafen, Nachbesserung. Alles, was v0 nicht als Regel kennt, läuft hier durch, mit Grund im Text. |
+| `undo` | leer | Das letzte Ereignis, das kein `undo` ist, wird ignoriert. |
 
-Es gibt höchstens eine `aktiv`. `bestanden` und `verloren` tragen das **Ergebnis** (z. B. `treffer: 4`, `umschlaege: 3`, `siege: 2`) und die daraus **angewendeten Effekte**. Die Prophezeiung hat zusätzlich `abgegeben` (Umschläge versiegelt, Abrechnung kommt später).
+Optional als viertes, wenn man es am Tag will: `start { id }` setzt eine Quest auf `aktiv`. Ohne dieses Ereignis ist die nächste Quest einfach die erste offene.
 
-### 3.2 Ziffer
+### A4. Zustand = Konfiguration + Ereignisse
 
-| Status | Bedeutung |
-|---|---|
-| `unbekannt` | Dennis kennt sie nicht |
-| `bekannt` | Durch Prüfung erspielt, Wert wird angezeigt |
-| `gekauft` | Am Kästchen für 1 Berry gekauft |
-| `geraten` | Am Kästchen erraten |
+```
+function reduce(config, events) {
+  state = { berry: config.start.berry, items: {}, quests: {}, ziffern: [null, null, null, null] }
+  für jedes Item in config.items:   state.items[id] = "nicht"
+  für jedes Startitem:              state.items[id] = "besitz"
+  für jede Quest in config.quests:  state.quests[id] = "offen"
 
-Der QM kennt alle vier Werte von Anfang an (Konfiguration, geheim). `digit.reveal` macht einen Wert für Dennis sichtbar.
+  aktive = events ohne die von undo aufgehobenen
+  für jedes Ereignis e in aktive:
+    wenn e.type == "quest":
+      effekt = outcome == "bestanden" ? quest.win : quest.lose
+      state.quests[e.id] = e.outcome
+      state.berry = clamp(state.berry + (effekt.berry || 0), 0, 10)
+      für item in effekt.items:  state.items[item] = outcome == "bestanden" ? "besitz" : "verloren"
+      wenn effekt.ziffer:        state.ziffern[effekt.ziffer - 1] = config.code[effekt.ziffer - 1]
+    wenn e.type == "korrektur":
+      berry und item wie angegeben
+  state.next = erste Quest mit Status "offen"
+  return state
+}
+```
 
-### 3.3 Ausrüstungslinie (Waffe, Ziel, Wurf)
+Das ist die ganze Logik. Sie ist eine reine Funktion, läuft ohne Netz und ohne Browser, und lässt sich mit einer Beispiel-Ereignisliste testen.
 
-| Feld | Werte |
-|---|---|
-| `stufe2` | `nicht_erspielt`, `im_besitz`, `verloren` |
-| `ausgeruestet` | `1` oder `2` (nur `2`, wenn `stufe2 = im_besitz`) |
+### A5. Zwei Sichten auf denselben Zustand
 
-Stufe 1 kann nicht verloren gehen. `verloren` kann durch Nachkauf wieder `im_besitz` werden.
-
-### 3.4 Fähigkeit (Token, Schwert, Schild, Log-Pose, Ring der Rieke)
-
-| Status | Bedeutung |
-|---|---|
-| `nicht_erspielt` | |
-| `im_besitz` | Dennis hält das Zeichen |
-| `eingesetzt` | Verbraucht (Schild nach Wiederholung, Ring nach Ablehnung, Log-Pose nach Einlösung) |
-| `verloren` | Abgenommen nach verlorener Prüfung |
-| `beim_bund` | In Verwahrung des Bundes, kann gegen Dennis eingesetzt werden (nur Token) |
-
-### 3.5 Verbrauchsgut
-
-`proviant: 0..5`, `steckbriefe: [wächter-ids]`, `berry: 0..10`. Nur Zahlen bzw. Listen, kein Status.
-
-### 3.6 Fluch
-
-| Status | Bedeutung |
-|---|---|
-| `aktiv` | Wird getragen, mit Zeitpunkt und Auslöser |
-| `erloest` | Mit Grund: `pruefung_gewonnen`, `berry`, `qm` |
-
-Höchstens zwei `aktiv` gleichzeitig (Regel §8 der Spielanleitung).
-
-### 3.7 Verwahrtes
-
-`botschaft: beim_bund | freigegeben`, `token: siehe 3.4`.
-
-### 3.8 Anfrage (vom Helden)
-
-| Status | Bedeutung |
-|---|---|
-| `offen` | Dennis hat gedrückt, QM hat noch nicht reagiert |
-| `bestaetigt` | QM hat bestätigt, Effekt angewendet |
-| `abgelehnt` | QM hat abgelehnt, mit kurzem Grund |
-
-Höchstens eine offene Anfrage gleichzeitig. Solange sie offen ist, zeigt das Menü „Wartet auf den Quest Master".
-
-### 3.9 Station (Karte)
-
-`erledigt`, `hier`, `offen`. `hier` wird vom QM per `game.position` gesetzt, alles davor wird `erledigt`.
-
----
-
-## 4. Ereignis-Katalog
-
-Jedes Ereignis: `id`, `ts`, `actor` (`qm` | `held` | `system`), `type`, `payload`. Ereignisse mit Wirkung tragen zusätzlich `effects[]`, die zum Zeitpunkt der Bestätigung aus der Konfiguration berechnet und **festgeschrieben** werden (spätere Regeländerungen ändern die Chronik nicht).
-
-| Typ | Payload | Wer | Effekte |
-|---|---|---|---|
-| `game.start` | | qm | Startinventar, Berry 3/7 |
-| `game.position` | `station` | qm | Karte |
-| `trial.start` | `trial` | qm | Status `aktiv` |
-| `trial.result` | `trial`, `outcome`, `result{}` | qm | aus Regeltabelle (§4.1), vom QM vor Bestätigung editierbar |
-| `encounter.draw` | `card` | qm | Karte gilt als gezogen |
-| `encounter.result` | `card`, `outcome` | qm | aus Regeltabelle |
-| `berry.transfer` | `amount`, `to`, `reason` | qm | Berry |
-| `item.grant` / `item.lose` | `line` oder `ability` | qm | Korrektur-Werkzeug |
-| `item.equip` | `line`, `stufe` | held | keine, nur Anzeige |
-| `consumable.use` | `proviant` | qm (nach Anfrage) | Zähler |
-| `digit.reveal` / `digit.buy` / `digit.guess` | `index`, `value` / `attempt`, `correct` | qm | Ziffer, Berry |
-| `curse.apply` / `curse.lift` | `curse`, `reason` | qm | Fluch |
-| `custody.transfer` | `thing`, `to` | qm | Verwahrung |
-| `request.create` | `action`, `payload` | held | Anfrage `offen` |
-| `request.resolve` | `requestId`, `bestaetigt|abgelehnt`, `reason?` | qm | wendet die Aktion an oder nicht |
-| `note` | `text` | qm | nur Chronik |
-| `revert` | `eventId` | qm | hebt ein Ereignis auf |
-
-### 4.1 Regeltabelle: Ergebnis zu Effekten (Beispiele)
-
-Diese Tabelle lebt in der Konfiguration. Der QM gibt nur das Rohergebnis ein, die Effekte werden vorgeschlagen.
-
-| Prüfung | Eingabe des QM | Effekte |
+| | Quest Master | Dennis |
 |---|---|---|
-| Log-Buch | `richtig: 0..10` | ≥7: Ziffer 1 bekannt. Pro falscher ab der vierten: QM wählt Startitem für `item.lose`. ≤3: Fluch des Vergessens. |
-| Kreuzung der Klingen | `outcome` | bestanden: Ziffer 2, Token `im_besitz`. verloren: Token `beim_bund`, Fluch der Stille. |
-| Auge des Jägers | `treffer: 0..5` | 0–1: −1 Berry, Waffe Stufe 2 `verloren`, bei 0 Fluch des Jägers. 2–3: +1. 4: +2. 5: +3, Schwert. |
-| Feuerprobe | `gewaehlt: 1..3`, `geschafft: 0..3` | alle geschafft: Ziffer 3 (ab 1), +1 Berry (ab 2), Schild und +1 (bei 3). Sonst: alles weg, −1 Berry, `item.lose` (QM wählt), Fluch der Schwere. |
-| Prüfung des Bundes | `siege: 0..3` | 3: Ziffer 4, Botschaft frei, +2, eine verlorene Ziffer zurück (QM wählt). 2: Ziffer 4, Botschaft, +1. 1: Botschaft. 0: −2, `item.lose`, Botschaft bleibt beim Bund. |
-| Prophezeiung (Abrechnung) | `eingetreten: 0..6` | min(n, 3) Berry |
-| Rast: Bestellung | `fehler: n` | n=0: +1, sonst −n |
-| Rast: Trank | `getrunken: ja/nein` | +1 / 0 |
+| Berry | ja | ja |
+| Items | alle mit Status | alle mit Status (grau = nicht, Kreuz = verloren) |
+| Quests | alle, mit Buttons „bestanden" / „verloren" | alle mit Status, die nächste hervorgehoben, mit Ort und Beschreibung |
+| Ziffern | alle vier Werte | nur bekannte, Rest `?` |
+| Ereignisse | Liste, „Rückgängig", „Korrektur" | nichts |
 
-### 4.2 Spieler-Aktionen (Anfragen)
+Dennis kann in v0 **nichts schreiben**. Er wählt Items nur zum Ansehen (Cursor, Beschreibung). Alles, was er im Spiel tut (Item einsetzen, Steckbrief kaufen), sagt er dem Quest Master, der es als `korrektur` bucht. Das ist bewusst: Erst wenn der Kern läuft, bekommt Dennis eigene Aktionen (Teil B, Stufe 2).
 
-| Aktion | Kosten | Wirkung nach Bestätigung |
+### A6. Zwei Handys
+
+Ein gemeinsames Dokument: `{ config, events[] }`. Der Quest Master hängt Ereignisse an, Dennis' Menü liest und rechnet `reduce` selbst.
+
+- **Einfachster Start:** ein Dokument in Firebase Realtime Database oder Supabase (kostenlos, ein Tag Arbeit inklusive Einrichtung). Beide Views abonnieren dasselbe Dokument. Rollen über zwei Links: der QM-Link enthält einen Schlüssel, der Spieler-Link nicht.
+- **Ohne Netz:** Das QM-Handy schreibt lokal weiter und lädt nach, sobald Netz da ist. Dennis' Menü zeigt „Stand von hh:mm". Für den Berg reicht das in v0. Die QR-Übergabe kommt in Teil B.
+- **Noch einfacher zum Testen:** beide Sichten auf einem Gerät, Umschalter oben rechts, Dokument im Browser-Speicher. Damit lässt sich die Logik komplett prüfen, bevor ein Backend angefasst wird.
+
+### A7. Was das Menü konkret ändert
+
+- Die Klassen `won / lost / locked` werden aus `state` gesetzt, nicht mehr per Klick. `decide()` und `persist()` in `app.js` entfallen.
+- Jeder `selectable` bekommt eine `data-id`, die in `config` existiert (Quest-ID oder Item-ID). Damit ist das Menü an die Konfiguration gebunden und nicht an Texte.
+- Die nächste Quest wird hervorgehoben, die Textbox zeigt Name, Ort, Beschreibung.
+- Herzen = Berry. Der Rest des HUD bleibt Deko, bis Teil B etwas daraus macht.
+
+### A8. Beispieltag als Ereignisliste (Test für die Logik)
+
+```
+config.start.berry = 3, Startitems ring_rieke, proviant, logpose
+1. quest  logbuch   bestanden   -> Ziffer 1 bekannt
+2. quest  klingen   bestanden   -> Ziffer 2 bekannt, token besitz
+3. korrektur berry -1 "Steckbrief Benne"        -> Berry 2
+4. quest  auge      bestanden   -> Berry 4 (win.berry +2)
+5. quest  feuerprobe verloren   -> Berry 3, logpose verloren (lose.items)
+6. undo                          -> Ereignis 5 aufgehoben: Berry 4, logpose besitz
+7. quest  feuerprobe bestanden  -> Ziffer 3 bekannt, schild besitz
+8. quest  bund      bestanden   -> Ziffer 4 bekannt, Berry 5
+Endstand: Berry 5, Ziffern 4/4, Items: ring_rieke, proviant, logpose, token, schild
+```
+
+Wenn `reduce` diese Liste so ausrechnet, ist v0 fertig.
+
+---
+
+## Teil B: Ausbaustufen (später, in dieser Reihenfolge)
+
+Jede Stufe fügt hinzu, keine ersetzt etwas aus Teil A.
+
+| Stufe | Was dazukommt | Was es an v0 anhängt |
 |---|---|---|
-| Steckbrief kaufen | 1 Berry (oder Log-Pose) | Steckbrief in Liste, Inhalt wird für Dennis sichtbar |
-| Fluch erlösen | 1 Berry | Fluch `erloest` |
-| Hinweis (Prophezeiung / Umschlag-Titel) | 1 Berry | QM sagt es mündlich, Ereignis nur für Chronik |
-| Wiederholung (Encounter 1, Kernprüfung 2) | 1 / 2 Berry | Prüfung wieder `aktiv` |
-| Proviant nutzen | 1 Gummibärchen | freier Schlossversuch |
-| Ring der Rieke einsetzen | Ring | Encounter abgelehnt |
-| Fähigkeit einsetzen (Token, Schwert, Schild) | keine | im Showdown: Regel-Effekt, Status `eingesetzt` |
-| Ziffer kaufen / raten | 1 Berry / 1 pro Fehlversuch | Ziffer `gekauft` / `geraten` |
+| **1 · Inhalte** | Konkrete Quests, Items, Beschreibungen, Icons. Encounter als Quests mit `typ: "encounter"`. | Nur Konfiguration, keine neue Logik |
+| **2 · Aktionen von Dennis** | Er kann Items einsetzen und Berry ausgeben. Jede Aktion ist eine **Anfrage**, die der Quest Master bestätigt. | Neues Ereignis `anfrage` (Dennis) und `antwort` (QM). Bestätigte Anfrage wirkt wie `korrektur`. |
+| **3 · Ergebnisse mit Zahlen** | Auge des Jägers 0 bis 5 Treffer, Feuerprobe 1 bis 3 Umschläge, Showdown 0 bis 3 Siege | `quest` bekommt optional `wert`, die Konfiguration bekommt pro Quest eine Tabelle `wert -> Effekt` statt nur win/lose |
+| **4 · Stufen bei Items** | Kleine und große Wasserpistole als eine Linie mit „ausgerüstet" | Item bekommt optional `linie` und `stufe`, Dennis darf `ausrüsten` (schreibt ohne Bestätigung) |
+| **5 · Flüche** | Negative Effekte nach verlorener Quest, erlösbar | Neuer Status-Typ `fluch` (aktiv, erlöst), `lose.fluch` in der Konfiguration |
+| **6 · Verwahrung und Bund** | Token beim Bund, Riekes Botschaft | Item-Status `beim_bund` |
+| **7 · Karte und Chronik** | Stationen mit Position, öffentliche Chronik im Menü | Ereignis `position`, Projektion der Ereignisse für Dennis |
+| **8 · Funkloch** | QR-Übergabe des Zustands vom QM-Handy an Dennis | Nur Transport, keine Logik |
+
+Die Detailideen zu Stufe 2 bis 8 (Zustandswerte, Ereigniskatalog, Regeltabellen, Screens) stehen in der Git-Historie dieser Datei (Commit „Add system plan") und in `00-spielanleitung.md`. Sie werden geholt, wenn die jeweilige Stufe dran ist, nicht vorher.
 
 ---
 
-## 5. Was jede Rolle sieht (Projektion)
+## Nächster Schritt
 
-Aus demselben Zustand entstehen zwei Sichten. Die Held-Sicht ist eine **Teilmenge**, nie eine andere Wahrheit.
-
-| Feld | QM | Held |
-|---|---|---|
-| Berry-Stand | ja | ja |
-| Ziffern | alle vier Werte | nur `bekannt`/`gekauft`/`geraten` mit Wert, Rest `?` |
-| Prüfungen | Status, Ergebnis, Effekte, Regel-Spickzettel, Geheiminhalte | Status, Name, Ort, öffentliche Beschreibung, Belohnung in Aussicht |
-| Nächste Prüfung | mit Vorbereitungs-Checkliste | Name, Ort, Beschreibung, was er dafür braucht |
-| Inventar | alles inkl. `beim_bund` | eigenes, Verwahrtes als gesperrt |
-| Steckbriefe | alle Texte | nur gekaufte Texte |
-| Flüche | alle, mit Erlösungsbedingung | aktive, mit Erlösungsbedingung |
-| Anfragen | Liste offen/erledigt | eigene, mit Status |
-| Chronik | vollständig | öffentliche Einträge (ohne QM-Notizen und Geheimnisse) |
-| Karte | alle Stationen inkl. Zeitplan | Stationen, Position, nächste |
-
----
-
-## 6. Screens
-
-### 6.1 QM-Konsole (schlicht, große Buttons, Listen. Kein Zelda-Look nötig.)
-
-1. **Übersicht:** Berry Dennis/Bund, Position, aktive und nächste Prüfung, offene Anfrage (rot), aktive Flüche, letzte drei Ereignisse.
-2. **Prüfung:** pro Prüfung eine Karte: Spickzettel der Regeln, Eingabe des Rohergebnisses (Stepper, Buttons), Vorschau der Effekte, „Bestätigen". Bei Effekten mit Wahl (welches Item verliert er) ein Auswahlschritt.
-3. **Encounter:** Karte aus dem Beutel wählen (der Beutel ist physisch, die App zeichnet nach), Ergebnis, Bestätigen.
-4. **Kasse:** Preisliste als Buttons, freie Buchung mit Grund.
-5. **Inventar und Flüche:** manuelles Geben und Nehmen (Korrektur), Fluch aussprechen und erlösen, Verwahrung umbuchen.
-6. **Anfragen:** offene Anfrage von Dennis mit Bestätigen / Ablehnen.
-7. **Chronik:** alle Ereignisse, „Letztes rückgängig", gezielter Revert.
-8. **Geheimfach:** Code, Umschlag-Inhalte, Steckbriefe, Rieke-Fragen mit Audio-Links, Zeitplan, Packliste.
-
-### 6.2 Held-Menü (das bestehende Pausenmenü)
-
-Bleibt optisch, ändert die Logik:
-
-- **Kein Umschalten per Klick.** Die drei Klassen `won/lost/locked` verschwinden als Eingabe, sie werden aus dem Zustand gerendert. `decide()` und `persist()` in der aktuellen `app.js` entfallen.
-- **Prüfungen:** Medaillons nach Status. Die `naechste` blinkt (Cursor), die Textbox zeigt Name, Ort, öffentliche Beschreibung und „Belohnung in Aussicht".
-- **Ausrüstung:** Linien mit Stufen, weißer Rahmen = `ausgeruestet`. Aktion „Ausrüsten" (sofort). Fähigkeiten mit Aktion „Einsetzen" (Anfrage).
-- **Inventar:** Verbrauchsgüter mit „Kaufen" und „Nutzen" (Anfrage), eine Reihe **Flüche** mit „Erlösen 1 Berry" (Anfrage), Verwahrtes gesperrt.
-- **Karte:** Position und nächste Station.
-- **HUD:** Berry als Herzen, Tank aus `ausgeruestet` Waffe. Toast: „Anfrage gesendet", „Bestätigt vom Quest Master", „Abgelehnt: Grund".
-- **Chronik** als fünfte Seite oder in der Textbox: die letzten öffentlichen Ereignisse.
-
----
-
-## 7. Synchronisation und Funkloch
-
-Der Tegernsee-Aufstieg hat kein durchgehendes Netz. Der Plan muss ohne Netz funktionieren.
-
-**Grundsatz:** Das QM-Handy ist die Wahrheit. Es schreibt Ereignisse immer zuerst lokal (Puffer) und lädt sie hoch, sobald Netz da ist. Die Held-Sicht zeigt immer „Stand von hh:mm" und aktualisiert, wenn sie darf.
-
-Drei Stufen, von bequem bis notfalls:
-
-| Stufe | Wann | Wie |
-|---|---|---|
-| **A · Live** | Netz vorhanden | Gemeinsames Spiel-Dokument in einer Echtzeit-Datenbank (z. B. Firebase Realtime DB oder Supabase, beides kostenlos). QM schreibt Ereignisse, Held abonniert. Rollen über Link mit Schlüssel. |
-| **B · Übergabe per QR** | kein Netz, beide Handys da | QM-Konsole zeigt den aktuellen Zustand als QR-Code (komprimiert, wenige hundert Bytes). Dennis scannt mit der Kamera, der Link öffnet sein Menü mit diesem Stand. Anfragen von Dennis laufen dann mündlich, der QM bucht sie. Thematisch passt es: „Log-Pose synchronisieren". |
-| **C · Ein Gerät** | Notfall | QM zeigt Dennis die Held-Sicht auf dem QM-Handy (Rollenwechsel per Button, Geheimfach hinter PIN). |
-
-Beide Views werden als **PWA** installiert (die aktuelle Seite hat schon ein Manifest), damit sie ohne Netz starten.
-
-Alternative für einen schnellen Prototyp ohne eigenes Backend: ein Claude-Artifact mit geteilter Datenbank (`db`). Das reicht für Stufe A zum Testen mit zwei Handys, ist aber an claude.ai-Logins gebunden und deshalb nicht der Zielzustand für den Spieltag.
-
----
-
-## 8. Bauphasen
-
-| Phase | Ergebnis | Abnahme |
-|---|---|---|
-| 1 | `game-data.json`: Konfiguration inkl. Regeltabelle §4.1, Preisliste, Stationen, Geheimnisse als Platzhalter | Jede Prüfung hat Eingabeschema und Effekte |
-| 2 | Engine: `reduce(config, events)` und `project(state, role)`, reine Funktionen, Tests in Node | Ein kompletter Beispieltag als Ereignisliste ergibt den erwarteten Endstand |
-| 3 | QM-Konsole (Stufe C: alles auf einem Gerät, lokal) | QM kann einen ganzen Tag durchbuchen und rückgängig machen |
-| 4 | Held-Menü rendert aus Zustand, Anfragen als Ereignisse | Menü zeigt nächste Prüfung, Inventar, Flüche, keine Klick-Toggles mehr |
-| 5 | Sync Stufe A und QR-Übergabe Stufe B | Zwei Handys, Flugmodus-Test |
-| 6 | Trockenlauf mit Spielleiter und einem Wächter | Fehlerliste, Regeln nachziehen |
-
-Reihenfolge ist bewusst: Erst Konfiguration und Engine (Phase 1 bis 2), weil beide Views nur davon leben. Das Menü wird zuletzt angebunden, damit es sich nicht an ein Zwischenmodell klammert.
-
----
-
-## 9. Entscheidungen, die noch offen sind
-
-1. **Backend für Stufe A:** Firebase, Supabase oder etwas, das ihr schon habt.
-2. **Schutz des QM-Links:** geheimer Link reicht, oder PIN zusätzlich.
-3. **Anfrage-Timeout:** Wenn der QM nicht reagiert, bleibt die Anfrage offen oder verfällt nach 5 Minuten.
-4. **Bund-Sicht:** ja oder nein. Kostet nichts, ist derselbe Link ohne Aktionen.
-5. **Chronik am Abend:** als fünfte Menü-Seite oder als separater Screen beim Pack-Öffnen.
+Phase 1 aus Teil A: `config` für v0 mit den fünf Kernprüfungen als Quests (win/lose mit Berry, Items, Ziffer) und einer kurzen Item-Liste, plus `reduce` als reine Funktion mit dem Beispieltag aus A8 als Test. Das ist ein Nachmittag und danach lässt sich das Menü daran hängen.
