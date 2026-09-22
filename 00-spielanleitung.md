@@ -254,31 +254,13 @@ Flüche sind die Kehrseite der Fähigkeiten: ein negativer Regel-Effekt, der nac
 
 ---
 
-## 10. Mapping aufs Game-Menü
+## 10. Rollen, Zustände und Menü
 
-Das Menü hat vier Seiten (Würfel) plus HUD. Jede Seite zeigt genau eine Ressourcenkategorie aus dieser Anleitung, damit nichts doppelt oder nirgends steht.
+Wie das Spiel am Handy läuft, steht in `05-system-plan.md`. Kurzfassung:
 
-| Menü | Zeigt | Datenquelle (`game-data.json`) |
-|---|---|---|
-| **HUD Herzen** | Berry-Stand (10 Herzen = 10 Packs, gefüllt = Dennis) | `state.berry` |
-| **HUD Balken** | Ausrüstungsstufe Waffe (Tank) | `state.equipment.waffe` |
-| **HUD Zähler unten links** | Berry als Zahl | `state.berry` |
-| **Prüfungen** (Quest Status) | 6 Medaillons = §5.1 bis §5.6, Steine = §5.7 Stationen, Noten = Ziffern, kleine Zähler = Steckbriefe, Prophezeiungen, Encounter gezogen | `trials`, `rast`, `state.digits`, `state.counts` |
-| **Ausrüstung** | Ausrüstungslinien mit Stufen (§7.1, weißer Rahmen = ausgerüstet), Fähigkeiten-Zeichen (§7.2), Startitems | `equipmentLines`, `abilities`, `state.equipment`, `state.abilities` |
-| **Inventar** | Verbrauchsgüter (§7.3), Flüche (§8), Verwahrtes (Riekes Botschaft, Token beim Bund), Prüfungs-Requisiten (Umschläge, Beutel) | `consumables`, `curses`, `state.curses`, `state.held` |
-| **Karte** | Stationen der Akte 1 bis 4 mit Status, Position von Dennis | `stations`, `state.position` |
-| **Plaque / Textbox** | Name und Beschreibung des gewählten Eintrags | `desc`-Felder |
-
-Statuswerte, die das Menü kennen muss:
-
-- Prüfung: `offen`, `aktiv`, `bestanden`, `verloren`
-- Ziffer: `unbekannt`, `bekannt`, `gekauft`, `geraten`
-- Ausrüstungslinie: Stufe `1` oder `2`
-- Fähigkeit / Verbrauchsgut: `nicht_erspielt`, `im_besitz`, `verloren`, `verbraucht`, `verwahrt`
-- Fluch: `aktiv`, `erloest`
-- Station: `offen`, `hier`, `erledigt`
-
-**Änderung gegenüber der aktuellen Preview:** Das Inventar bekommt eine Reihe für Flüche (§8), und die Ausrüstung zeigt Linien mit Stufen statt einzelner Items. Beides ist in `game-data.json` bereits angelegt.
+- **Quest Master** erfasst auf seinem Handy Ergebnisse, Buchungen, Flüche und Korrekturen. Er ist die einzige Quelle der Wahrheit.
+- **Dennis** sieht in seinem Menü nur die Folgen: Inventar, Berry, bekannte Ziffern, Status der Prüfungen, die nächste Prüfung, Flüche, Karte. Er wählt Items (ausrüsten) und stellt Anfragen (kaufen, einsetzen, erlösen), die der Quest Master bestätigt.
+- Zustände werden nie direkt umgeschaltet, sondern aus einer Ereignis-Chronik abgeleitet. Die Statuswerte pro Entität stehen in `05-system-plan.md` §3.
 
 ---
 

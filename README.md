@@ -7,13 +7,15 @@ Projektordner für das Quest-System zum JGA-Wochenende von Dennis (2. bis 4. Okt
 | Datei | Inhalt | Status |
 |---|---|---|
 | `README.md` | Projektbeschreibung (Original-Briefing, unverändert) | gesetzt |
+| `00-spielanleitung.md` | Regelwerk: Akte, Ressourcen, Prüfungen, Encounter, Ausrüstung, Fähigkeiten, Flüche, Kästchen | Entwurf |
+| `05-system-plan.md` | App-Struktur: Rollen (Quest Master, Held), Zustände, Ereignisse, Screens, Sync und Funkloch, Bauphasen | Plan v1 |
 | `01-showdown-pruefung-des-bundes.md` | Prüfung 5, das Finale auf dem Gipfel. Definiert, was jedes Item wert ist. | Vorschlag v1 |
 | `02-items-und-oekonomie.md` | Item-Liste, Berry-Währung, Ziffern-Logik, Kästchen | Vorschlag v1 |
 | `03-offene-pruefungen.md` | Prüfung 4 (Mut), Rast der Ahnen, weitere Geschicklichkeitsspiele, Encounter-Pool | Vorschlag v1 |
 | `04-ablauf-und-material.md` | Zeitplan Freitag/Samstag, Kategorien-Namen, Spielleiter-Checkliste, Packliste | Vorschlag v1 |
-| `preview-menu.html` | Preview: Pausenmenü im Ocarina-of-Time-Stil (Prüfungen, Ausrüstung, Inventar, Karte) mit Demo-Stand. Im Browser öffnen. | Preview |
+| `preview-menu.html` | Frühe Preview des Pausenmenüs. Überholt durch den eigenen Umbau (dennis-quest-pausenmenue.tissler.chatgpt.site). | überholt |
 
-Lesereihenfolge für Neueinsteiger: README, dann 01, dann 02. Die 01 ist zuerst gebaut, weil der Showdown festlegt, wofür die Items während des Tages gesammelt werden.
+Lesereihenfolge für Neueinsteiger: README, dann 00 (Regeln), dann 05 (App-Struktur), dann 01 und 02. Die 01 ist zuerst gebaut, weil der Showdown festlegt, wofür die Items während des Tages gesammelt werden.
 
 ---
 
