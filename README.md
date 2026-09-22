@@ -11,6 +11,7 @@ Projektordner für das Quest-System zum JGA-Wochenende von Dennis (2. bis 4. Okt
 | `02-items-und-oekonomie.md` | Item-Liste, Berry-Währung, Ziffern-Logik, Kästchen | Vorschlag v1 |
 | `03-offene-pruefungen.md` | Prüfung 4 (Mut), Rast der Ahnen, weitere Geschicklichkeitsspiele, Encounter-Pool | Vorschlag v1 |
 | `04-ablauf-und-material.md` | Zeitplan Freitag/Samstag, Kategorien-Namen, Spielleiter-Checkliste, Packliste | Vorschlag v1 |
+| `preview-menu.html` | Preview: Pausenmenü im Ocarina-of-Time-Stil (Prüfungen, Ausrüstung, Inventar, Karte) mit Demo-Stand. Im Browser öffnen. | Preview |
 
 Lesereihenfolge für Neueinsteiger: README, dann 01, dann 02. Die 01 ist zuerst gebaut, weil der Showdown festlegt, wofür die Items während des Tages gesammelt werden.
 

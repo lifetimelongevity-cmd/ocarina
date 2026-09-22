@@ -1,0 +1,800 @@
+<title>Dennis Quest Menü</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&display=swap">
+<style>
+  :root {
+    --bg: #100c08;
+    --wood: #4a2e17;
+    --wood-hi: #7a4d27;
+    --wood-lo: #2a1809;
+    --frame: #1c140c;
+    --cream: #f3e9c8;
+    --gold: #e8c247;
+    --gold-lo: #8f6a12;
+    --ink: #1a1508;
+    --heart: #e0322b;
+    --heart-empty: #4a3d3d;
+    --magic: #4be04d;
+    --magic-lo: #1c5e1e;
+    --cursor: #ffffff;
+    --face-quest: #5d6a3a;
+    --face-quest-lo: #2f371a;
+    --face-equip: #3e5b5c;
+    --face-equip-lo: #1c2f30;
+    --face-item: #2f4b7e;
+    --face-item-lo: #14223f;
+    --face-map: #6d3f2c;
+    --face-map-lo: #331a10;
+    --slot: rgba(0,0,0,.42);
+    --slot-edge: rgba(255,255,255,.14);
+    --btn-red: #c8322a;
+    --btn-green: #2e9e3a;
+    --btn-blue: #3a4fc4;
+    --paper: #e9dcb4;
+    --paper-ink: #3a2c14;
+    --muted: rgba(243,233,200,.62);
+    --font-display: "Cinzel", "Trajan Pro", Georgia, serif;
+    --font-body: "Crimson Pro", "Iowan Old Style", Georgia, serif;
+  }
+  /* Bewusst ein einziges visuelles Universum (N64-Pausenmenü), keine Light-Variante. */
+
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg) radial-gradient(ellipse at 50% 20%, #241a10 0%, var(--bg) 60%);
+    color: var(--cream);
+    font-family: var(--font-body);
+    padding-block: 24px;
+    padding-inline: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .kicker {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0;
+  }
+
+  /* ---------- Screen ---------- */
+  .screen {
+    position: relative;
+    width: min(100%, 980px);
+    aspect-ratio: 16 / 10;
+    max-width: 100%;
+    container-type: inline-size;
+    border-radius: 6px;
+    overflow: hidden;
+    background: var(--frame);
+    box-shadow: 0 0 0 2px #000, 0 30px 60px rgba(0,0,0,.7);
+    user-select: none;
+    outline: none;
+  }
+  .screen:focus-visible { box-shadow: 0 0 0 3px var(--gold), 0 30px 60px rgba(0,0,0,.7); }
+
+  .floor {
+    position: absolute; inset: auto 0 0 0; height: 20%;
+    background: linear-gradient(180deg, #2b1c0e, #140c05);
+  }
+  .pillar {
+    position: absolute; top: 0; bottom: 0; width: 13%;
+    background:
+      repeating-linear-gradient(90deg, rgba(0,0,0,.18) 0 .6cqw, transparent .6cqw 2.4cqw),
+      linear-gradient(90deg, var(--wood-lo), var(--wood-hi) 40%, var(--wood) 70%, var(--wood-lo));
+    box-shadow: inset 0 0 6cqw rgba(0,0,0,.6);
+  }
+  .pillar.left { left: 0; }
+  .pillar.right { right: 0; transform: scaleX(-1); }
+
+  /* ---------- Cube ---------- */
+  .stage {
+    position: absolute;
+    left: 13%; right: 13%; top: 18%; height: 66%;
+    perspective: 120cqw;
+    perspective-origin: 50% 45%;
+  }
+  .cube {
+    position: absolute; inset: 0;
+    transform-style: preserve-3d;
+    transform: translateZ(-37cqw) rotateY(calc(var(--i, 0) * -90deg));
+    transition: transform .55s cubic-bezier(.2,.8,.2,1);
+  }
+  .face {
+    position: absolute; inset: 0;
+    backface-visibility: hidden;
+    border-radius: 1.2cqw;
+    border: .5cqw solid rgba(0,0,0,.45);
+    box-shadow: inset 0 0 0 .3cqw rgba(255,255,255,.08), inset 0 0 8cqw rgba(0,0,0,.5);
+    background:
+      radial-gradient(ellipse at 40% 30%, rgba(255,255,255,.10), transparent 60%),
+      linear-gradient(160deg, var(--f-hi), var(--f-lo));
+    overflow: hidden;
+    padding: 2.2cqw 2.6cqw 2cqw;
+  }
+  .face::before {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .55 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    opacity: .5; mix-blend-mode: overlay;
+  }
+  .face[data-face="quest"] { --f-hi: var(--face-quest); --f-lo: var(--face-quest-lo); transform: rotateY(0deg) translateZ(37cqw); }
+  .face[data-face="equip"] { --f-hi: var(--face-equip); --f-lo: var(--face-equip-lo); transform: rotateY(90deg) translateZ(37cqw); }
+  .face[data-face="item"]  { --f-hi: var(--face-item);  --f-lo: var(--face-item-lo);  transform: rotateY(180deg) translateZ(37cqw); }
+  .face[data-face="map"]   { --f-hi: var(--face-map);   --f-lo: var(--face-map-lo);   transform: rotateY(270deg) translateZ(37cqw); }
+
+  .face-title {
+    position: absolute; top: -.2cqw; left: 0; right: 0;
+    text-align: center;
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: 3.4cqw;
+    letter-spacing: .14em;
+    color: rgba(0,0,0,.28);
+    text-shadow: 0 .15cqw 0 rgba(255,255,255,.12);
+    pointer-events: none;
+  }
+
+  /* ---------- HUD ---------- */
+  .hud { position: absolute; z-index: 5; }
+  .hearts {
+    top: 3.2%; left: 15%;
+    display: grid; grid-template-columns: repeat(10, 3.1cqw); gap: .3cqw;
+    font-size: 3.2cqw; line-height: 1;
+  }
+  .hearts span { color: var(--heart-empty); text-shadow: 0 .2cqw 0 #000; }
+  .hearts span.on { color: var(--heart); text-shadow: 0 0 .6cqw rgba(255,80,60,.6), 0 .2cqw 0 #5a0d08; }
+  .hearts-label, .magic-label {
+    position: absolute; left: 15%; font-family: var(--font-display); font-size: 1.15cqw; letter-spacing: .18em;
+    color: var(--muted); text-transform: uppercase;
+  }
+  .hearts-label { top: 9.4%; }
+  .magic {
+    top: 13.4%; left: 15%; width: 26cqw; height: 2.3cqw;
+    border: .35cqw solid #d8d0b0; border-radius: .4cqw; background: #0f1a0f;
+    box-shadow: 0 .2cqw 0 #000;
+  }
+  .magic i {
+    display: block; height: 100%; width: var(--tank, 33%);
+    background: linear-gradient(180deg, #8dff8f, var(--magic) 50%, var(--magic-lo));
+    transition: width .4s;
+  }
+  .magic-label { top: 12.1%; left: calc(15% + 27.4cqw); }
+
+  .btns {
+    top: 2.8%; right: 14%;
+    display: flex; gap: 1.6cqw;
+  }
+  .btn {
+    appearance: none; border: 0; cursor: pointer;
+    font-family: var(--font-display); font-weight: 900; font-size: 2.6cqw; letter-spacing: .02em;
+    color: var(--cream); background: transparent; padding: 0;
+    display: flex; align-items: center; gap: .4cqw;
+    text-shadow: .2cqw .2cqw 0 #000, -.1cqw -.1cqw 0 #000, .1cqw -.1cqw 0 #000, -.1cqw .1cqw 0 #000;
+  }
+  .btn::before {
+    content: ""; width: 4.2cqw; height: 3.2cqw; border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, rgba(255,255,255,.55), var(--c) 45%, color-mix(in srgb, var(--c) 45%, black) 100%);
+    box-shadow: 0 .3cqw 0 rgba(0,0,0,.6);
+    margin-right: -3.2cqw;
+  }
+  .btn:focus-visible { outline: .3cqw solid var(--gold); outline-offset: .3cqw; border-radius: 1cqw; }
+  .btn.red { --c: var(--btn-red); } .btn.green { --c: var(--btn-green); } .btn.blue { --c: var(--btn-blue); }
+
+  .berry {
+    left: 15%; bottom: 3.6%;
+    display: flex; align-items: center; gap: .8cqw;
+    font-family: var(--font-display); font-weight: 900; font-size: 3cqw; color: var(--gold);
+    text-shadow: .2cqw .2cqw 0 #000, 0 0 1.2cqw rgba(232,194,71,.35);
+    font-variant-numeric: tabular-nums;
+  }
+  .berry .coin {
+    width: 3.4cqw; height: 3.4cqw; border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #fff3b0, var(--gold) 45%, var(--gold-lo) 100%);
+    box-shadow: 0 .25cqw 0 #3d2c05, inset 0 0 0 .3cqw rgba(0,0,0,.25);
+    display: grid; place-items: center; color: #4a3505; font-size: 1.9cqw; font-weight: 900;
+  }
+  .berry small { font-size: 1.3cqw; color: var(--muted); letter-spacing: .14em; margin-left: .3cqw; }
+
+  .plaque {
+    left: 50%; bottom: 3.2%; transform: translateX(-50%);
+    min-width: 34cqw; max-width: 60cqw;
+    padding: 1cqw 3cqw;
+    background: linear-gradient(180deg, #3a3f52, #1c1f2c);
+    border: .4cqw solid #0c0d14; border-radius: .6cqw;
+    box-shadow: inset 0 .3cqw 0 rgba(255,255,255,.15), 0 .5cqw 0 #000;
+    font-family: var(--font-display); font-weight: 900; font-size: 2.4cqw; letter-spacing: .03em;
+    color: var(--gold); text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    text-shadow: .15cqw .15cqw 0 #000;
+  }
+
+  .nav {
+    top: 50%; transform: translateY(-50%);
+    width: 6cqw; height: 6cqw; border: 0; cursor: pointer; padding: 0;
+    background: linear-gradient(180deg, #8b96b8, #4d5675);
+    color: #101324; font-family: var(--font-display); font-weight: 900; font-size: 2.6cqw;
+    clip-path: polygon(0 50%, 25% 0, 100% 0, 100% 100%, 25% 100%);
+    box-shadow: inset 0 0 0 .3cqw rgba(255,255,255,.4);
+  }
+  .nav.left { left: 9.5%; }
+  .nav.right { right: 9.5%; clip-path: polygon(0 0, 75% 0, 100% 50%, 75% 100%, 0 100%); }
+  .nav:focus-visible { outline: .3cqw solid var(--gold); }
+  .nav span { display: inline-block; transform: translateX(.6cqw); }
+  .nav.right span { transform: translateX(-.6cqw); }
+
+  /* ---------- Slots & cursor ---------- */
+  .slot {
+    position: relative;
+    width: var(--s, 6.4cqw); height: var(--s, 6.4cqw);
+    border-radius: .9cqw;
+    background: var(--slot);
+    box-shadow: inset 0 0 0 .25cqw var(--slot-edge), inset 0 .6cqw 1cqw rgba(0,0,0,.5);
+    display: grid; place-items: center;
+    font-size: calc(var(--s, 6.4cqw) * .58); line-height: 1;
+    cursor: pointer; border: 0; padding: 0; color: inherit;
+    filter: drop-shadow(0 .25cqw 0 rgba(0,0,0,.6));
+  }
+  .slot:focus-visible { outline: .3cqw solid var(--gold); outline-offset: .2cqw; }
+  .slot[data-owned="0"] > .ico { filter: grayscale(1) brightness(.35) contrast(.8); opacity: .55; }
+  .slot[data-owned="lost"] > .ico { filter: grayscale(1) brightness(.5); opacity: .5; }
+  .slot[data-owned="lost"]::after {
+    content: "✕"; position: absolute; inset: 0; display: grid; place-items: center;
+    color: var(--heart); font-family: var(--font-display); font-weight: 900; font-size: calc(var(--s, 6.4cqw) * .7);
+    text-shadow: 0 0 .5cqw #000;
+  }
+  .slot .count {
+    position: absolute; right: .3cqw; bottom: .1cqw;
+    font-family: var(--font-display); font-weight: 900; font-size: calc(var(--s, 6.4cqw) * .28);
+    color: var(--gold); text-shadow: .1cqw .1cqw 0 #000, -.1cqw -.1cqw 0 #000;
+    font-variant-numeric: tabular-nums;
+  }
+  .slot .ico { display: block; }
+  .slot.sel { box-shadow: inset 0 0 0 .25cqw var(--slot-edge), 0 0 0 .3cqw var(--cursor), 0 0 1.6cqw rgba(255,255,255,.55); }
+  .slot.equipped::before {
+    content: ""; position: absolute; inset: -.5cqw; border-radius: 1.1cqw;
+    border: .35cqw solid #f5f0dc; pointer-events: none;
+    box-shadow: 0 0 .8cqw rgba(255,255,255,.5);
+  }
+
+  /* ---------- Face: Prüfungen ---------- */
+  .quest { display: grid; grid-template-columns: 1.05fr 1fr; gap: 2cqw; height: 100%; }
+  .quest-left { display: flex; flex-direction: column; gap: 1.2cqw; padding-top: 2.6cqw; }
+  .row-icons { display: flex; gap: 1cqw; align-items: flex-end; }
+  .stat { display: flex; align-items: center; gap: .6cqw; font-family: var(--font-display); font-weight: 900; font-size: 2.2cqw; color: var(--heart); text-shadow: .15cqw .15cqw 0 #000; }
+  .stat .slot { --s: 4.6cqw; }
+  .stat .val { font-variant-numeric: tabular-nums; }
+  .digits { margin-top: auto; }
+  .digits-label { font-family: var(--font-display); font-size: 1.2cqw; letter-spacing: .2em; text-transform: uppercase; color: var(--muted); margin-bottom: .6cqw; }
+  .digits-row { display: flex; gap: 1.2cqw; }
+  .digit {
+    width: 5.2cqw; height: 5.2cqw; border-radius: 50%; border: 0; padding: 0; cursor: pointer;
+    display: grid; place-items: center;
+    font-family: var(--font-display); font-weight: 900; font-size: 2.6cqw;
+    background: radial-gradient(circle at 35% 30%, #fff3b0, var(--gold) 45%, var(--gold-lo) 100%);
+    color: #3d2c05; box-shadow: 0 .35cqw 0 #2a1e04, inset 0 0 0 .3cqw rgba(0,0,0,.2);
+  }
+  .digit[data-known="0"] { background: radial-gradient(circle at 35% 30%, #8a8a8a, #4a4a4a 50%, #222 100%); color: #cfcfcf; }
+  .digit.sel { box-shadow: 0 .35cqw 0 #2a1e04, 0 0 0 .35cqw var(--cursor), 0 0 1.6cqw rgba(255,255,255,.6); }
+  .digit:focus-visible { outline: .3cqw solid var(--gold); outline-offset: .3cqw; }
+  .staff { position: relative; margin-top: 1cqw; height: 3.4cqw; }
+  .staff::before {
+    content: ""; position: absolute; inset: 0;
+    background: repeating-linear-gradient(180deg, rgba(0,0,0,.45) 0 .18cqw, transparent .18cqw .85cqw);
+    background-size: 100% 3.4cqw;
+  }
+  .staff .clef { position: absolute; left: 0; top: -1.3cqw; font-size: 5cqw; color: rgba(0,0,0,.5); }
+
+  .quest-right { position: relative; }
+  .medals { position: relative; width: 78%; aspect-ratio: 1.15; margin: 1.6cqw auto 0; }
+  .medals svg.hex { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .medal {
+    position: absolute; width: 6.6cqw; height: 6.6cqw; border-radius: 50%; border: 0; padding: 0; cursor: pointer;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle at 38% 30%, rgba(255,255,255,.7), var(--m) 40%, color-mix(in srgb, var(--m) 40%, black) 100%);
+    box-shadow: 0 .4cqw 0 rgba(0,0,0,.6), inset 0 0 0 .35cqw rgba(0,0,0,.3);
+    display: grid; place-items: center;
+  }
+  .medal svg { width: 62%; height: 62%; fill: rgba(0,0,0,.55); }
+  .medal[data-status="offen"] { filter: grayscale(.85) brightness(.55); }
+  .medal[data-status="verloren"] { filter: grayscale(1) brightness(.4); }
+  .medal[data-status="verloren"]::after { content: "✕"; position: absolute; inset: 0; display: grid; place-items: center; color: var(--heart); font-family: var(--font-display); font-weight: 900; font-size: 4cqw; }
+  .medal.sel { box-shadow: 0 .4cqw 0 rgba(0,0,0,.6), 0 0 0 .35cqw var(--cursor), 0 0 2cqw rgba(255,255,255,.6); }
+  .medal:focus-visible { outline: .3cqw solid var(--gold); outline-offset: .3cqw; }
+  .triforce { position: absolute; left: 50%; top: 50%; width: 9cqw; transform: translate(-50%, -50%); filter: drop-shadow(0 .3cqw 0 rgba(0,0,0,.6)); }
+  .stones { position: absolute; left: 50%; bottom: 0; transform: translateX(-50%); display: flex; gap: 1.8cqw; padding: 1cqw 2cqw; border-radius: 1.2cqw; background: rgba(0,0,0,.28); box-shadow: inset 0 0 0 .25cqw rgba(255,255,255,.1); }
+  .stone { width: 4.2cqw; height: 4.2cqw; border: 0; padding: 0; cursor: pointer; background: transparent; display: grid; place-items: center; }
+  .stone svg { width: 100%; height: 100%; filter: drop-shadow(0 .25cqw 0 rgba(0,0,0,.6)); }
+  .stone[data-status="offen"] { filter: grayscale(.9) brightness(.5); }
+  .stone.sel { outline: .3cqw solid var(--cursor); outline-offset: .2cqw; border-radius: 50%; }
+  .stone:focus-visible { outline: .3cqw solid var(--gold); }
+
+  /* ---------- Face: Ausrüstung ---------- */
+  .equip { display: grid; grid-template-columns: 7cqw 1fr 28cqw; gap: 1.6cqw; height: 100%; padding-top: 2.6cqw; }
+  .equip-col { display: flex; flex-direction: column; gap: 1.6cqw; align-items: center; }
+  .equip-col .slot { --s: 5.8cqw; }
+  .portrait {
+    position: relative; border-radius: 1cqw; background: radial-gradient(ellipse at 50% 80%, #26303a, #05070a 70%);
+    box-shadow: inset 0 0 0 .4cqw #0a0c10, inset 0 0 6cqw #000; overflow: hidden; display: grid; place-items: center;
+  }
+  .portrait svg { width: 58%; height: 86%; }
+  .portrait .tag { position: absolute; left: 0; right: 0; bottom: .8cqw; text-align: center; font-family: var(--font-display); font-size: 1.3cqw; letter-spacing: .2em; color: var(--muted); text-transform: uppercase; }
+  .equip-grid { display: grid; grid-template-columns: 5.2cqw repeat(3, 5.8cqw); grid-auto-rows: 5.8cqw; gap: 1.1cqw 1cqw; align-content: center; justify-content: end; }
+  .equip-grid .slot { --s: 5.8cqw; }
+  .equip-grid .rowlbl { font-family: var(--font-display); font-size: 1cqw; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); align-self: center; text-align: right; padding-right: .2cqw; }
+
+  /* ---------- Face: Inventar ---------- */
+  .items { display: grid; grid-template-columns: repeat(6, 1fr); grid-auto-rows: 1fr; gap: 1cqw 1.4cqw; height: 100%; padding-top: 2.8cqw; align-items: center; justify-items: center; }
+  .items .slot { --s: 6.2cqw; }
+  .items .slot.locked > .ico { filter: grayscale(1) brightness(.45); opacity: .6; }
+  .items .slot.locked::after { content: "🔒"; position: absolute; right: -.2cqw; top: -.4cqw; font-size: 2cqw; }
+  .items .slot.empty { cursor: default; box-shadow: inset 0 0 0 .25cqw rgba(255,255,255,.06), inset 0 .6cqw 1cqw rgba(0,0,0,.5); }
+
+  /* ---------- Face: Karte ---------- */
+  .map { position: relative; height: 100%; padding-top: 3cqw; }
+  .map svg { width: 100%; height: 100%; }
+  .map .stop { cursor: pointer; }
+  .map .stop circle { fill: #f3e9c8; stroke: #2a1509; stroke-width: 1.2; }
+  .map .stop[data-status="bestanden"] circle { fill: var(--gold); }
+  .map .stop[data-status="offen"] circle { fill: #7d6a52; }
+  .map .stop text { font-family: var(--font-display); font-weight: 700; font-size: 6.2px; fill: #f7efd6; paint-order: stroke; stroke: #2a1509; stroke-width: 1.6; }
+  .map .stop.sel circle { stroke: #fff; stroke-width: 2.2; filter: drop-shadow(0 0 3px #fff); }
+  .map .you { animation: bob 1.2s ease-in-out infinite; }
+  @keyframes bob { 50% { transform: translateY(-2px); } }
+
+  /* ---------- Beschreibung unter dem Screen ---------- */
+  .desc {
+    width: min(100%, 980px);
+    background: linear-gradient(180deg, #f1e5c0, var(--paper));
+    color: var(--paper-ink);
+    border: 2px solid #8b7345; border-radius: 4px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.6), inset 0 0 0 1px #fff7dc;
+    padding: 12px 18px;
+    display: grid; grid-template-columns: auto 1fr; gap: 4px 18px; align-items: baseline;
+    font-size: 17px; line-height: 1.4;
+  }
+  .desc .name { font-family: var(--font-display); font-weight: 900; font-size: 16px; letter-spacing: .04em; grid-column: 1; }
+  .desc .state { font-family: var(--font-display); font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: #7a5a1d; grid-column: 1; }
+  .desc .text { grid-column: 2; grid-row: 1 / span 2; }
+  .desc .text em { font-style: italic; }
+  .hint { font-size: 13px; color: var(--muted); margin: 0; text-align: center; max-width: 60ch; line-height: 1.5; }
+  .hint kbd { font-family: var(--font-display); font-size: 11px; padding: 1px 6px; border: 1px solid rgba(243,233,200,.35); border-radius: 3px; }
+
+  @media (max-width: 640px) {
+    .desc { grid-template-columns: 1fr; font-size: 15px; }
+    .desc .text { grid-column: 1; grid-row: auto; }
+    .hint { font-size: 12px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .cube { transition: none; }
+    .map .you { animation: none; }
+    .magic i { transition: none; }
+  }
+</style>
+
+<p class="kicker">JGA Dennis · Die Prüfungen · Preview</p>
+
+<div class="screen" id="screen" tabindex="0" aria-label="Pausenmenü">
+  <div class="floor"></div>
+  <div class="pillar left"></div>
+  <div class="pillar right"></div>
+
+  <div class="stage">
+    <div class="cube" id="cube" style="--i:0">
+
+      <!-- ===== Prüfungen ===== -->
+      <section class="face" data-face="quest" aria-label="Prüfungen">
+        <div class="face-title">PRÜFUNGEN</div>
+        <div class="quest">
+          <div class="quest-left">
+            <div class="row-icons">
+              <button class="slot" data-kind="item" data-id="steckbrief" style="--s:5.4cqw"><span class="ico">📇</span><span class="count" data-count="steckbrief"></span></button>
+              <button class="slot" data-kind="item" data-id="prophezeiung" style="--s:5.4cqw"><span class="ico">✉️</span><span class="count" data-count="prophezeiung"></span></button>
+            </div>
+            <div class="stat">
+              <button class="slot" data-kind="item" data-id="encounter"><span class="ico">💀</span></button>
+              <span class="val" id="encounterVal">2 / 5</span>
+            </div>
+            <div class="digits">
+              <div class="digits-label">Code des Kästchens</div>
+              <div class="digits-row" id="digits"></div>
+              <div class="staff"><span class="clef">𝄞</span></div>
+            </div>
+          </div>
+          <div class="quest-right">
+            <div class="medals" id="medals">
+              <svg class="hex" viewBox="0 0 100 100" aria-hidden="true">
+                <polygon points="50,6 88,28 88,72 50,94 12,72 12,28" fill="none" stroke="rgba(0,0,0,.45)" stroke-width="2.2"/>
+                <polygon points="50,6 88,28 88,72 50,94 12,72 12,28" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="1"/>
+              </svg>
+              <svg class="triforce" viewBox="0 0 100 88" aria-hidden="true">
+                <polygon points="50,2 74,44 26,44" fill="#e8c247"/>
+                <polygon points="26,44 50,86 2,86" fill="#e8c247"/>
+                <polygon points="74,44 98,86 50,86" fill="#e8c247"/>
+                <polygon points="50,2 74,44 26,44" fill="none" stroke="#7a5a10" stroke-width="2"/>
+                <polygon points="26,44 50,86 2,86" fill="none" stroke="#7a5a10" stroke-width="2"/>
+                <polygon points="74,44 98,86 50,86" fill="none" stroke="#7a5a10" stroke-width="2"/>
+              </svg>
+            </div>
+            <div class="stones" id="stones"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== Ausrüstung ===== -->
+      <section class="face" data-face="equip" aria-label="Ausrüstung">
+        <div class="face-title">AUSRÜSTUNG</div>
+        <div class="equip">
+          <div class="equip-col" id="startitems"></div>
+          <div class="portrait">
+            <svg viewBox="0 0 120 200" aria-hidden="true">
+              <defs><linearGradient id="tunic" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#4fae4c"/><stop offset="1" stop-color="#1f5a24"/></linearGradient></defs>
+              <ellipse cx="60" cy="190" rx="34" ry="6" fill="rgba(0,0,0,.6)"/>
+              <path d="M60 8 L92 40 L60 52 L28 40 Z" fill="url(#tunic)" stroke="#123e18" stroke-width="2"/>
+              <circle cx="60" cy="58" r="17" fill="#f0c9a0" stroke="#7a4a2a" stroke-width="2"/>
+              <path d="M43 52 q17 -14 34 0 l-2 -8 q-15 -12 -30 0z" fill="#e8b84a" stroke="#7a5a10" stroke-width="1.5"/>
+              <path d="M40 78 h40 l8 60 h-56 z" fill="url(#tunic)" stroke="#123e18" stroke-width="2"/>
+              <path d="M42 78 h36 v10 h-36z" fill="#2c6f2e"/>
+              <rect x="34" y="136" width="20" height="40" rx="4" fill="#c9b08a" stroke="#6b5334" stroke-width="2"/>
+              <rect x="66" y="136" width="20" height="40" rx="4" fill="#c9b08a" stroke="#6b5334" stroke-width="2"/>
+              <path d="M30 176 h26 v12 h-30z M64 176 h26 v12 h-30z" fill="#6b4224"/>
+              <path d="M34 82 l-14 40 l8 4 l12 -36z" fill="#f0c9a0" stroke="#7a4a2a" stroke-width="1.5"/>
+              <path d="M86 82 l14 30 l-8 4 l-12 -26z" fill="#f0c9a0" stroke="#7a4a2a" stroke-width="1.5"/>
+              <rect x="94" y="30" width="6" height="86" rx="2" fill="#dfe6ee" stroke="#5a6470" stroke-width="1.5" transform="rotate(14 97 73)"/>
+              <rect x="88" y="104" width="18" height="6" rx="2" fill="#e8c247" stroke="#7a5a10" transform="rotate(14 97 107)"/>
+              <path d="M24 122 a12 12 0 1 0 24 0 a12 12 0 1 0 -24 0" fill="#b9432f" stroke="#5a1d12" stroke-width="2"/>
+              <path d="M28 122 h16 M36 114 v16" stroke="#e8c247" stroke-width="2.5" stroke-linecap="round"/>
+            </svg>
+            <div class="tag">Dennis · Stufe Verlobter</div>
+          </div>
+          <div class="equip-grid" id="equipgrid"></div>
+        </div>
+      </section>
+
+      <!-- ===== Inventar ===== -->
+      <section class="face" data-face="item" aria-label="Inventar">
+        <div class="face-title">INVENTAR</div>
+        <div class="items" id="items"></div>
+      </section>
+
+      <!-- ===== Karte ===== -->
+      <section class="face" data-face="map" aria-label="Karte">
+        <div class="face-title">KARTE</div>
+        <div class="map">
+          <svg viewBox="0 0 200 118" aria-label="Route Tegernsee auf die Neureuth">
+            <defs>
+              <linearGradient id="lake" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#3f7fa8"/><stop offset="1" stop-color="#1e4a68"/></linearGradient>
+              <linearGradient id="hill" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#6f8a4a"/><stop offset="1" stop-color="#3d5228"/></linearGradient>
+            </defs>
+            <path d="M0 118 L0 96 Q40 100 70 92 Q90 86 100 84 Q140 78 200 92 L200 118 Z" fill="url(#lake)"/>
+            <path d="M0 60 Q30 40 60 46 Q100 8 130 22 Q160 40 200 30 L200 90 Q140 74 100 84 Q70 92 0 96 Z" fill="url(#hill)" opacity=".9"/>
+            <path d="M40 34 Q70 14 100 26 Q130 4 165 18" fill="none" stroke="#2b3a1c" stroke-width="1.2" opacity=".6"/>
+            <path id="route" d="M30 90 C 45 80, 55 72, 70 66 S 95 50, 110 42 S 140 30, 150 20" fill="none" stroke="#f3e9c8" stroke-width="1.6" stroke-dasharray="3 2.4" stroke-linecap="round"/>
+            <text x="14" y="108" font-family="Cinzel, serif" font-weight="700" font-size="7" fill="#dbe9f2" opacity=".85">Tegernsee</text>
+            <text x="118" y="10" font-family="Cinzel, serif" font-weight="700" font-size="6" fill="#f7efd6" opacity=".85">Neureuth 1 261 m</text>
+            <g id="mapstops"></g>
+          </svg>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <div class="hud hearts" id="hearts" aria-label="Packs"></div>
+  <div class="hearts-label">Packs · Dennis / Bund</div>
+  <div class="hud magic" aria-label="Tank der Wasserpistole"><i id="tank"></i></div>
+  <div class="magic-label" id="tankLabel">Tank</div>
+
+  <div class="hud btns">
+    <button class="btn red" id="btnReturn" title="Demo-Stand wiederherstellen">Zurück</button>
+    <button class="btn green" id="btnSave" title="Stand im Browser merken">Sichern</button>
+    <button class="btn blue" id="btnDecide" title="Auswahl umschalten: gewonnen / offen / verloren">Wählen</button>
+  </div>
+
+  <button class="hud nav left" id="navL" aria-label="Vorherige Seite (Z)"><span>Z</span></button>
+  <button class="hud nav right" id="navR" aria-label="Nächste Seite (R)"><span>R</span></button>
+
+  <div class="hud berry"><span class="coin">฿</span><span id="berryVal">4</span><small>BERRY</small></div>
+  <div class="hud plaque" id="plaque">Zur Ausrüstung</div>
+</div>
+
+<div class="desc" id="desc">
+  <div class="name" id="descName">Prüfungen</div>
+  <div class="state" id="descState">Übersicht</div>
+  <div class="text" id="descText">Sechs Medaillons für die sechs Prüfungen des Tages, das Triforce in der Mitte, unten die drei Steine der Rast der Ahnen. Links der Code des Kästchens: bekannte Ziffern in Gold.</div>
+</div>
+<p class="hint"><kbd>←</kbd> <kbd>→</kbd> oder <kbd>Z</kbd> <kbd>R</kbd> drehen das Menü. Klick wählt ein Item, <kbd>Wählen</kbd> schaltet es zwischen gewonnen, offen und verloren um (Spielleiter-Modus). Demo-Stand: Samstag, kurz vor der Feuerprobe.</p>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ---------- Demo-Daten (Stand: Samstag, kurz vor der Feuerprobe) ---------- */
+  const DEMO = {
+    berry: 4,
+    digits: [7, 4, null, null],
+    encounters: 2,
+    trials: {
+      logbuch:      'bestanden',
+      prophezeiung: 'offen',
+      klingen:      'bestanden',
+      auge:         'bestanden',
+      feuerprobe:   'offen',
+      bund:         'offen'
+    },
+    rast: { bestellung: 'offen', trank: 'offen', toast: 'offen' },
+    items: {
+      ring_rieke: 1, proviant: 1, logpose: 'lost',
+      token: 1, schwert: 0, pistole_klein: 1, pistole_gross: 1,
+      ring_klein: 1, ring_gross: 0, karten: 1, karten_gepanzert: 0,
+      schild: 0, steckbrief: 1, botschaft: 0, prophezeiung: 1, umschlaege: 0, beutel: 1
+    },
+    counts: { proviant: 5, steckbrief: 1, prophezeiung: 6, umschlaege: 3 }
+  };
+
+  const TRIALS = [
+    { id: 'logbuch',      name: 'Log-Buch',               color: '#e8c247', reward: 'Ziffer 1',                        when: 'Freitag, Zug',        desc: 'Zehn Fragen über Rieke, ihre Stimme ist der Beweis. Sieben richtige für die Ziffer, jede falsche ab der vierten kostet ein Startitem.', glyph: 'M50 22 l6 18 h18 l-14 11 5 18 -15 -11 -15 11 5 -18 -14 -11 h18z' },
+    { id: 'prophezeiung', name: 'Prophezeiung',           color: '#3aa657', reward: 'bis +3 Berry',                    when: 'Samstag früh',        desc: 'Zwei Vorhersagen pro Trauzeuge, versiegelt. Abrechnung in der Hütte. Manipulieren erlaubt.', glyph: 'M30 50 q20 -26 40 0 q-20 26 -40 0z M50 42 a8 8 0 1 0 0.1 0z' },
+    { id: 'klingen',      name: 'Kreuzung der Klingen',   color: '#d0442f', reward: 'Ziffer 2 + Token',                when: 'vor dem Anstieg',     desc: 'Gegner wählen, ohne die Disziplin zu kennen. Gewinn: Herausforderungs-Token. Verlust: das Token geht an den Bund.', glyph: 'M28 28 l44 44 M72 28 l-44 44 M24 24 l8 0 0 8z M76 24 l-8 0 0 8z' },
+    { id: 'auge',         name: 'Auge des Jägers',        color: '#2f7be0', reward: 'Berry, bei 5/5 das Schwert',      when: 'erstes Waldstück',    desc: 'Wasserpistole auf fünf Teelichter, Tank wie er ist. 0 bis 1 Treffer: Downgrade auf die kleine Pistole.', glyph: 'M50 30 a20 20 0 1 0 0.1 0z M50 40 a10 10 0 1 0 0.1 0z' },
+    { id: 'feuerprobe',   name: 'Feuerprobe',             color: '#e2812a', reward: 'Ziffer 3, Schild, Berry',         when: 'halbe Strecke',       desc: 'Drei versiegelte Umschläge, Dennis sagt vorher, wie viele er nimmt. Scheitert er an einem, verliert er alles aus dieser Prüfung.', glyph: 'M50 22 q18 20 8 34 q6 -4 6 -12 q14 22 -14 32 q-28 -10 -14 -32 q0 8 6 12 q-10 -14 8 -34z' },
+    { id: 'bund',         name: 'Prüfung des Bundes',     color: '#8a3ec7', reward: 'Ziffer 4, Riekes Botschaft',      when: 'Gipfel',              desc: 'Der Bund ist Endboss. Drei Duelle, Disziplin wird gezogen, der Bund schickt seinen Besten. Hier zahlt sich jedes Item aus.', glyph: 'M50 24 l22 14 v24 l-22 14 -22 -14 v-24z M50 36 l10 6 v12 l-10 6 -10 -6 v-12z' }
+  ];
+  const MEDAL_POS = [[50,6],[88,28],[88,72],[50,94],[12,72],[12,28]];
+
+  const STONES = [
+    { id: 'bestellung', name: 'Die Bestellung', color: '#3ecf5a', desc: 'Für alle bestellen, ohne Zettel. Jeder Fehler kostet 1 Berry, alles richtig bringt 1.' },
+    { id: 'trank',      name: 'Trank der Ahnen', color: '#e0392b', desc: 'Die Ahnen mischen, Dennis trinkt in einem Zug: +1 Berry. Ablehnen kostet nichts, außer eine Peinlichkeit aus seinem eigenen Steckbrief.' },
+    { id: 'toast',      name: 'Toast und Öffnung', color: '#3a6fe0', desc: 'Prophezeiungen öffnen, Weisheiten der Ahnen, Toast auf den Bund. Dann das Kästchen: fehlende Ziffern kaufen, raten oder aufgeben.' }
+  ];
+
+  const ITEMS = {
+    ring_rieke:       { name: 'Ring der Rieke',        ico: '💍', cat: 'Startitem',  desc: 'Einen Encounter ablehnen, ohne Berry zu verlieren. Der Ring wird dabei abgegeben.' },
+    proviant:         { name: 'Proviant',              ico: '🐻', cat: 'Startitem',  desc: 'Fünf Gummibärchen. Jedes ist ein freier Fehlversuch am Schloss. Wer eins isst, hat es benutzt.' },
+    logpose:          { name: 'Log-Pose',              ico: '🧭', cat: 'Startitem',  desc: 'Ein Steckbrief gratis, jederzeit einlösbar. Im Zug verloren: eine Frage über Rieke zu viel daneben.' },
+    token:            { name: 'Herausforderungs-Token', ico: '🪙', cat: 'Fähigkeit', desc: 'Ein Duell im Showdown von einem Wächter seiner Wahl austragen lassen. Oder jemanden zu einem Encounter zwingen.' },
+    schwert:          { name: 'Schwert der Verdammnis', ico: '🗡️', cat: 'Waffe',     desc: 'Im Showdown pro Duell den nominierten Wächter streichen. Der Bund muss einen anderen schicken.' },
+    pistole_klein:    { name: 'Kleine Wasserpistole',  ico: '🔫', cat: 'Waffe',      desc: 'Standard. Reicht für das Auge des Jägers knapp, im Wasserduell ein Nachteil.' },
+    pistole_gross:    { name: 'Große Wasserpistole',   ico: '💦', cat: 'Waffe',      desc: 'Dreifacher Tank. Beim Waffenschmied erspielt. Geht beim Auge des Jägers mit 0 bis 1 Treffern wieder verloren.' },
+    ring_klein:       { name: 'Kleiner Ring',          ico: '⭕', cat: 'Ziel',       desc: 'Seilring, 35 cm. Standard für den Ringwurf.' },
+    ring_gross:       { name: 'Großer Ring',           ico: '🛞', cat: 'Ziel',       desc: 'Seilring, 60 cm. Beim Ringschmied erspielt. Dennis wirft im Showdown auf den großen, der Gegner auf den kleinen.' },
+    karten:           { name: 'Karten',                ico: '🃏', cat: 'Wurf',       desc: 'Zehn Bulk-Commons für den Kartenwurf in den Hut.' },
+    karten_gepanzert: { name: 'Gepanzerte Karten',     ico: '🎴', cat: 'Wurf',       desc: 'Dieselben Karten in Sleeves, fliegen stabiler. Beim Kartenwurf-Encounter erspielt.' },
+    schild:           { name: 'Schild des Bundes',     ico: '🛡️', cat: 'Fähigkeit',  desc: 'Ein verlorenes Duell im Showdown wiederholen. Gibt es nur in der Feuerprobe, wenn Dennis alle drei Umschläge nimmt.' },
+    steckbrief:       { name: 'Steckbriefe',           ico: '📇', cat: 'Wissen',     desc: 'Stärke, Schwäche und Schnick-Schnack-Schnuck-Eröffnung eines Wächters. 1 Berry pro Stück. Aktuell: Benne.' },
+    botschaft:        { name: 'Riekes Botschaft',      ico: '📼', cat: 'Belohnung',  desc: 'Eine letzte Sprachnachricht von Rieke. Der Bund gibt sie erst nach dem Showdown frei. Die vierte Ziffer steckt darin.' },
+    prophezeiung:     { name: 'Prophezeiungen',        ico: '✉️', cat: 'Prüfung',    desc: 'Sechs versiegelte Umschläge vom Morgen. Werden in der Hütte geöffnet.' },
+    umschlaege:       { name: 'Umschläge der Feuerprobe', ico: '🔥', cat: 'Prüfung', desc: 'Drei Umschläge, werden schwerer. Für 1 Berry verrät der Spielleiter vorher einen Titel.' },
+    beutel:           { name: 'Encounter-Beutel',      ico: '🎒', cat: 'Prüfung',    desc: 'Zehn Karten, blind gezogen. Vier bis fünf Züge über den Tag.' },
+    encounter:        { name: 'Encounter',             ico: '💀', cat: 'Zähler',     desc: 'Bisher gezogen: Waffenschmied (gewonnen), Log-Buch: Nakama (gewonnen). Drei Züge bleiben.' }
+  };
+
+  const EQUIP_ROWS = [
+    { label: 'Waffe',  ids: ['pistole_klein', 'pistole_gross', 'schwert'] },
+    { label: 'Ziel',   ids: ['ring_klein', 'ring_gross', null] },
+    { label: 'Wurf',   ids: ['karten', 'karten_gepanzert', null] },
+    { label: 'Bund',   ids: ['token', 'schild', null] }
+  ];
+  const START_IDS = ['ring_rieke', 'proviant', 'logpose'];
+  const INV_IDS = ['token', 'schwert', 'pistole_gross', 'ring_gross', 'karten_gepanzert', 'schild',
+                   'ring_rieke', 'proviant', 'logpose', 'steckbrief', 'botschaft', null,
+                   'prophezeiung', 'umschlaege', 'beutel', null, null, null];
+
+  const MAP_STOPS = [
+    { id: 'start',       t: 0.00, lx: 5, ly: 8, anchor: 'start', name: 'Parkplatz Tegernsee', status: 'bestanden', desc: 'Ankunft 10:00. Prophezeiungen sind versiegelt.' },
+    { id: 'klingen',     t: 0.14, lx: 5, ly: 7, anchor: 'start', name: 'Kreuzung der Klingen', status: 'bestanden', desc: 'Blindes Duell auf der Wiese, dann Waffenschmied.' },
+    { id: 'auge',        t: 0.36, lx: -5, ly: -4, anchor: 'end', name: 'Auge des Jägers', status: 'bestanden', desc: 'Fünf Teelichter auf einem Baumstumpf im ersten Waldstück.' },
+    { id: 'feuerprobe',  t: 0.58, lx: 5, ly: 8, anchor: 'start', name: 'Feuerprobe', status: 'offen', desc: 'Aussichtspunkt auf halber Höhe. Drei Umschläge.' },
+    { id: 'bund',        t: 0.92, lx: -5, ly: 6, anchor: 'end', name: 'Prüfung des Bundes', status: 'offen', desc: 'Gipfelwiese. Drei Duelle gegen den Bund.' },
+    { id: 'rast',        t: 1.00, lx: 5, ly: 2, anchor: 'start', name: 'Rast der Ahnen', status: 'offen', desc: 'Berggasthaus Neureuth. Bestellung, Trank, Toast, Öffnung.' }
+  ];
+  const FACES = ['quest', 'equip', 'item', 'map'];
+  const FACE_NAMES = { quest: 'Prüfungen', equip: 'Ausrüstung', item: 'Inventar', map: 'Karte' };
+  const STATUS_CYCLE = ['bestanden', 'offen', 'verloren'];
+  const OWN_CYCLE = [1, 0, 'lost'];
+
+  let state = load() || clone(DEMO);
+  let face = 0;
+  let sel = null; // { kind, id }
+
+  const $ = (s, r) => (r || document).querySelector(s);
+  const el = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; };
+  function clone(o) { return JSON.parse(JSON.stringify(o)); }
+  function load() { try { const s = localStorage.getItem('jga-dennis-menu'); return s ? JSON.parse(s) : null; } catch (e) { return null; } }
+  function save() { try { localStorage.setItem('jga-dennis-menu', JSON.stringify(state)); return true; } catch (e) { return false; } }
+
+  /* ---------- Build ---------- */
+  function slotBtn(id, size) {
+    const it = ITEMS[id];
+    const b = el('button', 'slot');
+    b.dataset.kind = 'item'; b.dataset.id = id;
+    if (size) b.style.setProperty('--s', size);
+    b.innerHTML = `<span class="ico">${it.ico}</span>`;
+    if (state.counts[id] != null) { const c = el('span', 'count'); c.dataset.count = id; b.appendChild(c); }
+    return b;
+  }
+
+  function build() {
+    // Medaillons
+    const medals = $('#medals');
+    TRIALS.forEach((t, i) => {
+      const b = el('button', 'medal');
+      b.dataset.kind = 'trial'; b.dataset.id = t.id;
+      b.style.setProperty('--m', t.color);
+      b.style.left = MEDAL_POS[i][0] + '%'; b.style.top = MEDAL_POS[i][1] + '%';
+      b.innerHTML = `<svg viewBox="0 0 100 100" aria-hidden="true"><path d="${t.glyph}" stroke="rgba(0,0,0,.55)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="rgba(0,0,0,.35)"/></svg>`;
+      b.setAttribute('aria-label', t.name);
+      medals.appendChild(b);
+    });
+    // Steine
+    const stones = $('#stones');
+    STONES.forEach(s => {
+      const b = el('button', 'stone');
+      b.dataset.kind = 'stone'; b.dataset.id = s.id;
+      b.innerHTML = `<svg viewBox="0 0 40 40"><polygon points="20,3 36,14 30,36 10,36 4,14" fill="${s.color}" stroke="rgba(0,0,0,.5)" stroke-width="2"/><polygon points="20,9 30,16 26,31 14,31 10,16" fill="rgba(255,255,255,.28)"/></svg>`;
+      b.setAttribute('aria-label', s.name);
+      stones.appendChild(b);
+    });
+    // Ziffern
+    const d = $('#digits');
+    for (let i = 0; i < 4; i++) {
+      const b = el('button', 'digit');
+      b.dataset.kind = 'digit'; b.dataset.id = String(i);
+      b.setAttribute('aria-label', 'Ziffer ' + (i + 1));
+      d.appendChild(b);
+    }
+    // Startitems
+    const si = $('#startitems');
+    START_IDS.forEach(id => si.appendChild(slotBtn(id)));
+    // Ausrüstung
+    const eg = $('#equipgrid');
+    EQUIP_ROWS.forEach(r => {
+      eg.appendChild(el('div', 'rowlbl', r.label));
+      r.ids.forEach(id => {
+        if (!id) { eg.appendChild(el('div', 'slot empty')); return; }
+        eg.appendChild(slotBtn(id));
+      });
+    });
+    // Inventar
+    const inv = $('#items');
+    INV_IDS.forEach(id => {
+      if (!id) { inv.appendChild(el('div', 'slot empty')); return; }
+      inv.appendChild(slotBtn(id));
+    });
+    // Karte
+    const route = $('#route'), g = $('#mapstops');
+    const L = route.getTotalLength();
+    MAP_STOPS.forEach(s => {
+      const p = route.getPointAtLength(L * s.t);
+      const grp = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+      grp.setAttribute('class', 'stop'); grp.dataset.kind = 'stop'; grp.dataset.id = s.id;
+      grp.setAttribute('tabindex', '0'); grp.setAttribute('role', 'button');
+      grp.innerHTML = `<circle cx="${p.x}" cy="${p.y}" r="3.2"/><text x="${p.x + s.lx}" y="${p.y + s.ly}" text-anchor="${s.anchor}">${s.name}</text>`;
+      g.appendChild(grp);
+    });
+    const you = route.getPointAtLength(L * 0.5);
+    const yg = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    yg.setAttribute('class', 'you');
+    yg.innerHTML = `<polygon points="${you.x},${you.y - 9} ${you.x - 4},${you.y - 2} ${you.x + 4},${you.y - 2}" fill="#4fae4c" stroke="#123e18" stroke-width="1"/><circle cx="${you.x}" cy="${you.y - 1}" r="2.4" fill="#f0c9a0" stroke="#7a4a2a" stroke-width=".8"/>`;
+    g.appendChild(yg);
+    // Herzen
+    const h = $('#hearts');
+    for (let i = 0; i < 10; i++) h.appendChild(el('span', '', '♥'));
+  }
+
+  /* ---------- Render ---------- */
+  function render() {
+    // Berry + Herzen
+    $('#berryVal').textContent = state.berry;
+    [...$('#hearts').children].forEach((s, i) => s.classList.toggle('on', i < state.berry));
+    // Tank
+    const big = state.items.pistole_gross === 1;
+    $('#tank').style.setProperty('--tank', big ? '100%' : '33%');
+    $('#tankLabel').textContent = big ? 'Tank · groß' : 'Tank · klein';
+    // Ziffern
+    [...$('#digits').children].forEach((b, i) => {
+      const v = state.digits[i];
+      b.dataset.known = v == null ? '0' : '1';
+      b.textContent = v == null ? '?' : v;
+    });
+    // Medaillons / Steine / Items / Stops
+    document.querySelectorAll('.medal').forEach(b => b.dataset.status = state.trials[b.dataset.id]);
+    document.querySelectorAll('.stone').forEach(b => b.dataset.status = state.rast[b.dataset.id]);
+    document.querySelectorAll('.slot[data-id]').forEach(b => {
+      const id = b.dataset.id, v = state.items[id];
+      b.dataset.owned = v == null ? '1' : String(v);
+      b.classList.toggle('locked', id === 'botschaft' && v !== 1);
+      b.classList.toggle('equipped', ['pistole_gross', 'ring_klein', 'karten', 'token'].includes(id) && v === 1 && b.closest('.equip-grid') != null);
+    });
+    if (state.items.pistole_gross !== 1) document.querySelectorAll('.equip-grid .slot[data-id="pistole_klein"]').forEach(b => b.classList.add('equipped'));
+    document.querySelectorAll('[data-count]').forEach(c => { const n = state.counts[c.dataset.count]; c.textContent = n != null ? '×' + n : ''; });
+    document.querySelectorAll('.stop').forEach(s => { const t = MAP_STOPS.find(m => m.id === s.dataset.id); s.dataset.status = (state.trials[s.dataset.id] || t.status); });
+    $('#encounterVal').textContent = state.encounters + ' / 5';
+    // Auswahl
+    document.querySelectorAll('.sel').forEach(e => e.classList.remove('sel'));
+    if (sel) document.querySelectorAll(`[data-kind="${sel.kind}"][data-id="${sel.id}"]`).forEach(e => e.classList.add('sel'));
+    describe();
+  }
+
+  function stateWord(v) { return v === 1 ? 'Im Besitz' : v === 'lost' ? 'Verloren' : v === 0 ? 'Noch nicht erspielt' : ''; }
+
+  function describe() {
+    const name = $('#descName'), st = $('#descState'), tx = $('#descText'), pl = $('#plaque');
+    if (!sel) {
+      const f = FACES[face];
+      name.textContent = FACE_NAMES[f]; st.textContent = 'Übersicht';
+      tx.textContent = {
+        quest: 'Sechs Medaillons für die sechs Prüfungen des Tages, das Triforce in der Mitte, unten die drei Steine der Rast der Ahnen. Links der Code des Kästchens: bekannte Ziffern in Gold.',
+        equip: 'Was Dennis am Körper trägt. Links die Startitems aus dem Zug, rechts die Upgrade-Reihen: die weiße Rahmung zeigt, was gerade ausgerüstet ist.',
+        item: 'Alles, was er in der Hand hat oder noch holen kann. Grau ist noch nicht erspielt, rotes Kreuz ist verloren, Schloss ist vom Bund verwahrt.',
+        map: 'Die Route vom Tegernsee auf die Neureuth mit allen Stationen. Der grüne Marker ist Dennis, kurz vor der Feuerprobe.'
+      }[f];
+      pl.textContent = 'Zu ' + ({ quest: 'r Ausrüstung', equip: 'm Inventar', item: 'r Karte', map: ' den Prüfungen' })[f].replace(/^r /, 'r ').replace(/^ /, '');
+      pl.textContent = { quest: 'Zur Ausrüstung', equip: 'Zum Inventar', item: 'Zur Karte', map: 'Zu den Prüfungen' }[f];
+      return;
+    }
+    if (sel.kind === 'trial') {
+      const t = TRIALS.find(x => x.id === sel.id), s = state.trials[sel.id];
+      name.textContent = t.name; st.textContent = s + ' · ' + t.when; pl.textContent = t.name;
+      tx.innerHTML = t.desc + ' <em>Belohnung: ' + t.reward + '.</em>';
+    } else if (sel.kind === 'stone') {
+      const s = STONES.find(x => x.id === sel.id);
+      name.textContent = s.name; st.textContent = 'Rast der Ahnen · ' + state.rast[sel.id]; pl.textContent = s.name; tx.textContent = s.desc;
+    } else if (sel.kind === 'digit') {
+      const i = +sel.id, v = state.digits[i];
+      const src = ['Log-Buch (Zug)', 'Kreuzung der Klingen', 'Feuerprobe', 'Prüfung des Bundes'][i];
+      name.textContent = 'Ziffer ' + (i + 1); st.textContent = v == null ? 'Unbekannt' : 'Bekannt: ' + v; pl.textContent = 'Ziffer ' + (i + 1) + (v == null ? ' · ?' : ' · ' + v);
+      tx.textContent = 'Quelle: ' + src + '. ' + (v == null ? 'Am Kästchen für 1 Berry kaufen, raten (1 Berry pro Fehlversuch, außer mit Proviant) oder aufgeben.' : 'Steht fest im Log-Buch des Spielleiters.');
+    } else if (sel.kind === 'stop') {
+      const s = MAP_STOPS.find(x => x.id === sel.id);
+      name.textContent = s.name; st.textContent = 'Station · ' + (state.trials[s.id] || s.status); pl.textContent = s.name; tx.textContent = s.desc;
+    } else {
+      const it = ITEMS[sel.id], v = state.items[sel.id];
+      name.textContent = it.name; st.textContent = it.cat + (stateWord(v) ? ' · ' + stateWord(v) : ''); pl.textContent = it.name;
+      tx.textContent = it.desc;
+    }
+  }
+
+  /* ---------- Interaktion ---------- */
+  function rotate(dir) {
+    face = (face + dir + FACES.length) % FACES.length;
+    $('#cube').style.setProperty('--i', face);
+    sel = null; render();
+  }
+  function decide() {
+    if (!sel) return;
+    if (sel.kind === 'trial') { const c = STATUS_CYCLE; state.trials[sel.id] = c[(c.indexOf(state.trials[sel.id]) + 1) % c.length]; }
+    else if (sel.kind === 'stone') { const c = STATUS_CYCLE; state.rast[sel.id] = c[(c.indexOf(state.rast[sel.id]) + 1) % c.length]; }
+    else if (sel.kind === 'digit') { const i = +sel.id; state.digits[i] = state.digits[i] == null ? Math.floor(Math.random() * 10) : null; }
+    else if (sel.kind === 'stop') { const c = STATUS_CYCLE; if (state.trials[sel.id] != null) state.trials[sel.id] = c[(c.indexOf(state.trials[sel.id]) + 1) % c.length]; }
+    else if (sel.kind === 'item' && state.items[sel.id] != null) { const c = OWN_CYCLE; state.items[sel.id] = c[(c.indexOf(state.items[sel.id]) + 1) % c.length]; }
+    render();
+  }
+
+  document.addEventListener('click', e => {
+    const t = e.target.closest('[data-kind]');
+    if (t) { sel = { kind: t.dataset.kind, id: t.dataset.id }; render(); }
+  });
+  document.addEventListener('keydown', e => {
+    if (e.target.matches('input, textarea')) return;
+    const t = e.target.closest && e.target.closest('[data-kind]');
+    if ((e.key === 'Enter' || e.key === ' ') && t && t.tagName !== 'BUTTON') { e.preventDefault(); sel = { kind: t.dataset.kind, id: t.dataset.id }; render(); return; }
+    if (e.key === 'ArrowRight' || e.key === 'r' || e.key === 'R') { e.preventDefault(); rotate(1); }
+    if (e.key === 'ArrowLeft' || e.key === 'z' || e.key === 'Z') { e.preventDefault(); rotate(-1); }
+    if (e.key === 'a' || e.key === 'A') { decide(); }
+  });
+  $('#navL').addEventListener('click', () => rotate(-1));
+  $('#navR').addEventListener('click', () => rotate(1));
+  $('#btnDecide').addEventListener('click', decide);
+  $('#btnReturn').addEventListener('click', () => { state = clone(DEMO); try { localStorage.removeItem('jga-dennis-menu'); } catch (e) {} sel = null; render(); flash('Demo-Stand wiederhergestellt'); });
+  $('#btnSave').addEventListener('click', () => flash(save() ? 'Stand gesichert (nur in diesem Browser)' : 'Sichern nicht möglich'));
+
+  function flash(msg) { const p = $('#plaque'); const old = p.textContent; p.textContent = msg; setTimeout(() => { if (p.textContent === msg) describe(); }, 1600); }
+
+  build();
+  render();
+})();
+</script>
