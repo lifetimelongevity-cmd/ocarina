@@ -21,19 +21,19 @@ Die konkrete Konfiguration zu diesem Plan liegt in `game-config-v0.json`.
 | 7 | Quest-Ausgänge | **Nur bestanden / verloren.** Kein „übersprungen". Fällt eine Quest aus, wird sie nicht gebucht und bleibt offen. |
 | 8 | Umfang | **6 Kernprüfungen + 7 Sidequests** = 13 Quests in fester Reihenfolge. |
 | 9 | Balance | Siehe A2. Alle Siege ergeben mehr als 10 (gedeckelt), alle Niederlagen ergeben 0. Normaler Tag: 4 bis 6 Packs. |
-| 10 | Items | 9 Items: 3 Startitems, 3 aus Kernprüfungen, 3 aus Sidequests. Keine Stufen (Empfehlung übernommen). |
-| 11 | Verlorenes Item | Kommt nur per Korrektur zurück. |
-| 12 | Undo | Nur das letzte Ereignis, beliebig oft hintereinander. |
-| 13 | Ereignis „start" | Weggelassen. Nächste Quest = erste offene. |
-| 14 | Quest Master | Eine feste Person, im Showdown kein Wächter. |
-| 15 | Zwei Handys | Erst ein Gerät mit Umschalter, vor dem Probelauf Firebase oder Supabase. |
+| 10 | Items | **Ein Startitem: der Beutel.** Dazu 6 erspielbare (3 aus Kernprüfungen, 3 aus Sidequests). Keine Stufen. |
+| 11 | Verlorenes Item | **Weg.** Kommt in v0 nicht zurück. |
+| 12 | Undo | Entfällt als eigene Funktion: Der Quest Master schaltet den Toggle zurück. |
+| 13 | Nächste Quest | **Immer die nächste in der Liste**, die noch offen ist. Kein „aktiv". |
+| 14 | Quest Master | **Du.** Eine Person, den ganzen Tag. |
+| 15 | Zwei Handys | **Deployen, Admin-Menü mit Toggles, Stand wird online gespeichert.** Dennis' Menü liest den gespeicherten Stand. Siehe A7. |
 
 ### A1. Vier Begriffe, mehr nicht
 
 | Begriff | Was es ist | Zustand |
 |---|---|---|
 | **Quest** | Eine Aufgabe in fester Reihenfolge. `typ` ist `kern` oder `side`, die Logik ist dieselbe. | `offen`, `bestanden`, `verloren` |
-| **Item** | Ein Gegenstand oder eine Fähigkeit mit einem Satz Wirkung. Kein Unterschied zwischen Ausrüstung, Fähigkeit, Startitem. | `nicht`, `besitz`, `verloren` |
+| **Item** | Ein Gegenstand oder eine Fähigkeit mit einem Satz Wirkung. Kein Unterschied zwischen Ausrüstung und Fähigkeit. | `nicht`, `besitz`, `verloren` |
 | **Packs** | Dennis' Anteil an den 10 Packs im Kästchen | Zahl 0 bis 10, Rest gehört dem Bund |
 | **Ziffer** | Eine der vier Stellen des Kästchen-Codes | `unbekannt` oder `bekannt` (mit Wert) |
 
@@ -45,7 +45,7 @@ Kernprüfungen tragen die Ziffern, Sidequests tragen Packs und Items. Sidequest-
 
 | # | Quest | Typ | win | lose |
 |---|---|---|---|---|
-| 1 | Log-Buch | kern | +1, Ziffer 1 | ein Startitem weg (QM wählt per Korrektur) |
+| 1 | Log-Buch | kern | +1, Ziffer 1 | 0 (Ziffer 1 fehlt, muss später gekauft werden) |
 | 2 | Prophezeiung | kern | +1 (Abrechnung in der Hütte, wird dort gebucht) | 0 |
 | 3 | Waffenschmied | side | +1, Große Wasserpistole | 0 |
 | 4 | Kreuzung der Klingen | kern | +1, Ziffer 2, Token | −1, Token weg |
@@ -61,15 +61,13 @@ Kernprüfungen tragen die Ziffern, Sidequests tragen Packs und Items. Sidequest-
 
 Summe aller win: 14, gedeckelt auf 10. Summe aller lose: −10, gedeckelt auf 0. Bei 60 Prozent Siegquote landet Dennis bei etwa 5 Packs, bevor er Ziffern kauft.
 
-Verlorene Items: In v0 kann eine verlorene Quest nur Items nehmen, die in `lose.items` stehen. Hat Dennis das Item nicht, passiert nichts. Alles andere (welches Startitem beim Log-Buch) bucht der Quest Master per Korrektur.
+Verlorene Items: Eine verlorene Quest nimmt nur Items, die in `lose.items` stehen. Hat Dennis das Item nicht, passiert nichts. Weg ist weg.
 
-### A3. Die 9 Items
+### A3. Die 7 Items
 
 | Item | Woher | Wirkung (ein Satz, wird in Stufe 1 zur Regel) |
 |---|---|---|
-| Ring der Rieke | Start | Einmal eine Sidequest ablehnen. |
-| Proviant | Start | Freie Fehlversuche am Kästchen. |
-| Log-Pose | Start | Ein Steckbrief gratis. |
+| Beutel | Start | Hält alles, was Dennis erspielt. Keine Spielwirkung, das einzige Startitem. |
 | Herausforderungs-Token | Kreuzung der Klingen | Im Showdown ein Duell abgeben. |
 | Schwert der Verdammnis | Auge des Jägers | Im Showdown einen Gegner streichen. |
 | Schild des Bundes | Feuerprobe | Im Showdown ein Duell wiederholen. |
@@ -77,45 +75,59 @@ Verlorene Items: In v0 kann eine verlorene Quest nur Items nehmen, die in `lose.
 | Großer Ring | Ringschmied | Leichteres Ziel beim Ringwurf. |
 | Gepanzerte Karten | Kartenwurf | Stabilere Karten beim Kartenwurf. |
 
-### A4. Drei Ereignisse
+Ring der Rieke, Proviant und Log-Pose sind gestrichen, bis Dennis eigene Aktionen hat (Stufe 2).
 
-Der Quest Master schreibt, sonst niemand. Ereignisse werden nur angehängt, nie geändert.
+### A4. Das gespeicherte Dokument (was der Quest Master schaltet)
 
-| Ereignis | Payload | Wirkung |
-|---|---|---|
-| `quest` | `{ id, outcome: "bestanden" \| "verloren" }` | Quest bekommt den Status. Effekte aus `win` bzw. `lose` werden angewendet: Packs addieren (Deckel 0 bis 10), Items auf `besitz` bzw. `verloren`, Ziffer auf `bekannt`. |
-| `korrektur` | `{ packs?: ±n, item?: { id, status }, grund }` | Freie Buchung: Ziffer kaufen, Steckbrief kaufen, Startitem nach Log-Buch nehmen, Nachbesserung. Alles, was v0 nicht als Regel kennt, läuft hier durch, mit Grund im Text. |
-| `undo` | leer | Das letzte Ereignis, das kein `undo` ist, wird ignoriert. |
-
-### A5. Zustand = Konfiguration + Ereignisse
+Es gibt keine Ereignisliste. Gespeichert wird genau das, was der Quest Master im Admin-Menü einstellt:
 
 ```
-function reduce(config, events) {
-  state = { packs: 0, items: {}, quests: {}, ziffern: [null, null, null, null] }
-  für jedes Item in config.items:   state.items[id] = "nicht"
-  für jedes Startitem:              state.items[id] = "besitz"
-  für jede Quest in config.quests:  state.quests[id] = "offen"
-
-  aktive = events ohne die von undo aufgehobenen
-  für jedes Ereignis e in aktive:
-    wenn e.type == "quest":
-      quest  = config.quests[e.id]
-      effekt = e.outcome == "bestanden" ? quest.win : quest.lose
-      state.quests[e.id] = e.outcome
-      state.packs = clamp(state.packs + (effekt.packs || 0), 0, 10)
-      für item in effekt.items:
-        wenn e.outcome == "bestanden":              state.items[item] = "besitz"
-        sonst wenn state.items[item] == "besitz":   state.items[item] = "verloren"
-      wenn effekt.ziffer:  state.ziffern[effekt.ziffer - 1] = config.code[effekt.ziffer - 1]
-    wenn e.type == "korrektur":
-      wenn e.packs: state.packs = clamp(state.packs + e.packs, 0, 10)
-      wenn e.item:  state.items[e.item.id] = e.item.status
-  state.next = erste Quest mit Status "offen"
-  return state
+doc = {
+  quests: { logbuch: "bestanden", waffenschmied: "verloren", klingen: "offen", ... },   // ein Toggle je Quest
+  items:  { schwert: "verloren" },          // nur manuelle Korrekturen, sonst leer
+  buchungen: [ { packs: -1, grund: "Steckbrief Benne" }, ... ],   // freie Packs-Buchungen mit Grund
+  ziffern_gekauft: [1]                      // welche Ziffern Dennis gekauft hat
 }
 ```
 
-Reine Funktion, läuft ohne Netz und ohne Browser, testbar mit der Ereignisliste aus A8.
+Bedienelemente im Admin-Menü:
+
+| Element | Schreibt | Rückgängig |
+|---|---|---|
+| Toggle je Quest: offen / bestanden / verloren | `doc.quests[id]` | Toggle zurückstellen |
+| Buchung: Packs ±n mit Grund (Buttons für die üblichen Gründe) | `doc.buchungen[]` | Eintrag löschen |
+| Ziffer gekauft | `doc.ziffern_gekauft[]` plus Buchung −1 | Eintrag löschen |
+| Item manuell geben oder nehmen (selten) | `doc.items[id]` | Eintrag löschen |
+
+### A5. Zustand = Konfiguration + Dokument
+
+```
+function derive(config, doc) {
+  packs = config.waehrung.start
+  items = {}; für jedes Item: items[id] = "nicht"; für jedes Startitem: items[id] = "besitz"
+  ziffern = [null, null, null, null]
+
+  für jede Quest q in config.quests (in Reihenfolge):
+    status = doc.quests[q.id] || "offen"
+    wenn status == "bestanden":
+      packs += q.win.packs
+      für item in q.win.items:  items[item] = "besitz"
+      wenn q.win.ziffer:        ziffern[q.win.ziffer - 1] = config.code[q.win.ziffer - 1]
+    wenn status == "verloren":
+      packs += q.lose.packs
+      für item in q.lose.items: wenn items[item] == "besitz": items[item] = "verloren"
+
+  für jede Buchung b in doc.buchungen:      packs += b.packs
+  für jede Ziffer z in doc.ziffern_gekauft: ziffern[z - 1] = config.code[z - 1]
+  für jedes id in doc.items:                items[id] = doc.items[id]   // Korrektur schlägt Regel
+
+  packs = clamp(packs, 0, 10)
+  next  = erste Quest in Reihenfolge mit status "offen"
+  return { packs, items, ziffern, quests: status je Quest, next }
+}
+```
+
+Reine Funktion, beide Sichten rechnen sie selbst aus demselben Dokument. Das Dokument beschreibt den Stand, nicht den Weg dorthin. Deshalb ist Zurückschalten immer sauber, und der Deckel 0 bis 10 gilt einmal am Ende.
 
 ### A6. Zwei Sichten auf denselben Zustand
 
@@ -129,13 +141,16 @@ Reine Funktion, läuft ohne Netz und ohne Browser, testbar mit der Ereignisliste
 
 Dennis schreibt in v0 nichts. Er wählt Items nur zum Ansehen. Alles, was er im Spiel tut, sagt er dem Quest Master, der es bucht. Eigene Aktionen für Dennis sind Stufe 2.
 
-### A7. Zwei Handys
+### A7. Deployen und speichern
 
-Ein gemeinsames Dokument: `{ config, events[] }`. Der Quest Master hängt Ereignisse an, Dennis' Menü liest und rechnet `reduce` selbst.
+Genau so, wie du es beschrieben hast: Die Seite wird einmal deployt, es gibt ein Admin-Menü mit Toggles, jede Änderung wird online gespeichert, Dennis' Menü liest den gespeicherten Stand.
 
-1. **Zum Bauen und Testen:** beide Sichten auf einem Gerät, Umschalter, Dokument im Browser-Speicher.
-2. **Vor dem Probelauf:** ein Dokument in Firebase Realtime Database oder Supabase. Zwei Links, der QM-Link mit Schlüssel.
-3. **Ohne Netz:** QM-Handy schreibt lokal weiter, lädt nach. Dennis sieht „Stand von hh:mm". QR-Übergabe ist Stufe 8.
+- **Eine Seite, zwei Ansichten.** `index.html` ist Dennis' Menü (liest). `admin.html` ist dein Menü (schreibt). Der Admin-Link enthält einen langen Schlüssel, ohne den die Seite nicht schreibt.
+- **Speicher:** ein einziges JSON-Dokument (`doc` aus A4) in Firebase Realtime Database. Kostenlos, Echtzeit, JS ohne Build-Schritt, läuft auf statischem Hosting wie deiner jetzigen Seite. Supabase ginge genauso. Dennis' Seite abonniert das Dokument und rechnet `derive` bei jeder Änderung neu.
+- **Ohne Netz:** Firebase puffert Schreibzugriffe lokal und schickt sie nach, sobald Netz da ist. Dennis' Menü zeigt „Stand von hh:mm".
+- **Einrichtung:** Firebase-Projekt anlegen, Realtime Database aktivieren, Regel „lesen für alle, schreiben nur unter einem Pfad mit Schlüssel", leeres Dokument anlegen. Eine Stunde, einmalig.
+
+Alternative ohne eigenes Backend wäre ein Claude-Artifact mit geteilter Datenbank. Nachteil: Dennis bräuchte am Berg einen claude.ai-Login mit Zugriff. Für den Spieltag nicht empfohlen, zum schnellen Ausprobieren der Logik möglich.
 
 ### A8. Was das Menü konkret ändert
 
@@ -143,35 +158,28 @@ Ein gemeinsames Dokument: `{ config, events[] }`. Der Quest Master hängt Ereign
 - Jeder `selectable` bekommt eine `data-id`, die in `game-config-v0.json` existiert.
 - Die nächste Quest wird hervorgehoben, die Textbox zeigt Name, Ort, Beschreibung.
 - Herzen = Packs (10 Herzen, gefüllt = Dennis). Der Rest des HUD bleibt Deko bis Teil B.
-- Sechs Medaillons = die sechs Kernprüfungen. Sidequests bekommen eine eigene Reihe oder die Steine.
+- Sechs Medaillons = die sechs Kernprüfungen in Konfigurationsreihenfolge (Prophezeiung zuletzt, weil sie in der Hütte gebucht wird). Sidequests bekommen eine eigene Reihe oder die Steine.
 
-### A9. Beispieltag als Ereignisliste (Test)
+### A9. Beispielstand (Test für `derive`)
 
 ```
-Start: 0 Packs, Items ring_rieke, proviant, logpose
- 1. quest logbuch     bestanden -> 1 Pack, Ziffer 1
- 2. quest prophezeiung  (wird erst in der Hütte gebucht, bleibt offen)
- 3. quest waffenschmied bestanden -> 2, pistole_gross besitz
- 4. quest klingen     bestanden -> 3, Ziffer 2, token besitz
- 5. korrektur packs -1 "Steckbrief Benne"        -> 2
- 6. quest auge        verloren  -> 1, pistole_gross verloren
- 7. undo                         -> Ereignis 6 aufgehoben: 2, pistole_gross besitz
- 8. quest auge        bestanden -> 3, schwert besitz
- 9. quest ringschmied verloren  -> 2
-10. quest kartenwurf  bestanden -> 3, karten_gepanzert besitz
-11. quest nakama      bestanden -> 4
-12. quest feuerprobe  bestanden -> 5, Ziffer 3, schild besitz
-13. quest sss         verloren  -> 4
-14. quest steinwurf   bestanden -> 5
-15. quest bund        bestanden -> 7, Ziffer 4
-16. quest prophezeiung bestanden -> 8
-17. quest rast        bestanden -> 9
-Endstand: 9 Packs, Ziffern 4/4, next = keine
-Items besitz: ring_rieke, proviant, logpose, token, schwert, schild, pistole_gross, karten_gepanzert
-Items nicht: ring_gross
+doc = {
+  quests: { logbuch: "bestanden", waffenschmied: "bestanden", klingen: "bestanden",
+            auge: "verloren", ringschmied: "bestanden", kartenwurf: "verloren",
+            nakama: "bestanden", feuerprobe: "bestanden" },
+  items: {},
+  buchungen: [ { packs: -1, grund: "Steckbrief Benne" } ],
+  ziffern_gekauft: []
+}
+Packs:    +1 +1 +1 -1 +1 -1 +1 +1 = 4, Buchung -1 = 3
+Ziffern:  [7, 4, 2, null]
+Items:    besitz  beutel, token, ring_gross, schild
+          verloren pistole_gross (Waffenschmied gibt sie, Auge des Jägers nimmt sie)
+          nicht   schwert, karten_gepanzert
+next:     "sss"
 ```
 
-Hinweis: Die Prophezeiung steht an Position 2, wird aber erst in der Hütte gebucht. Deshalb ist „nächste Quest = erste offene" in v0 leicht falsch, solange sie offen ist. Lösung ohne neue Logik: Die Prophezeiung wird in der Konfiguration ans Ende sortiert (Position 13, nach der Rast) und im Menü trotzdem als Medaillon 2 gezeigt. Reihenfolge in der Konfiguration ist Buchungsreihenfolge, nicht Erzählreihenfolge.
+Wenn `derive` genau das liefert, ist v0 fertig. Der Test zeigt auch die Reihenfolge-Regel: Waffenschmied steht vor dem Auge des Jägers.
 
 ---
 
@@ -180,6 +188,7 @@ Hinweis: Die Prophezeiung steht an Position 2, wird aber erst in der Hütte gebu
 | Stufe | Was dazukommt | Was es an v0 anhängt |
 |---|---|---|
 | **1 · Inhalte** | Sidequests konkret, Beschreibungen, Icons, Orte | Nur Konfiguration |
+| **1b · Startitems** | Ring der Rieke, Proviant, Log-Pose zurück, sobald Dennis Aktionen hat | Konfiguration plus Stufe 2 |
 | **2 · Aktionen von Dennis** | Items einsetzen, Packs ausgeben, als Anfrage mit Bestätigung | Ereignisse `anfrage` und `antwort` |
 | **3 · Ergebnisse mit Zahlen** | Treffer 0 bis 5, Umschläge 1 bis 3, Siege 0 bis 3, Raten am Kästchen | `quest` bekommt `wert`, Konfiguration bekommt `wert -> Effekt` |
 | **4 · Stufen bei Items** | Kleine und große Pistole als Linie mit „ausgerüstet" | `linie`, `stufe`, Ereignis `ausruesten` |
@@ -194,4 +203,4 @@ Detailideen zu Stufe 2 bis 8 stehen in der Git-Historie dieser Datei (Commit „
 
 ## Nächster Schritt
 
-`reduce` als reine Funktion gegen `game-config-v0.json` mit der Liste aus A9 als Test. Danach das Menü an den Zustand hängen.
+`derive` als reine Funktion gegen `game-config-v0.json` mit dem Stand aus A9 als Test. Dann `admin.html` mit den Toggles, dann Dennis' Menü an `derive` hängen, dann Firebase dazwischen.
