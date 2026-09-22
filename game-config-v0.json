@@ -3,6 +3,7 @@
   "waehrung": {
     "name": "Packs",
     "max": 10,
+    "max_hinweis": "Anzahl noch offen, kann größer werden. Balance in 05-system-plan.md A2 anpassen.",
     "start": 0
   },
   "code": [

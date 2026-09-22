@@ -12,7 +12,7 @@ Die konkrete Konfiguration zu diesem Plan liegt in `game-config-v0.json`.
 
 | # | Entscheidung | Gewählt |
 |---|---|---|
-| 1 | Währung | **Packs**, direkt. Kein Berry, keine Umrechnung. 10 Packs im Kästchen, Zähler von 0 bis 10. |
+| 1 | Währung | **Packs**, direkt. Kein Berry, keine Umrechnung. Anzahl im Kästchen ist **noch offen** (10 oder mehr), steht als `waehrung.max` in der Konfiguration. Zähler von 0 bis `max`. |
 | 2 | Startstand | **0 Packs.** Dennis verdient alles. |
 | 3 | Untergrenze | Packs fallen nicht unter 0. Ein Verlust bei 0 verpufft (Empfehlung übernommen). |
 | 4 | Physisch oder App | **Nur App.** Keine Münzen. Das Kästchen mit den Packs ist die einzige physische Währung und bleibt zu. |
@@ -20,7 +20,7 @@ Die konkrete Konfiguration zu diesem Plan liegt in `game-config-v0.json`.
 | 6 | Verlorene Ziffer | Bleibt unbekannt. Am Kästchen: **1 Pack pro Ziffer kaufen** (Korrektur-Buchung). Kein Raten in v0. |
 | 7 | Quest-Ausgänge | **Nur bestanden / verloren.** Kein „übersprungen". Fällt eine Quest aus, wird sie nicht gebucht und bleibt offen. |
 | 8 | Umfang | **6 Kernprüfungen + 7 Sidequests** = 13 Quests in fester Reihenfolge. |
-| 9 | Balance | Siehe A2. Alle Siege ergeben mehr als 10 (gedeckelt), alle Niederlagen ergeben 0. Normaler Tag: 4 bis 6 Packs. |
+| 9 | Balance | Siehe A2, gerechnet für 10. Wird `max` größer, werden die win-Werte der Kernprüfungen angehoben, nicht die Anzahl der Quests. |
 | 10 | Items | **Ein Startitem: der Beutel.** Dazu 6 erspielbare (3 aus Kernprüfungen, 3 aus Sidequests). Keine Stufen. |
 | 11 | Verlorenes Item | **Weg.** Kommt in v0 nicht zurück. |
 | 12 | Undo | Entfällt als eigene Funktion: Der Quest Master schaltet den Toggle zurück. |
@@ -59,7 +59,9 @@ Kernprüfungen tragen die Ziffern, Sidequests tragen Packs und Items. Sidequest-
 | 12 | Prüfung des Bundes | kern | +2, Ziffer 4 | −2, Schwert weg |
 | 13 | Rast der Ahnen | side | +1 | −1 |
 
-Summe aller win: 14, gedeckelt auf 10. Summe aller lose: −10, gedeckelt auf 0. Bei 60 Prozent Siegquote landet Dennis bei etwa 5 Packs, bevor er Ziffern kauft.
+Summe aller win: 14, gedeckelt auf `max` (bei 10). Summe aller lose: −10, gedeckelt auf 0. Bei 60 Prozent Siegquote landet Dennis bei etwa 5 Packs, bevor er Ziffern kauft.
+
+Falls es mehr Packs werden: Faustregel ist Summe aller win = etwa 1,4 × `max`, damit ein perfekter Tag den Deckel erreicht und ein normaler Tag bei der Hälfte landet. Bei 15 Packs also win-Summe 21, z. B. Kernprüfungen +2 (Showdown +3), Sidequests +1. Alles im Menü (Herzen, Zähler) liest `max` aus der Konfiguration, nichts ist fest auf 10.
 
 Verlorene Items: Eine verlorene Quest nimmt nur Items, die in `lose.items` stehen. Hat Dennis das Item nicht, passiert nichts. Weg ist weg.
 
@@ -121,7 +123,7 @@ function derive(config, doc) {
   für jede Ziffer z in doc.ziffern_gekauft: ziffern[z - 1] = config.code[z - 1]
   für jedes id in doc.items:                items[id] = doc.items[id]   // Korrektur schlägt Regel
 
-  packs = clamp(packs, 0, 10)
+  packs = clamp(packs, 0, config.waehrung.max)
   next  = erste Quest in Reihenfolge mit status "offen"
   return { packs, items, ziffern, quests: status je Quest, next }
 }
@@ -157,7 +159,7 @@ Alternative ohne eigenes Backend wäre ein Claude-Artifact mit geteilter Datenba
 - `won / lost / locked` werden aus `state` gesetzt, nicht per Klick. `decide()` und `persist()` in `app.js` entfallen.
 - Jeder `selectable` bekommt eine `data-id`, die in `game-config-v0.json` existiert.
 - Die nächste Quest wird hervorgehoben, die Textbox zeigt Name, Ort, Beschreibung.
-- Herzen = Packs (10 Herzen, gefüllt = Dennis). Der Rest des HUD bleibt Deko bis Teil B.
+- Herzen = Packs (`max` Herzen, gefüllt = Dennis). Der Rest des HUD bleibt Deko bis Teil B.
 - Sechs Medaillons = die sechs Kernprüfungen in Konfigurationsreihenfolge (Prophezeiung zuletzt, weil sie in der Hütte gebucht wird). Sidequests bekommen eine eigene Reihe oder die Steine.
 
 ### A9. Beispielstand (Test für `derive`)
