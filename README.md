@@ -11,6 +11,7 @@ Quest-System zum JGA-Wochenende von Dennis (2. bis 4. Oktober, München / Tegern
 | `README.md` | Projektbeschreibung (Original-Briefing, unverändert) | gesetzt |
 | `00-spielanleitung.md` | Regelwerk: Akte, Ressourcen, Prüfungen, Encounter, Ausrüstung, Fähigkeiten, Flüche, Kästchen | Entwurf |
 | `05-system-plan.md` | Kernlogik v0 (Quest, Item, Packs, Ziffer, drei Ereignisse, reduce), Entscheidungen, Ausbaustufen | Plan v0 |
+| `06-design-plan.md` | Design von Dennis' Menü: drei Seiten, HUD, Bildsprache, Texte, Querformat. Entwurf in `app/entwurf.html?demo` | Vorschlag |
 | `app/` | Die App v0: Dennis' Menü (`index.html`), Quest-Master-Menü (`admin.html`), Konfiguration (`config.js`), Logik mit Tests. Anleitung in `app/README.md`. | v0 |
 | `01-showdown-pruefung-des-bundes.md` | Prüfung 5, das Finale auf dem Gipfel. Definiert, was jedes Item wert ist. | Vorschlag v1 |
 | `02-items-und-oekonomie.md` | Item-Liste, Berry-Währung, Ziffern-Logik, Kästchen | Vorschlag v1 |

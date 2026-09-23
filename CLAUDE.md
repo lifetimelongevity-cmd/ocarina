@@ -13,6 +13,7 @@ JGA-Wochenende für Dennis, 2. bis 4. Oktober 2026, München und Wanderung am Te
 - **Live:** Dennis `https://dd-ocarina.netlify.app/`, Quest Master `https://dd-ocarina.netlify.app/admin.html`. Hosting auf Netlify, Projekt `dd-ocarina`. `netlify.toml` setzt den Veröffentlichungsordner auf `app`. Ist das Netlify-Projekt mit diesem Repo verknüpft, geht jeder Push auf `main` automatisch live. Sonst lädt der Nutzer den Ordner `app/` per Drag-and-drop hoch.
 - **Speicher:** Firebase Realtime Database, Projekt `dennis-quest`, URL `https://dennis-quest-default-rtdb.europe-west1.firebasedatabase.app`, Pfad `/spiele/dennis-jga-2026`. Zugriff per REST ohne SDK. Datenbank war beim letzten Check noch im offenen Testmodus, empfohlene Regel steht in `app/README.md`.
 - **Getestet:** Logik per `node app/engine.test.js`, Synchronisation Admin zu Dennis mit zwei getrennten Browsern über die Live-Adresse. Noch nicht mit zwei echten Handys getestet.
+- **Design (23.09.):** Der Nutzer will Dennis' Menü neu ordnen und im iPhone-Querformat lesbar machen. Plan in `06-design-plan.md`, klickbarer Entwurf in `app/entwurf.html` (mit `?demo` ohne Datenbank). Drei Seiten KARTE, QUESTS, AUSRÜSTUNG, HUD mit Packs als Spielkarten und Code als Zahlenschloss, Ergebnis-Fenster nach jeder Buchung. **Noch nicht freigegeben, die App ist unverändert.** Entscheidungen offen in `06-design-plan.md` Abschnitt 9.
 
 ## Wo was liegt
 
@@ -20,6 +21,8 @@ JGA-Wochenende für Dennis, 2. bis 4. Oktober 2026, München und Wanderung am Te
 |---|---|
 | `app/` | **Die App.** `index.html` + `app.js` + `styles.css` (Dennis' Menü, Optik vom Nutzer gebaut), `admin.html` + `admin.js` + `admin.css` (Quest Master), `config.js` (alle Quests, Items, Code, Packs), `engine.js` (Logik), `store.js` (Firebase oder lokal), `README.md` (Einrichtung, Deploy) |
 | `05-system-plan.md` | **Maßgeblicher Plan.** Kernlogik v0, alle Entscheidungen (Tabelle A0), Ausbaustufen (Teil B) |
+| `06-design-plan.md` | **Design-Plan für Dennis' Menü** (Vorschlag): Befund, Seitenaufbau aus der Spielanleitung, Bildsprache, Texte im Spielton, Querformat-Regeln, Bauplan |
+| `app/entwurf.html`, `entwurf.css`, `entwurf.js` | Klickbarer Entwurf zu 06. Nutzt `config.js`, `engine.js`, `store.js` unverändert. Neue Texte, Farben und Kartenpunkte stehen oben in `entwurf.js` und wandern beim Bauen nach `config.js` |
 | `00-spielanleitung.md` | Ausführliches Regelwerk (Ideen für später: Flüche, Anfragen, Stufen). Spricht noch von „Berry", gemeint sind Packs |
 | `01` bis `04` | Frühe Detailentwürfe: Showdown, Items und Ökonomie, offene Prüfungen, Zeitplan und Packliste. Teilweise überholt durch 05 |
 | `README.md` | Original-Briefing des Nutzers |
@@ -42,6 +45,7 @@ Der Nutzer will es **einfach und in sich geschlossen** halten und schrittweise a
 
 ## Offene Punkte
 
+0. Design-Plan `06-design-plan.md` freigeben (Entscheidungen in Abschnitt 9), dann nach Abschnitt 10 bauen.
 1. Firebase-Regeln setzen (siehe `app/README.md`).
 2. Test mit zwei echten Handys.
 3. Sidequest-Inhalte sind Platzhalter (`[PLATZHALTER]` in `config.js`).
