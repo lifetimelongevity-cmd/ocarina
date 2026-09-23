@@ -174,6 +174,9 @@ svg { display: block; }
 .gem svg { width: 100%; height: 100%; filter: drop-shadow(1px 1px 0 rgba(0,0,0,.7)); }
 .gem.won { color: var(--g); }
 .gem.lost { color: #6d6c64; }
+/* verdeckt (im Nebel): dunkles Medaillon mit Fragezeichen */
+.medal.covered { color: #d8d1ae; background: radial-gradient(circle at 35% 28%, #4c4b3f, #1d1f18 62%, #0a0c08); }
+.medal.covered b { font: 900 calc(var(--sz, 28px) * .56)/1 Georgia, serif; opacity: .8; text-shadow: 1px 1px 0 #000; }
 /* verloren: rotes X, jetzt: pulsierender Ring */
 .medal.lost::after, .gem.lost::after, .well.lost::after { content: ""; position: absolute; right: -3px; bottom: -3px; width: 44%; height: 44%; min-width: 11px; min-height: 11px; border-radius: 50%;
   background: #c3261d url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='m4.5 4.5 7 7m0-7-7 7' stroke='%23fff' stroke-width='2.6' stroke-linecap='round'/%3E%3C/svg%3E") center/80% no-repeat; box-shadow: 0 0 0 1.5px #1a0605; }
@@ -212,6 +215,8 @@ svg { display: block; }
 .q-row .q-mark.won { color: var(--gold); } .q-row .q-mark.lost { color: #ff6b5e; }
 .q-row.is-selected { background: rgba(250,242,110,.13); box-shadow: inset 0 0 0 2px var(--cursor); }
 .q-row:focus-visible { outline: 2px solid #fff; outline-offset: -2px; }
+.q-row.nebel .q-name { color: #b3ad90; font-style: italic; font-weight: 600; }
+.q-row.nebel .medal { --sz: 26px; }
 .q-sep { list-style: none; padding: 7px 6px 3px; color: #c9c29a; font: 800 var(--fs-tiny)/1 "Courier New", monospace; letter-spacing: .08em; opacity: .8; }
 
 .quest-card { display: flex; flex-direction: column; min-height: 0; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none; padding: 10px 12px; }
@@ -253,6 +258,13 @@ svg { display: block; }
 .t-sky { fill: #e3d8a2; } .t-back { fill: #a7ad73; } .t-front { fill: #71894b; } .t-forest { fill: #3f5a2c; } .t-lake { fill: #5f9aaa; }
 .t-rail { fill: none; stroke: #4a3b24; stroke-width: 3; stroke-dasharray: 2 5; vector-effect: non-scaling-stroke; }
 .t-route { fill: none; stroke: #302718; stroke-width: 3; stroke-dasharray: 7 5; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+.map-fog { position: absolute; top: 0; right: 0; bottom: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 30% 18% at 30% 30%, rgba(250,246,226,.55), transparent 70%),
+    radial-gradient(ellipse 34% 20% at 70% 62%, rgba(250,246,226,.5), transparent 70%),
+    radial-gradient(ellipse 26% 16% at 50% 88%, rgba(250,246,226,.45), transparent 70%),
+    linear-gradient(90deg, rgba(222,214,178,0), rgba(222,214,178,.82) 38px, rgba(222,214,178,.9)); }
+.map-fog[hidden] { display: none; }
 .map-marks { position: absolute; inset: 0; }
 .mark { position: absolute; transform: translate(-50%, -50%); display: grid; justify-items: center; gap: 2px; padding: 4px; border: 0; background: none; cursor: pointer; }
 .mark .medal { --sz: clamp(24px, 7.6vh, 30px); }
@@ -279,6 +291,7 @@ svg { display: block; }
 .pips .medal { --sz: clamp(17px, 5.4vh, 24px); border-width: 1.5px; }
 .pips .gem { --sz: clamp(13px, 4.4vh, 19px); }
 .pips .medal.lost::after, .pips .gem.lost::after { min-width: 8px; min-height: 8px; right: -2px; bottom: -2px; }
+.pips-none { color: #bdb99c; font: italic 600 var(--fs-tiny)/1.4 "Trebuchet MS", sans-serif; }
 .left-count { margin: 2px 0 0; color: var(--cream); font: 900 var(--fs-small)/1.1 Georgia, serif; text-shadow: 1px 1px 0 #000; }
 .station-box { overflow: hidden; padding: 7px 10px; }
 .station-box .tb-title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

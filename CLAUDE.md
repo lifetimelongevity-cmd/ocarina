@@ -13,7 +13,7 @@ JGA-Wochenende für Dennis, 2. bis 4. Oktober 2026, München und Wanderung am Te
 - **Live:** Dennis `https://dd-ocarina.netlify.app/`, Quest Master `https://dd-ocarina.netlify.app/admin.html`. Hosting auf Netlify, Projekt `dd-ocarina`. `netlify.toml` setzt den Veröffentlichungsordner auf `app`. Ist das Netlify-Projekt mit diesem Repo verknüpft, geht jeder Push auf `main` automatisch live. Sonst lädt der Nutzer den Ordner `app/` per Drag-and-drop hoch.
 - **Speicher:** Firebase Realtime Database, Projekt `dennis-quest`, URL `https://dennis-quest-default-rtdb.europe-west1.firebasedatabase.app`, Pfad `/spiele/dennis-jga-2026`. Zugriff per REST ohne SDK. Datenbank war beim letzten Check noch im offenen Testmodus, empfohlene Regel steht in `app/README.md`.
 - **Getestet:** Logik per `node app/engine.test.js`, Synchronisation Admin zu Dennis mit zwei getrennten Browsern über die Live-Adresse. Noch nicht mit zwei echten Handys getestet.
-- **Design (23.09.):** Der Nutzer will Dennis' Menü neu ordnen und im iPhone-Querformat lesbar machen. Plan in `06-design-plan.md`, klickbarer Entwurf in `app/entwurf.html` (mit `?demo` ohne Datenbank). Drei Seiten KARTE, QUESTS, AUSRÜSTUNG, HUD mit Packs als Spielkarten und Code als Zahlenschloss, Ergebnis-Fenster nach jeder Buchung. **Noch nicht freigegeben, die App ist unverändert.** Entscheidungen offen in `06-design-plan.md` Abschnitt 9.
+- **Design (23.09.):** Der Nutzer will Dennis' Menü neu ordnen und im iPhone-Querformat lesbar machen. Plan in `06-design-plan.md`, klickbarer Entwurf in `app/entwurf.html` (mit `?demo` ohne Datenbank). Drei Seiten KARTE, QUESTS, AUSRÜSTUNG, HUD mit Packs als Spielkarten und Code als Zahlenschloss, Ergebnis-Fenster nach jeder Buchung. Entschieden: Dennis sieht nur Erledigtes und die nächste Quest, der Rest liegt im Nebel (`06-design-plan.md` 3.1). **Plan noch nicht freigegeben, die App ist unverändert.** Weitere Entscheidungen offen in `06-design-plan.md` Abschnitt 9.
 
 ## Wo was liegt
 
@@ -33,11 +33,11 @@ JGA-Wochenende für Dennis, 2. bis 4. Oktober 2026, München und Wanderung am Te
 - Vier Begriffe: Quest (offen, bestanden, verloren), Item (nicht, besitz, verloren), Packs (0 bis `max`, Start 0), Ziffer (unbekannt, bekannt).
 - 13 Quests in fester Reihenfolge: 6 Kernprüfungen (Medaillons, tragen die Ziffern) und 7 Sidequests (Steine). Nächste Quest = erste offene.
 - Gespeichert wird nur, was der Quest Master einstellt: `{ quests: {id: status}, buchungen: [{packs, grund, ziffer?}], items: {Korrekturen}, stand }`. Alles andere berechnet `derive()` in `engine.js`. Ziffer kaufen = Buchung mit Feld `ziffer`.
-- Dennis schreibt nichts, er sieht nur. Tippen zeigt Beschreibung.
+- Dennis schreibt nichts, er sieht nur. Tippen zeigt Beschreibung. Er sieht nur erledigte Quests und die nächste, alles danach ist verdeckt (A0 Nr. 16).
 
 ## Wichtige Entscheidungen des Nutzers
 
-Währung sind direkt Packs (keine Umrechnung), Start 0, nur in der App gezählt. Anzahl der Packs noch offen (`waehrung.max`, derzeit 10). Einziges Startitem ist der Beutel. Verlorenes Item ist weg. Nur bestanden oder verloren. Der Nutzer ist Quest Master.
+Währung sind direkt Packs (keine Umrechnung), Start 0, nur in der App gezählt. Anzahl der Packs noch offen (`waehrung.max`, derzeit 10). Einziges Startitem ist der Beutel. Verlorenes Item ist weg. Nur bestanden oder verloren. Der Nutzer ist Quest Master. Für Dennis ist immer nur die nächste Quest sichtbar (erledigte bleiben sichtbar, kommende Prüfungen nur als „?", kommende Sidequests gar nicht).
 
 ## Arbeitsweise
 
@@ -51,3 +51,4 @@ Der Nutzer will es **einfach und in sich geschlossen** halten und schrittweise a
 3. Sidequest-Inhalte sind Platzhalter (`[PLATZHALTER]` in `config.js`).
 4. Anzahl der Packs festlegen, dann Balance anpassen (Faustregel in `05-system-plan.md` A2).
 5. Danach Ausbaustufe 1 und 2: Inhalte, dann Aktionen für Dennis.
+6. Der Code des Kästchens und alle Quest-Namen stehen in `app/config.js`, das jedes Handy lädt. Wer den Quelltext öffnet, sieht sie. Vor dem Spieltag entscheiden, ob der Code aus der öffentlichen Konfiguration raus soll.
