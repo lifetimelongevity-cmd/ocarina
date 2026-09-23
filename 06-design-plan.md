@@ -121,17 +121,22 @@ Grenze: Die Namen aller Quests und der Code stehen in `config.js`, das jedes Han
 
 ### 4.5 Ergebnis-Fenster
 
-Bucht der Quest Master etwas, erscheint bei Dennis ein Fenster wie beim Item-Fund in Ocarina of Time:
+Bucht der Quest Master etwas, erscheint bei Dennis ein Fenster wie beim Item-Fund in Ocarina of Time. Nach einer entschiedenen Quest ist es **der große Moment** des Spiels:
 
 - Kopf: Medaillon oder Stein, **PRÜFUNG BESTANDEN** (gold) oder **SIDEQUEST VERLOREN** (rot), Name der Quest.
-- Zeilen: „+1 Pack · jetzt 4 von 10", „Ziffer 2 des Codes: 4", „Erhalten: Herausforderungs-Token", „Verloren: Große Wasserpistole".
-- Fuß: „Nächste Quest: … · Ort". Tippen schließt und dreht zur Quest-Seite mit der nächsten Quest.
-- Buchungen ohne Quest (Steckbrief, Bonus, Ziffer gekauft) zeigen Grund und Folge. Zurückstellen und Löschen aktualisiert still, ohne Fenster.
+- Gewonnen: Das Medaillon dreht sich ins Bild, dahinter gehen Strahlen auf und es leuchtet nach. Verloren: Es fällt grau mit rotem X herab.
+- Dazu eine kurze Melodie: Fanfare bei einer Prüfung, kürzere bei einer Sidequest, abfallend bei Verlust. Eigene Tonfolgen, keine Musik aus dem Spiel.
+- Zeilen erscheinen nacheinander: „+1 Pack", „Ziffer 2: 4", Item-Name, „Große Wasserpistole weg". Ohne Folgen steht „Keine Folgen".
+- Die nächste Quest steht **nicht** im Fenster. Auch das HUD zeigt bis dahin „?". Tippen schließt, das Menü dreht zur Quest-Seite und die nächste Quest **tritt aus dem Nebel**: Die Zeile wird scharf, der Nebel zieht ab, ein kurzer Ton. Erst dann steht ihr Name im HUD. Nach der letzten Quest steht im Fenster „Zum Kästchen".
+- Buchungen ohne Quest (Steckbrief, Bonus, Ziffer gekauft) zeigen Grund und Folge, ohne Drehen und Strahlen. Zurückstellen und Löschen aktualisiert still, ohne Fenster.
 - Neue Karten und Ziffern blinken im HUD kurz auf.
+- Wer „Bewegung reduzieren" eingestellt hat, sieht alles ohne Animation.
 
 ### 4.6 Startbildschirm und Hochformat
 
-- **Startbildschirm wie das Cover von Ocarina of Time** (Wunsch vom 23.09.): Waldweg im Licht, Dennis steht auf dem Weg, daneben schwebt eine Fee, Glühwürmchen ziehen durchs Bild. Links das Logo **THE LEGEND OF / DENNIS / A LINK TO RIEKE** mit Hylia-Schild und Schwert, goldene Schrift mit gehämmerter Oberfläche (Schrift Cinzel, frei lizenziert, liegt in `app/assets`). Darunter blinkt PRESS START, Tippen irgendwo startet.
+- **Startbildschirm wie das Cover von Ocarina of Time** (Wunsch vom 23.09.): Waldweg im Licht, Dennis steht auf dem Weg, daneben schwebt eine Fee, Glühwürmchen ziehen durchs Bild. Links das Logo **THE LEGEND OF / DENNIS / A LINK TO RIEKE** mit Hylia-Schild und Schwert, goldene Schrift mit gehämmerter Oberfläche. Darunter blinkt PRESS START, Tippen irgendwo startet.
+- **Schriften und Zeichen von zeldauniverse.net** (Wunsch vom 23.09.): „DENNIS" in **Triforce** (die Schrift des Original-Logos), die kleinen Zeilen und PRESS START in **Hylia Serif**. Das Wappen auf dem Schild (Vogel und Triforce) kommt aus **Hylian Symbols**, als Vektorpfad eingebaut. Die Schriften liegen in `app/assets`, Herkunft und Bedingungen in `app/assets/SCHRIFTEN.md`: Fan-Schriften, nur privat und nicht kommerziell. Für den JGA passt das. Die Netlify-Seite ist aber öffentlich erreichbar, damit werden die Dateien streng genommen verbreitet.
+- **Vollbild-Knopf nur hier**, oben rechts. Er startet das Spiel nicht, dafür tippt man auf PRESS START oder irgendwo ins Bild. Im Menü selbst gibt es keinen Vollbild-Knopf mehr.
 - Hintergrund: das Bild des Nutzers, Link und Original-Logo entfernt, für das Querformat auf 2,6 : 1 verlängert (`app/assets/intro-wald.jpg`). Wo Link stand, liegt ein Lichtschein hinter Dennis.
 - Grenze: Dennis' Avatar schaut nach vorn. Für die Pose wie Link (von hinten, in den Wald laufend) braucht es ein neues Bild von Dennis von hinten, freigestellt als PNG.
 - Hochformat zeigt „Handy quer halten" mit drehendem Handy. Eine eigene Hochformat-Ansicht ist möglich, aber doppelte Arbeit (Entscheidung 5).
@@ -152,12 +157,14 @@ Die sechs Medaillons tragen die sechs Medaillonfarben aus Ocarina of Time. So er
 
 | Prüfung | Farbe | Zeichen |
 |---|---|---|
-| Log-Buch | Blau | aufgeschlagenes Buch |
-| Kreuzung der Klingen | Orange | gekreuzte Klingen |
-| Auge des Jägers | Grün | Auge |
-| Feuerprobe | Rot | Flamme |
-| Prüfung des Bundes | Gold | drei Dreiecke |
-| Prophezeiung | Violett | versiegelter Brief |
+| Log-Buch | Blau | Zeichen des Wassers |
+| Kreuzung der Klingen | Orange | Zeichen der Geister |
+| Auge des Jägers | Grün | Zeichen des Waldes |
+| Feuerprobe | Rot | Flamme (eigenes Zeichen, das Feuer fehlt in der Schrift) |
+| Prüfung des Bundes | Gold | Triforce |
+| Prophezeiung | Violett | Zeichen der Schatten |
+
+Die Zeichen sind die Weisen-Zeichen der Medaillons aus Ocarina of Time, entnommen aus der Schrift Hylian Symbols und als Vektorpfad eingebaut.
 
 Farbregeln: **Gold** = gewonnen, **Rot** = verloren oder Verlust, **Gelb pulsierend** = jetzt dran, **Blau** = Erklärung (Textbox).
 
