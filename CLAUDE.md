@@ -1,8 +1,8 @@
 # JGA Dennis · „Die Prüfungen" (Übergabe für neue Chats)
 
-Dieser Ordner hat **nichts mit dem Shopify-Theme** im restlichen Repo zu tun. Die Regeln aus der `CLAUDE.md` im Repo-Stamm (Lifetime Health, Tokens, Shopify) gelten hier nicht.
+Repo `lifetimelongevity-cmd/ocarina`, Branch `main`. Sprache: Deutsch, Du-Form, keine Gedankenstriche in Texten.
 
-Branch: `claude/jga-dennis-quest-system-oasppz`. Sprache: Deutsch, Du-Form, keine Gedankenstriche in Texten.
+Das Projekt lag bis zum 23.09.2026 im Ordner `jga-dennis/` des Repos `lifetime-health-theme` und ist mit Historie hierher umgezogen.
 
 ## Worum es geht
 
@@ -10,7 +10,7 @@ JGA-Wochenende für Dennis, 2. bis 4. Oktober 2026, München und Wanderung am Te
 
 ## Stand (23.09.2026)
 
-- **Live:** Dennis `https://dd-ocarina.netlify.app/`, Quest Master `https://dd-ocarina.netlify.app/admin.html`. Hosting auf Netlify, Projekt `dd-ocarina`, per Drag-and-drop hochgeladen. Kein Deploy-Token in der Umgebung: Neue Versionen lädt der Nutzer selbst hoch (Zip des Ordners `app/`).
+- **Live:** Dennis `https://dd-ocarina.netlify.app/`, Quest Master `https://dd-ocarina.netlify.app/admin.html`. Hosting auf Netlify, Projekt `dd-ocarina`. `netlify.toml` setzt den Veröffentlichungsordner auf `app`. Ist das Netlify-Projekt mit diesem Repo verknüpft, geht jeder Push auf `main` automatisch live. Sonst lädt der Nutzer den Ordner `app/` per Drag-and-drop hoch.
 - **Speicher:** Firebase Realtime Database, Projekt `dennis-quest`, URL `https://dennis-quest-default-rtdb.europe-west1.firebasedatabase.app`, Pfad `/spiele/dennis-jga-2026`. Zugriff per REST ohne SDK. Datenbank war beim letzten Check noch im offenen Testmodus, empfohlene Regel steht in `app/README.md`.
 - **Getestet:** Logik per `node app/engine.test.js`, Synchronisation Admin zu Dennis mit zwei getrennten Browsern über die Live-Adresse. Noch nicht mit zwei echten Handys getestet.
 
