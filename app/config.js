@@ -10,9 +10,9 @@
     code: [7, 4, 2, 9],                                // geheim, nur der Quest Master sieht alle vier
 
     speicher: {
-      typ: "lokal",                                    // "lokal" (ein Gerät, zum Testen) oder "firebase"
+      typ: "firebase",                                 // "lokal" (ein Gerät, zum Testen) oder "firebase"
       spielId: "dennis-jga-2026",
-      databaseURL: ""                                  // z. B. "https://dennis-quest-default-rtdb.europe-west1.firebasedatabase.app"
+      databaseURL: "https://dennis-quest-default-rtdb.europe-west1.firebasedatabase.app"
     },
 
     startitems: ["beutel"],

@@ -63,23 +63,30 @@
     try { pending = JSON.parse(localStorage.getItem(pendingKey) || "null"); } catch (_) {}
     b.status({ online: false, pending: !!pending });
 
-    // Lesen: Stream
-    let es;
+    function apply(data) {
+      if (pending) return;                           // eigener ungesendeter Stand hat Vorrang
+      const next = E.normalize(data || E.emptyDoc());
+      if (JSON.stringify(next) === JSON.stringify(b.doc)) return;
+      writeCache(cfg, next);
+      b.set(next, { remote: true });
+    }
+
+    // Lesen, Weg 1: Live-Stream (Server-Sent Events)
+    let es, streamOpen = false;
     function connect() {
       try { es && es.close(); } catch (_) {}
+      if (typeof EventSource === "undefined") return;
       es = new EventSource(url);
-      es.onopen = () => { b.status({ online: true }); flush(); };
-      es.onerror = () => b.status({ online: false });
+      es.onopen = () => { streamOpen = true; b.status({ online: true }); flush(); };
+      es.onerror = () => { streamOpen = false; };
       const onEvent = ev => {
         let msg; try { msg = JSON.parse(ev.data); } catch (_) { return; }
         if (!msg || typeof msg.path !== "string") return;
-        if (pending) return;                         // eigener ungesendeter Stand hat Vorrang
+        if (pending) return;
         let next;
         if (msg.path === "/") next = ev.type === "patch" ? { ...b.doc, ...msg.data } : msg.data;
         else next = setPath(JSON.parse(JSON.stringify(b.doc)), msg.path, msg.data, ev.type === "patch");
-        next = E.normalize(next || E.emptyDoc());
-        writeCache(cfg, next);
-        b.set(next, { remote: true });
+        apply(next);
       };
       es.addEventListener("put", onEvent);
       es.addEventListener("patch", onEvent);
@@ -90,20 +97,41 @@
     async function flush() {
       if (!pending || flushing) return;
       flushing = true;
+      const sending = pending;
       try {
-        const res = await fetch(url + auth, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(pending) });
+        // Ohne Content-Type-Header: einfacher Request ohne CORS-Vorabfrage, Firebase liest den Body trotzdem als JSON
+        const res = await fetch(url + auth, { method: "PUT", body: JSON.stringify(sending) });
         if (!res.ok) throw new Error("HTTP " + res.status);
-        pending = null;
-        localStorage.removeItem(pendingKey);
-        b.status({ online: true, pending: false });
+        if (pending === sending) {                   // nur löschen, wenn in der Zwischenzeit nichts Neues kam
+          pending = null;
+          try { localStorage.removeItem(pendingKey); } catch (_) {}
+        }
+        b.status({ online: true, pending: !!pending });
       } catch (err) {
         b.status({ online: false, pending: true, fehler: String(err.message || err) });
-      } finally { flushing = false; }
+      } finally {
+        flushing = false;
+        if (pending && pending !== sending) flush(); // neuerer Stand wartet: sofort hinterher
+      }
     }
     window.addEventListener("online", flush);
     setInterval(flush, 10000);
 
+    // Lesen, Weg 2: Abfrage alle 4 Sekunden, solange der Stream nicht steht (Mobilnetz, Proxys)
+    async function poll() {
+      if (streamOpen) return;
+      try {
+        const res = await fetch(url, { cache: "no-store" });
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        apply(await res.json());
+        b.status({ online: true });
+        flush();
+      } catch (_) { b.status({ online: false }); }
+    }
+    setInterval(poll, 4000);
+
     connect();
+    poll();
     return {
       subscribe: b.subscribe, onStatus: b.onStatus,
       save(doc) {

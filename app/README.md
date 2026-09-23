@@ -27,6 +27,12 @@ python3 -m http.server 8000
 
 Dann `http://localhost:8000/admin.html` und `http://localhost:8000/` in zwei Tabs desselben Browsers öffnen. Was du im Admin schaltest, erscheint sofort im Menü.
 
+## Aktueller Stand
+
+Firebase ist eingerichtet und in `config.js` eingetragen (`dennis-quest-default-rtdb.europe-west1.firebasedatabase.app`, Spiel `dennis-jga-2026`). Lesen und Schreiben aus zwei getrennten Browsern ist getestet. Für einen reinen Test auf einem Gerät ohne Datenbank in `config.js` `typ: "lokal"` setzen.
+
+Verbindung: Die App nutzt den Live-Stream von Firebase. Kommt der nicht zustande (schwaches Netz), fragt sie alle 4 Sekunden ab. Nicht gesendete Änderungen am Admin-Handy werden gespeichert und automatisch nachgeschickt, auch nach Neuladen der Seite.
+
 ## Für zwei Handys: Firebase einrichten (einmalig, etwa 20 Minuten)
 
 1. Auf console.firebase.google.com ein Projekt anlegen (Analytics kann aus bleiben).
