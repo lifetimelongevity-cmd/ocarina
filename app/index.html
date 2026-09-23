@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#080907">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Dennis Quest">
+  <meta name="description" content="Dennis Quest: ein interaktives Pausenmenü im Stil eines späten 64-Bit-Fantasy-Abenteuers.">
+  <title>Dennis Quest · Pausenmenü</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath fill='%23d8aa2d' d='M16 2 29 26H3z'/%3E%3Cpath fill='%2349602d' d='m16 9 7 14H9z'/%3E%3C/svg%3E">
+  <link rel="apple-touch-icon" href="assets/touch-icon.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="site-main">
+    <section class="console" aria-label="Dennis Quest Pausenmenü">
+      <div class="game" id="game">
+        <img class="world" src="assets/alpine-trail.png" alt="Eine niedrig aufgelöste Berglandschaft am Tegernsee">
+        <div class="world-shade" aria-hidden="true"></div>
+
+        <section class="intro-screen" id="introScreen" aria-label="Dennis Quest Startbildschirm">
+          <img class="intro-avatar" src="assets/dennis-v9.png" alt="" aria-hidden="true">
+          <div class="intro-copy">
+            <p class="intro-kicker">DIE PRÜFUNG DES BUNDES</p>
+            <div class="intro-crest" aria-hidden="true"><span></span><span></span><span></span></div>
+            <h1 class="intro-title"><span>DENNIS</span> QUEST</h1>
+            <p class="intro-place">TEGERNSEE · 2026</p>
+            <button class="start-quest" id="startQuest" type="button">JGA QUEST STARTEN</button>
+          </div>
+        </section>
+
+        <div class="hud hud-hearts" aria-label="Herzen: sechs von acht">
+          <div class="heart-row" aria-hidden="true">
+            <span class="heart full">♥</span><span class="heart full">♥</span><span class="heart full">♥</span><span class="heart full">♥</span><span class="heart full">♥</span>
+            <span class="heart full">♥</span><span class="heart empty">♥</span><span class="heart empty">♥</span>
+          </div>
+        </div>
+
+        <button class="fullscreen-toggle" id="fullscreenToggle" type="button" aria-label="Vollbild öffnen" aria-pressed="false" title="Vollbild">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path fill="currentColor" d="M3 7V5a2 2 0 0 1 2-2h2m10 0h2a2 2 0 0 1 2 2v2m0 10v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><rect fill="currentColor" width="10" height="8" x="7" y="8" rx="1"/></g></svg>
+        </button>
+
+        <button class="shoulder shoulder-left" type="button" data-nav="prev" aria-label="Vorherige Seite, Taste Z"><span>Z</span></button>
+        <button class="shoulder shoulder-right" type="button" data-nav="next" aria-label="Nächste Seite, Taste R"><span>R</span></button>
+
+        <div class="menu-viewport">
+          <div class="menu-cube" id="menuCube">
+            <section class="face face-quest" data-page="0" aria-label="Prüfungen">
+              <h1 class="face-title">QUEST STATUS</h1>
+              <div class="quest-left">
+                <div class="papers">
+                  <button class="mini-item selectable" data-name="Log-Buch" aria-label="Log-Buch"><svg><use href="#icon-scroll"></use></svg><b>1</b></button>
+                  <button class="mini-item selectable" data-name="Prophezeiung" aria-label="Prophezeiung"><svg><use href="#icon-envelope"></use></svg><b>6</b></button>
+                  <button class="mini-item selectable lost" data-name="Verlorene Prüfung" aria-label="Verlorene Prüfung"><span>☠</span></button>
+                  <strong class="progress">2 / 5</strong>
+                </div>
+                <p class="code-label">CODE DES KÄSTCHENS</p>
+                <div class="notes" aria-label="Code 7 4 unbekannt unbekannt">
+                  <button class="note selectable won" data-name="Ziffer 7"><b>7</b><span>♪</span></button>
+                  <button class="note selectable won red-note" data-name="Ziffer 4"><b>4</b><span>♪</span></button>
+                  <button class="note selectable locked" data-name="Unbekannte Ziffer"><b>?</b><span>♪</span></button>
+                  <button class="note selectable locked" data-name="Unbekannte Ziffer"><b>?</b><span>♪</span></button>
+                </div>
+                <div class="staff" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+              </div>
+              <div class="quest-web" aria-label="Sechs Prüfungen">
+                <div class="web-lines" aria-hidden="true"></div>
+                <button class="medallion m1 selectable won" data-name="Log-Buch"><svg><use href="#icon-medal"></use></svg></button>
+                <button class="medallion m2 selectable won" data-name="Prophezeiung"><span>✦</span></button>
+                <button class="medallion m3 selectable" data-name="Kreuzung der Klingen"><span>⚔</span></button>
+                <button class="medallion m4 selectable" data-name="Auge des Jägers"><span>◉</span></button>
+                <button class="medallion m5 selectable" data-name="Feuerprobe"><span>♨</span></button>
+                <button class="medallion m6 selectable locked" data-name="Prüfung des Bundes"><span>◇</span></button>
+                <div class="mountain-mark" aria-hidden="true"><span></span><span></span><span></span></div>
+                <div class="stones">
+                  <button class="stone selectable won" data-name="Die Bestellung">◒</button>
+                  <button class="stone selectable won" data-name="Trank der Ahnen">♦</button>
+                  <button class="stone selectable" data-name="Toast und Öffnung">◉</button>
+                </div>
+              </div>
+            </section>
+
+            <section class="face face-equipment" data-page="1" aria-label="Ausrüstung">
+              <h1 class="face-title">EQUIPMENT</h1>
+              <div class="equipment-start">
+                <button class="slot selectable won" data-name="Ring der Rieke"><svg><use href="#icon-ring"></use></svg></button>
+                <button class="slot selectable won" data-name="Proviant"><svg><use href="#icon-backpack"></use></svg><b>5</b></button>
+                <button class="slot selectable lost" data-name="Log-Pose"><span>✕</span></button>
+              </div>
+              <div class="character-window">
+                <img src="assets/dennis-v9.png" alt="Dennis als niedrig aufgelöste 3D-Abenteurerfigur">
+                <span>DENNIS · STUFE VERLOBTER</span>
+              </div>
+              <div class="equipment-grid">
+                <button class="slot selectable won" data-name="Kleine Wasserpistole"><svg><use href="#icon-water"></use></svg></button>
+                <button class="slot selectable equipped" data-name="Große Wasserpistole"><svg><use href="#icon-water"></use></svg></button>
+                <button class="slot selectable locked" data-name="Schwert der Verdammnis"><svg><use href="#icon-sword"></use></svg></button>
+                <button class="slot selectable won" data-name="Kleiner Ring"><svg><use href="#icon-ring"></use></svg></button>
+                <button class="slot selectable locked" data-name="Großer Ring"><svg><use href="#icon-ring"></use></svg></button>
+                <button class="slot selectable won" data-name="Karten"><svg><use href="#icon-cards"></use></svg></button>
+                <button class="slot selectable locked" data-name="Gepanzerte Karten"><svg><use href="#icon-cards"></use></svg></button>
+                <button class="slot selectable won" data-name="Herausforderungs-Token"><span>★</span></button>
+                <button class="slot selectable locked" data-name="Schild des Bundes"><span>⬟</span></button>
+              </div>
+            </section>
+
+            <section class="face face-inventory" data-page="2" aria-label="Inventar">
+              <h1 class="face-title">SELECT ITEM</h1>
+              <div class="inventory-grid">
+                <button class="item selectable won" data-name="Herausforderungs-Token"><span>★</span></button>
+                <button class="item selectable locked" data-name="Schwert der Verdammnis"><svg><use href="#icon-sword"></use></svg></button>
+                <button class="item selectable won" data-name="Große Wasserpistole"><svg><use href="#icon-water"></use></svg></button>
+                <button class="item selectable locked" data-name="Großer Ring"><svg><use href="#icon-ring"></use></svg></button>
+                <button class="item selectable won" data-name="Gepanzerte Karten"><svg><use href="#icon-cards"></use></svg></button>
+                <button class="item selectable locked" data-name="Schild des Bundes"><span>⬟</span></button>
+                <button class="item selectable won" data-name="Ring der Rieke"><svg><use href="#icon-ring"></use></svg></button>
+                <button class="item selectable won" data-name="Proviant"><svg><use href="#icon-backpack"></use></svg><b>5</b></button>
+                <button class="item selectable lost" data-name="Log-Pose"><span>✕</span></button>
+                <button class="item selectable won" data-name="Steckbriefe"><svg><use href="#icon-scroll"></use></svg><b>1</b></button>
+                <button class="item selectable" data-name="Riekes Botschaft"><svg><use href="#icon-envelope"></use></svg></button>
+                <button class="item selectable won" data-name="Prophezeiungen"><svg><use href="#icon-scroll"></use></svg><b>6</b></button>
+                <button class="item selectable locked" data-name="Umschläge der Feuerprobe"><svg><use href="#icon-envelope"></use></svg><b>3</b></button>
+                <button class="item selectable" data-name="Encounter-Beutel"><svg><use href="#icon-backpack"></use></svg></button>
+                <button class="item selectable empty" data-name="Leerer Platz"></button>
+                <button class="item selectable empty" data-name="Leerer Platz"></button>
+                <button class="item selectable empty" data-name="Leerer Platz"></button>
+                <button class="item selectable empty" data-name="Leerer Platz"></button>
+              </div>
+            </section>
+
+            <section class="face face-map" data-page="3" aria-label="Karte">
+              <h1 class="face-title">MAP</h1>
+              <svg class="route-map" viewBox="0 0 500 275" role="img" aria-label="Route vom Tegernsee zur Neureuth">
+                <defs><filter id="rough"><feTurbulence type="fractalNoise" baseFrequency=".04" numOctaves="2" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="3"/></filter></defs>
+                <path class="mountain-back" d="M0 102 Q85 31 159 89 Q228 8 328 92 Q402 34 500 76 L500 275 L0 275Z"/>
+                <path class="mountain-front" d="M0 162 Q74 95 155 140 Q245 74 332 143 Q408 89 500 129 L500 275 L0 275Z"/>
+                <path class="lake" d="M0 225 Q120 205 246 230 Q370 205 500 224 L500 275 L0 275Z"/>
+                <path class="route" d="M63 224 C103 205 115 185 158 177 S224 145 265 127 S334 95 386 66 S433 53 462 36"/>
+                <g class="map-stops">
+                  <circle cx="63" cy="224" r="8"/><circle cx="158" cy="177" r="8"/><circle cx="265" cy="127" r="8"/><circle cx="345" cy="88" r="8"/><circle cx="386" cy="66" r="8"/><circle cx="462" cy="36" r="8"/>
+                </g>
+                <path class="player-arrow" d="M330 98 343 66 355 98 343 90Z"/>
+                <g class="map-labels">
+                  <text x="20" y="253">TEGERNSEE</text><text x="31" y="210">PARKPLATZ</text><text x="101" y="198">KREUZUNG DER KLINGEN</text>
+                  <text x="215" y="154">AUGE DES JÄGERS</text><text x="357" y="107">FEUERPROBE</text><text x="304" y="47">PRÜFUNG DES BUNDES</text><text x="383" y="20">NEUREUTH · 1261 M</text>
+                </g>
+              </svg>
+            </section>
+          </div>
+        </div>
+
+        <div class="rupees" aria-label="Vier Token"><span>◆</span><b>4</b></div>
+        <div class="prompt" id="prompt" aria-live="polite"><span id="promptText">Zur Ausrüstung</span></div>
+        <div class="toast" id="toast" role="status"></div>
+        <div class="dither" aria-hidden="true"></div>
+      </div>
+    </section>
+  </main>
+
+  <svg class="svg-sprite" aria-hidden="true">
+    <symbol id="icon-sword" viewBox="0 0 512 512"><path d="M437 75 355 106 194 267c1 2 1 4 1 6 0 14-12 26-26 26s-26-12-26-26c0-1 0-3 1-4-13 13-20 31-20 48 14 0 28 4 40 13-20 12-45 37-57 57-4-2-7-4-11-5-6-2-10-1-12 2s-2 7 0 12c3 13 19 29 32 32 6 2 9 0 11-1 2-2 3-6 2-12-1-4-3-8-6-12 20-12 46-37 57-57 10 12 15 27 15 42 17 0 34-6 48-19h-2c-14 0-26-12-26-26s12-26 26-26h4l161-161 31-82Z"/></symbol>
+    <symbol id="icon-backpack" viewBox="0 0 512 512"><path d="M186 21 173 47c7 0 14-1 21-1l4-7h116l4 7 21 1-13-26H186Zm70 42c-46 0-91 2-135 5-4 50-9 101-1 146 89 12 180 13 273 0 7-31 5-85-1-146-44-3-90-5-136-5Zm0 29c33 0 65 3 98 9l7 1v8c0 15 2 35-13 50-10 10-26 17-51 20v19h-82v-19c-24-4-39-10-49-20-15-15-15-34-15-50v-8l7-1c33-6 65-9 98-9Zm-71 179v219c48 2 95 2 142 0V271c-48 2-95 2-142 0Z"/></symbol>
+    <symbol id="icon-ring" viewBox="0 0 512 512"><path d="M255 23 205 91l21 86c-78 14-137 82-137 164 0 92 75 167 167 167s167-75 167-167c0-82-60-151-139-164l22-86-51-68Zm0 201c65 0 117 52 117 117s-52 117-117 117-117-52-117-117 52-117 117-117Zm0-180 26 49-26 34-26-34 26-49Z"/></symbol>
+    <symbol id="icon-medal" viewBox="0 0 512 512"><path d="M141 19v173l22 29h15V19h-37Zm56 0v202h122V19H197Zm140 0v202h13l22-29V19h-35ZM174 240v18h164v-18H174Zm86 43c-61 0-110 49-110 110s49 110 110 110 109-49 109-110-48-110-109-110Zm0 33 22 45 50 7-36 35 8 49-44-23-45 23 9-49-36-35 49-7 23-45Z"/></symbol>
+    <symbol id="icon-envelope" viewBox="0 0 512 512"><path d="M40 111h432v290H40V111Zm18 26 198 153 198-153H58Zm396 238V168L267 313a18 18 0 0 1-22 0L58 168v207l130-107 12 15-128 105h368L312 283l12-15 130 107Z"/></symbol>
+    <symbol id="icon-scroll" viewBox="0 0 512 512"><path d="M374 18c-16 0-28 5-33 15-23 50-49 87-79 117 17 5 34 18 44 35 11 17 20 40 22 55 39-24 85-41 141-51 15-3 24-29 21-59l-35-1 31-24c-4-15-11-29-21-41-16-18-37-32-57-39l-26 16 3-22-11-1ZM185 210c-1 0-3 0-4 1-37 20-79 38-127 55 30 7 59 34 79 67 25 42 42 94 30 126 4-15 16-45 29-70 18-37 38-65 60-91 7-22-3-49-20-70-15-18-33-27-47-18Z"/></symbol>
+    <symbol id="icon-water" viewBox="0 0 512 512"><path d="M80 33c-25 0-39 31-39 63s14 63 39 63h39V33H80Zm57 0v126h174V33H137Zm192 0v126h39c25 0 39-31 39-63s-14-63-39-63h-39ZM119 177v32H41v94h366v-94h-78v-32h-18v32H137v-32h-18ZM85 321 65 441c13-22 26-44 43-64 18-22 39-42 67-56H85Zm123 5c-38 13-64 35-86 62-22 27-40 59-58 91h80c10 0 25-15 40-42l24-111Z"/></symbol>
+    <symbol id="icon-cards" viewBox="0 0 24 24"><path d="M15 2h1c1 0 2 1 2 2v7L15 2Zm5 2 1 1c1 0 2 1 1 2l-2 6V4Zm-2 12L13 4c0-1-1-2-2-2h-1L3 6C2 6 2 7 2 8l5 12c0 1 1 2 2 2h1l7-3c1 0 1-1 1-2v-1Zm-7-1-3-2 1-4 3 2-1 4Z"/></symbol>
+  </svg>
+  <script src="app.js"></script>
+</body>
+</html>

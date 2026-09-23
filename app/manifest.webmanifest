@@ -1,0 +1,20 @@
+{
+  "name": "Dennis Quest – Pausenmenü",
+  "short_name": "Dennis Quest",
+  "description": "Ein interaktives 64-Bit-Fantasy-Pausenmenü.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "display_override": ["fullscreen", "standalone"],
+  "orientation": "landscape",
+  "background_color": "#050605",
+  "theme_color": "#080907",
+  "icons": [
+    {
+      "src": "assets/touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
