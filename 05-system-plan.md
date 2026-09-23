@@ -27,6 +27,7 @@ Die konkrete Konfiguration liegt in `app/config.js`, die Logik in `app/engine.js
 | 13 | Nächste Quest | **Immer die nächste in der Liste**, die noch offen ist. Kein „aktiv". |
 | 14 | Quest Master | **Du.** Eine Person, den ganzen Tag. |
 | 15 | Zwei Handys | **Deployen, Admin-Menü mit Toggles, Stand wird online gespeichert.** Dennis' Menü liest den gespeicherten Stand. Siehe A7. |
+| 16 | Sichtbarkeit für Dennis (23.09.) | **Nur Erledigtes und die nächste Quest.** Kommende Prüfungen verdeckt mit „?" (Anzahl bekannt), kommende Sidequests unsichtbar. Details in `06-design-plan.md` 3.1. |
 
 ### A1. Vier Begriffe, mehr nicht
 
@@ -137,7 +138,7 @@ Reine Funktion, beide Sichten rechnen sie selbst aus demselben Dokument. Das Dok
 |---|---|---|
 | Packs | ja | ja |
 | Items | alle mit Status | alle mit Status (grau = nicht, Kreuz = verloren) |
-| Quests | alle, mit Buttons „bestanden" / „verloren" | alle mit Status, die nächste hervorgehoben, mit Ort und Beschreibung |
+| Quests | alle, mit Buttons „bestanden" / „verloren" | erledigte mit Status, die nächste mit Ort und Beschreibung. Danach Nebel: Prüfungen als „?", Sidequests gar nicht (A0 Nr. 16) |
 | Ziffern | alle vier Werte | nur bekannte, Rest `?` |
 | Buchungen | Liste mit Grund, löschbar | nichts |
 

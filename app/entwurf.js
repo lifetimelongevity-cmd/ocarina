@@ -39,9 +39,9 @@
   // Items: links Ausrüstung (Gegenstände), rechts Fähigkeiten (Regeln im Showdown)
   const ITEM = {
     beutel:           { gruppe: "item",       kurz: "Beutel",        farbe: "#d9a441", symbol: "i-backpack", text: "Dein Beutel. Hier landet alles, was du dir erspielst." },
-    pistole_gross:    { gruppe: "item",       kurz: "Pistole",       farbe: "#4fb8e8", symbol: "i-pistol",   text: "Dreifacher Tank. Hilft beim Auge des Jägers und im Wasserduell." },
+    pistole_gross:    { gruppe: "item",       kurz: "Pistole",       farbe: "#4fb8e8", symbol: "i-pistol",   text: "Dreifacher Tank. Du kannst länger schießen als jeder andere." },
     ring_gross:       { gruppe: "item",       kurz: "Großer Ring",   farbe: "#d6b278", symbol: "i-ropering", text: "Ein Seilring mit 60 cm. Beim Ringwurf wird dein Ziel größer." },
-    karten_gepanzert: { gruppe: "item",       kurz: "Karten",        farbe: "#9fd0f0", symbol: "i-cards",    text: "Karten in Hüllen. Sie fliegen beim Kartenwurf stabiler." },
+    karten_gepanzert: { gruppe: "item",       kurz: "Karten",        farbe: "#9fd0f0", symbol: "i-cards",    text: "Karten in Hüllen. Sie fliegen weiter und stabiler." },
     token:            { gruppe: "faehigkeit", kurz: "Token",         farbe: "#f2c94c", symbol: "i-token",    text: "Lass im Showdown einen Wächter deiner Wahl für dich kämpfen." },
     schwert:          { gruppe: "faehigkeit", kurz: "Schwert",       farbe: "#e05a4f", symbol: "i-sword",    text: "Streiche im Showdown den Wächter, den der Bund schickt." },
     schild:           { gruppe: "faehigkeit", kurz: "Schild",        farbe: "#7aa7ff", symbol: "i-shield",   text: "Wiederhole im Showdown ein verlorenes Duell. Einmal." }
@@ -128,6 +128,14 @@
   const questIcon = (q, st, isNext) => q.typ === "kern" ? medalHtml(q, st, isNext) : gemHtml(st, isNext);
   const statusWort = (id) => id === state.next ? "jetzt dran" : { bestanden: "bestanden", verloren: "verloren", offen: "noch offen" }[state.quests[id]];
 
+  // Sichtbarkeit für Dennis: erledigte Quests und die nächste. Was danach kommt, liegt im Nebel.
+  // Verdeckte Prüfungen erscheinen als Medaillon mit „?" (ihre Zahl ist bekannt), verdeckte Sidequests gar nicht.
+  const aufgedeckt = id => state.quests[id] !== "offen" || id === state.next;
+  const NEBEL = "nebel";
+  const coveredMedal = () => `<span class="medal covered"><b>?</b></span>`;
+  const verdeckteKern = () => C.quests.filter(q => q.typ === "kern" && !aufgedeckt(q.id)).length;
+  const pruefungen = n => `${n} ${n === 1 ? "Prüfung" : "Prüfungen"}`;
+
   // Was eine Quest gibt oder nimmt, als kleine Symbole
   function fxChips(effekt, gewonnen) {
     const out = [];
@@ -155,7 +163,8 @@
 
     // Quests: eine Zeile pro Quest, in Spielreihenfolge
     $("#questList").innerHTML = C.quests.map(q =>
-      `<li><button type="button" class="q-row ${q.typ}" data-id="${q.id}"><span class="ic"></span><span class="q-name">${esc(q.name)}</span><span class="q-mark"></span></button></li>`).join("");
+      `<li><button type="button" class="q-row ${q.typ}" data-id="${q.id}"><span class="ic"></span><span class="q-name">${esc(q.name)}</span><span class="q-mark"></span></button></li>`).join("")
+      + `<li><button type="button" class="q-row nebel" data-id="${NEBEL}"><span class="ic">${coveredMedal()}</span><span class="q-name"></span><span class="q-mark"></span></button></li>`;
     document.querySelectorAll(".q-row").forEach(b => b.addEventListener("click", () => { followNext = b.dataset.id === state.next; selectQuest(b.dataset.id); }));
 
     // Karte: Weg durch die Stationen, eine Marke pro Station
@@ -220,9 +229,12 @@
   }
 
   function renderQuests() {
-    if (followNext || !sel[1]) sel[1] = state.next || C.quests[C.quests.length - 1].id;
-    document.querySelectorAll(".q-row").forEach(b => {
+    const verdeckt = C.quests.filter(q => !aufgedeckt(q.id));
+    const ungueltig = sel[1] === NEBEL ? !verdeckt.length : !sel[1] || !aufgedeckt(sel[1]);
+    if (followNext || ungueltig) sel[1] = state.next || C.quests[C.quests.length - 1].id;
+    document.querySelectorAll(".q-row:not(.nebel)").forEach(b => {
       const q = questById(b.dataset.id), st = state.quests[q.id], isNext = q.id === state.next;
+      b.parentElement.hidden = !aufgedeckt(q.id);
       b.className = `q-row ${q.typ} st-${st}${isNext ? " is-next" : ""}${sel[1] === q.id ? " is-selected" : ""}`;
       b.querySelector(".ic").innerHTML = questIcon(q, st, isNext);
       const mark = b.querySelector(".q-mark");
@@ -230,14 +242,27 @@
       mark.innerHTML = isNext ? `<span class="tag now">JETZT</span>` : st === "bestanden" ? useSvg("i-check") : st === "verloren" ? useSvg("i-x") : "";
       b.setAttribute("aria-label", `${q.name}, ${q.typ === "kern" ? "Prüfung" : "Sidequest"}, ${statusWort(q.id)}`);
     });
+    const nebel = $(".q-row.nebel"), nk = verdeckteKern();
+    nebel.parentElement.hidden = !verdeckt.length;
+    nebel.querySelector(".q-name").textContent = nk ? `Noch ${pruefungen(nk)} im Nebel` : "Was danach kommt, liegt im Nebel";
+    nebel.classList.toggle("is-selected", sel[1] === NEBEL);
+    nebel.setAttribute("aria-label", nebel.querySelector(".q-name").textContent);
+    // Prüfungen mit Gesamtzahl, Sidequests nur die erledigten (wie viele noch kommen, bleibt offen)
     const kern = C.quests.filter(q => q.typ === "kern"), side = C.quests.filter(q => q.typ === "side");
     const done = list => list.filter(q => state.quests[q.id] !== "offen").length;
     $("#listLegend").innerHTML = `<span><span class="medal won" style="--m:#d9b54a"></span>PRÜFUNGEN <b>${done(kern)}/${kern.length}</b></span>`
-      + `<span>${gemHtml("bestanden", false)}SIDEQUESTS <b>${done(side)}/${side.length}</b></span>`;
+      + `<span>${gemHtml("bestanden", false)}SIDEQUESTS <b>${done(side)}</b></span>`;
     renderQuestCard(sel[1]);
   }
 
   function renderQuestCard(id) {
+    if (id === NEBEL) {
+      const nk = verdeckteKern();
+      $("#questCard").innerHTML = `
+        <div class="qc-head">${coveredMedal()}<div><p class="tb-title">Im Nebel</p><p class="tb-meta">${nk ? `Noch ${pruefungen(nk)} verdeckt` : "Verdeckt"}</p></div></div>
+        <p class="tb-text">Was danach kommt, siehst du erst, wenn es dran ist. Jede Quest tritt aus dem Nebel, sobald die vorige entschieden ist.</p>`;
+      return;
+    }
     const q = questById(id), st = state.quests[id], isNext = id === state.next;
     const tag = isNext ? `<span class="tag now">JETZT DRAN</span>` : st === "bestanden" ? `<span class="tag won">BESTANDEN</span>`
       : st === "verloren" ? `<span class="tag lost">VERLOREN</span>` : `<span class="tag open">NOCH OFFEN</span>`;
@@ -281,13 +306,13 @@
   function renderMap() {
     const s = state;
     const kern = C.quests.filter(q => q.typ === "kern"), side = C.quests.filter(q => q.typ === "side");
-    $("#pipsKern").innerHTML = kern.map(q => medalHtml(q, s.quests[q.id], q.id === s.next)).join("");
-    $("#pipsSide").innerHTML = side.map(q => gemHtml(s.quests[q.id], q.id === s.next)).join("");
+    $("#pipsKern").innerHTML = kern.map(q => aufgedeckt(q.id) ? medalHtml(q, s.quests[q.id], q.id === s.next) : coveredMedal()).join("");
+    const sichtbareSide = side.filter(q => aufgedeckt(q.id));
+    $("#pipsSide").innerHTML = sichtbareSide.length ? sichtbareSide.map(q => gemHtml(s.quests[q.id], q.id === s.next)).join("") : `<span class="pips-none">noch keine</span>`;
     const offenK = kern.filter(q => s.quests[q.id] === "offen").length, offenS = side.filter(q => s.quests[q.id] === "offen").length;
     $("#cntKern").textContent = `${kern.length - offenK}/${kern.length}`;
-    $("#cntSide").textContent = `${side.length - offenS}/${side.length}`;
-    $("#leftCount").textContent = offenK + offenS === 0 ? "Alle Quests erledigt." :
-      `Noch ${offenK} ${offenK === 1 ? "Prüfung" : "Prüfungen"} und ${offenS} ${offenS === 1 ? "Sidequest" : "Sidequests"}.`;
+    $("#cntSide").textContent = `${side.length - offenS}`;
+    $("#leftCount").textContent = !s.next ? "Alle Quests erledigt." : offenK ? `Noch ${pruefungen(offenK)} vor dir.` : "Alle Prüfungen geschafft.";
 
     const nq = s.next ? questById(s.next) : null;
     const hier = nq ? nq.station : STATIONEN[STATIONEN.length - 1].id;
@@ -296,12 +321,16 @@
       const id = m.dataset.station;
       const k = C.quests.find(q => q.station === id && q.typ === "kern");
       const sides = C.quests.filter(q => q.station === id && q.typ === "side");
-      m.querySelector(".m-medal").innerHTML = k ? medalHtml(k, s.quests[k.id], k.id === s.next) : `<span class="no-medal"></span>`;
-      m.querySelector(".gems").innerHTML = sides.map(q => gemHtml(s.quests[q.id], q.id === s.next)).join("");
+      m.querySelector(".m-medal").innerHTML = !k ? `<span class="no-medal"></span>` : aufgedeckt(k.id) ? medalHtml(k, s.quests[k.id], k.id === s.next) : coveredMedal();
+      m.querySelector(".gems").innerHTML = sides.filter(q => aufgedeckt(q.id)).map(q => gemHtml(s.quests[q.id], q.id === s.next)).join("");
       m.classList.toggle("is-selected", id === sel[0]);
       m.querySelector(".you")?.remove();
       if (id === hier) m.insertAdjacentHTML("afterbegin", `<span class="you" title="Du bist hier"></span>`);
     });
+    // Nebel liegt über dem Weg ab der Mitte zur nächsten Station
+    const hi = STATIONEN.findIndex(x => x.id === hier), weiter = STATIONEN[hi + 1];
+    $("#mapFog").hidden = !(s.next && weiter);
+    if (s.next && weiter) $("#mapFog").style.left = ((STATIONEN[hi].x + weiter.x) / 2) + "%";
     renderStationBox(sel[0]);
   }
 
@@ -309,13 +338,20 @@
     const st = STATIONEN.find(x => x.id === id), idx = STATIONEN.indexOf(st);
     const qs = C.quests.filter(q => q.station === id);
     const nq = state.next ? questById(state.next) : null;
-    const hierText = nq && nq.station === id ? "DU BIST HIER" : `STATION ${idx + 1} VON ${STATIONEN.length}`;
+    const sichtbar = qs.filter(q => aufgedeckt(q.id));
+    const kernImNebel = qs.some(q => q.typ === "kern" && !aufgedeckt(q.id));
+    const hierText = nq && nq.station === id ? "DU BIST HIER" : !sichtbar.length ? "IM NEBEL" : `STATION ${idx + 1} VON ${STATIONEN.length}`;
+    if (!sichtbar.length) {
+      $("#stationBox").innerHTML = `<p class="tb-title">${esc(st.ort)}</p><p class="tb-meta">${hierText}</p>
+        <p class="tb-text">${kernImNebel ? "Hier wartet eine Prüfung. " : ""}Mehr siehst du, wenn du näher kommst.</p>`;
+      return;
+    }
     $("#stationBox").innerHTML = `<p class="tb-title">${esc(st.ort)}</p><p class="tb-meta">${hierText}</p>
-      <ul class="st-list">${qs.map(q => {
+      <ul class="st-list">${sichtbar.map(q => {
         const w = state.quests[q.id], isNext = q.id === state.next;
         const cls = isNext ? "now" : w === "bestanden" ? "won" : w === "verloren" ? "lost" : "open";
         return `<li>${questIcon(q, w, false)}<span>${esc(q.name)}</span><span class="st ${cls}">${isNext ? "JETZT" : w === "offen" ? "OFFEN" : w.toUpperCase()}</span></li>`;
-      }).join("")}</ul>`;
+      }).join("")}${kernImNebel ? `<li>${coveredMedal()}<span>Prüfung im Nebel</span><span class="st open">?</span></li>` : ""}</ul>`;
   }
 
   function selectStation(id, play = true) {
@@ -344,16 +380,16 @@
       const weg = C.items.filter(it => state.items[it.id] === "verloren").length;
       box.style.removeProperty("--c");
       box.innerHTML = `${useSvg("i-backpack", "ib-icon")}<p class="tb-title">${hat} von ${C.items.length} im Beutel</p>
-        <p class="tb-text">${weg ? `${weg} verloren. ` : ""}Tippe auf ein Feld: Du siehst, was es kann und wo du es bekommst.</p>`;
+        <p class="tb-text">${weg ? `${weg} verloren. ` : ""}Tippe auf ein Feld: Du siehst, was es kann.</p>`;
       return;
     }
     const it = itemById(id), x = itemInfo(id), st = state.items[id];
     const tag = st === "besitz" ? `<span class="tag won">IM BEUTEL</span>` : st === "verloren" ? `<span class="tag lost">VERLOREN</span>` : `<span class="tag open">NOCH NICHT</span>`;
     const quelle = C.quests.find(q => (q.win.items || []).includes(id));
     const nahm = C.quests.find(q => (q.lose.items || []).includes(id) && state.quests[q.id] === "verloren");
-    const gefahr = C.quests.find(q => (q.lose.items || []).includes(id) && state.quests[q.id] === "offen");
+    const gefahr = C.quests.find(q => (q.lose.items || []).includes(id) && state.quests[q.id] === "offen" && aufgedeckt(q.id));
     let extra = "";
-    if (st === "nicht" && quelle) extra = ` Zu holen bei <em>${esc(quelle.name)}</em>.`;
+    if (st === "nicht" && quelle) extra = aufgedeckt(quelle.id) ? ` Zu holen bei <em>${esc(quelle.name)}</em>.` : " Wo es das gibt, zeigt sich unterwegs.";
     if (st === "verloren" && nahm) extra = ` Verloren bei <em>${esc(nahm.name)}</em>.`;
     if (st === "besitz" && gefahr) extra = ` Vorsicht: <em>${esc(gefahr.name)}</em> kann es dir nehmen.`;
     box.style.setProperty("--c", x.farbe);
@@ -448,8 +484,10 @@
     const lines = C.code.map((_, i) => {
       const v = s.ziffern[i];
       const q = C.quests.find(x => x.win.ziffer === i + 1);
-      const wo = q ? q.name : "?";
-      return `<li class="${v == null ? "" : "plus"}"><span class="ri"><span class="tumbler${v == null ? "" : " known"}" style="--hud-h:30px">${v == null ? "?" : v}</span></span>Ziffer ${i + 1}: ${v == null ? `noch offen, aus ${esc(wo)}` : `${s.gekauft[i] ? "gekauft" : "erspielt bei " + esc(wo)}`}</li>`;
+      const wo = q ? esc(q.name) : "?";
+      const offen = !q || !aufgedeckt(q.id) ? "noch im Nebel"
+        : s.quests[q.id] === "verloren" ? `bei ${wo} verloren, am Kästchen kaufbar` : `jetzt dran bei ${wo}`;
+      return `<li class="${v == null ? "" : "plus"}"><span class="ri"><span class="tumbler${v == null ? "" : " known"}" style="--hud-h:30px">${v == null ? "?" : v}</span></span>Ziffer ${i + 1}: ${v == null ? offen : s.gekauft[i] ? "gekauft" : "erspielt bei " + wo}</li>`;
     }).join("");
     const bekannt = s.ziffern.filter(v => v != null).length;
     showOverlay({
@@ -532,7 +570,7 @@
     const step = { arrowdown: 1, arrowright: 1, arrowup: -1, arrowleft: -1 }[k];
     if (!step) return;
     e.preventDefault();
-    if (page === 1) { const ids = C.quests.map(q => q.id); followNext = false; selectQuest(ids[(ids.indexOf(sel[1]) + step + ids.length) % ids.length]); }
+    if (page === 1) { const ids = [...document.querySelectorAll(".quest-list li:not([hidden]) .q-row")].map(b => b.dataset.id); followNext = false; selectQuest(ids[(ids.indexOf(sel[1]) + step + ids.length) % ids.length]); }
     if (page === 0) { const ids = STATIONEN.map(s => s.id); selectStation(ids[(ids.indexOf(sel[0]) + step + ids.length) % ids.length]); }
     if (page === 2) { const ids = [...document.querySelectorAll(".slot")].map(b => b.dataset.id); selectItem(ids[(ids.indexOf(sel[2]) + step + ids.length) % ids.length]); }
   });
@@ -612,6 +650,7 @@
     lastDoc = JSON.parse(JSON.stringify(doc));
     render();
     renderSync();
+    if (meta.initial && intro.hidden) requestAnimationFrame(() => { const row = document.querySelector(".q-row.is-selected"); if (row) scrollIntoList(row); });
     if (prev && !meta.initial && intro.hidden) announce(prev, state, prevDoc, doc);
   });
 })();

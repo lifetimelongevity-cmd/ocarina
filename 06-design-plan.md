@@ -1,6 +1,6 @@
 # Design-Plan: Dennis' Menü von A bis Z
 
-Stand 23.09.2026. **Vorschlag, noch nicht gebaut.** Die App (`app/index.html`) ist unverändert. Zum Ansehen gibt es einen klickbaren Entwurf als eigene Seite:
+Stand 23.09.2026. **Vorschlag, noch nicht gebaut.** Entschieden: Dennis sieht nur Erledigtes und die nächste Quest (Abschnitt 3.1). Die App (`app/index.html`) ist unverändert. Zum Ansehen gibt es einen klickbaren Entwurf als eigene Seite:
 
 - `app/entwurf.html?demo` zeigt den Beispielstand aus `05-system-plan.md` A9. Unten sind Demo-Knöpfe (nächste Quest bestanden, verloren, zurück), ohne Datenbank.
 - `app/entwurf.html?demo=start` und `?demo=ende` zeigen Anfang und Ende des Tages.
@@ -69,13 +69,28 @@ Daraus folgen die Fragen, die Dennis sich unterwegs stellt. Jede Frage bekommt g
 - **Fällt weg:** QUEST STATUS (aufgeteilt auf Quests und Karte), SELECT ITEM (doppelt), Herzen und Rubin (ersetzt durch die Karten), die Prompt-Leiste unten (Erklärungen stehen jetzt in der Seite).
 - **Bleibt:** Startbildschirm, Hintergrund, Steinplatten in eigener Farbe je Seite, die blauen N64-Tafeln (jetzt als Textbox), Z- und R-Tasten, Drehung, Töne, Avatar.
 
+### 3.1 Was Dennis sieht: nur die nächste Quest (entschieden am 23.09.)
+
+Dennis sieht, was erledigt ist, und die nächste Quest. Alles danach liegt **im Nebel**. Jede Quest tritt aus dem Nebel, sobald die vorige entschieden ist. Gespeichert wird dafür nichts Neues: sichtbar ist eine Quest, wenn sie bestanden oder verloren ist oder die nächste ist.
+
+| | Dennis sieht |
+|---|---|
+| Erledigte Quests | Name, Ergebnis, Beschreibung, Einsatz |
+| Nächste Quest | Name, Ort, Beschreibung, Einsatz, was hilft |
+| Kommende Prüfungen | nur als verdecktes Medaillon mit „?". Ihre Zahl ist bekannt („Noch 2 Prüfungen"), weil die Karte zeigen soll, wie viele Prüfungen noch kommen |
+| Kommende Sidequests | gar nicht, auch nicht ihre Zahl. Sie tauchen auf, wenn sie dran sind, wie gezogene Begegnungen in der Spielanleitung §6 |
+| Items | alle Felder, noch nicht erspielte als dunkler Umriss. Kein Hinweis auf verdeckte Quests („Wo es das gibt, zeigt sich unterwegs") |
+| Code | Herkunft einer Ziffer nur bei aufgedeckten Prüfungen, sonst „noch im Nebel" |
+
+Grenze: Die Namen aller Quests und der Code stehen in `config.js`, das jedes Handy lädt. Wer den Quelltext öffnet, sieht alles. Für den Code lohnt eine Lösung vor dem Spieltag (offener Punkt in `CLAUDE.md`).
+
 ---
 
 ## 4. Die Seiten
 
 ### 4.1 QUESTS (Startseite)
 
-- **Links die Liste aller 13 Quests** in Spielreihenfolge. Prüfungen mit Medaillon und fetter Schrift, Sidequests mit Stein. Rechts in jeder Zeile: goldener Haken (bestanden), rotes X (verloren), JETZT (nächste Quest). Darüber: PRÜFUNGEN 4/6 · SIDEQUESTS 4/7. Die Liste scrollt von selbst zur nächsten Quest.
+- **Links die Liste**: die erledigten Quests in Spielreihenfolge, dann die nächste. Prüfungen mit Medaillon und fetter Schrift, Sidequests mit Stein. Rechts in jeder Zeile: goldener Haken (bestanden), rotes X (verloren), JETZT (nächste Quest). Als letzte Zeile „Noch 2 Prüfungen im Nebel" mit verdecktem Medaillon, Tippen erklärt den Nebel. Darüber: PRÜFUNGEN 4/6 · SIDEQUESTS 4 (Sidequests ohne Gesamtzahl). Die Liste scrollt von selbst zur nächsten Quest.
 - **Rechts die Quest-Karte** der gewählten Quest, beim Öffnen immer die nächste:
   - Name, Status, Art und Ort
   - Beschreibung im Spielton (Abschnitt 6)
@@ -84,8 +99,8 @@ Daraus folgen die Fragen, die Dennis sich unterwegs stellt. Jede Frage bekommt g
 
 ### 4.2 KARTE
 
-- **Links die Karte** vom Tegernsee zur Neureuth mit sechs Stationen: Zug, Wiese, Wald, Aussicht, Gipfel, Hütte. An jeder Station das Medaillon der Prüfung dort und kleine Steine für die Sidequests dort. Dennis' Kopf zeigt „Du bist hier" (Station der nächsten Quest).
-- **Rechts der Fortschritt:** alle sechs Medaillons (PRÜFUNGEN 4/6), alle sieben Steine (SIDEQUESTS 4/7) und der Satz „Noch 2 Prüfungen und 3 Sidequests." Darunter die gewählte Station mit ihren Quests und deren Stand.
+- **Links die Karte** vom Tegernsee zur Neureuth mit sechs Stationen: Zug, Wiese, Wald, Aussicht, Gipfel, Hütte. Der Weg und die Ortsnamen sind immer sichtbar, ihr lauft ihn ja. An jeder Station das Medaillon ihrer Prüfung, verdeckt mit „?", solange sie im Nebel liegt. Steine nur für erledigte Sidequests und die nächste. Dennis' Kopf zeigt „Du bist hier" (Station der nächsten Quest). Ab der Mitte zur nächsten Station liegt Nebel über dem Weg.
+- **Rechts der Fortschritt:** sechs Medaillons (PRÜFUNGEN 4/6, verdeckte mit „?"), die Steine der erledigten Sidequests (SIDEQUESTS 4) und der Satz „Noch 2 Prüfungen vor dir." Darunter die gewählte Station mit ihren sichtbaren Quests. Eine Station im Nebel sagt nur „Hier wartet eine Prüfung. Mehr siehst du, wenn du näher kommst."
 - Beschriftungen sind Text im Menü, keine Grafik. Sie schrumpfen nicht mehr mit.
 
 ### 4.3 AUSRÜSTUNG
@@ -93,7 +108,7 @@ Daraus folgen die Fragen, die Dennis sich unterwegs stellt. Jede Frage bekommt g
 - **Mitte:** Avatar mit „DENNIS · STUFE VERLOBTER".
 - **Links ITEMS:** Beutel, Pistole, Großer Ring, Karten (Gegenstände für Geschicklichkeit).
 - **Rechts FÄHIGKEITEN:** Token, Schwert, Schild (Regeln im Showdown). Die Trennung folgt §4.3 der Spielanleitung.
-- **Unten die Textbox:** Name, Stand, Wirkung und je nach Lage „Zu holen bei Kartenwurf", „Verloren bei Auge des Jägers" oder „Vorsicht: Feuerprobe kann es dir nehmen". Ohne Auswahl steht dort „4 von 7 im Beutel".
+- **Unten die Textbox:** Name, Stand, Wirkung und je nach Lage „Zu holen bei Kartenwurf", „Verloren bei Auge des Jägers" oder „Vorsicht: Feuerprobe kann es dir nehmen". Diese Hinweise erscheinen nur, wenn die genannte Quest schon sichtbar ist, sonst „Wo es das gibt, zeigt sich unterwegs." Ohne Auswahl steht dort „4 von 7 im Beutel".
 
 ### 4.4 HUD
 
@@ -101,7 +116,7 @@ Daraus folgen die Fragen, die Dennis sich unterwegs stellt. Jede Frage bekommt g
 |---|---|---|
 | oben links | eine Karte je Pack im Kästchen (bei `max` über 10 zwei Reihen wie Herzen), gefüllt = deins, gestrichelt = noch beim Bund, dazu „3/10" | erklärt die Packs |
 | oben Mitte | NÄCHSTE QUEST mit Namen, am Ende „Alle Quests erledigt" | springt zur Quest-Seite |
-| oben rechts | Schloss mit vier Zahlenrädern, unbekannt = ? | zeigt jede Ziffer mit Herkunft und Preis am Kästchen |
+| oben rechts | Schloss mit vier Zahlenrädern, unbekannt = ? | zeigt jede Ziffer mit Herkunft (bei verdeckten Prüfungen „noch im Nebel") und Preis am Kästchen |
 | unten rechts | „Stand 13:05" oder „Offline · Stand 13:05" | |
 
 ### 4.5 Ergebnis-Fenster
@@ -127,8 +142,8 @@ Bucht der Quest Master etwas, erscheint bei Dennis ein Fenster wie beim Item-Fun
 |---|---|---|
 | **Pack** | Spielkarte im Goldrahmen mit Totenkopf (One Piece), statt Herz und Rubin | gefüllt = deins, gestrichelter Rahmen = noch beim Bund |
 | **Ziffer** | Zahlenrad im Schloss | ? = unbekannt, Gold = bekannt |
-| **Prüfung** | Medaillon mit eigener Farbe und eigenem Zeichen | dunkel mit farbigem Zeichen = offen, leuchtend = bestanden, grau mit rotem X = verloren, pulsierender Ring = jetzt |
-| **Sidequest** | Stein | dunkel = offen, grün = bestanden, grau mit rotem X = verloren |
+| **Prüfung** | Medaillon mit eigener Farbe und eigenem Zeichen | dunkles Medaillon mit „?" = im Nebel, pulsierender Ring = jetzt, leuchtend = bestanden, grau mit rotem X = verloren |
+| **Sidequest** | Stein | unsichtbar = im Nebel, dunkel mit pulsierendem Ring = jetzt, grün = bestanden, grau mit rotem X = verloren |
 | **Item, Fähigkeit** | Feld mit Symbol | hell = im Beutel, dunkler Umriss = noch nicht, grau mit rotem X = verloren |
 
 Die sechs Medaillons tragen die sechs Medaillonfarben aus Ocarina of Time. So erkennt man jede Prüfung überall wieder, auf der Liste, der Karte und im Ergebnis:
@@ -148,7 +163,7 @@ Farbregeln: **Gold** = gewonnen, **Rot** = verloren oder Verlust, **Gelb pulsier
 
 ## 6. Texte im Spielton
 
-Regeln: Du-Form, höchstens zwei kurze Sätze, keine Gedankenstriche, keine Regeldetails (die kennt der Quest Master). Sidequests mit `[PLATZHALTER]` bekommen hier schon einen Text, der Inhalt kann sich in Stufe 1 noch ändern.
+Regeln: Du-Form, höchstens zwei kurze Sätze, keine Gedankenstriche, keine Regeldetails (die kennt der Quest Master). Item-Texte nennen keine Quest beim Namen, sonst verraten sie, was im Nebel liegt. Sidequests mit `[PLATZHALTER]` bekommen hier schon einen Text, der Inhalt kann sich in Stufe 1 noch ändern.
 
 | Quest | Text |
 |---|---|
@@ -169,9 +184,9 @@ Regeln: Du-Form, höchstens zwei kurze Sätze, keine Gedankenstriche, keine Rege
 | Item | Kurzname | Text |
 |---|---|---|
 | Beutel | Beutel | Dein Beutel. Hier landet alles, was du dir erspielst. |
-| Große Wasserpistole | Pistole | Dreifacher Tank. Hilft beim Auge des Jägers und im Wasserduell. |
+| Große Wasserpistole | Pistole | Dreifacher Tank. Du kannst länger schießen als jeder andere. |
 | Großer Ring | Großer Ring | Ein Seilring mit 60 cm. Beim Ringwurf wird dein Ziel größer. |
-| Gepanzerte Karten | Karten | Karten in Hüllen. Sie fliegen beim Kartenwurf stabiler. |
+| Gepanzerte Karten | Karten | Karten in Hüllen. Sie fliegen weiter und stabiler. |
 | Herausforderungs-Token | Token | Lass im Showdown einen Wächter deiner Wahl für dich kämpfen. |
 | Schwert der Verdammnis | Schwert | Streiche im Showdown den Wächter, den der Bund schickt. |
 | Schild des Bundes | Schild | Wiederhole im Showdown ein verlorenes Duell. Einmal. |
@@ -197,7 +212,7 @@ Ergebnis im Entwurf, gemessen wie in 1.1:
 | Tippfläche Quest-Zeile, Station | 33 px, 36 px | 34 px, 37 px | 39 px, 41 px | 40 px, 41 px |
 | Item-Feld | 48 px | 50 px | 57 px | 60 px |
 
-Geprüft in allen vier Größen mit Start, Mitte und Ende des Tages: kein Text läuft über, jede Quest-Karte passt ohne Scrollen. Getestet mit Chromium in iPhone-Maßen. Ein Test auf einem echten iPhone in Safari steht noch aus.
+Geprüft in allen vier Größen mit Start, Mitte und Ende des Tages: kein Text läuft über, jede Quest-Karte passt ohne Scrollen. Nebel-Test: in 14 Spielständen vom Start bis zum Ende taucht auf keiner Seite, in keiner Textbox und in keinem Fenster der Name einer verdeckten Quest auf. Getestet mit Chromium in iPhone-Maßen. Ein Test auf einem echten iPhone in Safari steht noch aus.
 
 ---
 
@@ -219,7 +234,8 @@ Anschluss an Teil B von `05-system-plan.md`: Stufe 2 (Aktionen von Dennis) bekom
 
 1. **Drei Seiten plus HUD** wie im Entwurf? Empfehlung: ja.
 2. **Seitennamen** deutsch (KARTE, QUESTS, AUSRÜSTUNG) oder englisch wie im N64-Original (MAP, QUEST LOG, EQUIPMENT)? Empfehlung: deutsch, alles andere ist auch deutsch.
-3. **Kommende Quests** mit Namen und Beschreibung sichtbar oder als „???" bis sie dran sind? Empfehlung: sichtbar. Dennis soll planen können, zum Beispiel dass der Waffenschmied vor dem Auge des Jägers kommt.
+3. ~~Kommende Quests sichtbar oder verdeckt?~~ **Entschieden am 23.09.: nur die nächste ist sichtbar** (Abschnitt 3.1).
+6. **Noch nicht erspielte Items**: als dunkler Umriss mit Namen zeigen (so im Entwurf, Dennis sieht, was es zu gewinnen gibt) oder ganz leer lassen wie in Ocarina of Time, bis er sie findet?
 4. **Texte** aus Abschnitt 6 so übernehmen oder anpassen?
 5. **Hochformat**: nur Hinweis zum Drehen oder eine eigene Ansicht? Empfehlung: Hinweis.
 
