@@ -158,7 +158,6 @@
     row.style.gridTemplateColumns = `repeat(${Math.min(max, 10)}, auto)`;
     row.classList.toggle("two", max > 10);
     row.innerHTML = Array.from({ length: max }, () => cardSvg("empty")).join("");
-    $("#packsMax").textContent = "/" + max;
     $("#tumblers").innerHTML = C.code.map((_, i) => `<span class="tumbler" data-i="${i}">?</span>`).join("");
 
     // Quests: eine Zeile pro Quest, in Spielreihenfolge
@@ -178,7 +177,7 @@
     // Ausrüstung: links Items, rechts Fähigkeiten
     const slot = it => {
       const x = itemInfo(it.id);
-      return `<button type="button" class="slot" data-id="${it.id}"><span class="well" style="--c:${x.farbe}">${useSvg(x.symbol)}</span><span class="cap">${esc(x.kurz)}</span></button>`;
+      return `<button type="button" class="slot" data-id="${it.id}"><span class="well" style="--c:${x.farbe}">${useSvg(x.symbol)}</span></button>`;
     };
     const gear = C.items.filter(it => itemInfo(it.id).gruppe !== "faehigkeit");
     const skill = C.items.filter(it => itemInfo(it.id).gruppe === "faehigkeit");
@@ -224,8 +223,7 @@
     $("#hudCode").setAttribute("aria-label", "Code des Kästchens: " + s.ziffern.map(v => v == null ? "unbekannt" : v).join(", "));
     const n = s.next ? questById(s.next) : null;
     $("#hudNext").classList.toggle("done", !n);
-    $("#hudNextName").textContent = n ? n.name : "Alle Quests erledigt";
-    $("#hudNext").querySelector(".hud-next-label").textContent = n ? "NÄCHSTE QUEST" : "ZIEL";
+    $("#hudNextName").textContent = n ? n.name : "Zum Kästchen";
   }
 
   function renderQuests() {
@@ -244,14 +242,14 @@
     });
     const nebel = $(".q-row.nebel"), nk = verdeckteKern();
     nebel.parentElement.hidden = !verdeckt.length;
-    nebel.querySelector(".q-name").textContent = nk ? `Noch ${pruefungen(nk)} im Nebel` : "Was danach kommt, liegt im Nebel";
+    nebel.querySelector(".q-name").textContent = nk ? `Noch ${pruefungen(nk)}` : "Im Nebel";
     nebel.classList.toggle("is-selected", sel[1] === NEBEL);
     nebel.setAttribute("aria-label", nebel.querySelector(".q-name").textContent);
     // Prüfungen mit Gesamtzahl, Sidequests nur die erledigten (wie viele noch kommen, bleibt offen)
     const kern = C.quests.filter(q => q.typ === "kern"), side = C.quests.filter(q => q.typ === "side");
     const done = list => list.filter(q => state.quests[q.id] !== "offen").length;
-    $("#listLegend").innerHTML = `<span><span class="medal won" style="--m:#d9b54a"></span>PRÜFUNGEN <b>${done(kern)}/${kern.length}</b></span>`
-      + `<span>${gemHtml("bestanden", false)}SIDEQUESTS <b>${done(side)}</b></span>`;
+    $("#listLegend").innerHTML = `<span title="Prüfungen"><span class="medal won" style="--m:#d9b54a"></span><b>${done(kern)}/${kern.length}</b></span>`
+      + `<span title="Sidequests">${gemHtml("bestanden", false)}<b>${done(side)}</b></span>`;
     renderQuestCard(sel[1]);
   }
 
@@ -259,19 +257,18 @@
     if (id === NEBEL) {
       const nk = verdeckteKern();
       $("#questCard").innerHTML = `
-        <div class="qc-head">${coveredMedal()}<div><p class="tb-title">Im Nebel</p><p class="tb-meta">${nk ? `Noch ${pruefungen(nk)} verdeckt` : "Verdeckt"}</p></div></div>
-        <p class="tb-text">Was danach kommt, siehst du erst, wenn es dran ist. Jede Quest tritt aus dem Nebel, sobald die vorige entschieden ist.</p>`;
+        <div class="qc-head">${coveredMedal()}<div><p class="tb-title">Im Nebel</p></div></div>
+        <p class="tb-text">Zeigt sich, wenn es dran ist.</p>`;
       return;
     }
     const q = questById(id), st = state.quests[id], isNext = id === state.next;
-    const tag = isNext ? `<span class="tag now">JETZT DRAN</span>` : st === "bestanden" ? `<span class="tag won">BESTANDEN</span>`
+    const tag = isNext ? `<span class="tag now">JETZT</span>` : st === "bestanden" ? `<span class="tag won">BESTANDEN</span>`
       : st === "verloren" ? `<span class="tag lost">VERLOREN</span>` : `<span class="tag open">NOCH OFFEN</span>`;
     $("#questCard").innerHTML = `
-      <div class="qc-head">${questIcon(q, st, false)}<div><p class="tb-title">${esc(q.name)}</p><p class="tb-meta">${tag} ${q.typ === "kern" ? "Prüfung" : "Sidequest"} · ${esc(q.ort)}</p></div></div>
+      <div class="qc-head">${questIcon(q, st, false)}<div><p class="tb-title">${esc(q.name)}</p><p class="tb-meta">${tag} ${esc(q.ort)}</p></div></div>
       <p class="tb-text">${esc(QUEST_TEXT[id] || q.beschreibung)}</p>
       ${hilftHtml(id)}
       <div class="fx-rows">
-        <p class="fx-head einsatz">EINSATZ</p>
         <div class="fx-row${st === "verloren" ? " dim" : ""}"><span class="fx-lbl win">SIEG</span><span class="fx">${fxChips(q.win, true)}</span></div>
         <div class="fx-row${st === "bestanden" ? " dim" : ""}"><span class="fx-lbl lose">NIEDERLAGE</span><span class="fx">${fxChips(q.lose, false)}</span></div>
       </div>`;
@@ -282,7 +279,7 @@
     const ids = HILFT[id];
     if (!ids) return "";
     const hat = ids.filter(i => state.items[i] === "besitz").length;
-    return `<div class="helps"><span class="fx-head">HILFT DIR HIER · ${hat} VON ${ids.length} DABEI</span><span class="helps-row">${ids.map(i => {
+    return `<div class="helps"><span class="fx-head">HILFT · ${hat}/${ids.length}</span><span class="helps-row">${ids.map(i => {
       const x = itemInfo(i), st = state.items[i];
       return `<span class="well mini st-${st}${st === "verloren" ? " lost" : ""}" style="--c:${x.farbe}" title="${esc(itemById(i).name)}">${useSvg(x.symbol)}</span>`;
     }).join("")}</span></div>`;
@@ -308,11 +305,10 @@
     const kern = C.quests.filter(q => q.typ === "kern"), side = C.quests.filter(q => q.typ === "side");
     $("#pipsKern").innerHTML = kern.map(q => aufgedeckt(q.id) ? medalHtml(q, s.quests[q.id], q.id === s.next) : coveredMedal()).join("");
     const sichtbareSide = side.filter(q => aufgedeckt(q.id));
-    $("#pipsSide").innerHTML = sichtbareSide.length ? sichtbareSide.map(q => gemHtml(s.quests[q.id], q.id === s.next)).join("") : `<span class="pips-none">noch keine</span>`;
+    $("#pipsSide").innerHTML = sichtbareSide.length ? sichtbareSide.map(q => gemHtml(s.quests[q.id], q.id === s.next)).join("") : "";
     const offenK = kern.filter(q => s.quests[q.id] === "offen").length, offenS = side.filter(q => s.quests[q.id] === "offen").length;
     $("#cntKern").textContent = `${kern.length - offenK}/${kern.length}`;
     $("#cntSide").textContent = `${side.length - offenS}`;
-    $("#leftCount").textContent = !s.next ? "Alle Quests erledigt." : offenK ? `Noch ${pruefungen(offenK)} vor dir.` : "Alle Prüfungen geschafft.";
 
     const nq = s.next ? questById(s.next) : null;
     const hier = nq ? nq.station : STATIONEN[STATIONEN.length - 1].id;
@@ -340,18 +336,18 @@
     const nq = state.next ? questById(state.next) : null;
     const sichtbar = qs.filter(q => aufgedeckt(q.id));
     const kernImNebel = qs.some(q => q.typ === "kern" && !aufgedeckt(q.id));
-    const hierText = nq && nq.station === id ? "DU BIST HIER" : !sichtbar.length ? "IM NEBEL" : `STATION ${idx + 1} VON ${STATIONEN.length}`;
+    const hierText = nq && nq.station === id ? "DU BIST HIER" : "";
     if (!sichtbar.length) {
       $("#stationBox").innerHTML = `<p class="tb-title">${esc(st.ort)}</p><p class="tb-meta">${hierText}</p>
-        <p class="tb-text">${kernImNebel ? "Hier wartet eine Prüfung. " : ""}Mehr siehst du, wenn du näher kommst.</p>`;
+        <p class="tb-text">Im Nebel</p>`;
       return;
     }
     $("#stationBox").innerHTML = `<p class="tb-title">${esc(st.ort)}</p><p class="tb-meta">${hierText}</p>
       <ul class="st-list">${sichtbar.map(q => {
         const w = state.quests[q.id], isNext = q.id === state.next;
-        const cls = isNext ? "now" : w === "bestanden" ? "won" : w === "verloren" ? "lost" : "open";
-        return `<li>${questIcon(q, w, false)}<span>${esc(q.name)}</span><span class="st ${cls}">${isNext ? "JETZT" : w === "offen" ? "OFFEN" : w.toUpperCase()}</span></li>`;
-      }).join("")}${kernImNebel ? `<li>${coveredMedal()}<span>Prüfung im Nebel</span><span class="st open">?</span></li>` : ""}</ul>`;
+        const mark = isNext ? `<span class="tag now">JETZT</span>` : w === "bestanden" ? `<span class="st won">${useSvg("i-check")}</span>` : `<span class="st lost">${useSvg("i-x")}</span>`;
+        return `<li>${questIcon(q, w, false)}<span>${esc(q.name)}</span>${mark}</li>`;
+      }).join("")}${kernImNebel ? `<li>${coveredMedal()}<span>Im Nebel</span></li>` : ""}</ul>`;
   }
 
   function selectStation(id, play = true) {
@@ -362,6 +358,7 @@
   }
 
   function renderEquip() {
+    if (!sel[2]) sel[2] = state.erhalten[state.erhalten.length - 1] || C.items[0].id;
     document.querySelectorAll(".slot").forEach(b => {
       const st = state.items[b.dataset.id];
       b.classList.remove("st-besitz", "st-verloren", "st-nicht");
@@ -375,21 +372,14 @@
 
   function renderItemBox(id) {
     const box = $("#itemBox");
-    if (!id) {
-      const hat = C.items.filter(it => state.items[it.id] === "besitz").length;
-      const weg = C.items.filter(it => state.items[it.id] === "verloren").length;
-      box.style.removeProperty("--c");
-      box.innerHTML = `${useSvg("i-backpack", "ib-icon")}<p class="tb-title">${hat} von ${C.items.length} im Beutel</p>
-        <p class="tb-text">${weg ? `${weg} verloren. ` : ""}Tippe auf ein Feld: Du siehst, was es kann.</p>`;
-      return;
-    }
+    if (!id) id = sel[2] = state.erhalten[state.erhalten.length - 1] || C.items[0].id;
     const it = itemById(id), x = itemInfo(id), st = state.items[id];
     const tag = st === "besitz" ? `<span class="tag won">IM BEUTEL</span>` : st === "verloren" ? `<span class="tag lost">VERLOREN</span>` : `<span class="tag open">NOCH NICHT</span>`;
     const quelle = C.quests.find(q => (q.win.items || []).includes(id));
     const nahm = C.quests.find(q => (q.lose.items || []).includes(id) && state.quests[q.id] === "verloren");
     const gefahr = C.quests.find(q => (q.lose.items || []).includes(id) && state.quests[q.id] === "offen" && aufgedeckt(q.id));
     let extra = "";
-    if (st === "nicht" && quelle) extra = aufgedeckt(quelle.id) ? ` Zu holen bei <em>${esc(quelle.name)}</em>.` : " Wo es das gibt, zeigt sich unterwegs.";
+    if (st === "nicht" && quelle) extra = aufgedeckt(quelle.id) ? ` Zu holen bei <em>${esc(quelle.name)}</em>.` : "";
     if (st === "verloren" && nahm) extra = ` Verloren bei <em>${esc(nahm.name)}</em>.`;
     if (st === "besitz" && gefahr) extra = ` Vorsicht: <em>${esc(gefahr.name)}</em> kann es dir nehmen.`;
     box.style.setProperty("--c", x.farbe);
@@ -430,15 +420,15 @@
     const neueBuchungen = doc.buchungen.filter(b => !alteIds.has(b.id));
     const lines = [];
     const dPacks = next.packs - prev.packs;
-    if (dPacks) lines.push(`<li class="${dPacks > 0 ? "plus" : "minus"}"><span class="ri">${cardSvg()}</span>${dPacks > 0 ? "+" : "−"}${Math.abs(dPacks)} ${packsWort(dPacks)} · jetzt ${next.packs} von ${next.max}</li>`);
+    if (dPacks) lines.push(`<li class="${dPacks > 0 ? "plus" : "minus"}"><span class="ri">${cardSvg()}</span>${dPacks > 0 ? "+" : "−"}${Math.abs(dPacks)} ${packsWort(dPacks)}</li>`);
     next.ziffern.forEach((v, i) => {
-      if (v != null && prev.ziffern[i] == null) lines.push(`<li class="plus"><span class="ri"><span class="tumbler known" style="--hud-h:30px">${v}</span></span>Ziffer ${i + 1} des Codes: ${v}${next.gekauft[i] ? " (gekauft)" : ""}</li>`);
+      if (v != null && prev.ziffern[i] == null) lines.push(`<li class="plus"><span class="ri"><span class="tumbler known" style="--hud-h:30px">${v}</span></span>Ziffer ${i + 1}: ${v}</li>`);
     });
     const itemLines = [];
     C.items.forEach(it => {
       const x = itemInfo(it.id);
-      if (prev.items[it.id] !== "besitz" && next.items[it.id] === "besitz") itemLines.push(`<li class="plus"><span class="ri" style="color:${x.farbe}">${useSvg(x.symbol)}</span>Erhalten: ${esc(it.name)}</li>`);
-      if (prev.items[it.id] === "besitz" && next.items[it.id] === "verloren") itemLines.push(`<li class="minus"><span class="ri x-over" style="color:${x.farbe}">${useSvg(x.symbol)}</span>Verloren: ${esc(it.name)}</li>`);
+      if (prev.items[it.id] !== "besitz" && next.items[it.id] === "besitz") itemLines.push(`<li class="plus"><span class="ri" style="color:${x.farbe}">${useSvg(x.symbol)}</span>${esc(it.name)}</li>`);
+      if (prev.items[it.id] === "besitz" && next.items[it.id] === "verloren") itemLines.push(`<li class="minus"><span class="ri x-over" style="color:${x.farbe}">${useSvg(x.symbol)}</span>${esc(it.name)} weg</li>`);
     });
     lines.push(...itemLines);
     const zurueck = C.quests.some(q => prev.quests[q.id] !== "offen" && next.quests[q.id] === "offen");
@@ -454,7 +444,7 @@
       const art = q.typ === "kern" ? "PRÜFUNG" : "SIDEQUEST";
       head = `${questIcon(q, next.quests[q.id], false)}<p class="big${won ? "" : " lost"}">${art} ${won ? "BESTANDEN" : "VERLOREN"}</p>
               <p class="sub">${esc(q.name)}${fertig.length > 1 ? ` und ${fertig.length - 1} weitere` : ""}</p>`;
-      if (!lines.length) lines.push(`<li><span class="ri"></span>Diesmal ohne Folgen.</li>`);
+      if (!lines.length) lines.push(`<li><span class="ri"></span>Keine Folgen</li>`);
     } else if (neueBuchungen.length) {
       const b = neueBuchungen[neueBuchungen.length - 1];
       const titel = b.ziffer ? "ZIFFER GEKAUFT" : dPacks < 0 ? "PACKS WEG" : dPacks > 0 ? "PACKS DAZU" : "BUCHUNG";
@@ -465,17 +455,17 @@
     }
     const n = next.next ? questById(next.next) : null;
     tone("confirm");
-    showOverlay({ head, lines: lines.join(""), next: n ? `Nächste Quest: ${n.name} · ${n.ort}` : "Alle Quests erledigt. Auf zum Kästchen!" },
+    showOverlay({ head, lines: lines.join(""), next: n ? `Nächste: ${n.name}` : "Zum Kästchen" },
       showNextQuest);
   }
 
   function explainPacks() {
     const s = state;
     showOverlay({
-      head: `<span class="ri-big">${cardSvg()}</span><p class="big">${s.packs} VON ${s.max} PACKS</p><p class="sub">Dein Anteil am Kästchen</p>`,
-      lines: `<li><span class="ri">${cardSvg()}</span>Jede Karte oben ist ein Pack im Kästchen. Gefüllt heißt: gehört dir.</li>
-              <li><span class="ri">${cardSvg("empty")}</span>Die leeren gehören noch dem Bund. Gewinnst du, wandern sie zu dir.</li>`,
-      next: `Fehlt dir am Ende eine Ziffer, kostet sie am Kästchen ${C.ziffer_preis} ${packsWort(C.ziffer_preis)}.`
+      head: `<span class="ri-big">${cardSvg()}</span><p class="big">${s.packs} / ${s.max} PACKS</p>`,
+      lines: `<li><span class="ri">${cardSvg()}</span>deins</li>
+              <li><span class="ri">${cardSvg("empty")}</span>beim Bund</li>`,
+      next: ""
     });
   }
 
@@ -485,15 +475,14 @@
       const v = s.ziffern[i];
       const q = C.quests.find(x => x.win.ziffer === i + 1);
       const wo = q ? esc(q.name) : "?";
-      const offen = !q || !aufgedeckt(q.id) ? "noch im Nebel"
-        : s.quests[q.id] === "verloren" ? `bei ${wo} verloren, am Kästchen kaufbar` : `jetzt dran bei ${wo}`;
-      return `<li class="${v == null ? "" : "plus"}"><span class="ri"><span class="tumbler${v == null ? "" : " known"}" style="--hud-h:30px">${v == null ? "?" : v}</span></span>Ziffer ${i + 1}: ${v == null ? offen : s.gekauft[i] ? "gekauft" : "erspielt bei " + wo}</li>`;
+      const offen = !q || !aufgedeckt(q.id) ? "im Nebel"
+        : s.quests[q.id] === "verloren" ? `verloren, am Kästchen ${C.ziffer_preis} ${packsWort(C.ziffer_preis)}` : `jetzt: ${wo}`;
+      return `<li class="${v == null ? "" : "plus"}"><span class="ri"><span class="tumbler${v == null ? "" : " known"}" style="--hud-h:30px">${v == null ? "?" : v}</span></span>${v == null ? offen : s.gekauft[i] ? "gekauft" : wo}</li>`;
     }).join("");
-    const bekannt = s.ziffern.filter(v => v != null).length;
     showOverlay({
-      head: `<span class="ri-big lock">${useSvg("i-lock")}</span><p class="big">CODE DES KÄSTCHENS</p><p class="sub">${bekannt} von ${C.code.length} Ziffern bekannt</p>`,
+      head: `<span class="ri-big lock">${useSvg("i-lock")}</span><p class="big">CODE</p>`,
       lines,
-      next: `Fehlende Ziffern kaufst du am Kästchen, je ${C.ziffer_preis} ${packsWort(C.ziffer_preis)}.`
+      next: ""
     });
   }
 
@@ -590,7 +579,7 @@
       if (row) scrollIntoList(row);
     }, 500);
   }
-  $("#startQuest").addEventListener("click", beginQuest);
+  intro.addEventListener("click", beginQuest);        // PRESS START: Tippen irgendwo startet
   if (params.has("direkt")) { intro.hidden = true; }
 
   const fsBtn = $("#fullscreenToggle");
