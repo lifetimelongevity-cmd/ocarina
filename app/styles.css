@@ -150,3 +150,36 @@ html:-webkit-full-screen body { background:#000 }
   .selectable.selected, .character-window img, .intro-avatar, .start-quest { animation: none; }
   .intro-screen { transition:none }
 }
+
+/* ===== v0: Darstellung aus dem gespeicherten Stand ===== */
+/* Nächste Quest: blinkender goldener Ring */
+.medallion.next::before, .stone.next::before { content:""; position:absolute; inset:-.75cqw; border-radius:50%; border:.34cqw solid #faf26e; box-shadow:0 0 .9cqw #faf26e; pointer-events:none; animation:nextPulse 700ms steps(2,end) infinite }
+@keyframes nextPulse { 50% { opacity:.25 } }
+.medallion.lost { background:radial-gradient(circle at 35% 25%,#b25a44,#5d1712 55%,#1a0605) }
+.medallion.lost span, .medallion.lost svg { opacity:.55 }
+
+/* Sidequests: sieben kleine Steine */
+.stones.side { bottom:-3%; left:4%; right:4%; justify-content:space-between }
+.stones.side .stone { width:3.9cqw; height:3.3cqw; font-size:1.9cqw; display:grid; place-items:center; color:#6f8f86 }
+.stone.won { color:#ffd23c; background:radial-gradient(circle at 40% 30%,#7fa66a,#29491f 65%,#0b1608) }
+.stone.lost { color:#e0463a; background:radial-gradient(circle at 40% 30%,#6a3a33,#2b100d 65%,#0b0504) }
+
+/* Code-Noten: bekannt in Farbe, unbekannt dunkel */
+.note.won { color:#20a333 } .note.note-2.won { color:#d73525 } .note.note-3.won { color:#2f6fd6 } .note.note-4.won { color:#e38a1c }
+
+/* Herzen: eine Reihe pro 10 Packs */
+.hud-hearts { display:grid; gap:.25cqw }
+
+/* Stand-Anzeige unten rechts */
+.sync { right:5.2%; bottom:5.4%; color:#c8c5a2; font:900 1.25cqw/1 "Courier New",monospace; letter-spacing:.06cqw; text-shadow:.14cqw .14cqw #000 }
+.sync.offline { color:#f0a43a }
+
+/* Karte: Stationen nach Status */
+.map-stops circle { fill:#a39873 }
+.map-stops circle.done { fill:#e1b32d }
+.map-stops circle.lost { fill:#c53a2a }
+
+.item.empty { cursor:default }
+@media (prefers-reduced-motion: reduce) { .medallion.next::before, .stone.next::before { animation:none } }
+.papers { grid-template-columns: 6cqw 6cqw auto }
+.progress { white-space: nowrap; font-size: 2.6cqw }

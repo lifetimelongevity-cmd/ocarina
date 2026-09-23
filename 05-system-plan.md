@@ -2,7 +2,7 @@
 
 Ziel: eine kleine, in sich geschlossene Logik, auf der das Menü und die Quest-Master-Konsole aufsetzen. Erst wenn v0 mit zwei Handys rund läuft, kommen weitere Regeln dazu (Teil B). Nichts in Teil B darf v0 umbauen, es kommt nur obendrauf.
 
-Die konkrete Konfiguration zu diesem Plan liegt in `game-config-v0.json`.
+Die konkrete Konfiguration liegt in `app/config.js`, die Logik in `app/engine.js`, die App in `app/` (siehe `app/README.md`).
 
 ---
 
@@ -87,8 +87,9 @@ Es gibt keine Ereignisliste. Gespeichert wird genau das, was der Quest Master im
 doc = {
   quests: { logbuch: "bestanden", waffenschmied: "verloren", klingen: "offen", ... },   // ein Toggle je Quest
   items:  { schwert: "verloren" },          // nur manuelle Korrekturen, sonst leer
-  buchungen: [ { packs: -1, grund: "Steckbrief Benne" }, ... ],   // freie Packs-Buchungen mit Grund
-  ziffern_gekauft: [1]                      // welche Ziffern Dennis gekauft hat
+  buchungen: [ { id, packs: -1, grund: "Steckbrief Benne" },
+               { id, packs: -1, grund: "Ziffer 1 gekauft", ziffer: 1 } ],   // Buchung mit ziffer = Ziffer gekauft
+  stand: Zeitstempel
 }
 ```
 
@@ -98,7 +99,7 @@ Bedienelemente im Admin-Menü:
 |---|---|---|
 | Toggle je Quest: offen / bestanden / verloren | `doc.quests[id]` | Toggle zurückstellen |
 | Buchung: Packs ±n mit Grund (Buttons für die üblichen Gründe) | `doc.buchungen[]` | Eintrag löschen |
-| Ziffer gekauft | `doc.ziffern_gekauft[]` plus Buchung −1 | Eintrag löschen |
+| Ziffer gekauft | Buchung −1 mit Feld `ziffer` | Buchung löschen |
 | Item manuell geben oder nehmen (selten) | `doc.items[id]` | Eintrag löschen |
 
 ### A5. Zustand = Konfiguration + Dokument
@@ -119,8 +120,7 @@ function derive(config, doc) {
       packs += q.lose.packs
       für item in q.lose.items: wenn items[item] == "besitz": items[item] = "verloren"
 
-  für jede Buchung b in doc.buchungen:      packs += b.packs
-  für jede Ziffer z in doc.ziffern_gekauft: ziffern[z - 1] = config.code[z - 1]
+  für jede Buchung b in doc.buchungen:      packs += b.packs; wenn b.ziffer: ziffern[b.ziffer - 1] = config.code[b.ziffer - 1]
   für jedes id in doc.items:                items[id] = doc.items[id]   // Korrektur schlägt Regel
 
   packs = clamp(packs, 0, config.waehrung.max)
@@ -157,7 +157,7 @@ Alternative ohne eigenes Backend wäre ein Claude-Artifact mit geteilter Datenba
 ### A8. Was das Menü konkret ändert
 
 - `won / lost / locked` werden aus `state` gesetzt, nicht per Klick. `decide()` und `persist()` in `app.js` entfallen.
-- Jeder `selectable` bekommt eine `data-id`, die in `game-config-v0.json` existiert.
+- Jeder `selectable` bekommt eine `data-id`, die in `app/config.js` existiert (so umgesetzt).
 - Die nächste Quest wird hervorgehoben, die Textbox zeigt Name, Ort, Beschreibung.
 - Herzen = Packs (`max` Herzen, gefüllt = Dennis). Der Rest des HUD bleibt Deko bis Teil B.
 - Sechs Medaillons = die sechs Kernprüfungen in Konfigurationsreihenfolge (Prophezeiung zuletzt, weil sie in der Hütte gebucht wird). Sidequests bekommen eine eigene Reihe oder die Steine.
@@ -171,7 +171,6 @@ doc = {
             nakama: "bestanden", feuerprobe: "bestanden" },
   items: {},
   buchungen: [ { packs: -1, grund: "Steckbrief Benne" } ],
-  ziffern_gekauft: []
 }
 Packs:    +1 +1 +1 -1 +1 -1 +1 +1 = 4, Buchung -1 = 3
 Ziffern:  [7, 4, 2, null]
@@ -203,6 +202,6 @@ Detailideen zu Stufe 2 bis 8 stehen in der Git-Historie dieser Datei (Commit „
 
 ---
 
-## Nächster Schritt
+## Stand
 
-`derive` als reine Funktion gegen `game-config-v0.json` mit dem Stand aus A9 als Test. Dann `admin.html` mit den Toggles, dann Dennis' Menü an `derive` hängen, dann Firebase dazwischen.
+v0 ist gebaut: `app/` enthält Dennis' Menü, das Quest-Master-Menü, die Logik mit Tests und den Speicher (lokal oder Firebase). Nächster Schritt: Firebase einrichten (`app/README.md`) und mit zwei Handys testen, dann Stufe 1 (Inhalte).

@@ -9,7 +9,7 @@ Projektordner für das Quest-System zum JGA-Wochenende von Dennis (2. bis 4. Okt
 | `README.md` | Projektbeschreibung (Original-Briefing, unverändert) | gesetzt |
 | `00-spielanleitung.md` | Regelwerk: Akte, Ressourcen, Prüfungen, Encounter, Ausrüstung, Fähigkeiten, Flüche, Kästchen | Entwurf |
 | `05-system-plan.md` | Kernlogik v0 (Quest, Item, Packs, Ziffer, drei Ereignisse, reduce), Entscheidungen, Ausbaustufen | Plan v0 |
-| `game-config-v0.json` | Konfiguration v0: 13 Quests mit win/lose, 9 Items, Code, Startitems | v0 |
+| `app/` | Die App v0: Dennis' Menü (`index.html`), Quest-Master-Menü (`admin.html`), Konfiguration (`config.js`), Logik mit Tests. Anleitung in `app/README.md`. | v0 |
 | `01-showdown-pruefung-des-bundes.md` | Prüfung 5, das Finale auf dem Gipfel. Definiert, was jedes Item wert ist. | Vorschlag v1 |
 | `02-items-und-oekonomie.md` | Item-Liste, Berry-Währung, Ziffern-Logik, Kästchen | Vorschlag v1 |
 | `03-offene-pruefungen.md` | Prüfung 4 (Mut), Rast der Ahnen, weitere Geschicklichkeitsspiele, Encounter-Pool | Vorschlag v1 |

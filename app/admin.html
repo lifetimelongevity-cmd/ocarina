@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0c0e0a">
+  <meta name="robots" content="noindex">
+  <title>Dennis Quest · Quest Master</title>
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+  <header class="top">
+    <div class="top-row">
+      <strong class="brand">Quest Master</strong>
+      <span class="sync" id="sync">…</span>
+    </div>
+    <div class="top-row stats">
+      <div class="stat"><span class="lbl">Packs</span><b id="packs">0</b><small id="packsMax">/ 10</small></div>
+      <div class="stat"><span class="lbl">Code</span><span class="code" id="code"></span></div>
+      <div class="stat"><span class="lbl">Erledigt</span><b id="done">0</b><small id="total">/ 13</small></div>
+    </div>
+  </header>
+
+  <main>
+    <section class="card next" id="nextCard" aria-labelledby="nextTitle">
+      <p class="eyebrow">Nächste Quest</p>
+      <h1 id="nextTitle">…</h1>
+      <p class="meta" id="nextMeta"></p>
+      <p class="fx" id="nextFx"></p>
+      <div class="big-actions">
+        <button type="button" class="btn win" id="nextWin">Bestanden</button>
+        <button type="button" class="btn lose" id="nextLose">Verloren</button>
+      </div>
+    </section>
+
+    <section class="card" aria-labelledby="questsTitle">
+      <h2 id="questsTitle">Alle Quests</h2>
+      <ol class="quests" id="quests"></ol>
+    </section>
+
+    <section class="card" aria-labelledby="packsTitle">
+      <h2 id="packsTitle">Packs buchen</h2>
+      <div class="chips" id="quick"></div>
+      <div class="chips" id="buyDigits"></div>
+      <form class="custom" id="customForm">
+        <label for="customAmount">Menge</label>
+        <input id="customAmount" type="number" inputmode="numeric" step="1" value="-1">
+        <label for="customReason">Grund</label>
+        <input id="customReason" type="text" placeholder="z. B. Hinweis gekauft" autocomplete="off">
+        <button type="submit" class="btn">Buchen</button>
+      </form>
+      <ul class="ledger" id="ledger"></ul>
+    </section>
+
+    <section class="card" aria-labelledby="itemsTitle">
+      <h2 id="itemsTitle">Items</h2>
+      <p class="hint">Normalerweise ergeben sich Items aus den Quests. Hier nur korrigieren, wenn etwas außerhalb der Regeln passiert ist.</p>
+      <ul class="items" id="items"></ul>
+    </section>
+
+    <section class="card" aria-labelledby="gameTitle">
+      <h2 id="gameTitle">Spiel</h2>
+      <p class="hint" id="storageInfo"></p>
+      <div class="chips">
+        <a class="btn ghost" href="./" target="_blank" rel="noopener">Dennis' Ansicht öffnen</a>
+        <button type="button" class="btn danger" id="reset">Alles zurücksetzen</button>
+      </div>
+    </section>
+  </main>
+
+  <div class="toast" id="toast" role="status"></div>
+
+  <script src="config.js"></script>
+  <script src="engine.js"></script>
+  <script src="store.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>

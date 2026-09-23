@@ -2,7 +2,7 @@
 
 Regelwerk für den JGA von Dennis.
 
-> **Hinweis zur Währung:** Dieses Regelwerk spricht von "Berry". Entscheidung vom 22.09.: Die Währung sind direkt die **Packs** (1 Berry = 1 Pack, 10 Stück, Start 0, nur in der App gezählt). Für v0 gilt `05-system-plan.md` und `game-config-v0.json`. Das Regelwerk wird beim Ausbau nachgezogen. Dieses Dokument ist die **eine** Struktur, auf der alles andere aufsetzt: die Detail-Docs (01 bis 04), das Game-Menü (`preview-menu.html`) und die Datendatei (`game-data.json`). Wo Inhalte noch nicht feststehen, steht **[PLATZHALTER]**. Die Struktur drumherum ist gesetzt.
+> **Hinweis zur Währung:** Dieses Regelwerk spricht von "Berry". Entscheidung vom 22.09.: Die Währung sind direkt die **Packs** (1 Berry = 1 Pack, 10 Stück, Start 0, nur in der App gezählt). Für v0 gilt `05-system-plan.md` und `app/config.js`. Das Regelwerk wird beim Ausbau nachgezogen. Dieses Dokument ist die **eine** Struktur, auf der alles andere aufsetzt: die Detail-Docs (01 bis 04), die App (`app/`, Konfiguration in `app/config.js`). Wo Inhalte noch nicht feststehen, steht **[PLATZHALTER]**. Die Struktur drumherum ist gesetzt.
 
 Lesehilfe: §1 bis §3 sind das Spiel in drei Minuten. §4 bis §9 sind die Bausteine. §10 ist das Mapping aufs Menü.
 
