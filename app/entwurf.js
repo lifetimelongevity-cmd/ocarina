@@ -8,12 +8,12 @@
   /* ---------- Entwurf-Inhalte (wandern beim Bauen nach config.js) ---------- */
   // Sechs Prüfungen = sechs Medaillons, jedes mit eigener Farbe und eigenem Zeichen
   const MEDAILLON = {
-    logbuch:      { farbe: "#4a8fe8", emblem: "e-book" },
-    klingen:      { farbe: "#ec8f2e", emblem: "e-swords" },
-    auge:         { farbe: "#48b454", emblem: "e-eye" },
-    feuerprobe:   { farbe: "#e2472f", emblem: "e-flame" },
-    bund:         { farbe: "#f2c94c", emblem: "e-triforce" },
-    prophezeiung: { farbe: "#a468e6", emblem: "e-letter" }
+    logbuch:      { farbe: "#4a8fe8", emblem: "z-water" },     // Wasser, blau
+    klingen:      { farbe: "#ec8f2e", emblem: "z-spirit" },    // Geist, orange
+    auge:         { farbe: "#48b454", emblem: "z-forest" },    // Wald, grün
+    feuerprobe:   { farbe: "#e2472f", emblem: "e-flame" },     // Feuer, rot (fehlt in der Schrift, eigene Flamme)
+    bund:         { farbe: "#f2c94c", emblem: "z-triforce" },  // Licht, gold
+    prophezeiung: { farbe: "#a468e6", emblem: "z-shadow" }     // Schatten, violett
   };
   // Beschreibungen im Spielton: Du-Form, höchstens zwei kurze Sätze
   const QUEST_TEXT = {
@@ -100,6 +100,7 @@
   const sel = { 0: null, 1: null, 2: null };  // Auswahl je Seite: Station, Quest, Item
   let followNext = true;                        // Quest-Seite folgt der nächsten Quest, bis Dennis selbst etwas antippt
   let followHier = true;                        // Karte zeigt die Station der nächsten Quest, bis Dennis eine andere antippt
+  let revealPending = null;                     // Quest, die nach dem Ergebnis-Fenster aus dem Nebel tritt
   let audio;
 
   function tone(kind = "move") {
@@ -115,9 +116,44 @@
     } catch (_) {}
   }
 
+  // Eigene kurze Melodien im Stil der N64-Fanfaren (keine Originalmusik): [Hz, Sekunden]
+  const MELODIE = {
+    pruefung: [[392, .1], [523, .1], [659, .1], [784, .12], [1047, .55]],
+    side:     [[659, .09], [784, .09], [1047, .34]],
+    verloren: [[330, .2], [277, .2], [220, .5]],
+    plus:     [[523, .09], [784, .24]],
+    minus:    [[392, .12], [262, .32]],
+    nebel:    [[1047, .05], [1319, .05], [1568, .05], [2093, .2]]
+  };
+  function melody(name) {
+    try {
+      audio ??= new (window.AudioContext || window.webkitAudioContext)();
+      if (audio.state === "suspended") audio.resume();
+      const traurig = name === "verloren" || name === "minus";
+      let t = audio.currentTime + .03;
+      MELODIE[name].forEach(([f, d], i, alle) => {
+        const letzte = i === alle.length - 1;
+        const o = audio.createOscillator(), g = audio.createGain();
+        o.type = traurig ? "sawtooth" : name === "nebel" ? "sine" : "triangle";
+        o.frequency.setValueAtTime(f, t);
+        if (letzte && !traurig) {                     // leichtes Vibrato auf dem Schlusston
+          const v = audio.createOscillator(), vg = audio.createGain();
+          v.frequency.value = 6; vg.gain.value = f * .012; v.connect(vg).connect(o.frequency); v.start(t); v.stop(t + d + .3);
+        }
+        const vol = traurig || name === "nebel" ? .03 : .055;
+        g.gain.setValueAtTime(.0001, t);
+        g.gain.exponentialRampToValueAtTime(vol, t + .012);
+        g.gain.setValueAtTime(vol, t + d * .7);
+        g.gain.exponentialRampToValueAtTime(.0001, t + d + (letzte ? .3 : .03));
+        o.connect(g).connect(audio.destination); o.start(t); o.stop(t + d + .35);
+        t += d;
+      });
+    } catch (_) {}
+  }
+
   /* ---------- Symbole für Quests ---------- */
   function medalHtml(q, st, isNext) {
-    const m = MEDAILLON[q.id] || { farbe: "#c9c3a2", emblem: "e-triforce" };
+    const m = MEDAILLON[q.id] || { farbe: "#c9c3a2", emblem: "z-triforce" };
     const cls = st === "bestanden" ? "won" : st === "verloren" ? "lost" : "";
     return `<span class="medal ${cls}${isNext ? " is-next" : ""}" style="--m:${m.farbe}">${useSvg(m.emblem)}</span>`;
   }
@@ -223,7 +259,7 @@
     $("#hudCode").setAttribute("aria-label", "Code des Kästchens: " + s.ziffern.map(v => v == null ? "unbekannt" : v).join(", "));
     const n = s.next ? questById(s.next) : null;
     $("#hudNext").classList.toggle("done", !n);
-    $("#hudNextName").textContent = n ? n.name : "Zum Kästchen";
+    $("#hudNextName").textContent = !n ? "Zum Kästchen" : n.id === revealPending ? "?" : n.name;
   }
 
   function renderQuests() {
@@ -233,7 +269,7 @@
     document.querySelectorAll(".q-row:not(.nebel)").forEach(b => {
       const q = questById(b.dataset.id), st = state.quests[q.id], isNext = q.id === state.next;
       b.parentElement.hidden = !aufgedeckt(q.id);
-      b.className = `q-row ${q.typ} st-${st}${isNext ? " is-next" : ""}${sel[1] === q.id ? " is-selected" : ""}`;
+      b.className = `q-row ${q.typ} st-${st}${isNext ? " is-next" : ""}${sel[1] === q.id ? " is-selected" : ""}${q.id === revealPending ? " fogged" : ""}`;
       b.querySelector(".ic").innerHTML = questIcon(q, st, isNext);
       const mark = b.querySelector(".q-mark");
       mark.className = "q-mark" + (st === "bestanden" ? " won" : st === "verloren" ? " lost" : "");
@@ -254,6 +290,7 @@
   }
 
   function renderQuestCard(id) {
+    $("#questCard").classList.toggle("fogged", id === revealPending);
     if (id === NEBEL) {
       const nk = verdeckteKern();
       $("#questCard").innerHTML = `
@@ -400,6 +437,8 @@
     $("#resultHead").innerHTML = html.head;
     $("#resultLines").innerHTML = html.lines || "";
     $("#resultNext").textContent = html.next || "";
+    r.classList.toggle("big-moment", !!html.gross);
+    [...$("#resultLines").children].forEach((li, i) => li.style.setProperty("--d", i));
     $("#overlay").hidden = false;
     r.style.animation = "none"; void r.offsetWidth; r.style.animation = "";
     overlayAfter = after || null;
@@ -438,11 +477,13 @@
     document.querySelectorAll("#packRow .ic-card").forEach((c, i) => c.classList.toggle("gain", i >= prev.packs && i < next.packs));
     document.querySelectorAll("#tumblers .tumbler").forEach((t, i) => t.classList.toggle("gain", next.ziffern[i] != null && prev.ziffern[i] == null));
 
-    let head;
+    let head, klang = dPacks < 0 ? "minus" : "plus";
     if (fertig.length) {
       const q = fertig[0], won = next.quests[q.id] === "bestanden";
       const art = q.typ === "kern" ? "PRÜFUNG" : "SIDEQUEST";
-      head = `${questIcon(q, next.quests[q.id], false)}<p class="big${won ? "" : " lost"}">${art} ${won ? "BESTANDEN" : "VERLOREN"}</p>
+      const farbe = q.typ === "kern" ? (MEDAILLON[q.id] || {}).farbe : "#3ddc97";
+      klang = !won ? "verloren" : q.typ === "kern" ? "pruefung" : "side";
+      head = `<span class="medal-stage ${won ? "won" : "lost"}" style="--m:${farbe}">${questIcon(q, next.quests[q.id], false)}</span><p class="big${won ? "" : " lost"}">${art} ${won ? "BESTANDEN" : "VERLOREN"}</p>
               <p class="sub">${esc(q.name)}${fertig.length > 1 ? ` und ${fertig.length - 1} weitere` : ""}</p>`;
       if (!lines.length) lines.push(`<li><span class="ri"></span>Keine Folgen</li>`);
     } else if (neueBuchungen.length) {
@@ -453,10 +494,12 @@
     } else {
       head = `<span class="ri-big">${useSvg("i-backpack")}</span><p class="big">DEIN BEUTEL</p><p class="sub">Der Quest Master hat etwas geändert.</p>`;
     }
-    const n = next.next ? questById(next.next) : null;
-    tone("confirm");
-    showOverlay({ head, lines: lines.join(""), next: n ? `Nächste: ${n.name}` : "Zum Kästchen" },
-      showNextQuest);
+    // Die nächste Quest wird erst nach dem Fenster aufgedeckt, darum steht ihr Name hier nicht
+    const warSichtbar = id => prev.quests[id] !== "offen" || prev.next === id;
+    if (next.next && !warSichtbar(next.next)) revealPending = next.next;
+    melody(klang);
+    showOverlay({ head, lines: lines.join(""), next: next.next ? "" : "Zum Kästchen", gross: fertig.length > 0 }, showNextQuest);
+    renderHud(); renderQuests();
   }
 
   function explainPacks() {
@@ -525,9 +568,23 @@
   function showNextQuest() {
     followNext = true; followHier = true;
     renderQuests(); renderMap();
-    if (page !== 1) return goTo(1);
-    const row = document.querySelector(".q-row.is-selected");
-    if (row) scrollIntoList(row);
+    const warte = page !== 1 ? 480 : 0;
+    if (page !== 1) goTo(1);
+    else { const row = document.querySelector(".q-row.is-selected"); if (row) scrollIntoList(row); }
+    if (revealPending) setTimeout(reveal, warte + 150);
+  }
+
+  // Die nächste Quest tritt aus dem Nebel: Zeile und Karte klären sich, HUD zeigt den Namen
+  function reveal() {
+    const id = revealPending;
+    if (!id) return;
+    revealPending = null;
+    const row = document.querySelector(`.q-row[data-id="${id}"]`), card = $("#questCard");
+    if (row) { scrollIntoList(row); row.classList.remove("fogged"); row.classList.add("revealing"); }
+    if (sel[1] === id) { card.classList.remove("fogged"); card.classList.add("revealing"); }
+    renderHud();
+    melody("nebel");
+    setTimeout(() => { row?.classList.remove("revealing"); card.classList.remove("revealing"); }, 1400);
   }
 
   document.querySelectorAll("[data-nav]").forEach(b => b.addEventListener("click", e => { e.stopPropagation(); turn(b.dataset.nav === "next" ? 1 : -1); }));
@@ -602,7 +659,7 @@
       try { await screen.orientation?.lock?.("landscape"); } catch (_) {}
     } catch (_) { hinweis(); }
   }
-  fsBtn.addEventListener("click", toggleFs);
+  fsBtn.addEventListener("click", e => { e.stopPropagation(); toggleFs(); });
   document.addEventListener("fullscreenchange", updateFs);
   document.addEventListener("webkitfullscreenchange", updateFs);
 

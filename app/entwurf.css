@@ -95,7 +95,7 @@ svg { display: block; }
 .tumbler.known { color: var(--gold); text-shadow: 0 0 6px rgba(242,201,76,.45), 1px 1px 0 #000; border-color: #a58a33; }
 .tumbler.gain { animation: packGain 900ms steps(6, end) 2; }
 
-.fullscreen-toggle { flex: none; display: grid; place-items: center; width: calc(var(--hud-h) - 4px); height: calc(var(--hud-h) - 4px); border-radius: 4px; color: #12172a !important;
+.fullscreen-toggle { position: absolute; z-index: 3; top: max(10px, env(safe-area-inset-top)); right: max(12px, env(safe-area-inset-right)); padding: 0; border: 0; cursor: pointer; display: grid; place-items: center; width: calc(var(--hud-h) - 4px); height: calc(var(--hud-h) - 4px); border-radius: 4px; color: #12172a !important;
   background: linear-gradient(135deg, #d6dae7, #858ba7 65%, #555b75) !important; box-shadow: inset 2px 2px 0 #f4f6ff, 2px 3px 0 #000; }
 .fullscreen-toggle svg { width: 64%; height: 64%; }
 .fullscreen-toggle[aria-pressed="true"] { color: #f3d75c !important; background: linear-gradient(135deg, #36466d, #15203e 65%, #080d20) !important; }
@@ -358,7 +358,9 @@ svg { display: block; }
 .result-lines li .ri .tumbler { font-size: 15px; }
 
 /* ---------- Startbildschirm im Stil des Covers von Ocarina of Time ---------- */
-@font-face { font-family: "Cinzel"; src: url("assets/cinzel.woff2") format("woff2"); font-weight: 400 900; font-display: block; }
+/* Schriften von zeldauniverse.net/media/fonts: Triforce (Schriftzug „Zelda") und Hylia Serif (Artsy Omni), nur privat */
+@font-face { font-family: "Triforce"; src: url("assets/triforce.woff2") format("woff2"); font-display: block; }
+@font-face { font-family: "Hylia Serif"; src: url("assets/hylia-serif.woff2") format("woff2"); font-display: block; }
 .intro-screen { position: absolute; inset: 0; z-index: 40; overflow: hidden; background: #0b140c; cursor: pointer; transition: opacity 480ms steps(8, end), transform 480ms steps(8, end); }
 .intro-screen[hidden] { display: none; }
 .intro-screen.is-leaving { opacity: 0; transform: scale(1.045); }
@@ -386,11 +388,43 @@ svg { display: block; }
 .intro-screen::before { content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none; background: linear-gradient(90deg, rgba(4,10,6,.5), rgba(4,10,6,.18) 40%, transparent 55%), linear-gradient(270deg, rgba(4,10,6,.55), transparent 20%), radial-gradient(ellipse at 50% 120%, rgba(0,0,0,.35), transparent 60%); }
 .intro-front { z-index: 2; }
 .intro-logo { width: 100%; height: auto; overflow: visible; filter: drop-shadow(2px 4px 4px rgba(0,0,0,.6)); }
-.intro-logo .t { font-family: Cinzel, Georgia, serif; fill: url(#lg-gold); stroke: #3d2305; stroke-linejoin: round; paint-order: stroke; filter: url(#lg-tex); }
-.start-quest { padding: 10px 18px; border: 0; background: none; cursor: pointer; color: #fff7d6; font: 700 clamp(13px, 5cqh, 20px)/1 Cinzel, Georgia, serif; letter-spacing: .16em;
+.intro-logo .t { fill: url(#lg-gold); stroke: #3d2305; stroke-linejoin: round; paint-order: stroke; filter: url(#lg-tex); }
+.intro-logo .t.tri { font-family: "Triforce", Georgia, serif; }
+.intro-logo .t.hy { font-family: "Hylia Serif", Georgia, serif; }
+.start-quest { padding: 10px 18px; border: 0; background: none; cursor: pointer; color: #fff7d6; font: 400 clamp(14px, 5.4cqh, 22px)/1 "Hylia Serif", Georgia, serif; letter-spacing: .14em;
   text-shadow: 0 0 10px rgba(242,201,76,.9), 1px 2px 2px #000; animation: pressStart 1.6s steps(2, end) infinite; }
 .start-quest:focus-visible { outline: 2px solid #fff; outline-offset: 4px; }
 @keyframes pressStart { 50% { opacity: .25; } }
+
+/* ---------- Ergebnis als großer Moment ---------- */
+.medal-stage { position: relative; grid-row: span 2; display: grid; place-items: center; width: clamp(48px, 15vh, 64px); aspect-ratio: 1; }
+.medal-stage > .medal, .medal-stage > .gem { position: relative; z-index: 1; grid-row: auto; --sz: clamp(40px, 13vh, 54px); }
+.medal-stage.won > .medal, .medal-stage.won > .gem { animation: spinIn 950ms cubic-bezier(.2, .8, .3, 1.15) both; }
+.medal-stage.won::before { content: ""; position: absolute; inset: -55%; border-radius: 50%;
+  background: repeating-conic-gradient(color-mix(in srgb, var(--m), transparent 35%) 0 7deg, transparent 7deg 22deg);
+  -webkit-mask: radial-gradient(circle, #000 18%, transparent 66%); mask: radial-gradient(circle, #000 18%, transparent 66%);
+  animation: raysIn 900ms ease-out both, rays 7s linear infinite; }
+.medal-stage.won::after { content: ""; position: absolute; inset: 8%; border-radius: 50%; box-shadow: 0 0 26px 10px color-mix(in srgb, var(--m), transparent 45%); animation: glowPulse 1.8s ease-in-out infinite; }
+.medal-stage.lost > .medal, .medal-stage.lost > .gem { animation: dropIn 750ms ease-out both; }
+@keyframes spinIn { 0% { transform: scale(.2) rotateY(0); opacity: 0; } 65% { transform: scale(1.22) rotateY(640deg); opacity: 1; } 100% { transform: scale(1) rotateY(720deg); } }
+@keyframes rays { to { transform: rotate(360deg); } }
+@keyframes raysIn { from { opacity: 0; scale: .4; } }
+@keyframes glowPulse { 50% { opacity: .45; } }
+@keyframes dropIn { 0% { transform: translateY(-45%); opacity: 0; } 50% { transform: translateY(5%); opacity: 1; } 65% { transform: translateX(-7%); } 80% { transform: translateX(6%); } 100% { transform: none; } }
+.result.big-moment .big { animation: titleIn 520ms ease-out 260ms both; }
+.result.big-moment .result-lines li { animation: lineIn 360ms ease-out both; animation-delay: calc(750ms + var(--d, 0) * 150ms); }
+.result.big-moment .result-more { animation: raysIn 300ms ease-out 1.3s both, nextPulse 700ms steps(2, end) 1.6s infinite; }
+@keyframes titleIn { from { opacity: 0; transform: scale(1.35); } }
+@keyframes lineIn { from { opacity: 0; transform: translateX(-12px); } }
+
+/* ---------- Aus dem Nebel ---------- */
+.q-row { position: relative; }
+.q-row.fogged, .quest-card.fogged > * { opacity: 0; filter: blur(6px); }
+.q-row.revealing, .quest-card.revealing > * { animation: fogReveal 1.2s ease-out both; }
+.q-row.revealing::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(90deg, rgba(236,240,226,.95), rgba(236,240,226,.55) 55%, rgba(236,240,226,0)); animation: mistAway 1.2s ease-out forwards; }
+@keyframes fogReveal { 0% { opacity: 0; filter: blur(8px) brightness(1.9); transform: scale(.97); } 55% { opacity: 1; filter: blur(1.5px) brightness(1.35); } 100% { opacity: 1; filter: none; transform: none; } }
+@keyframes mistAway { to { opacity: 0; transform: translateX(45%); } }
+.map-fog { transition: left 1.2s ease-out; }
 
 /* ---------- Hochformat: bitte drehen ---------- */
 .rotate-hint { display: none; }
@@ -404,6 +438,7 @@ svg { display: block; }
 
 @media (prefers-reduced-motion: reduce) {
   .menu-cube { transition: none; }
+  .medal-stage > *, .medal-stage::before, .medal-stage::after, .result.big-moment *, .q-row.revealing, .q-row.revealing::after, .quest-card.revealing > *,
   .is-next::before, .slot.is-selected .well, .character-window img, .intro-hero, .fairy, .fairy::before, .fairy::after, .fireflies i, .start-quest, .mark .you, .result-more, .pack-row .gain, .tumbler.gain, .rotate-hint .phone { animation: none !important; }
   .intro-screen { transition: none; }
 }
