@@ -90,7 +90,7 @@ Grenze: Die Namen aller Quests und der Code stehen in `config.js`, das jedes Han
 
 ### 4.1 QUESTS (Startseite)
 
-- **Links die Liste**: die erledigten Quests in Spielreihenfolge, dann die nächste. Prüfungen mit Medaillon und fetter Schrift, Sidequests mit Stein. Rechts in jeder Zeile: goldener Haken (bestanden), rotes X (verloren), JETZT (nächste Quest). Als letzte Zeile „Noch 2 Prüfungen im Nebel" mit verdecktem Medaillon, Tippen erklärt den Nebel. Darüber: PRÜFUNGEN 4/6 · SIDEQUESTS 4 (Sidequests ohne Gesamtzahl). Die Liste scrollt von selbst zur nächsten Quest.
+- **Links die Liste**: die erledigten Quests in Spielreihenfolge, dann die nächste. Prüfungen mit Medaillon und fetter Schrift, Sidequests mit Stein. Rechts in jeder Zeile: goldener Haken (bestanden), rotes X (verloren), JETZT (nächste Quest). Als letzte Zeile „Noch 2 Prüfungen" mit verdecktem Medaillon. Darüber nur Symbol und Zahl: Medaillon 4/6, Stein 4. Die Liste scrollt von selbst zur nächsten Quest.
 - **Rechts die Quest-Karte** der gewählten Quest, beim Öffnen immer die nächste:
   - Name, Status, Art und Ort
   - Beschreibung im Spielton (Abschnitt 6)
@@ -100,22 +100,22 @@ Grenze: Die Namen aller Quests und der Code stehen in `config.js`, das jedes Han
 ### 4.2 KARTE
 
 - **Links die Karte** vom Tegernsee zur Neureuth mit sechs Stationen: Zug, Wiese, Wald, Aussicht, Gipfel, Hütte. Der Weg und die Ortsnamen sind immer sichtbar, ihr lauft ihn ja. An jeder Station das Medaillon ihrer Prüfung, verdeckt mit „?", solange sie im Nebel liegt. Steine nur für erledigte Sidequests und die nächste. Dennis' Kopf zeigt „Du bist hier" (Station der nächsten Quest). Ab der Mitte zur nächsten Station liegt Nebel über dem Weg.
-- **Rechts der Fortschritt:** sechs Medaillons (PRÜFUNGEN 4/6, verdeckte mit „?"), die Steine der erledigten Sidequests (SIDEQUESTS 4) und der Satz „Noch 2 Prüfungen vor dir." Darunter die gewählte Station mit ihren sichtbaren Quests. Eine Station im Nebel sagt nur „Hier wartet eine Prüfung. Mehr siehst du, wenn du näher kommst."
+- **Rechts der Fortschritt:** sechs Medaillons (PRÜFUNGEN 4/6, verdeckte mit „?"), die Steine der erledigten Sidequests (SIDEQUESTS 4). Darunter die gewählte Station mit ihren sichtbaren Quests und denselben Zeichen wie in der Liste. Eine Station im Nebel sagt nur „Im Nebel".
 - Beschriftungen sind Text im Menü, keine Grafik. Sie schrumpfen nicht mehr mit.
 
 ### 4.3 AUSRÜSTUNG
 
-- **Mitte:** Avatar mit „DENNIS · STUFE VERLOBTER".
+- **Mitte:** Avatar, ohne Beschriftung.
 - **Links ITEMS:** Beutel, Pistole, Großer Ring, Karten (Gegenstände für Geschicklichkeit).
 - **Rechts FÄHIGKEITEN:** Token, Schwert, Schild (Regeln im Showdown). Die Trennung folgt §4.3 der Spielanleitung.
-- **Unten die Textbox:** Name, Stand, Wirkung und je nach Lage „Zu holen bei Kartenwurf", „Verloren bei Auge des Jägers" oder „Vorsicht: Feuerprobe kann es dir nehmen". Diese Hinweise erscheinen nur, wenn die genannte Quest schon sichtbar ist, sonst „Wo es das gibt, zeigt sich unterwegs." Ohne Auswahl steht dort „4 von 7 im Beutel".
+- **Unten die Textbox:** Name, Stand, Wirkung und je nach Lage „Zu holen bei Kartenwurf", „Verloren bei Auge des Jägers" oder „Vorsicht: Feuerprobe kann es dir nehmen". Diese Hinweise erscheinen nur, wenn die genannte Quest schon sichtbar ist, sonst nichts. Beim Öffnen ist das zuletzt erhaltene Item gewählt. Unter den Feldern steht kein Name, den zeigt die Textbox.
 
 ### 4.4 HUD
 
 | Stelle | Inhalt | Tippen |
 |---|---|---|
-| oben links | eine Karte je Pack im Kästchen (bei `max` über 10 zwei Reihen wie Herzen), gefüllt = deins, gestrichelt = noch beim Bund, dazu „3/10" | erklärt die Packs |
-| oben Mitte | NÄCHSTE QUEST mit Namen, am Ende „Alle Quests erledigt" | springt zur Quest-Seite |
+| oben links | eine Karte je Pack im Kästchen (bei `max` über 10 zwei Reihen wie Herzen), gefüllt = deins, gestrichelt = noch beim Bund, dazu die Zahl | erklärt die Packs |
+| oben Mitte | Name der nächsten Quest, am Ende „Zum Kästchen" | springt zur Quest-Seite |
 | oben rechts | Schloss mit vier Zahlenrädern, unbekannt = ? | zeigt jede Ziffer mit Herkunft (bei verdeckten Prüfungen „noch im Nebel") und Preis am Kästchen |
 | unten rechts | „Stand 13:05" oder „Offline · Stand 13:05" | |
 
@@ -131,8 +131,10 @@ Bucht der Quest Master etwas, erscheint bei Dennis ein Fenster wie beim Item-Fun
 
 ### 4.6 Startbildschirm und Hochformat
 
-- Startbildschirm bleibt wie gebaut, nur mit der neuen Größenlogik.
-- Hochformat zeigt „Dreh dein Handy ins Querformat." mit drehendem Handy. Eine eigene Hochformat-Ansicht ist möglich, aber doppelte Arbeit (Entscheidung 5).
+- **Startbildschirm wie das Cover von Ocarina of Time** (Wunsch vom 23.09.): Waldweg im Licht, Dennis steht auf dem Weg, daneben schwebt eine Fee, Glühwürmchen ziehen durchs Bild. Links das Logo **THE LEGEND OF / DENNIS / A LINK TO RIEKE** mit Hylia-Schild und Schwert, goldene Schrift mit gehämmerter Oberfläche (Schrift Cinzel, frei lizenziert, liegt in `app/assets`). Darunter blinkt PRESS START, Tippen irgendwo startet.
+- Hintergrund: das Bild des Nutzers, Link und Original-Logo entfernt, für das Querformat auf 2,6 : 1 verlängert (`app/assets/intro-wald.jpg`). Wo Link stand, liegt ein Lichtschein hinter Dennis.
+- Grenze: Dennis' Avatar schaut nach vorn. Für die Pose wie Link (von hinten, in den Wald laufend) braucht es ein neues Bild von Dennis von hinten, freigestellt als PNG.
+- Hochformat zeigt „Handy quer halten" mit drehendem Handy. Eine eigene Hochformat-Ansicht ist möglich, aber doppelte Arbeit (Entscheidung 5).
 
 ---
 
@@ -162,6 +164,8 @@ Farbregeln: **Gold** = gewonnen, **Rot** = verloren oder Verlust, **Gelb pulsier
 ---
 
 ## 6. Texte im Spielton
+
+**So wenig Text wie möglich, so viel wie nötig** (Wunsch vom 23.09.). Was ein Symbol oder eine Zahl schon sagt, steht nicht noch einmal als Wort da. Gestrichen wurden: Seitenhinweise neben dem Titel, „NÄCHSTE QUEST" im HUD, „/10" neben den Packs, die Wörter in der Legende, „EINSATZ", Art der Quest neben dem Ort, der Satz „Noch 2 Prüfungen vor dir", die Beschriftung unter den Item-Feldern und unter dem Avatar, der Bedienhinweis unten, Erklärsätze in den Fenstern für Packs, Code und Ergebnis.
 
 Regeln: Du-Form, höchstens zwei kurze Sätze, keine Gedankenstriche, keine Regeldetails (die kennt der Quest Master). Item-Texte nennen keine Quest beim Namen, sonst verraten sie, was im Nebel liegt. Sidequests mit `[PLATZHALTER]` bekommen hier schon einen Text, der Inhalt kann sich in Stufe 1 noch ändern.
 

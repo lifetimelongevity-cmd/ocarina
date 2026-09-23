@@ -22,14 +22,93 @@
     <img class="world" src="assets/alpine-trail.png" alt="">
     <div class="world-shade" aria-hidden="true"></div>
 
+    <!-- Startbildschirm im Stil des Covers von Ocarina of Time -->
     <section class="intro-screen" id="introScreen" aria-label="Startbildschirm">
-      <img class="intro-avatar" src="assets/dennis-v9.png" alt="" aria-hidden="true">
-      <div class="intro-copy">
-        <p class="intro-kicker">DIE PRÜFUNG DES BUNDES</p>
-        <div class="intro-crest" aria-hidden="true"><span></span><span></span><span></span></div>
-        <h1 class="intro-title"><span>DENNIS</span> QUEST</h1>
-        <p class="intro-place">TEGERNSEE · 2026</p>
-        <button class="start-quest" id="startQuest" type="button">JGA QUEST STARTEN</button>
+      <div class="intro-scene" aria-hidden="true">
+        <img class="intro-bg" src="assets/intro-wald.jpg" alt="">
+        <span class="hero-glow"></span>
+        <span class="hero-shadow"></span>
+        <img class="intro-hero" src="assets/dennis-v9.png" alt="">
+        <span class="fairy"></span>
+        <span class="fireflies"><i style="left:25.7%;top:16.7%;animation-delay:2.4s;animation-duration:5.6s"></i><i style="left:10.1%;top:41.7%;animation-delay:5.5s;animation-duration:8.2s"></i><i style="left:74.4%;top:26.6%;animation-delay:3.2s;animation-duration:6.1s"></i><i style="left:19.9%;top:16.9%;animation-delay:1.3s;animation-duration:8.7s"></i><i style="left:80.3%;top:75.8%;animation-delay:4.8s;animation-duration:5.8s"></i><i style="left:32.5%;top:60.7%;animation-delay:4.4s;animation-duration:8.4s"></i><i style="left:85.0%;top:15.3%;animation-delay:3.6s;animation-duration:7.7s"></i><i style="left:50.5%;top:22.9%;animation-delay:2.8s;animation-duration:5.4s"></i><i style="left:90.0%;top:80.7%;animation-delay:3.3s;animation-duration:6.2s"></i><i style="left:87.6%;top:56.1%;animation-delay:5.3s;animation-duration:8.4s"></i><i style="left:50.8%;top:42.8%;animation-delay:3.6s;animation-duration:6.7s"></i><i style="left:18.8%;top:33.6%;animation-delay:4.9s;animation-duration:5.2s"></i><i style="left:8.3%;top:60.6%;animation-delay:1.7s;animation-duration:7.1s"></i><i style="left:47.4%;top:36.8%;animation-delay:6.0s;animation-duration:5.8s"></i><i style="left:42.0%;top:25.0%;animation-delay:3.8s;animation-duration:6.1s"></i><i style="left:36.7%;top:70.7%;animation-delay:1.9s;animation-duration:7.2s"></i></span>
+      </div>
+      <div class="intro-front">
+        <svg class="intro-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 440" role="img" aria-label="The Legend of Dennis. A Link to Rieke">
+  <defs>
+    <!-- Gold wie im Original: hell oben, satt in der Mitte, dunkel unten, mit Glanzkante -->
+    <linearGradient id="lg-gold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff6c4"/>
+      <stop offset=".18" stop-color="#f7d466"/>
+      <stop offset=".5" stop-color="#e1ad35"/>
+      <stop offset=".78" stop-color="#b87c1c"/>
+      <stop offset="1" stop-color="#e6b440"/>
+    </linearGradient>
+    <!-- gehämmerte Oberfläche -->
+    <filter id="lg-tex" x="-3%" y="-3%" width="106%" height="106%">
+      <feTurbulence type="fractalNoise" baseFrequency=".75" numOctaves="2" seed="7" result="n"/>
+      <feColorMatrix in="n" type="matrix" values="0 0 0 0 .28  0 0 0 0 .16  0 0 0 0 .02  0 0 0 -2.2 1.25" result="d"/>
+      <feComposite in="d" in2="SourceAlpha" operator="in" result="di"/>
+      <feMerge><feMergeNode in="SourceGraphic"/><feMergeNode in="di"/></feMerge>
+    </filter>
+    <linearGradient id="lg-steel" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#6d7584"/><stop offset=".45" stop-color="#eef2f8"/><stop offset=".55" stop-color="#c3cad6"/><stop offset="1" stop-color="#586070"/>
+    </linearGradient>
+    <linearGradient id="lg-rim" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#e8ecf2"/><stop offset=".45" stop-color="#9aa3b2"/><stop offset=".7" stop-color="#d7dce6"/><stop offset="1" stop-color="#5e6676"/>
+    </linearGradient>
+    <radialGradient id="lg-field" cx=".4" cy=".28" r=".9">
+      <stop offset="0" stop-color="#3f5bcc"/><stop offset=".5" stop-color="#23369a"/><stop offset="1" stop-color="#0e1650"/>
+    </radialGradient>
+    <linearGradient id="lg-hilt" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#7f8cff"/><stop offset=".5" stop-color="#3a3fc4"/><stop offset="1" stop-color="#1c1f70"/>
+    </linearGradient>
+    <linearGradient id="lg-goldFlat" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe98a"/><stop offset="1" stop-color="#c88f22"/></linearGradient>
+    <linearGradient id="lg-red" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ef4a3a"/><stop offset="1" stop-color="#a3130f"/></linearGradient>
+    <path id="lg-shieldShape" d="M-112 -138 C-86 -150 -46 -148 -22 -158 L0 -174 L22 -158 C46 -148 86 -150 112 -138 C118 -80 118 -30 114 16 C108 94 62 142 0 172 C-62 142 -108 94 -114 16 C-118 -30 -118 -80 -112 -138 Z"/>
+  </defs>
+
+  <!-- Klinge hinter dem Schild, Spitze unten links -->
+  <g transform="translate(236 104) rotate(33)">
+    <path d="M-12 6 L12 6 L10 362 L0 396 L-10 362 Z" fill="url(#lg-steel)" stroke="#262b35" stroke-width="2.5"/>
+    <path d="M0 14 V352" stroke="#7d8697" stroke-width="3"/>
+  </g>
+
+  <!-- Schild -->
+  <g transform="translate(138 252) rotate(-7)">
+    <use href="#lg-shieldShape" fill="url(#lg-rim)" stroke="#1f232b" stroke-width="5"/>
+    <use href="#lg-shieldShape" transform="scale(.9)" fill="none" stroke="#5a6272" stroke-width="3"/>
+    <use href="#lg-shieldShape" transform="scale(.82)" fill="url(#lg-field)" stroke="#0a0e33" stroke-width="3"/>
+    <use href="#lg-shieldShape" transform="scale(.74)" fill="none" stroke="#7f95e6" stroke-width="2.5" opacity=".7"/>
+    <g fill="url(#lg-goldFlat)" stroke="#5b3c06" stroke-width="1.8">
+      <path d="M0 -124 L13 -102 L-13 -102 Z"/><path d="M-13 -102 L0 -80 L-26 -80 Z"/><path d="M13 -102 L26 -80 L0 -80 Z"/>
+    </g>
+    <g fill="url(#lg-red)" stroke="#4a0907" stroke-width="2.2" stroke-linejoin="round">
+      <path d="M-9 -44 C-38 -66 -74 -58 -92 -28 C-70 -38 -50 -34 -36 -26 C-58 -22 -76 -8 -84 12 C-62 0 -42 -2 -26 2 C-46 10 -58 22 -62 38 C-42 24 -24 18 -8 -6 Z"/>
+      <path d="M9 -44 C38 -66 74 -58 92 -28 C70 -38 50 -34 36 -26 C58 -22 76 -8 84 12 C62 0 42 -2 26 2 C46 10 58 22 62 38 C42 24 24 18 8 -6 Z"/>
+      <path d="M0 -62 L11 -46 L7 -16 L0 -6 L-7 -16 L-11 -46 Z"/>
+      <path d="M0 -6 L12 34 L5 29 L0 66 L-5 29 L-12 34 Z"/>
+    </g>
+    <path d="M-60 -118 Q0 -134 60 -118" fill="none" stroke="#fff" stroke-width="3" opacity=".35"/>
+  </g>
+
+  <!-- Griff vor dem Schild, oben rechts -->
+  <g transform="translate(236 104) rotate(33) scale(1.25)">
+    <path d="M-54 -2 Q-34 -30 -12 -9 L12 -9 Q34 -30 54 -2 Q36 6 12 11 L-12 11 Q-36 6 -54 -2Z" fill="url(#lg-hilt)" stroke="#0d0f38" stroke-width="3"/>
+    <path d="M-44 -4 Q-30 -20 -14 -6 M44 -4 Q30 -20 14 -6" fill="none" stroke="#b4bcff" stroke-width="2" opacity=".7"/>
+    <path d="M0 -6 L6 2 L0 9 L-6 2 Z" fill="#f2c94c" stroke="#5a3b05" stroke-width="1.5"/>
+    <rect x="-8.5" y="-76" width="17" height="66" rx="3" fill="url(#lg-hilt)" stroke="#0d0f38" stroke-width="3"/>
+    <path d="M-8 -68 L8 -60 M-8 -54 L8 -46 M-8 -40 L8 -32 M-8 -26 L8 -18" stroke="#a9b2ff" stroke-width="2.5" opacity=".7"/>
+    <path d="M0 -80 L-13 -90 L0 -110 L13 -90 Z" fill="url(#lg-hilt)" stroke="#0d0f38" stroke-width="3"/>
+    <circle cx="0" cy="-92" r="3.5" fill="#f2c94c" stroke="#5a3b05" stroke-width="1"/>
+  </g>
+
+  <!-- Schrift -->
+  <text class="t" x="352" y="158" font-size="40" font-weight="700" stroke-width="5" textLength="360" lengthAdjust="spacingAndGlyphs">THE LEGEND OF</text>
+  <text class="t" x="196" y="298" font-size="232" font-weight="900" stroke-width="7">D</text>
+  <text class="t" x="352" y="292" font-size="172" font-weight="900" stroke-width="6" textLength="410" lengthAdjust="spacingAndGlyphs">ENNIS</text>
+  <text class="t" x="340" y="342" font-size="44" font-weight="700" stroke-width="5" textLength="424" lengthAdjust="spacingAndGlyphs">A LINK TO RIEKE</text>
+</svg>
+        <button class="start-quest" id="startQuest" type="button">PRESS START</button>
       </div>
     </section>
 
@@ -37,10 +116,9 @@
     <header class="hud">
       <button class="hud-packs" id="hudPacks" type="button" aria-label="Packs">
         <span class="pack-row" id="packRow" aria-hidden="true"></span>
-        <span class="hud-num"><b id="packsVal">0</b><small id="packsMax">/10</small></span>
+        <span class="hud-num"><b id="packsVal">0</b></span>
       </button>
       <button class="hud-next" id="hudNext" type="button">
-        <span class="hud-next-label">NÄCHSTE QUEST</span>
         <span class="hud-next-name" id="hudNextName">…</span>
       </button>
       <button class="hud-code" id="hudCode" type="button" aria-label="Code des Kästchens">
@@ -62,9 +140,7 @@
           <!-- Seite 0: KARTE · Wo stehe ich, was liegt noch vor mir? -->
           <section class="face face-map" data-page="0" aria-label="Karte">
             <header class="face-head">
-              <button class="nav-hint prev" type="button" data-nav="prev">AUSRÜSTUNG</button>
               <h2>KARTE</h2>
-              <button class="nav-hint next" type="button" data-nav="next">QUESTS</button>
             </header>
             <div class="map-body">
               <div class="map-sheet" id="mapSheet">
@@ -86,7 +162,6 @@
                   <div class="pips" id="pipsKern"></div>
                   <p class="lbl">SIDEQUESTS <b id="cntSide">0/7</b></p>
                   <div class="pips" id="pipsSide"></div>
-                  <p class="left-count" id="leftCount"></p>
                 </div>
                 <div class="station-box textbox" id="stationBox"></div>
               </aside>
@@ -96,9 +171,7 @@
           <!-- Seite 1: QUESTS · Was ist dran, was ist geschafft? (Startseite) -->
           <section class="face face-quests" data-page="1" aria-label="Quests">
             <header class="face-head">
-              <button class="nav-hint prev" type="button" data-nav="prev">KARTE</button>
               <h2>QUESTS</h2>
-              <button class="nav-hint next" type="button" data-nav="next">AUSRÜSTUNG</button>
             </header>
             <div class="quests-body">
               <div class="list-col">
@@ -112,9 +185,7 @@
           <!-- Seite 2: AUSRÜSTUNG · Was habe ich dabei? -->
           <section class="face face-equip" data-page="2" aria-label="Ausrüstung">
             <header class="face-head">
-              <button class="nav-hint prev" type="button" data-nav="prev">QUESTS</button>
               <h2>AUSRÜSTUNG</h2>
-              <button class="nav-hint next" type="button" data-nav="next">KARTE</button>
             </header>
             <div class="equip-body">
               <div class="equip-group">
@@ -123,7 +194,6 @@
               </div>
               <div class="character-window">
                 <img src="assets/dennis-v9.png" alt="Dennis als Abenteurer">
-                <span>DENNIS · STUFE VERLOBTER</span>
               </div>
               <div class="equip-group">
                 <p class="lbl">FÄHIGKEITEN</p>
@@ -144,7 +214,6 @@
         <button type="button" data-demo="verloren">Nächste verloren</button>
         <button type="button" data-demo="zurueck">Zurück</button>
       </span>
-      <span class="hint" id="hint">Wischen oder Z / R: Seite wechseln · Tippen: Details</span>
       <span class="sync" id="sync"></span>
     </footer>
 
@@ -160,7 +229,7 @@
 
     <div class="rotate-hint" aria-hidden="true">
       <div class="phone"></div>
-      <p>Dreh dein Handy ins Querformat.</p>
+      <p>Handy quer halten</p>
     </div>
     <div class="dither" aria-hidden="true"></div>
   </div>
