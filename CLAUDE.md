@@ -1,0 +1,49 @@
+# JGA Dennis · „Die Prüfungen" (Übergabe für neue Chats)
+
+Dieser Ordner hat **nichts mit dem Shopify-Theme** im restlichen Repo zu tun. Die Regeln aus der `CLAUDE.md` im Repo-Stamm (Lifetime Health, Tokens, Shopify) gelten hier nicht.
+
+Branch: `claude/jga-dennis-quest-system-oasppz`. Sprache: Deutsch, Du-Form, keine Gedankenstriche in Texten.
+
+## Worum es geht
+
+JGA-Wochenende für Dennis, 2. bis 4. Oktober 2026, München und Wanderung am Tegernsee auf die Neureuth (Samstag). Die Gruppe spielt ein selbstgebautes Quest-System im Zelda-/Ocarina-of-Time-Stil. Dennis durchläuft Quests, gewinnt oder verliert Packs (One-Piece-Booster-Packs im Kästchen), Items und Ziffern für den vierstelligen Code des Kästchens. Der Nutzer ist der **Quest Master**: Er bucht Ergebnisse auf seinem Handy, Dennis sieht auf seinem Handy ein Pausenmenü im N64-Stil mit dem Ergebnis.
+
+## Stand (23.09.2026)
+
+- **Live:** Dennis `https://dd-ocarina.netlify.app/`, Quest Master `https://dd-ocarina.netlify.app/admin.html`. Hosting auf Netlify, Projekt `dd-ocarina`, per Drag-and-drop hochgeladen. Kein Deploy-Token in der Umgebung: Neue Versionen lädt der Nutzer selbst hoch (Zip des Ordners `app/`).
+- **Speicher:** Firebase Realtime Database, Projekt `dennis-quest`, URL `https://dennis-quest-default-rtdb.europe-west1.firebasedatabase.app`, Pfad `/spiele/dennis-jga-2026`. Zugriff per REST ohne SDK. Datenbank war beim letzten Check noch im offenen Testmodus, empfohlene Regel steht in `app/README.md`.
+- **Getestet:** Logik per `node app/engine.test.js`, Synchronisation Admin zu Dennis mit zwei getrennten Browsern über die Live-Adresse. Noch nicht mit zwei echten Handys getestet.
+
+## Wo was liegt
+
+| Datei | Inhalt |
+|---|---|
+| `app/` | **Die App.** `index.html` + `app.js` + `styles.css` (Dennis' Menü, Optik vom Nutzer gebaut), `admin.html` + `admin.js` + `admin.css` (Quest Master), `config.js` (alle Quests, Items, Code, Packs), `engine.js` (Logik), `store.js` (Firebase oder lokal), `README.md` (Einrichtung, Deploy) |
+| `05-system-plan.md` | **Maßgeblicher Plan.** Kernlogik v0, alle Entscheidungen (Tabelle A0), Ausbaustufen (Teil B) |
+| `00-spielanleitung.md` | Ausführliches Regelwerk (Ideen für später: Flüche, Anfragen, Stufen). Spricht noch von „Berry", gemeint sind Packs |
+| `01` bis `04` | Frühe Detailentwürfe: Showdown, Items und Ökonomie, offene Prüfungen, Zeitplan und Packliste. Teilweise überholt durch 05 |
+| `README.md` | Original-Briefing des Nutzers |
+| `preview-menu.html` | Erste Menü-Preview, überholt |
+
+## Kernlogik v0 (kurz)
+
+- Vier Begriffe: Quest (offen, bestanden, verloren), Item (nicht, besitz, verloren), Packs (0 bis `max`, Start 0), Ziffer (unbekannt, bekannt).
+- 13 Quests in fester Reihenfolge: 6 Kernprüfungen (Medaillons, tragen die Ziffern) und 7 Sidequests (Steine). Nächste Quest = erste offene.
+- Gespeichert wird nur, was der Quest Master einstellt: `{ quests: {id: status}, buchungen: [{packs, grund, ziffer?}], items: {Korrekturen}, stand }`. Alles andere berechnet `derive()` in `engine.js`. Ziffer kaufen = Buchung mit Feld `ziffer`.
+- Dennis schreibt nichts, er sieht nur. Tippen zeigt Beschreibung.
+
+## Wichtige Entscheidungen des Nutzers
+
+Währung sind direkt Packs (keine Umrechnung), Start 0, nur in der App gezählt. Anzahl der Packs noch offen (`waehrung.max`, derzeit 10). Einziges Startitem ist der Beutel. Verlorenes Item ist weg. Nur bestanden oder verloren. Der Nutzer ist Quest Master.
+
+## Arbeitsweise
+
+Der Nutzer will es **einfach und in sich geschlossen** halten und schrittweise ausbauen. Erst Plan, dann bauen, wenn er es sagt. Neue Inhalte (Quests, Items) nur in `app/config.js`, danach `node app/engine.test.js`. Ausbau in der Reihenfolge von `05-system-plan.md` Teil B.
+
+## Offene Punkte
+
+1. Firebase-Regeln setzen (siehe `app/README.md`).
+2. Test mit zwei echten Handys.
+3. Sidequest-Inhalte sind Platzhalter (`[PLATZHALTER]` in `config.js`).
+4. Anzahl der Packs festlegen, dann Balance anpassen (Faustregel in `05-system-plan.md` A2).
+5. Danach Ausbaustufe 1 und 2: Inhalte, dann Aktionen für Dennis.

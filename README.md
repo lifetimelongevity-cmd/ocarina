@@ -2,6 +2,8 @@
 
 Projektordner für das Quest-System zum JGA-Wochenende von Dennis (2. bis 4. Oktober, München / Tegernsee). Nicht Teil des Shopify-Themes, liegt nur im selben Repo.
 
+**Neu hier? Zuerst `CLAUDE.md` in diesem Ordner lesen.**
+
 ## Dateien
 
 | Datei | Inhalt | Status |
