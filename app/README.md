@@ -21,7 +21,7 @@ Zwei Seiten, ein gespeicherter Stand.
 ## Lokal ausprobieren
 
 ```
-cd jga-dennis/app
+cd app
 python3 -m http.server 8000
 ```
 
