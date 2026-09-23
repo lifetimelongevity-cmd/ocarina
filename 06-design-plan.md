@@ -134,10 +134,10 @@ Bucht der Quest Master etwas, erscheint bei Dennis ein Fenster wie beim Item-Fun
 
 ### 4.6 Startbildschirm und Hochformat
 
-- **Startbildschirm wie das Cover von Ocarina of Time** (Wunsch vom 23.09.): Waldweg im Licht, Dennis steht auf dem Weg, daneben schwebt eine Fee, Glühwürmchen ziehen durchs Bild. Links das Logo **THE LEGEND OF / DENNIS / A LINK TO RIEKE** mit Hylia-Schild und Schwert, goldene Schrift mit gehämmerter Oberfläche. Darunter blinkt PRESS START, Tippen irgendwo startet.
+- **Startbildschirm wie das Cover von Ocarina of Time** (Wunsch vom 23.09.): Waldweg im Licht, Glühwürmchen ziehen durchs Bild. Aufbau wie auf dem Cover, alles mittig: **oben das Logo** THE LEGEND OF / DENNIS / A LINK TO RIEKE mit Hylia-Schild und Schwert, goldene Schrift mit gehämmerter Oberfläche (43 % der Höhe), **darunter Dennis** auf dem Weg (54 % der Höhe), rechts neben seinem Kopf schwebt eine Fee. **PRESS START blinkt über seinen Schienbeinen.** Tippen irgendwo startet.
 - **Schriften und Zeichen von zeldauniverse.net** (Wunsch vom 23.09.): „DENNIS" in **Triforce** (die Schrift des Original-Logos), die kleinen Zeilen und PRESS START in **Hylia Serif**. Das Wappen auf dem Schild (Vogel und Triforce) kommt aus **Hylian Symbols**, als Vektorpfad eingebaut. Die Schriften liegen in `app/assets`, Herkunft und Bedingungen in `app/assets/SCHRIFTEN.md`: Fan-Schriften, nur privat und nicht kommerziell. Für den JGA passt das. Die Netlify-Seite ist aber öffentlich erreichbar, damit werden die Dateien streng genommen verbreitet.
 - **Vollbild-Knopf nur hier**, oben rechts. Er startet das Spiel nicht, dafür tippt man auf PRESS START oder irgendwo ins Bild. Im Menü selbst gibt es keinen Vollbild-Knopf mehr.
-- Hintergrund: das Bild des Nutzers, Link und Original-Logo entfernt, für das Querformat auf 2,6 : 1 verlängert (`app/assets/intro-wald.jpg`). Wo Link stand, liegt ein Lichtschein hinter Dennis.
+- Hintergrund: das Cover des Nutzers ohne Logo, Link und Fee (mit dem Bildfüller LaMa ergänzt, der Weg läuft jetzt durch), Ausschnitt vom Licht bis zum Weg, seitlich mit Wald auf 2,2 : 1 verlängert (`app/assets/intro-wald.jpg`). Auf sehr breiten Bildschirmen wird oben etwas Licht abgeschnitten, Dennis steht immer auf dem Weg.
 - Grenze: Dennis' Avatar schaut nach vorn. Für die Pose wie Link (von hinten, in den Wald laufend) braucht es ein neues Bild von Dennis von hinten, freigestellt als PNG.
 - Hochformat zeigt „Handy quer halten" mit drehendem Handy. Eine eigene Hochformat-Ansicht ist möglich, aber doppelte Arbeit (Entscheidung 5).
 
