@@ -631,6 +631,7 @@
     intro.classList.add("is-leaving");
     setTimeout(() => {
       intro.hidden = true;
+      introFx.stop();
       setPlayable(true);
       const row = document.querySelector(".q-row.is-selected");
       if (row) scrollIntoList(row);
@@ -638,6 +639,95 @@
   }
   intro.addEventListener("click", beginQuest);        // PRESS START: Tippen irgendwo startet
   if (params.has("direkt")) { intro.hidden = true; }
+
+  /* ---------- Startbildschirm belebt: Fee schwebt, Feenstaub, Glühwürmchen, Staub im Lichtstrahl ---------- */
+  // Alles in Koordinaten des Titelbilds (1672 × 941). Läuft nur, solange der Startbildschirm zu sehen ist.
+  const introFx = (() => {
+    const BW = 1672, FEE = { x: 649, y: 337 };          // Mitte der Fee im Bild
+    const canvas = $("#introFx"), fee = $("#introFee"), ctx = canvas.getContext("2d");
+    const still = matchMedia("(prefers-reduced-motion: reduce)");
+    const rnd = (a, b) => a + Math.random() * (b - a);
+    let raf = 0, last = 0, t = 0, k = 1, dpr = 1, emit = 0, alt = { x: 0, y: 0 };
+    // Leuchtpunkte einmal vorzeichnen, danach nur noch kopieren
+    function glow(r, g, b, kern = true) {
+      const c = document.createElement("canvas"); c.width = c.height = 64;
+      const x = c.getContext("2d"), grd = x.createRadialGradient(32, 32, 0, 32, 32, 32);
+      grd.addColorStop(0, kern ? "rgba(255,255,255,1)" : `rgba(${r},${g},${b},.5)`); grd.addColorStop(.2, `rgba(${r},${g},${b},${kern ? .9 : .35})`);
+      grd.addColorStop(.5, `rgba(${r},${g},${b},${kern ? .25 : .12})`); grd.addColorStop(1, `rgba(${r},${g},${b},0)`);
+      x.fillStyle = grd; x.fillRect(0, 0, 64, 64); return c;
+    }
+    const SPR = { flieder: glow(236, 214, 255), blau: glow(190, 232, 255), gold: glow(255, 226, 150), gruen: glow(196, 255, 104), schein: glow(196, 170, 255, false) };
+    const staub = [];
+    // Glühwürmchen kreisen um ihren Platz, nie über Logo, Gesicht oder PRESS START
+    const wuermchen = [[70, 230], [150, 520], [40, 640], [230, 90], [260, 760], [120, 860], [840, 120], [980, 60], [1120, 130], [790, 560], [1330, 875], [1500, 860], [1625, 700], [1560, 120], [1400, 60], [860, 870]]
+      .map(([x, y]) => ({ x, y, a: rnd(0, 6.3), b: rnd(0, 6.3), s: rnd(.25, .5), r: rnd(5, 8), p: rnd(0, 6.3), f: rnd(.5, 1) }));
+    // Staub im Lichtstrahl über dem Weg (der Strahl fällt wie im Bild leicht nach links)
+    const inStrahl = (m, neu) => { m.y = neu ? rnd(0, 700) : m.y; m.x = rnd(640, 880) - m.y * .149; return m; };
+    const licht = Array.from({ length: 34 }, () => inStrahl({ vx: rnd(-6, 4), vy: rnd(-5, 3), r: rnd(1.3, 2.5), p: rnd(0, 6.3) }, true));
+
+    function size() {
+      const w = canvas.clientWidth, h = canvas.clientHeight;
+      if (!w) return;
+      dpr = Math.min(1.5, window.devicePixelRatio || 1);    // weiche Lichtpunkte brauchen keine volle Auflösung
+      canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr);
+      k = w / BW;
+    }
+    const dot = (spr, x, y, r, a) => { if (a <= 0) return; ctx.globalAlpha = Math.min(1, a); ctx.drawImage(spr, x - r, y - r, r * 2, r * 2); };
+    function frame(now) {
+      raf = requestAnimationFrame(frame);
+      const dt = Math.min(.05, (now - (last || now)) / 1000); last = now; t += dt;
+      // Fee schwebt in einer ruhigen Acht um ihren Platz
+      const d = { x: Math.sin(t * .8) * 12 + Math.sin(t * 1.9) * 4, y: Math.sin(t * 1.3) * 8 + Math.cos(t * .55) * 5 };
+      fee.style.transform = `translate(${(d.x * k).toFixed(2)}px, ${(d.y * k).toFixed(2)}px)`;
+      const fx = FEE.x + d.x, fy = FEE.y + d.y, vfx = dt ? (d.x - alt.x) / dt : 0; alt = d;
+      for (emit += dt * 15; emit >= 1; emit--) {               // Staub fällt unter der Fee heraus, nicht aus ihrem Körper
+        const farbe = Math.random();
+        staub.push({ x: fx + rnd(-16, 18), y: fy + rnd(12, 26), vx: rnd(-14, 14) - vfx * .4, vy: rnd(0, 16), r: rnd(1.4, 3.2), life: 0, max: rnd(1.6, 3.4), p: rnd(0, 6.3),
+          spr: farbe < .6 ? SPR.flieder : farbe < .88 ? SPR.blau : SPR.gold, glanz: Math.random() < .18 });
+      }
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.setTransform(k * dpr, 0, 0, k * dpr, 0, 0);
+      ctx.globalCompositeOperation = "lighter";
+      // Lichtstaub
+      for (const m of licht) {
+        m.x += m.vx * dt; m.y += m.vy * dt;
+        const links = 640 - m.y * .149;
+        if (m.y < 0 || m.y > 700 || m.x < links || m.x > links + 240) inStrahl(m, true);
+        dot(SPR.gold, m.x, m.y, m.r * 2.4, (.22 + .2 * Math.sin(t * 1.8 + m.p)) * (1 - m.y / 900));
+      }
+      // Glühwürmchen
+      for (const g of wuermchen) {
+        const x = g.x + Math.sin(t * g.s + g.a) * 28 + Math.sin(t * g.s * 2.3 + g.b) * 10;
+        const y = g.y + Math.cos(t * g.s * .9 + g.b) * 22 + Math.sin(t * g.s * 1.7 + g.a) * 8;
+        const an = Math.max(0, Math.sin(t * g.f + g.p));
+        dot(SPR.gruen, x, y, g.r * 3.2, an * an * .9);
+      }
+      // leiser Schein um die Fee, pulsiert
+      dot(SPR.schein, fx, fy, 70, .2 + .1 * Math.sin(t * 3.1));
+      // Feenstaub rieselt, schwankt und funkelt
+      for (let i = staub.length - 1; i >= 0; i--) {
+        const s = staub[i];
+        s.life += dt;
+        if (s.life >= s.max) { staub.splice(i, 1); continue; }
+        s.vy += 14 * dt; s.vx *= .985;
+        s.x += (s.vx + Math.sin(s.life * 3 + s.p) * 7) * dt; s.y += s.vy * dt;
+        const a = Math.min(1, s.life / .35) * Math.min(1, (s.max - s.life) / (s.max * .4)) * (.5 + .4 * Math.sin(s.life * 14 + s.p));
+        dot(s.spr, s.x, s.y, s.r * 2.6, a);
+        if (s.glanz && a > .3) {
+          ctx.globalAlpha = a * .8; ctx.strokeStyle = "#fff"; ctx.lineWidth = .9;
+          ctx.beginPath(); ctx.moveTo(s.x - s.r * 3, s.y); ctx.lineTo(s.x + s.r * 3, s.y); ctx.moveTo(s.x, s.y - s.r * 3); ctx.lineTo(s.x, s.y + s.r * 3); ctx.stroke();
+        }
+      }
+      ctx.globalAlpha = 1;
+    }
+    function start() { if (raf || still.matches || intro.hidden) return; size(); last = 0; raf = requestAnimationFrame(frame); }
+    function stop() { cancelAnimationFrame(raf); raf = 0; }
+    if ("ResizeObserver" in window) new ResizeObserver(size).observe(canvas);
+    document.addEventListener("visibilitychange", () => (document.hidden ? stop() : start()));
+    return { start, stop };
+  })();
+  introFx.start();
 
   const fsBtn = $("#fullscreenToggle");
   const isStandalone = () => navigator.standalone === true || matchMedia("(display-mode: standalone)").matches || matchMedia("(display-mode: fullscreen)").matches;
