@@ -1,6 +1,6 @@
 # Umbauplan: Das Menü auf das Niveau des Startbildschirms
 
-Stand 24.09.2026. **Vorschlag, noch nicht gebaut.** Baut auf `06-design-plan.md` auf: Seiten, HUD, Nebel, Texte und Logik bleiben, wie sie dort stehen. Dieser Plan ändert nur **Optik, Bewegung und Übergänge**. Geprüft am Entwurf (`app/entwurf.html?demo`) in iPhone SE und iPhone 15 quer.
+Stand 24.09.2026. **Freigegeben und im Entwurf gebaut** (Stufen 1 bis 5, Stufe 6 ohne Bilder, Stufe 7 im Browser geprüft, siehe Abschnitt 12). Die App unter der Hauptadresse ist unverändert. Baut auf `06-design-plan.md` auf: Seiten, HUD, Nebel, Texte und Logik bleiben, wie sie dort stehen. Dieser Plan ändert nur **Optik, Bewegung und Übergänge**. Geprüft am Entwurf (`app/entwurf.html?demo`) in iPhone SE und iPhone 15 quer.
 
 ---
 
@@ -225,11 +225,27 @@ Stufen 1 bis 5 sind der Kern und gehen ohne neue Bilder. Stufe 6 wird mit deinen
 
 ---
 
-## 11. Entscheidungen für dich
+## 11. Entscheidungen (24.09.)
 
-1. **Richtung** „neues Zelda" (Wald im Hintergrund, dunkles Glas, Gold) statt N64-Steinplatte? Die Steinplatte war deine ursprüngliche Optik. Empfehlung: umbauen, sonst bleibt der Bruch zum Startbild.
-2. **Seitenwechsel:** weich gleiten oder die Drehung behalten, dann aber weich statt ruckelig? Empfehlung: gleiten.
-3. **Fee als Cursor:** ja oder nein? Empfehlung: ja, sie verbindet Startbild und Menü.
-4. **Z und R** als Seitenleiste oben oder als Tasten an den Seiten behalten? Empfehlung: Seitenleiste.
-5. **Bilder:** Lieferst du Dennis als Link von vorn und die Karte als Gemälde (Abschnitt 8)? Sonst baue ich beides im Code.
-6. Offene Entscheidungen aus 06 Abschnitt 9 gleich mit freigeben?
+1. **Richtung „neues Zelda"** statt N64-Steinplatte: ja.
+2. **Seitenwechsel:** gleiten.
+3. **Fee als Cursor:** ja.
+4. **Seitenleiste oben** statt Z und R: ja. Auf dem Laptop gehen Z und R weiter über die Tastatur.
+5. **Bilder** (Abschnitt 8) kommen nachträglich. Bis dahin steht der Wanderer in der Ausrüstung und die Karte ist im Code gezeichnet.
+6. Offene Entscheidungen aus 06 Abschnitt 9: noch nicht beantwortet.
+
+---
+
+## 12. Gebaut (24.09.)
+
+Alles in `app/entwurf.html`, `entwurf.css`, `entwurf.js`. `config.js`, `engine.js`, `store.js` und der Admin sind unverändert.
+
+- **Stufe 1:** Hintergrund ist das Titelbild, vorgerechnet unscharf (`assets/menue-wald.webp`, 12 KB). Glasplatten mit Goldlinie, Ecken und Stein oben. Farben aus 3.1. Hylia Serif für alle Titel, Fließtext in der Systemschrift. Umlaute, ß (als SS), · und − sind in `assets/hylia-serif.woff2` ergänzt. Punktraster und Stufen-Animationen sind weg.
+- **Stufe 2:** HUD mit glänzenden Karten, Ortsname der nächsten Quest mit Medaillon, Schloss und Messingrädern. Seitenleiste mit den drei Namen, die Seiten gleiten, der Wald dahinter wandert leicht mit.
+- **Stufe 3:** Medaillons als Münzen (Goldrand, Emaille, geprägtes Zeichen, Glanz bei großen gewonnenen), Steine als Kristalle, alle sieben Items neu gezeichnet. Noch nicht erspielt: Schattenriss mit Goldumriss. Verloren: grau mit rotem X.
+- **Stufe 4:** PRESS START blitzt, die Kamera fährt den Weg hinein und geht in den unscharfen Wald über, die Fee fliegt zur nächsten Quest und bleibt Cursor mit Feenstaub. Glühwürmchen hinter den Platten. Menütöne als Glöckchen und Luftzug.
+- **Stufe 5:** Nach einer Quest Vollbild mit Lichtstrahl, großem Medaillon, Strahlenkranz und Funken in seiner Farbe, Band in Hylia Serif. Gewonnene Packs fliegen ins HUD, eine neue Ziffer dreht sich im Zahlenrad ein. Verloren: Bild wird grau, Medaillon fällt und bekommt einen Riss, roter Rand. Fanfaren mit Begleitung und Hall. Das Fenster lässt sich erst nach 0,65 s wegtippen.
+- **Stufe 6 ohne Bilder:** Quest-Karte mit großem Zeichen als Wasserzeichen und Einsatz in zwei Feldern (Sieg gold, Niederlage rot). Fähigkeiten im Triforce-Dreieck, Dennis im Lichtkegel. Karte auf Papier mit Höhenlinien und Bäumen, gegangener Weg in Gold, ziehende Nebelschwaden.
+- **Stufe 7, geprüft mit Chromium:** vier Größen (iPhone SE und 15 in Safari, 15 und Pro Max vom Home-Bildschirm), je 14 Spielstände vom Start bis zum Ende, alle Quests, Stationen und Items angetippt. Kein Name einer verdeckten Quest auf einer Seite, im Ergebnis- oder Code-Fenster. Keine Tafel läuft über. Kleinste Schrift 10,5 px. Keine Fehler in der Konsole. Dasselbe mit „Bewegung reduzieren". `node app/engine.test.js` grün.
+
+Offen: deine zwei Bilder (Abschnitt 8), Test auf einem echten iPhone in Safari (vor allem Unschärfe, additive Fee, Ton), dann Übernahme in die App nach 06 Abschnitt 10.
