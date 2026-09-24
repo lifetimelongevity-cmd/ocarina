@@ -347,6 +347,9 @@ svg { display: block; }
 .result-lines li .ri { display: grid; place-items: center; width: 26px; flex: none; }
 .result-lines li .ri svg { width: 22px; height: 22px; }
 .result-lines li .ri .ic-card { width: 17px; height: 23px; }
+.result-lines .tarn { display: block; font: italic 400 calc(var(--fs-body) * .8)/1.2 Georgia, serif; color: #c9c3a2; margin-bottom: 2px; }
+.result-lines .reveal > span:last-child { animation: revealName 900ms ease-out calc(var(--d, 0) * 220ms + 500ms) both; }
+@keyframes revealName { from { opacity: .35; filter: blur(3px); } to { opacity: 1; filter: none; } }
 .result-lines .plus { color: #ffe27a; } .result-lines .minus { color: #ff9b90; }
 .result-next { margin: 10px 0 0; color: #aab3cf; font: 700 var(--fs-tiny)/1.2 "Courier New", monospace; letter-spacing: .04em; }
 .result-more { position: absolute; right: 12px; bottom: 8px; color: var(--gold); font-size: 12px; animation: nextPulse 700ms steps(2, end) infinite; }
