@@ -22,95 +22,23 @@
     <img class="world" src="assets/alpine-trail.png" alt="">
     <div class="world-shade" aria-hidden="true"></div>
 
-    <!-- Startbildschirm im Stil des Covers von Ocarina of Time -->
-    <section class="intro-screen" id="introScreen" aria-label="Startbildschirm">
-      <div class="intro-scene" aria-hidden="true">
-        <img class="intro-bg" src="assets/intro-wald.jpg" alt="">
-        <span class="fireflies"><i style="left:25.7%;top:16.7%;animation-delay:2.4s;animation-duration:5.6s"></i><i style="left:10.1%;top:41.7%;animation-delay:5.5s;animation-duration:8.2s"></i><i style="left:74.4%;top:26.6%;animation-delay:3.2s;animation-duration:6.1s"></i><i style="left:19.9%;top:16.9%;animation-delay:1.3s;animation-duration:8.7s"></i><i style="left:80.3%;top:75.8%;animation-delay:4.8s;animation-duration:5.8s"></i><i style="left:32.5%;top:60.7%;animation-delay:4.4s;animation-duration:8.4s"></i><i style="left:85.0%;top:15.3%;animation-delay:3.6s;animation-duration:7.7s"></i><i style="left:50.5%;top:22.9%;animation-delay:2.8s;animation-duration:5.4s"></i><i style="left:90.0%;top:80.7%;animation-delay:3.3s;animation-duration:6.2s"></i><i style="left:87.6%;top:56.1%;animation-delay:5.3s;animation-duration:8.4s"></i><i style="left:50.8%;top:42.8%;animation-delay:3.6s;animation-duration:6.7s"></i><i style="left:18.8%;top:33.6%;animation-delay:4.9s;animation-duration:5.2s"></i><i style="left:8.3%;top:60.6%;animation-delay:1.7s;animation-duration:7.1s"></i><i style="left:47.4%;top:36.8%;animation-delay:6.0s;animation-duration:5.8s"></i><i style="left:42.0%;top:25.0%;animation-delay:3.8s;animation-duration:6.1s"></i><i style="left:36.7%;top:70.7%;animation-delay:1.9s;animation-duration:7.2s"></i></span>
+    <!-- Startbildschirm: Titelbild vom Nutzer. Die Fee ist aus dem Bild gelöst und schwebt,
+         Licht, Feenstaub und Glühwürmchen bewegen sich (entwurf.js, Abschnitt Startbildschirm) -->
+    <section class="intro-screen" id="introScreen" aria-label="Startbildschirm: The Legend of Dennis, A Link to Rieke">
+      <div class="intro-scene">
+        <div class="intro-cam">
+          <img class="intro-bg" src="assets/intro-titel.webp" alt="" draggable="false">
+          <span class="intro-sun" aria-hidden="true"></span>
+          <span class="intro-rays" aria-hidden="true"><i style="--x:16.8%;--w:5.5%;--d:9s;--o:.8"></i><i style="--x:44%;--w:7%;--d:8s;--o:.75"></i><i style="--x:51.5%;--w:4.5%;--d:12s;--o:.55"></i></span>
+          <span class="intro-path-light" aria-hidden="true"></span>
+          <img class="intro-fee" id="introFee" src="assets/intro-fee.png" alt="" draggable="false">
+          <canvas class="intro-fx" id="introFx" aria-hidden="true"></canvas>
+        </div>
+        <button class="start-quest" id="startQuest" type="button">PRESS START</button>
       </div>
       <button class="fullscreen-toggle" id="fullscreenToggle" type="button" aria-label="Vollbild öffnen" aria-pressed="false" title="Vollbild">
         <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4" d="M3 8V5a2 2 0 0 1 2-2h3m8 0h3a2 2 0 0 1 2 2v3m0 8v3a2 2 0 0 1-2 2h-3m-8 0H5a2 2 0 0 1-2-2v-3"/></svg>
       </button>
-      <div class="intro-front">
-        <svg class="intro-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 440" role="img" aria-label="The Legend of Dennis. A Link to Rieke">
-  <defs>
-    <!-- Gold wie im Original: hell oben, satt in der Mitte, dunkel unten, mit Glanzkante -->
-    <linearGradient id="lg-gold" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#fff6c4"/>
-      <stop offset=".18" stop-color="#f7d466"/>
-      <stop offset=".5" stop-color="#e1ad35"/>
-      <stop offset=".78" stop-color="#b87c1c"/>
-      <stop offset="1" stop-color="#e6b440"/>
-    </linearGradient>
-    <!-- gehämmerte Oberfläche -->
-    <filter id="lg-tex" x="-3%" y="-3%" width="106%" height="106%">
-      <feTurbulence type="fractalNoise" baseFrequency=".75" numOctaves="2" seed="7" result="n"/>
-      <feColorMatrix in="n" type="matrix" values="0 0 0 0 .28  0 0 0 0 .16  0 0 0 0 .02  0 0 0 -2.2 1.25" result="d"/>
-      <feComposite in="d" in2="SourceAlpha" operator="in" result="di"/>
-      <feMerge><feMergeNode in="SourceGraphic"/><feMergeNode in="di"/></feMerge>
-    </filter>
-    <linearGradient id="lg-steel" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0" stop-color="#6d7584"/><stop offset=".45" stop-color="#eef2f8"/><stop offset=".55" stop-color="#c3cad6"/><stop offset="1" stop-color="#586070"/>
-    </linearGradient>
-    <linearGradient id="lg-rim" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#e8ecf2"/><stop offset=".45" stop-color="#9aa3b2"/><stop offset=".7" stop-color="#d7dce6"/><stop offset="1" stop-color="#5e6676"/>
-    </linearGradient>
-    <radialGradient id="lg-field" cx=".4" cy=".28" r=".9">
-      <stop offset="0" stop-color="#3f5bcc"/><stop offset=".5" stop-color="#23369a"/><stop offset="1" stop-color="#0e1650"/>
-    </radialGradient>
-    <linearGradient id="lg-hilt" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#7f8cff"/><stop offset=".5" stop-color="#3a3fc4"/><stop offset="1" stop-color="#1c1f70"/>
-    </linearGradient>
-    <linearGradient id="lg-goldFlat" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe98a"/><stop offset="1" stop-color="#c88f22"/></linearGradient>
-    <linearGradient id="lg-red" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ef4a3a"/><stop offset="1" stop-color="#a3130f"/></linearGradient>
-    <path id="lg-shieldShape" d="M-112 -138 C-86 -150 -46 -148 -22 -158 L0 -174 L22 -158 C46 -148 86 -150 112 -138 C118 -80 118 -30 114 16 C108 94 62 142 0 172 C-62 142 -108 94 -114 16 C-118 -30 -118 -80 -112 -138 Z"/>
-  </defs>
-
-  <!-- Klinge hinter dem Schild, Spitze unten links -->
-  <g transform="translate(236 104) rotate(33)">
-    <path d="M-12 6 L12 6 L10 362 L0 396 L-10 362 Z" fill="url(#lg-steel)" stroke="#262b35" stroke-width="2.5"/>
-    <path d="M0 14 V352" stroke="#7d8697" stroke-width="3"/>
-  </g>
-
-  <!-- Schild -->
-  <g transform="translate(138 252) rotate(-7)">
-    <use href="#lg-shieldShape" fill="url(#lg-rim)" stroke="#1f232b" stroke-width="5"/>
-    <use href="#lg-shieldShape" transform="scale(.9)" fill="none" stroke="#5a6272" stroke-width="3"/>
-    <use href="#lg-shieldShape" transform="scale(.82)" fill="url(#lg-field)" stroke="#0a0e33" stroke-width="3"/>
-    <use href="#lg-shieldShape" transform="scale(.74)" fill="none" stroke="#7f95e6" stroke-width="2.5" opacity=".7"/>
-    <!-- Hylia-Wappen aus der Schrift „Hylian Symbols" -->
-    <g transform="translate(0 -14) scale(0.2143 -0.2143) translate(-330.6 -350.0)" stroke-linejoin="round">
-      <path d="M4 413Q-2 383 1 351L108 354Q110 338 114 322L9 304Q14 288 20.0 272.5Q26 257 34 241L131 286Q140 276 150 267L68 196Q79 185 91.0 176.5Q103 168 116 160L169 254Q175 251 182.0 248.5Q189 246 197 244L153 145Q181 138 212 136L225 240Q235 238 246 240Q273 238 271 258Q271 288 247 287Q120 272 141 444Q122 422 115 399ZM285 321Q304 349 330 306Q357 349 376 321Q380 367 413 321Q408 352 390 364Q354 394 330 449Q308 395 271 364Q253 352 248 321Q281 367 285 321ZM547 322Q551 338 553 354L660 351Q663 381 658 413L546 399Q539 422 520 444Q541 272 414 287Q390 288 390 258Q390 239 415 240Q425 238 436 240L449 136Q480 137 507 145L464 244Q472 246 479.0 248.5Q486 251 492 254L545 160Q558 168 570.0 176.5Q582 185 593 196L512 267Q517 272 521.0 276.5Q525 281 530 286L627 241Q635 257 641.0 272.5Q647 288 652 304ZM416 115Q407 128 397 117Q391 109 401 93L421 62Q423 54 400 54Q376 54 387 33Q396 13 429 0Q424 10 422.0 19.5Q420 29 420 37H484Q482 20 468 3Q506 23 527 49Q530 56 515 56H461Q449 56 448 62ZM264 117Q253 129 244 115L213 62Q211 56 200 56H146Q131 56 134 49Q155 23 193 3Q179 20 177 37H241Q241 19 232 0Q265 13 274 33Q284 54 261 54Q238 54 240 62L260 93Q270 109 264 117ZM330 44Q348 74 342 112Q339 151 384 161Q346 221 330 282Q316 223 277 161Q322 151 319 112Q313 75 330 44Z" fill="url(#lg-red)" stroke="#4a0907" stroke-width="12"/>
-      <path d="M330 700 263 598H398ZM196 495H330L263 598ZM465 495 398 598 330 495Z" fill="url(#lg-goldFlat)" stroke="#5b3c06" stroke-width="12"/>
-    </g>
-    <path d="M-60 -118 Q0 -134 60 -118" fill="none" stroke="#fff" stroke-width="3" opacity=".35"/>
-  </g>
-
-  <!-- Griff vor dem Schild, oben rechts -->
-  <g transform="translate(236 104) rotate(33) scale(1.25)">
-    <path d="M-54 -2 Q-34 -30 -12 -9 L12 -9 Q34 -30 54 -2 Q36 6 12 11 L-12 11 Q-36 6 -54 -2Z" fill="url(#lg-hilt)" stroke="#0d0f38" stroke-width="3"/>
-    <path d="M-44 -4 Q-30 -20 -14 -6 M44 -4 Q30 -20 14 -6" fill="none" stroke="#b4bcff" stroke-width="2" opacity=".7"/>
-    <path d="M0 -6 L6 2 L0 9 L-6 2 Z" fill="#f2c94c" stroke="#5a3b05" stroke-width="1.5"/>
-    <rect x="-8.5" y="-76" width="17" height="66" rx="3" fill="url(#lg-hilt)" stroke="#0d0f38" stroke-width="3"/>
-    <path d="M-8 -68 L8 -60 M-8 -54 L8 -46 M-8 -40 L8 -32 M-8 -26 L8 -18" stroke="#a9b2ff" stroke-width="2.5" opacity=".7"/>
-    <path d="M0 -80 L-13 -90 L0 -110 L13 -90 Z" fill="url(#lg-hilt)" stroke="#0d0f38" stroke-width="3"/>
-    <circle cx="0" cy="-92" r="3.5" fill="#f2c94c" stroke="#5a3b05" stroke-width="1"/>
-  </g>
-
-  <!-- Schrift -->
-  <text class="t hy" x="346" y="176" font-size="47" stroke-width="5" textLength="358" lengthAdjust="spacingAndGlyphs">THE LEGEND OF</text>
-  <text class="t tri" x="200" y="290" font-size="200" stroke-width="6">D</text>
-  <text class="t tri" x="336" y="282" font-size="140" stroke-width="5" textLength="428" lengthAdjust="spacingAndGlyphs">ENNIS</text>
-  <text class="t hy" x="336" y="360" font-size="51" stroke-width="5" textLength="424" lengthAdjust="spacingAndGlyphs">A LINK TO RIEKE</text>
-</svg>
-        <div class="intro-hero-wrap" aria-hidden="true">
-          <span class="hero-glow"></span>
-          <span class="hero-shadow"></span>
-          <img class="intro-hero" src="assets/dennis-v9.png" alt="">
-          <span class="fairy"></span>
-        </div>
-        <button class="start-quest" id="startQuest" type="button">PRESS START</button>
-      </div>
     </section>
 
     <!-- HUD: immer sichtbar. Links die Packs, Mitte die nächste Quest, rechts der Code des Kästchens -->
