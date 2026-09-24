@@ -39,7 +39,8 @@
   // Items: links Ausrüstung (Gegenstände), rechts Fähigkeiten (Regeln im Showdown)
   // tarn: So heißt das Item, solange Dennis es nicht erspielt hat. Beim Gewinnen entpuppt es sich als das echte Ding.
   const ITEM = {
-    beutel:           { gruppe: "item",       kurz: "Beutel",        farbe: "#d9a441", symbol: "i-backpack", text: "Dein Beutel. Hier landet alles, was du dir erspielst." },
+    beutel:           { gruppe: "item",       name: "Dennis' Eier",  kurz: "Eier",   farbe: "#d9a441", symbol: "i-backpack", text: "Klein, aber oho. Hier landet alles, was du dir erspielst.",
+                        tarn: { name: "Heiliger Beutel des Helden", kurz: "Beutel", text: "Seit jeher an deiner Seite. Was steckt wohl darin?" } },
     pistole_gross:    { gruppe: "item",       kurz: "Pistole",       farbe: "#4fb8e8", symbol: "i-pistol",   text: "Dreifacher Tank. Du kannst länger schießen als jeder andere.",
                         tarn: { name: "Zoras Quellstab",        kurz: "Quellstab",  text: "Ein Relikt aus Zoras Reich. Wer es führt, hat den längsten Atem." } },
     ring_gross:       { gruppe: "item",       kurz: "Großer Ring",   farbe: "#d6b278", symbol: "i-ropering", text: "Ein Seilring mit 60 cm. Beim Ringwurf wird dein Ziel größer.",
@@ -67,6 +68,10 @@
   /* ---------- Speicher: echt oder Demo ---------- */
   const params = new URLSearchParams(location.search);
   const DEMO = params.has("demo");
+  // Onboarding einmal pro Handy. In der Demo und mit ?onboarding jedes Mal neu.
+  const OB_KEY = "dq-onboarding-v1";
+  let onboarded = false;
+  try { onboarded = !DEMO && !params.has("onboarding") && localStorage.getItem(OB_KEY) === "1"; } catch (e) {}
   const DEMO_DOCS = {
     start: { quests: {}, buchungen: [], items: {} },
     mitte: {                                   // Beispielstand aus 05-system-plan.md A9
@@ -98,10 +103,11 @@
   const itemById = id => C.items.find(i => i.id === id);
   const itemInfo = id => ITEM[id] || { gruppe: "item", kurz: itemById(id).name, farbe: "#f2c94c", symbol: "i-backpack", text: itemById(id).wirkung };
   // Was Dennis von einem Item sieht: vor dem ersten Erspielen die Tarnung mit Truhe, danach das echte Ding
-  const getarnt = id => !!(ITEM[id] && ITEM[id].tarn) && state.items[id] === "nicht";
+  // Der Beutel ist Startitem: seine Tarnung fällt beim ersten Besuch der Ausrüstung (Onboarding)
+  const getarnt = id => !!(ITEM[id] && ITEM[id].tarn) && (id === "beutel" ? !onboarded : state.items[id] === "nicht");
   const itemSicht = id => {
     const x = itemInfo(id);
-    return getarnt(id) ? { ...x, ...x.tarn, symbol: "i-chest" } : { ...x, name: itemById(id).name };
+    return getarnt(id) ? { ...x, ...x.tarn, symbol: "i-chest" } : { ...x, name: x.name || itemById(id).name };
   };
   const useSvg = (id, cls = "") => `<svg class="${cls}" aria-hidden="true"><use href="#${id}"></use></svg>`;
   const cardSvg = (cls = "") => `<svg class="ic-card ${cls}" aria-hidden="true"><use href="#${cls.includes("empty") ? "i-card-empty" : "i-card"}"></use></svg>`;
@@ -577,8 +583,51 @@
     flatTimer = setTimeout(() => {
       cube.classList.add("flat");
       if (page === 1) { const row = document.querySelector(".q-row.is-selected"); if (row) scrollIntoList(row); }
+      if (page === 2 && !onboarded && $("#overlay").hidden) onboarding();
     }, 470);
   }
+  /* ---------- Onboarding: erster Besuch der Ausrüstung ---------- */
+  // Erst das Fundfenster mit Enthüllung des Beutels, dann drei kurze Hinweise nacheinander.
+  function onboarding() {
+    const x = ITEM.beutel;
+    melody("pruefung");
+    showOverlay({
+      head: `<span class="medal-stage won" style="--m:${x.farbe}"><span class="medal">${useSvg(x.symbol)}</span></span><p class="big">ERSTES ITEM GEFUNDEN</p><p class="sub">${esc(x.tarn.name)}</p>`,
+      lines: `<li class="plus reveal"><span class="ri" style="color:${x.farbe}">${useSvg(x.symbol)}</span><span><small class="tarn">${esc(x.tarn.name)} entpuppt sich als</small>${esc(x.name)}</span></li>`,
+      next: "", gross: true
+    }, () => {
+      onboarded = true;
+      try { if (!DEMO) localStorage.setItem(OB_KEY, "1"); } catch (e) {}
+      renderEquip();
+      coach([
+        [$("#slotsGear").parentElement, "Hier landet, was dir hilft."],
+        [$("#slotsSkill").parentElement, "Hier landen deine Tricks für den Showdown."],
+        [$(".hud"), "Packs und Ziffern für dein Kästchen."]
+      ]);
+    });
+  }
+  function coach(schritte) {
+    const bubble = $("#coach");
+    let i = -1, ziel = null;
+    const weiter = () => {
+      if (ziel) ziel.classList.remove("coach-focus");
+      if (++i >= schritte.length) { bubble.hidden = true; bubble.onclick = null; return; }
+      const [el, text] = schritte[i];
+      ziel = el; el.classList.add("coach-focus");
+      const b = bubble.querySelector(".coach-bubble");
+      b.firstElementChild.textContent = text;
+      bubble.hidden = false;
+      const box = bubble.getBoundingClientRect(), r = el.getBoundingClientRect(), unten = r.top - box.top < box.height / 2;
+      b.style.left = Math.max(12, Math.min(box.width - 232, r.left - box.left + r.width / 2 - 110)) + "px";
+      b.style.top = unten ? r.bottom - box.top + 10 + "px" : "";
+      b.style.bottom = unten ? "" : box.bottom - r.top + 10 + "px";
+      b.style.animation = "none"; void b.offsetWidth; b.style.animation = "";
+      tone("move");
+    };
+    bubble.onclick = weiter;
+    weiter();
+  }
+
   const turn = d => goTo((page + d + 3) % 3, d);
 
   function showNextQuest() {
