@@ -202,10 +202,15 @@ Regeln: Du-Form, höchstens zwei kurze Sätze, keine Gedankenstriche, keine Rege
 | Schwert der Verdammnis | Schwert | Streiche im Showdown den Wächter, den der Bund schickt. |
 | Schild des Bundes | Schild | Wiederhole im Showdown ein verlorenes Duell. Einmal. |
 
+**Onboarding (24.09.):** Beim ersten Besuch der AUSRÜSTUNG erscheint „ERSTES ITEM GEFUNDEN": „Heiliger Beutel des Helden entpuppt sich als Dennis' Eier". Danach leuchten nacheinander Items („Hier landet, was dir hilft."), Fähigkeiten („Hier landen deine Tricks für den Showdown.") und das HUD („Packs und Ziffern für dein Kästchen."). Einmal pro Handy, gemerkt im Browser, im Spielstand ändert sich nichts. Mit `?onboarding` oder in der Demo läuft es jedes Mal.
+
+**Neue Spiele in Planung (24.09.):** Beyblade-Duell und Knobelspiel (eine Brosche zusammensetzen). Beide als Sidequest oder Showdown-Disziplin denkbar. Welche Items sie geben, nehmen oder brauchen, wird zusammen mit den übrigen Items festgelegt.
+
 **Tarnung** (so heißt ein Item, bis Dennis es erspielt; Symbol ist eine Truhe):
 
 | Item | Tarnname | Kurzname | Text |
 |---|---|---|---|
+| Beutel (Anzeige „Dennis' Eier", Text „Klein, aber oho. Hier landet alles, was du dir erspielst.") | Heiliger Beutel des Helden | Beutel | Seit jeher an deiner Seite. Was steckt wohl darin? |
 | Große Wasserpistole | Zoras Quellstab | Quellstab | Ein Relikt aus Zoras Reich. Wer es führt, hat den längsten Atem. |
 | Großer Ring | Reif der Goronen | Reif | Schwer, rund und größer, als er sein müsste. |
 | Gepanzerte Karten | Schriftrollen der Shiekah | Rollen | Blätter, die kein Wind aus der Bahn wirft. |
