@@ -8,19 +8,19 @@ Stand 25.09.2026. Sammelt, was der Nutzer pro Spiel und Item festgelegt hat. Die
 
 | Nr. | Spiel | Stand | Offen |
 |---|---|---|---|
-| 1 | Log-Buch | Bleibt. **6 statt 10 Fragen.** Variante: Rieke beantwortet vorab Fragen (Sprachnachricht), Dennis muss sagen, was sie geantwortet hat. | Welche Variante, Fragen schreiben |
+| 1 | Log-Buch | **Entschieden (25.09.):** Rieke beantwortet vorab 6 Fragen per Sprachnachricht. Dennis sitzt allein im Zug, rät ihre Antwort in der App, danach spielt die App Riekes Sprachnachricht ab (Plan unten). | Fragen, Sprachdateien |
 | 2 | Auge des Jägers | Bleibt: 5 Teelichter, Wasserpistole, ein Tank. | Grenze später |
-| 3 | Feuerprobe | Alter Plan: 3 Mutproben in Umschlägen (Taufe, Ruf, Opening), Dennis sagt vorher, wie viele er nimmt. | Behalten, ändern oder streichen? |
-| 4 | Kreuzung der Klingen | Bleibt: erst Gegner wählen, dann kommt die Disziplin. **Kein Topf** (25.09.): Die Disziplin ist fest, Dennis erfährt sie erst nach der Wahl. | Welche Disziplin |
-| 5 | Prüfung des Bundes (Showdown auf dem Gipfel) | **Bleibt sicher** (25.09.). Kein Deck. Idee: Kombi aus Spielen, die Dennis vorher verloren hat (Revanche). | Feste Liste oder Revanche, Ablauf |
+| 3 | Feuerprobe | **Entschieden (25.09.):** eine Mutprobe, „Der Ruf": Eine fremde Wandergruppe nimmt mit Dennis ein Video für Rieke auf. Keine Umschläge. | |
+| 4 | Kreuzung der Klingen | **Entschieden (25.09.):** Dennis wählt einen Gegner aus dem Bund, erst danach erfährt er die Disziplin: Schnick Schnack Schnuck, Best of 3. | |
+| 5 | Prüfung des Bundes (Showdown auf dem Gipfel) | **Entschieden (25.09.):** 3 Duelle. Zuerst die Spiele, die Dennis am Tag verloren hat (Revanche), aufgefüllt mit Wirbel der Götter. Die App zeigt dem Quest Master die drei. | |
 | 6 | Prophezeiung | **Bleibt** (25.09.). Morgens sagt Dennis 2 bis 3 Dinge voraus, die der Bund heute tun wird („Bene wird sich dehnen"). Jede, die in Erfüllung geht, bringt ihm eine **Spruchrolle** (F1). Läuft den ganzen Tag, der Quest Master bucht, sobald sich eine erfüllt. | Anzahl Vorhersagen, Rolle oder Pack pro Treffer |
 | 7 | **Das Podrennen** (RC-Auto, ersetzt Waffenschmied) | Name steht (25.09.). Kleines ferngesteuertes Auto, Parcours auf Zeit. Wird eine Prüfung. | Parcours |
 | 8 | ~~Ringschmied~~ | **Gestrichen** (25.09.), mit dem Großen Ring. | |
 | 9 | Kartenwurf | Bleibt, **als Duell**, mit Karten aus schon geöffneten Packs, fester Abstand. Start mit 3 Karten, Item gibt +2. Fähigkeiten können helfen (näher ran, nur einer wirft). | Abstand, Ziel |
 | 10 | ~~Nakama-Quiz~~ | **Gestrichen.** | |
-| 11 | Schnick Schnack Schnuck | **Bleibt sicher.** | |
+| 11 | ~~Schnick Schnack Schnuck~~ | Steckt jetzt in 4, als eigene Sidequest gestrichen (25.09.). | |
 | 12 | **Klingen des Deku-Baums** (Schwertwurf, ersetzt Steinwurf) | 4 Mini-Schwerter (Brieföffner, 20 cm) auf einen Baum werfen, sie müssen stecken bleiben. Wie viele Schwerter Dennis bekommt (1 bis 4 = Versuche), hängt davon ab, wie gut er ein anderes Spiel gemacht hat. | Name, welches Spiel die Schwerter vergibt |
-| 13 | Rast der Ahnen | Wahrscheinlich raus. Falls drin, mit anderem, mittelalterlich-mythischem Namen. | Drin oder raus |
+| 13 | ~~Rast der Ahnen~~ | **Gestrichen** (25.09.). Die Hütte ist nur noch Abrechnung und Öffnen des Kästchens. | |
 | 14 | **Wirbel der Götter** (Beyblade) | Name steht (25.09.). Duell gegeneinander, nur zwei Kreisel. Eigenes Spiel, nicht der Showdown. | Gegen wen, Best of 3, wo im Ablauf |
 | 15 | **Riekes Amulett** (Knobelspiel, Brosche) | Zeitquest: Die Brosche ist versteckt, Dennis muss sie in einer Frist finden. Dann darf er den ganzen Tag über versuchen, sie zusammenzusetzen. Gelöst = Belohnung, eher Packs. | Versteck, Frist, Anzahl Packs |
 
@@ -61,3 +61,13 @@ Stand 25.09.2026. Sammelt, was der Nutzer pro Spiel und Item festgelegt hat. Die
 ## Laufende Quests (25.09.)
 
 6 Prophezeiung und 15 Riekes Amulett laufen den ganzen Tag neben der festen Reihenfolge. Die App kennt bisher nur eine Reihe, in der immer die erste offene Quest dran ist. Für diese beiden braucht es einen eigenen Bereich „Läuft" (sichtbar, sobald gestartet) und für die Prophezeiung einen Zähler statt bestanden oder verloren.
+
+**Übrig (25.09.):** 1 Log-Buch, 2 Auge des Jägers, 3 Feuerprobe, 4 Kreuzung der Klingen, 5 Showdown, 6 Prophezeiung (läuft), 7 Podrennen, 9 Kartenwurf, 12 Klingen des Deku-Baums, 14 Wirbel der Götter, 15 Riekes Amulett (läuft).
+
+## Plan: Log-Buch mit Riekes Sprachnachrichten (Vorschlag, noch nicht gebaut)
+
+- Dateien: `app/assets/logbuch/frage1.m4a` bis `frage6.m4a`, Fragen als Text in `config.js`.
+- Bei Dennis öffnet die Quest Log-Buch eine eigene Ansicht: Frage 1 erscheint, Dennis tippt seine Antwort ein und „besiegelt" sie. Erst dann spielt Riekes Sprachnachricht. Danach Frage 2 und so weiter.
+- Seine Antworten werden gespeichert (einzige Stelle, an der Dennis etwas schreibt). Der Quest Master sieht sie im Admin neben den Fragen und bucht bestanden oder verloren.
+- Zug-Funklöcher: Die App lädt alle sechs Dateien beim Start vorab, die Antworten werden bei Netz nachgereicht.
+- Hinweis: Dateien auf Netlify sind für jeden mit dem Link abrufbar.
