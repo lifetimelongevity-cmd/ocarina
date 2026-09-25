@@ -42,6 +42,14 @@ Die Log-Buch-Antworten liegen bewusst neben dem Spiel, damit das Speichern im Ad
 - **Showdown:** Die App zeigt die drei Duelle (verlorene Spiele vom Tag zuerst, aufgefüllt mit Wirbel der Götter). Je Duell Sieg oder Niederlage tippen, dann die Prüfung buchen.
 - **Log-Buch:** Dennis' Antworten erscheinen live unter der Quest und unten im Bereich Log-Buch.
 
+## Auf den Startbildschirm (App installieren)
+
+Auf dem Startbildschirm des Spiels steht oben rechts **APP INSTALLIEREN**, solange die App nicht installiert ist.
+
+- **Android (Chrome, Samsung Internet):** Ein Tipp öffnet das Fenster „App installieren?", noch ein Tipp, fertig. Wurde das Fenster einmal weggetippt, zeigt der Knopf bis zum nächsten Laden die Handgriffe von Hand.
+- **iPhone:** Apple erlaubt keiner Webseite, sich selbst zu installieren. Der Knopf zeigt die Anleitung (Teilen, „Zum Home-Bildschirm").
+- Vom Startbildschirm aus geöffnet, ist der Knopf weg.
+
 ## Lokal ausprobieren
 
 ```

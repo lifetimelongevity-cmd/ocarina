@@ -15,6 +15,10 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="preload" as="image" href="assets/intro-titel.webp" fetchpriority="high">
   <link rel="stylesheet" href="styles.css">
+  <script>
+    // Android (Chrome, Samsung Internet): Angebot zum Installieren früh abfangen, app.js zeigt dafür den Knopf
+    addEventListener("beforeinstallprompt", e => { e.preventDefault(); window.__installEvent = e; });
+  </script>
 </head>
 <body>
   <!-- Dennis' Menü (06-design-plan.md, 07-spiele-und-items.md)
@@ -39,6 +43,10 @@
         </div>
         <button class="start-quest" id="startQuest" type="button">PRESS START</button>
       </div>
+      <button class="install-btn" id="installBtn" type="button" hidden>
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.6" d="M12 3v11m-4.5-4.5L12 14l4.5-4.5M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>
+        <span>APP INSTALLIEREN</span>
+      </button>
       <button class="fullscreen-toggle" id="fullscreenToggle" type="button" aria-label="Vollbild öffnen" aria-pressed="false" title="Vollbild">
         <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4" d="M3 8V5a2 2 0 0 1 2-2h3m8 0h3a2 2 0 0 1 2 2v3m0 8v3a2 2 0 0 1-2 2h-3m-8 0H5a2 2 0 0 1-2-2v-3"/></svg>
       </button>

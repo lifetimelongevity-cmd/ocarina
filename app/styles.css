@@ -104,6 +104,16 @@ svg { display: block; }
 .fullscreen-toggle svg { width: 64%; height: 64%; }
 .fullscreen-toggle[aria-pressed="true"] { color: #f3d75c !important; background: linear-gradient(135deg, #36466d, #15203e 65%, #080d20) !important; }
 .fullscreen-toggle[hidden] { display: none; }
+/* App installieren: Android öffnet das Installieren-Fenster, iPhone zeigt die Anleitung. Nur solange die App nicht installiert ist. */
+.install-btn { position: absolute; z-index: 3; top: max(10px, var(--sa-t)); right: calc(max(12px, var(--sa-r)) + var(--hud-h) + 6px); display: inline-flex; align-items: center; gap: 8px;
+  height: calc(var(--hud-h) - 4px); min-height: 36px; padding: 0 14px; border: 2px solid #080a10; outline: 1.5px solid var(--gold); border-radius: 4px; cursor: pointer;
+  background: linear-gradient(#f5d766, #d8aa2d 60%, #a57a12); color: #1c1604; font: 900 clamp(11px, 3.6vh, 14px)/1 "Courier New", monospace; letter-spacing: .06em;
+  box-shadow: inset 2px 2px 0 rgba(255,255,255,.4), 2px 3px 0 #000; animation: installGlow 2.4s ease-in-out infinite; }
+.install-btn svg { width: 1.35em; height: 1.35em; flex: none; }
+.install-btn:active { filter: brightness(1.15); transform: translateY(1px); }
+.install-btn[hidden] { display: none; }
+.fullscreen-toggle[hidden] ~ .install-btn, .install-btn:has(~ .fullscreen-toggle[hidden]) { right: max(12px, var(--sa-r)); }
+@keyframes installGlow { 50% { box-shadow: inset 2px 2px 0 rgba(255,255,255,.4), 2px 3px 0 #000, 0 0 16px rgba(242,201,76,.7); } }
 
 /* ---------- Schultertasten Z / R ---------- */
 .shoulder { grid-row: 2; z-index: 14; align-self: center; justify-self: center; width: 100%; height: clamp(54px, 22%, 76px); padding: 0; border: 2px solid #9297b0; cursor: pointer; color: #10162a;
@@ -372,6 +382,7 @@ svg { display: block; }
 .result { position: relative; }
 .result-head .ri-big { grid-row: span 2; display: grid; place-items: center; width: clamp(40px, 13vh, 54px); }
 .result-head .ri-big .ic-card { width: 70%; height: auto; aspect-ratio: 22 / 30; }
+.result-head .ri-big > svg:not(.ic-card) { width: 72%; height: auto; aspect-ratio: 1; filter: drop-shadow(1px 2px 0 #000); }
 .result-head .ri-big.lock svg { width: 70%; height: auto; aspect-ratio: 24 / 28; color: #c9c3a2; }
 .result-lines li .ri { font: 900 var(--fs-body)/1 Georgia, serif; color: var(--gold); }
 .result-lines li .ri .tumbler { font-size: 15px; }
@@ -456,7 +467,7 @@ svg { display: block; }
 @media (prefers-reduced-motion: reduce) {
   .menu-cube { transition: none; }
   .medal-stage > *, .medal-stage::before, .medal-stage::after, .result.big-moment *, .q-row.revealing, .q-row.revealing::after, .quest-card.revealing > *,
-  .is-next::before, .slot.is-selected .well, .character-window img, .notes i, .slot.usable .well::before, .lb-wave i, .intro-cam, .intro-sun, .intro-rays, .intro-rays i, .intro-path-light, .start-quest, .mark .you, .result-more, .pack-row .gain, .tumbler.gain, .rotate-hint .phone { animation: none !important; }
+  .is-next::before, .slot.is-selected .well, .character-window img, .notes i, .slot.usable .well::before, .lb-wave i, .intro-cam, .install-btn, .intro-sun, .intro-rays, .intro-rays i, .intro-path-light, .start-quest, .mark .you, .result-more, .pack-row .gain, .tumbler.gain, .rotate-hint .phone { animation: none !important; }
   .intro-screen { transition: none; }
 }
 

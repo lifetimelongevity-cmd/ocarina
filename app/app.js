@@ -969,6 +969,42 @@
     } catch (_) { hinweis(); }
   }
   fsBtn.addEventListener("click", e => { e.stopPropagation(); toggleFs(); });
+
+  /* ---------- App installieren (Startbildschirm) ---------- */
+  // Android (Chrome, Samsung Internet): ein Tipp öffnet das Fenster „App installieren?".
+  // iPhone: Apple erlaubt das keiner Webseite, der Knopf zeigt stattdessen die Anleitung.
+  const installBtn = $("#installBtn");
+  const IOS = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  const ANDROID = /Android/i.test(navigator.userAgent);
+  let installEvent = window.__installEvent || null, installiert = false;
+  try { installiert = localStorage.getItem("dq-installiert") === "1"; } catch (_) {}
+  function updateInstall() { installBtn.hidden = isStandalone() || (installiert && !installEvent) || !(installEvent || IOS || ANDROID); }
+  const iosAnleitung = () => showOverlay({
+    head: `<span class="ri-big">${useSvg("i-star")}</span><p class="big">APP INSTALLIEREN</p><p class="sub">Auf dem iPhone in Safari:</p>`,
+    lines: `<li><span class="ri">1</span>Unten auf Teilen tippen (bei neuem iOS erst auf „…“).</li><li><span class="ri">2</span>„Zum Home-Bildschirm“ wählen, dann „Hinzufügen“.</li><li><span class="ri">3</span>Dennis Quest dort öffnen und quer halten.</li>` });
+  // Ersatz, falls Android das Fenster gerade nicht anbietet (zum Beispiel nach einmal Abbrechen)
+  const androidAnleitung = () => showOverlay({
+    head: `<span class="ri-big">${useSvg("i-star")}</span><p class="big">APP INSTALLIEREN</p><p class="sub">So geht es von Hand:</p>`,
+    lines: `<li><span class="ri">1</span>Chrome: oben rechts auf ⋮ tippen. Samsung Internet: unten auf ≡.</li><li><span class="ri">2</span>„Zum Startbildschirm hinzufügen“ bzw. „Seite hinzufügen zu“, dann „Startbildschirm“.</li><li><span class="ri">3</span>Dennis Quest dort öffnen.</li>` });
+  addEventListener("beforeinstallprompt", e => { e.preventDefault(); installEvent = e; updateInstall(); });
+  addEventListener("appinstalled", () => {
+    installEvent = null; installiert = true;
+    try { localStorage.setItem("dq-installiert", "1"); } catch (_) {}
+    updateInstall();
+    melody("side");
+    showOverlay({ head: `<span class="ri-big">${useSvg("i-check")}</span><p class="big">INSTALLIERT</p><p class="sub">Dennis Quest liegt jetzt auf deinem Startbildschirm.</p>`,
+      lines: `<li><span class="ri">▶</span>Ab jetzt dort öffnen, dann läuft es im Vollbild.</li>` });
+  });
+  installBtn.addEventListener("click", async e => {
+    e.stopPropagation();
+    tone("confirm");
+    if (!installEvent) return IOS ? iosAnleitung() : androidAnleitung();
+    const ev = installEvent;
+    installEvent = null;                     // das Fenster lässt sich nur einmal öffnen
+    try { await ev.prompt(); await ev.userChoice; } catch (_) { androidAnleitung(); }
+    updateInstall();
+  });
+  updateInstall();
   document.addEventListener("fullscreenchange", updateFs);
   document.addEventListener("webkitfullscreenchange", updateFs);
 
