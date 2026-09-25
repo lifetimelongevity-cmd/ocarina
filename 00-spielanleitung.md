@@ -10,7 +10,7 @@ Lesehilfe: §1 bis §3 sind das Spiel in drei Minuten. §4 bis §9 sind die Baus
 
 ## 1. Spielziel
 
-Dennis (der **Held**) muss über ein Wochenende beweisen, dass er würdig ist, den **Bund** (seine Freunde) für einen neuen Bund (Rieke) zu verlassen. Am Ende steht ein verschlossenes **Kästchen** mit zehn One-Piece-Booster-Packs. Dennis gewinnt, was er sich erspielt hat. Der Rest gehört dem Bund.
+Dennis (der **Held**) muss über ein Wochenende beweisen, dass er würdig ist, den **Bund** (seine Freunde) für einen neuen Bund (Rike) zu verlassen. Am Ende steht ein verschlossenes **Kästchen** mit zehn One-Piece-Booster-Packs. Dennis gewinnt, was er sich erspielt hat. Der Rest gehört dem Bund.
 
 Drei Dinge zählen am Ende:
 
@@ -28,7 +28,7 @@ Drei Dinge zählen am Ende:
 | **Verzahnung** | Jede Prüfung gibt oder nimmt etwas, das in einer späteren Prüfung messbar wirkt. Was nirgends wirkt, wird gestrichen. |
 | **Zwei Schichten** | Berry ist Geld (weg ist weg). Inventar ist bleibend (wirkt ab Freischaltung auf alles Folgende, kann aber verloren gehen). |
 | **Sichtbarkeit** | Kästchen, Berry-Stand und Inventar-Tafel sind jederzeit sichtbar. Jede Änderung wird laut angesagt. |
-| **Der Bund spielt mit** | Der Bund ist Gegner, Schiedsrichter und Publikum. Er kann selbst Dinge halten (Token, Riekes Botschaft) und gegen Dennis einsetzen. |
+| **Der Bund spielt mit** | Der Bund ist Gegner, Schiedsrichter und Publikum. Er kann selbst Dinge halten (Token, Rikes Botschaft) und gegen Dennis einsetzen. |
 | **Tricksen erlaubt** | Manipulation ist Teil des Spiels, außer bei Sicherheit und Wetter. Der Spielleiter hat das letzte Wort. |
 
 ---
@@ -67,7 +67,7 @@ Vier Ziffern, feste Reihenfolge, je eine Quelle:
 | 1 | Log-Buch (Akt 0) | mindestens 7 von 10 Fragen |
 | 2 | Kreuzung der Klingen (Akt 1) | Duell gewonnen |
 | 3 | Feuerprobe (Akt 2) | Umschlag 1 geschafft |
-| 4 | Prüfung des Bundes (Akt 3) | mindestens 2 von 3 Duellen, versteckt in Riekes Botschaft |
+| 4 | Prüfung des Bundes (Akt 3) | mindestens 2 von 3 Duellen, versteckt in Rikes Botschaft |
 
 Status einer Ziffer: **unbekannt**, **bekannt** (erspielt), **gekauft** (am Kästchen für 1 Berry), **geraten**. Eine bekannte Ziffer geht nur über die Berry-Regel (§4.1) oder eine Encounter-Karte verloren.
 
@@ -82,7 +82,7 @@ Das Inventar hat vier Kategorien. Sie unterscheiden sich darin, *wie* sie wirken
 | **Verbrauchsgut** | Zählbares Ding (Proviant, Steckbriefe) | Einmal-Effekt, dann weg | Wird verbraucht | Inventar |
 | **Fluch** | Negativer Regel-Effekt nach verlorener Prüfung, physisch sichtbar getragen | Nachteil bis zur Erlösung | Wird erlöst (§8) | Inventar |
 
-Dazu kommen **Verwahrtes**: Dinge, die der Bund hält und Dennis erst freigeben muss (Riekes Botschaft, ggf. das Token).
+Dazu kommen **Verwahrtes**: Dinge, die der Bund hält und Dennis erst freigeben muss (Rikes Botschaft, ggf. das Token).
 
 Status eines Inventar-Eintrags: **nicht erspielt**, **im Besitz**, **verloren**, **verbraucht**, **verwahrt** (beim Bund).
 
@@ -95,10 +95,10 @@ Jede Prüfung folgt derselben Karte: Kategorie, Akt, Dauer, Ablauf, Gewinn, Verl
 ### 5.1 Log-Buch (Wissen)
 
 - **Akt 0**, Zug, 20 Minuten.
-- **Ablauf:** 10 Fragen über Rieke. Dennis antwortet, dann wird Riekes Sprachnachricht abgespielt. Der Bund entscheidet, ob es zählt.
+- **Ablauf:** 10 Fragen über Rike. Dennis antwortet, dann wird Rikes Sprachnachricht abgespielt. Der Bund entscheidet, ob es zählt.
 - **Gewinn:** ab 7 richtig: Ziffer 1. Alle Startitems bleiben.
 - **Verlust:** pro falscher Antwort ab der vierten: ein Startitem (Dennis wählt). Unter 5 richtig: keine Ziffer, keine Startitems.
-- **Wirkt auf:** Startitems (Ring der Rieke, Proviant, Log-Pose) und damit auf Encounter, Kästchen, Showdown.
+- **Wirkt auf:** Startitems (Ring der Rike, Proviant, Log-Pose) und damit auf Encounter, Kästchen, Showdown.
 - **Fluch bei Totalversagen (0 bis 3 richtig):** [PLATZHALTER: Fluch des Vergessens, siehe §8].
 
 ### 5.2 Prophezeiung (Vorhersage)
@@ -138,7 +138,7 @@ Jede Prüfung folgt derselben Karte: Kategorie, Akt, Dauer, Ablauf, Gewinn, Verl
 
 - **Akt 3**, Gipfelwiese, 25 bis 35 Minuten.
 - **Ablauf:** Drei Duelle. Pro Duell: Disziplin aus dem Bund-Deck ziehen, der Bund nominiert seinen besten Wächter (jeder nur einmal), Dennis setzt Fähigkeiten ein, Duell. Details in `01-showdown-pruefung-des-bundes.md`.
-- **Gewinn:** 3 Siege: Ziffer 4, Riekes Botschaft, eine verlorene Ziffer zurück, +2 Berry. 2 Siege: Ziffer 4, Riekes Botschaft, +1 Berry. 1 Sieg: nur Riekes Botschaft.
+- **Gewinn:** 3 Siege: Ziffer 4, Rikes Botschaft, eine verlorene Ziffer zurück, +2 Berry. 2 Siege: Ziffer 4, Rikes Botschaft, +1 Berry. 1 Sieg: nur Rikes Botschaft.
 - **Verlust:** 0 Siege: −2 Berry, ein Item weg, keine Botschaft. Ziffer 4 muss gekauft oder geraten werden.
 - **Wirkt auf:** Kästchen (Ziffer 4), Berry-Endstand, Rucksack-Forfeit beim Abstieg.
 - **Bund-Deck:** Schnick Schnack Schnuck, Wasserduell, Ringwurf, Kartenwurf, Log-Buch, Eiserne Faust. Zwei Karten ohne Item-Bezug sind Absicht.
@@ -161,14 +161,14 @@ Kleine Aufgaben zwischen den Prüfungen. Ein Beutel mit 10 Karten, 4 bis 5 Züge
 | Waffenschmied | Handel | Ausrüstung Waffe Stufe 2 | Nachkauf nur für 2 Berry |
 | Ringschmied | Geschicklichkeit | Ausrüstung Ziel Stufe 2, +1 Berry | −1 Berry |
 | Kartenwurf | Geschicklichkeit | Ausrüstung Wurf Stufe 2, +1 Berry | −1 Berry |
-| Log-Buch: Rieke | Wissen | +1 Berry | −1 Berry |
+| Log-Buch: Rike | Wissen | +1 Berry | −1 Berry |
 | Log-Buch: Nakama | Wissen | +1 Berry | −1 Berry |
 | Schnick Schnack Schnuck | Duell | +1 Berry | −1 Berry |
 | Diebstahl | Ereignis | nichts | Würfel 4 bis 6: ein Ausrüstungs-Upgrade weg |
 | Schatzkarte | Ereignis | 1 Steckbrief | nichts |
 | Der Bund fordert | Ereignis | Token-Besitzer setzt es ein | siehe §7 |
 
-**Ring der Rieke:** Dennis darf genau einen Encounter ablehnen (Ring abgeben), außer „Der Bund fordert" mit Token beim Bund.
+**Ring der Rike:** Dennis darf genau einen Encounter ablehnen (Ring abgeben), außer „Der Bund fordert" mit Token beim Bund.
 
 Erweiterungen: [PLATZHALTER: bis zu 2 weitere Geschicklichkeits-Karten, Kriterium: physisch, upgradebar, wirkt im Showdown].
 
@@ -195,10 +195,10 @@ Regel: Dennis hat pro Linie immer genau eine Stufe „ausgerüstet". Stufe 1 kan
 | **Schwert der Verdammnis** | Wanderstock mit rotem Tape | Auge des Jägers 5/5 oder Encounter | Showdown: pro Duell den nominierten Wächter streichen | Encounter Kreuzung der Klingen verloren, Showdown 0 Siege |
 | **Schild des Bundes** | Frisbee mit Sticker | Feuerprobe, drei Umschläge | Showdown: ein verlorenes Duell einmal wiederholen | Showdown 0 Siege (vor dem Einsatz) |
 | **Log-Pose** (Startitem) | Kompass-Anhänger | Start | Ein Steckbrief gratis | Log-Buch |
-| **Ring der Rieke** (Startitem) | Holzring am Band | Start | Einen Encounter ablehnen | Log-Buch, Einsatz |
+| **Ring der Rike** (Startitem) | Holzring am Band | Start | Einen Encounter ablehnen | Log-Buch, Einsatz |
 | [PLATZHALTER Fähigkeit 6] | | | | |
 
-**Token beim Bund:** Einmal im Showdown die gezogene Disziplin zurücklegen und neu ziehen, nachdem Dennis seine Fähigkeiten gesetzt hat. Oder einmal am Tag Dennis zu einem Encounter zwingen (schlägt den Ring der Rieke).
+**Token beim Bund:** Einmal im Showdown die gezogene Disziplin zurücklegen und neu ziehen, nachdem Dennis seine Fähigkeiten gesetzt hat. Oder einmal am Tag Dennis zu einem Encounter zwingen (schlägt den Ring der Rike).
 
 ### 7.3 Verbrauchsgüter
 
@@ -283,5 +283,5 @@ Alles, was inhaltlich noch fehlt, in einer Liste. Die Struktur bleibt auch ohne 
 5. §7.1 Vierte Ausrüstungslinie (optional)
 6. §7.2 Sechste Fähigkeit (optional)
 7. §8 Endgültige Fluch-Liste und ihre Zeichen
-8. Namen der Wächter, Steckbriefe, Rieke-Fragen
+8. Namen der Wächter, Steckbriefe, Rike-Fragen
 9. Teilnehmerzahl und Bund-Deck-Größe

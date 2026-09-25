@@ -40,7 +40,7 @@ Lesereihenfolge für Neueinsteiger: README, dann 00 (Regeln), dann 05 (App-Struk
 
 **Die 5 Kernprüfungen (Dramaturgie-Bogen):**
 
-1. **Wissen über Rieke** (Freitag im Zug, Intro): Fragen über Dennis' Verlobte Rieke. Die Fragen werden vorab an Rieke geschickt, sie beantwortet sie per Sprachnachricht – ihre Stimme ist der Beweis. Dennis muss sagen, was Rieke geantwortet hat, bzw. Detailfragen beantworten. Falsche Antworten kosten Startitems.
+1. **Wissen über Rike** (Freitag im Zug, Intro): Fragen über Dennis' Verlobte Rike. Die Fragen werden vorab an Rike geschickt, sie beantwortet sie per Sprachnachricht – ihre Stimme ist der Beweis. Dennis muss sagen, was Rike geantwortet hat, bzw. Detailfragen beantworten. Falsche Antworten kosten Startitems.
 2. **Die Prophezeiung** (Samstagmorgen, vor dem Aufstieg): Dennis schreibt für jeden Trauzeugen zwei Vorhersagen auf ("Benne wird in den ersten zwei Stunden anhalten und sich dehnen"). Zettel werden versiegelt abgegeben. Tritt eine Prophezeiung ein, gibt es eine Belohnung. Tricksen/Manipulieren ist erlaubt und Teil des Spaßes.
 3. **Das blinde Duell** (vor dem Anstieg, körperlich aber kurz): Dennis wählt einen Gegner, OHNE die Disziplin zu kennen. Erst danach wird gezogen: Schnick Schnack Schnuck (Best of 3, hat Geschichte in der Runde), Stein möglichst nah an einen Baum werfen / durch einen Ring in weniger Versuchen, o.ä. Belohnung: Herausforderungs-Token – damit kann Dennis später eine Aufgabe an jemanden abgeben oder jemanden zwingen, mitzumachen. Verliert er, geht das Token an den Gewinner, der es gegen ihn einsetzen kann.
 4. **Mut-Prüfung unterwegs** (noch offen, auf halber Strecke)

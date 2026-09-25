@@ -78,7 +78,7 @@ Verlorene Items: Eine verlorene Quest nimmt nur Items, die in `lose.items` stehe
 | Großer Ring | Ringschmied | Leichteres Ziel beim Ringwurf. |
 | Gepanzerte Karten | Kartenwurf | Stabilere Karten beim Kartenwurf. |
 
-Ring der Rieke, Proviant und Log-Pose sind gestrichen, bis Dennis eigene Aktionen hat (Stufe 2).
+Ring der Rike, Proviant und Log-Pose sind gestrichen, bis Dennis eigene Aktionen hat (Stufe 2).
 
 ### A4. Das gespeicherte Dokument (was der Quest Master schaltet)
 
@@ -190,12 +190,12 @@ Wenn `derive` genau das liefert, ist v0 fertig. Der Test zeigt auch die Reihenfo
 | Stufe | Was dazukommt | Was es an v0 anhängt |
 |---|---|---|
 | **1 · Inhalte** | Sidequests konkret, Beschreibungen, Icons, Orte | Nur Konfiguration |
-| **1b · Startitems** | Ring der Rieke, Proviant, Log-Pose zurück, sobald Dennis Aktionen hat | Konfiguration plus Stufe 2 |
+| **1b · Startitems** | Ring der Rike, Proviant, Log-Pose zurück, sobald Dennis Aktionen hat | Konfiguration plus Stufe 2 |
 | **2 · Aktionen von Dennis** | Items einsetzen, Packs ausgeben, als Anfrage mit Bestätigung | Liste `anfragen` im Dokument, jede mit Status offen / bestätigt / abgelehnt |
 | **3 · Ergebnisse mit Zahlen** | Treffer 0 bis 5, Umschläge 1 bis 3, Siege 0 bis 3, Raten am Kästchen | `quest` bekommt `wert`, Konfiguration bekommt `wert -> Effekt` |
 | **4 · Stufen bei Items** | Kleine und große Pistole als Linie mit „ausgerüstet" | `linie`, `stufe`, Feld `ausgeruestet` im Dokument |
 | **5 · Flüche** | Negative Effekte nach verlorener Quest, erlösbar | Status-Typ `fluch`, `lose.fluch` |
-| **6 · Verwahrung** | Token beim Bund, Riekes Botschaft | Item-Status `beim_bund` |
+| **6 · Verwahrung** | Token beim Bund, Rikes Botschaft | Item-Status `beim_bund` |
 | **7 · Karte und Chronik** | Position, öffentliche Chronik im Menü | Feld `position` im Dokument, Projektion |
 | **8 · Funkloch** | QR-Übergabe des Zustands | Nur Transport |
 

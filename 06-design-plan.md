@@ -134,7 +134,7 @@ Bucht der Quest Master etwas, erscheint bei Dennis ein Fenster wie beim Item-Fun
 
 ### 4.6 Startbildschirm und Hochformat
 
-- **Startbildschirm: Titelbild vom Nutzer** (24.09.): Dennis als Link von hinten auf dem Waldweg, daneben die Fee, rechts das Logo THE LEGEND OF DENNIS · A LINK TO RIEKE mit Schild und Schwert (`app/assets/intro-titel.webp`). **PRESS START** blinkt unter dem Logo, auf Höhe von Dennis' Stiefeln, in der Schrift Hylia Serif. Tippen irgendwo startet.
+- **Startbildschirm: Titelbild vom Nutzer** (24.09.): Dennis als Link von hinten auf dem Waldweg, daneben die Fee, rechts das Logo THE LEGEND OF DENNIS · A LINK TO RIKE mit Schild und Schwert (`app/assets/intro-titel.webp`). **PRESS START** blinkt unter dem Logo, auf Höhe von Dennis' Stiefeln, in der Schrift Hylia Serif. Tippen irgendwo startet.
 - **Leicht belebt:** Das Licht oben pulsiert, schräge Lichtstrahlen wie im Bild werden heller und dunkler und wandern ein wenig, der Lichtfleck auf dem Weg atmet. Die Fee ist aus dem Bild gelöst (`intro-fee.png`) und schwebt in einer ruhigen Acht, unter ihr rieselt funkelnder Feenstaub. Glühwürmchen blinken am Rand, nie über Logo, Gesicht oder PRESS START, im Lichtstrahl treibt Staub. Dazu ein langsamer Kamera-Zoom von 3 %. Alles läuft nur, solange der Startbildschirm zu sehen ist. Wer „Bewegung reduzieren" eingestellt hat, sieht das stille Bild.
 - **Zuschnitt:** Das Bild ist 16 : 9, Handys quer sind breiter. Es füllt den Bildschirm, abgeschnitten wird oben etwas mehr als unten, Schwertspitze und Stiefel bleiben sichtbar.
 - **Schriften von zeldauniverse.net:** PRESS START in **Hylia Serif**, die Zeichen auf den Medaillons aus **Hylian Symbols** (als Vektorpfad eingebaut). Herkunft und Bedingungen in `app/assets/SCHRIFTEN.md`: Fan-Schriften, nur privat und nicht kommerziell. Für den JGA passt das. Die Netlify-Seite ist aber öffentlich erreichbar, damit werden die Dateien streng genommen verbreitet.
@@ -178,7 +178,7 @@ Regeln: Du-Form, höchstens zwei kurze Sätze, keine Gedankenstriche, keine Rege
 
 | Quest | Text |
 |---|---|
-| Log-Buch | Zehn Fragen über Rieke. Ihre Stimme verrät, ob du ihr zugehört hast. |
+| Log-Buch | Zehn Fragen über Rike. Ihre Stimme verrät, ob du ihr zugehört hast. |
 | Waffenschmied | Ein Schmied bietet dir die große Wasserpistole an. Sein Preis ist ein Duell. |
 | Kreuzung der Klingen | Wähle deinen Gegner, bevor du die Disziplin kennst. Der Sieger hält den Token. |
 | Auge des Jägers | Fünf Flammen, ein Tank, drei Meter. Lösch sie, bevor dir das Wasser ausgeht. |
@@ -268,9 +268,11 @@ Anschluss an Teil B von `05-system-plan.md`: Stufe 2 (Aktionen von Dennis) bekom
 
 ---
 
-## 10. Bauplan, wenn du „bauen" sagst
+## 10. Bauplan (gebaut am 25.09.2026)
 
-1. Texte, Farben, Stationen nach `config.js`, Tests laufen lassen.
-2. Entwurf wird zu `index.html`, `app.js`, `styles.css`.
-3. Test mit zwei echten Handys (offener Punkt 2 in `CLAUDE.md`): iPhone quer in Safari und vom Home-Bildschirm, Admin bucht, Ergebnis-Fenster erscheint.
-4. `CLAUDE.md` und `app/README.md` nachziehen, `entwurf.*` löschen.
+1. ~~Texte, Farben, Stationen nach `config.js`, Tests laufen lassen.~~ Erledigt, zusammen mit den Spielen aus `07-spiele-und-items.md`.
+2. ~~Entwurf wird zu `index.html`, `app.js`, `styles.css`.~~ Erledigt, `entwurf.html` leitet auf die Hauptseite um (`netlify.toml`).
+3. Test mit zwei echten Handys (offener Punkt 2 in `CLAUDE.md`): iPhone quer in Safari und vom Home-Bildschirm, Admin bucht, Ergebnis-Fenster erscheint. **Noch offen.** In Playwright nachgestellt (iPhone 13, iPhone 15, Samsung gedrosselt): `tests/geraete.mjs`.
+4. ~~`CLAUDE.md` und `app/README.md` nachziehen, `entwurf.*` löschen.~~ Erledigt.
+
+**Änderungen gegenüber diesem Plan (25.09.):** Noch nicht erspielte Items sind in der AUSRÜSTUNG ein **leerer Platz** (Wunsch des Nutzers). Die Tarnnamen erscheinen nur noch in der Vorschau einer Belohnung und bei der Enthüllung im Ergebnis-Fenster. Bei der aktuellen Quest **leuchtet**, was dort einsetzbar ist, alles andere im Besitz ist ausgegraut. Die Quest-Karte zeigt statt „Hilft" die Zeile „Einsetzbar". Laufende Quests stehen oben in der Liste unter LÄUFT. Der Avatar ist das Okarina-Bild. Die Liste „Hilft" (`HILFT`) und die Items Großer Ring, Token und Schwert der Verdammnis sind entfallen.

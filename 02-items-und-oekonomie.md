@@ -34,7 +34,7 @@ Gründe: Die Packs nie aus dem Kästchen zu nehmen hält das Kästchen als Tages
 
 | Wann | Ereignis | Berry für Dennis |
 |---|---|---|
-| Freitag Zug | Log-Buch (Rieke-Quiz) | keine, kostet Startitems |
+| Freitag Zug | Log-Buch (Rike-Quiz) | keine, kostet Startitems |
 | Sa früh | Prophezeiung | pro eingetretene Prophezeiung +1 (Deckel +3), Abrechnung in der Hütte |
 | Sa vor Anstieg | Blindes Duell | keine, es geht um das Token |
 | Sa unterwegs | Encounter (4 bis 5 Stück) | je ±1 |
@@ -74,7 +74,7 @@ Kriterium für jedes Item: physisch in der Hand, hat eine Upgrade- oder Verlust-
 
 | Item | Physisch | Wirkung | Wo |
 |---|---|---|---|
-| **Ring der Rieke** | großer Plastik- oder Holzring am Schlüsselband | Dennis darf **einen** Encounter ablehnen, ohne Berry zu verlieren. Der Ring wird dann abgegeben. | Encounter |
+| **Ring der Rike** | großer Plastik- oder Holzring am Schlüsselband | Dennis darf **einen** Encounter ablehnen, ohne Berry zu verlieren. Der Ring wird dann abgegeben. | Encounter |
 | **Proviant** | kleine Tüte Gummibärchen (5 Stück) | Jedes Gummibärchen ist ein freier Fehlversuch am Schloss. Wer eins isst, hat es benutzt. | Kästchen |
 | **Log-Pose** | Kompass-Schlüsselanhänger | Ein Steckbrief gratis, jederzeit einlösbar. | Showdown-Vorbereitung |
 
@@ -96,7 +96,7 @@ Quiz-Regel: 10 Fragen. 7 und mehr richtig: Ziffer 1 und alle Startitems bleiben.
 
 | Item | Woher | Wirkung |
 |---|---|---|
-| Herausforderungs-Token (beim Bund) | Blindes Duell verloren | Einmal im Showdown die gezogene Disziplin zurücklegen und neu ziehen, nachdem Dennis seine Items gesetzt hat. Oder: einmal am Tag Dennis zu einem Encounter zwingen, den er ablehnen wollte (schlägt den Ring der Rieke). |
+| Herausforderungs-Token (beim Bund) | Blindes Duell verloren | Einmal im Showdown die gezogene Disziplin zurücklegen und neu ziehen, nachdem Dennis seine Items gesetzt hat. Oder: einmal am Tag Dennis zu einem Encounter zwingen, den er ablehnen wollte (schlägt den Ring der Rike). |
 
 ---
 
@@ -122,7 +122,7 @@ Der Spielleiter führt eine Inventar-Tafel (Rückseite des Kontobuchs), die bei 
 
 ```
 INVENTAR DENNIS         Berry: 3
-[x] Ring der Rieke    [x] Proviant (5)    [x] Log-Pose
+[x] Ring der Rike    [x] Proviant (5)    [x] Log-Pose
 [ ] Token             [ ] Schwert         [ ] Große Wasserpistole
 [ ] Großer Ring       [ ] Gepanzerte Karten
 [ ] Schild des Bundes

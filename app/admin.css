@@ -79,3 +79,43 @@ h2 { margin: 0 0 12px; font-size: 15px; letter-spacing: .08em; text-transform: u
 .toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%) translateY(20px); opacity: 0; padding: 10px 16px; border-radius: 10px; background: #f2c94c; color: #1d1604; font-weight: 700; transition: opacity .15s, transform .15s; pointer-events: none; max-width: calc(100% - 32px); }
 .toast.show { opacity: 1; transform: translateX(-50%); }
 @media (prefers-reduced-motion: reduce) { .toast { transition: none; } }
+
+/* v1: Inventar im Kopf, Einsetzen, laufende Quests, Showdown-Duelle, Log-Buch */
+.inv { justify-content: flex-start; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.inv:empty { display: none; }
+.inv-i { font-size: 12px; padding: 2px 8px; border-radius: 999px; background: #262b1c; }
+.inv-i.st-besitz { color: #8fd694; } .inv-i.st-verloren, .inv-i.st-verbraucht { color: var(--muted); text-decoration: line-through; }
+.st-verbraucht { color: var(--muted); }
+.qm { margin: 8px 0 0; padding: 8px 10px; border-left: 3px solid var(--gold); background: #1f2316; font-size: 14px; color: #e3dcb9; }
+.qm:empty { display: none; }
+.sub-h { margin: 14px 0 6px; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--gold); }
+.use .chips { margin-bottom: 4px; }
+.use-btn small { margin-left: 6px; color: var(--muted); font-weight: 500; }
+.use-btn:not([disabled]) { border-color: #6b5a1c; background: #2f2a12; }
+.used { margin: 4px 0 0; font-size: 14px; color: #c9a4ff; }
+.q-nr { display: inline-grid; place-items: center; min-width: 26px; height: 22px; padding: 0 4px; border-radius: 6px; background: #262b1c; color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+.badge.st-laeuft { background: #2a2350; color: #c9a4ff; }
+.badge.st-bestanden { background: #1f4a25; color: #8fd694; }
+.badge.st-verloren { background: #4a1f1b; color: #f08b80; }
+.lauf { display: grid; gap: 14px; }
+.lauf-q { display: grid; gap: 8px; padding-top: 12px; border-top: 1px solid var(--line); }
+.lauf-q:first-child { border-top: 0; padding-top: 0; }
+.lauf-q .chips { margin-bottom: 0; }
+.counter { display: inline-flex; align-items: center; gap: 8px; }
+.counter b { min-width: 28px; text-align: center; font-size: 22px; color: var(--gold); font-variant-numeric: tabular-nums; }
+.btn.on { background: #1f4a25; border-color: #2c7a37; }
+.duel-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; counter-reset: d; }
+.duel-list li { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 10px; counter-increment: d; }
+.duel-list .d-name::before { content: counter(d) ". "; color: var(--muted); }
+.duel-list .d-name small { display: block; color: var(--muted); font-size: 12px; }
+.seg.two { grid-template-columns: repeat(2, auto); }
+.seg.two button { padding: 0 12px; }
+.seg button[aria-pressed="true"][data-v="sieg"] { background: var(--win); color: #fff; }
+.seg button[aria-pressed="true"][data-v="niederlage"] { background: var(--lose); color: #fff; }
+.lb-list { margin: 0; padding-left: 22px; display: grid; gap: 10px; }
+.lb-list li { display: grid; gap: 2px; }
+.lb-q { color: var(--muted); font-size: 14px; }
+.lb-a { font-weight: 700; color: #f4e7b2; }
+.lb-a.leer { font-weight: 400; color: #6f6b58; font-style: italic; }
+.items .it em { font-style: normal; color: var(--muted); font-size: 12px; }
+.use-btn { min-height: 40px; padding: 0 12px; font-size: 14px; }
