@@ -1,0 +1,16 @@
+{
+  "name": "Quest Master · Dennis Quest",
+  "short_name": "Quest Master",
+  "start_url": "./admin.html",
+  "scope": "./",
+  "id": "./admin.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0c0e0a",
+  "theme_color": "#1d070c",
+  "icons": [
+    { "src": "assets/icons/admin-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icons/admin-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icons/admin-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

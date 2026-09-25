@@ -28,7 +28,7 @@ Dennis darf **einen** Berry zahlen, um vor der Entscheidung den Titel (nicht den
 | Nr. | Titel | Aufgabe | Scheitern heißt |
 |---|---|---|---|
 | 1 | **Die Taufe** | Ein Liter Bergwasser (mitgebrachte Flasche, kalt) über den Kopf. Alternativ: Kopf in den nächsten Bach oder Brunnen. | Abbruch vor dem letzten Tropfen |
-| 2 | **Der Ruf** | Die nächste fremde Wandergruppe ansprechen und sie dazu bringen, gemeinsam mit ihm ein Video für Rieke aufzunehmen: "Rieke, Dennis ist wirklich hier oben." Mindestens zwei fremde Stimmen im Video. | Nach drei Gruppen niemand überzeugt |
+| 2 | **Der Ruf** | Die nächste fremde Wandergruppe ansprechen und sie dazu bringen, gemeinsam mit ihm ein Video für Rike aufzunehmen: "Rike, Dennis ist wirklich hier oben." Mindestens zwei fremde Stimmen im Video. | Nach drei Gruppen niemand überzeugt |
 | 3 | **Das Opening** | Am Aussichtspunkt den Refrain des One Piece Openings ("We Are!") in voller Lautstärke singen, auf Japanisch oder Deutsch, mindestens 30 Sekunden. Der Bund singt nicht mit. | Leiser als Zimmerlautstärke oder unter 30 Sekunden |
 | R1 | **Die Glut** | Ein Chili-Bonbon oder ein Shot mit Hot-Sauce (Team kalibriert vorher). Danach 60 Sekunden kein Wasser. | Wasser vor Ablauf |
 | R2 | **Barfuß** | 100 Meter des Wegs barfuß, Schuhe trägt ein Wächter. | Schuhe vorher wieder an |
@@ -123,7 +123,7 @@ Blind aus einem Beutel gezogen, 4 bis 5 Stück über den Tag verteilt, immer an 
 | Waffenschmied | Handel | siehe §3.3 | Große Wasserpistole | Nachkauf nur mit 2 Berry |
 | Ringschmied | Geschicklichkeit | siehe §3.2 | Großer Ring, +1 Berry | −1 Berry |
 | Kartenwurf | Geschicklichkeit | siehe §3.1 | Gepanzerte Karten, +1 Berry | −1 Berry |
-| Log-Buch: Rieke | Wissen | 3 Detailfragen aus dem Zug-Quiz, die noch nicht dran waren. | +1 Berry | −1 Berry |
+| Log-Buch: Rike | Wissen | 3 Detailfragen aus dem Zug-Quiz, die noch nicht dran waren. | +1 Berry | −1 Berry |
 | Log-Buch: Nakama | Wissen | 3 Fragen über die Trauzeugen (Geburtsjahr, erstes gemeinsames Spiel, Ähnliches). | +1 Berry | −1 Berry |
 | Schnick Schnack Schnuck | Duell | Best of 3 gegen einen vom Bund bestimmten Gegner. | +1 Berry | −1 Berry |
 | Diebstahl | Ereignis | Der Bund würfelt: bei 4 bis 6 verliert Dennis den Großen Ring oder die Gepanzerten Karten (Bund wählt). Hat er keins davon, passiert nichts. | nichts | siehe Aufgabe |
@@ -132,4 +132,4 @@ Blind aus einem Beutel gezogen, 4 bis 5 Stück über den Tag verteilt, immer an 
 
 Karten, die Items geben, bleiben nach dem Ziehen draußen. Karten mit Berry-Wirkung gehen zurück in den Beutel.
 
-**Ring der Rieke:** Dennis darf genau einen Encounter ablehnen, indem er den Ring abgibt. Ausnahme: "Der Bund fordert" mit Token beim Bund.
+**Ring der Rike:** Dennis darf genau einen Encounter ablehnen, indem er den Ring abgibt. Ausnahme: "Der Bund fordert" mit Token beim Bund.

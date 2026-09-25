@@ -8,12 +8,12 @@
 
 ## 1. Story-Rahmen
 
-Der Bund (die Gruppe) steht als Endboss auf dem Gipfel. Wer den Bund verlässt, um einen neuen Bund einzugehen (die Ehe mit Rieke), muss ihn vorher besiegen. Die Freunde sind die **Wächter des Bundes**. Dennis ist allein, hat aber sein Inventar.
+Der Bund (die Gruppe) steht als Endboss auf dem Gipfel. Wer den Bund verlässt, um einen neuen Bund einzugehen (die Ehe mit Rike), muss ihn vorher besiegen. Die Freunde sind die **Wächter des Bundes**. Dennis ist allein, hat aber sein Inventar.
 
 Der Bund hält zwei Dinge zurück, die Dennis für das Kästchen braucht:
 
 - die **vierte Ziffer** des Codes (die einzige Ziffer, die es nur hier gibt)
-- **Riekes Botschaft**: eine letzte Sprachnachricht von Rieke, die der Bund erst freigibt, wenn Dennis bestanden hat (die Ziffer ist in der Nachricht versteckt, siehe §6)
+- **Rikes Botschaft**: eine letzte Sprachnachricht von Rike, die der Bund erst freigibt, wenn Dennis bestanden hat (die Ziffer ist in der Nachricht versteckt, siehe §6)
 
 Eröffnungssatz des Spielleiters (frei, nur als Ton):
 
@@ -40,7 +40,7 @@ Sechs Karten, drei werden gezogen. Jede Disziplin ist in unter drei Minuten auf 
 | B | **Wasserduell** | Jeder hat eine Wasserpistole und drei Teelichter (oder drei Papierbecher) in 3 m Entfernung. Wer zuerst alle drei umlegt bzw. löscht, gewinnt. Tank darf nicht nachgefüllt werden. | Große Wasserpistole (dreifacher Tank, der Gegner bekommt immer die kleine) |
 | C | **Ringwurf** | Stein aus 4 m in einen Seilring auf dem Boden. Jeder drei Würfe, mehr Treffer gewinnt. Bei Gleichstand Sudden Death. | Großer Ring (Dennis wirft auf den großen Ring, der Gegner auf den kleinen) |
 | D | **Kartenwurf** | Zehn Trading Cards (Bulk-Commons) aus 3 m in einen Hut. Mehr Karten im Hut gewinnt. | Gepanzerte Karten (Dennis wirft gesleevte Karten, die fliegen stabiler) |
-| E | **Log-Buch** | Drei Fragen zu Rieke oder den Trauzeugen, die am Tag noch nicht dran waren. Beide antworten gleichzeitig schriftlich, Riekes Sprachnachricht bzw. der Betroffene entscheidet. Mehr richtige gewinnt. | Nichts direkt. Belohnt, wer am Freitag im Zug zugehört hat. |
+| E | **Log-Buch** | Drei Fragen zu Rike oder den Trauzeugen, die am Tag noch nicht dran waren. Beide antworten gleichzeitig schriftlich, Rikes Sprachnachricht bzw. der Betroffene entscheidet. Mehr richtige gewinnt. | Nichts direkt. Belohnt, wer am Freitag im Zug zugehört hat. |
 | F | **Eiserne Faust** | Beide halten einen Wanderstock mit gestrecktem Arm waagerecht. Wer zuerst absinkt (Spielleiter-Urteil), verliert. | Nichts. Reine Härte, bewusst als Karte ohne Item drin, damit nicht alles kaufbar ist. |
 
 Warum sechs und nicht mehr: Bei drei gezogenen Karten ist die Wahrscheinlichkeit, dass das Wasserduell dabei ist, 50 %. Ein Item, das mit 50 % Chance ein Duell fast sicher gewinnt, ist stark genug, um sich den ganzen Tag dafür zu strecken, aber nicht sicher genug, um alles andere zu ignorieren.
@@ -78,7 +78,7 @@ Diese Tabelle ist der Vertrag zwischen Tag und Finale. Jedes Item, das es im Spi
 | Gepanzerte Karten (Sleeves) | Encounter-Pool (Kartenwurf-Karte) | Kartenwurf deutlich leichter | mittel |
 | Steckbrief (je Wächter einer) | Log-Pose (Startitem) oder Kauf für 1 Berry | Kennt Stärke, Schwäche und SSS-Eröffnung des Wächters. Sagt Dennis, wen er streichen und wen er mit dem Token schicken soll. | mittel, multipliziert Schwert und Token |
 | Schild des Bundes | Feuerprobe (Prüfung 4), alle drei Umschläge | Ein verlorenes Duell wiederholen | hoch, eine zweite Chance |
-| Ring der Rieke (Startitem) | Zug-Quiz | Kein Effekt im Showdown (wirkt bei Encountern) | siehe 02 |
+| Ring der Rike (Startitem) | Zug-Quiz | Kein Effekt im Showdown (wirkt bei Encountern) | siehe 02 |
 | Proviant (Startitem) | Zug-Quiz | Kein Effekt im Showdown (wirkt am Kästchen) | siehe 02 |
 
 Sichtbare Faustregel für Dennis: **Mit vollem Inventar gewinnt er den Showdown fast sicher. Mit leerem Inventar ist er ein Mann gegen sechs.** Das ist die Aussage, die der Tag erzählen soll.
@@ -91,12 +91,12 @@ Nach drei Duellen zählt der Spielleiter.
 
 | Siege | Titel | Konsequenz |
 |---|---|---|
-| 3 | "Der Bund kniet" | Vierte Ziffer wird laut genannt. Riekes Botschaft wird freigegeben. Zusätzlich darf Dennis **eine** verlorene Ziffer vom Tag zurückfordern. Der Bund zahlt 2 Berry. |
-| 2 | "Der Bund lässt dich ziehen" | Vierte Ziffer und Riekes Botschaft werden freigegeben. Der Bund zahlt 1 Berry. |
-| 1 | "Der Bund zögert" | Riekes Botschaft wird freigegeben, aber die vierte Ziffer nicht. Dennis muss sie am Kästchen raten oder kaufen. Kein Berry-Transfer. |
+| 3 | "Der Bund kniet" | Vierte Ziffer wird laut genannt. Rikes Botschaft wird freigegeben. Zusätzlich darf Dennis **eine** verlorene Ziffer vom Tag zurückfordern. Der Bund zahlt 2 Berry. |
+| 2 | "Der Bund lässt dich ziehen" | Vierte Ziffer und Rikes Botschaft werden freigegeben. Der Bund zahlt 1 Berry. |
+| 1 | "Der Bund zögert" | Rikes Botschaft wird freigegeben, aber die vierte Ziffer nicht. Dennis muss sie am Kästchen raten oder kaufen. Kein Berry-Transfer. |
 | 0 | "Der Bund verstößt dich" | Keine Botschaft, keine Ziffer. Dennis zahlt 2 Berry und verliert ein Item seiner Wahl. |
 
-**Riekes Botschaft:** Rieke nimmt vorab eine dritte Sprachnachricht auf (neben Quiz-Antworten und dem Zug-Intro). Inhalt: etwas Persönliches plus eine Zahl, die in ihrer gemeinsamen Geschichte steckt (Tag des Kennenlernens, Hausnummer der ersten Wohnung, Ähnliches). Diese Zahl ist die vierte Ziffer. Dennis muss die Ziffer selbst aus der Nachricht heraushören, der Spielleiter bestätigt nur, ob richtig. Damit ist der emotionale Höhepunkt gleichzeitig ein Spielzug.
+**Rikes Botschaft:** Rike nimmt vorab eine dritte Sprachnachricht auf (neben Quiz-Antworten und dem Zug-Intro). Inhalt: etwas Persönliches plus eine Zahl, die in ihrer gemeinsamen Geschichte steckt (Tag des Kennenlernens, Hausnummer der ersten Wohnung, Ähnliches). Diese Zahl ist die vierte Ziffer. Dennis muss die Ziffer selbst aus der Nachricht heraushören, der Spielleiter bestätigt nur, ob richtig. Damit ist der emotionale Höhepunkt gleichzeitig ein Spielzug.
 
 **Forfeit für besiegte Wächter:** Jeder Wächter, den Dennis besiegt hat, trägt beim Abstieg seinen Rucksack. Kostet nichts, ist sichtbar, und die Gruppe hat einen Grund, im Showdown ernst zu machen.
 
@@ -109,7 +109,7 @@ Nach drei Duellen zählt der Spielleiter.
 - **Zwei Karten ohne Item (E, F).** Damit Dennis nicht alles über Käufe lösen kann und der Tag ohne Items trotzdem gewinnbar bleibt.
 - **Die vierte Ziffer gibt es nur hier.** Sonst kann Dennis mit Glück vor dem Gipfel fertig sein und der Showdown ist nur noch Show.
 - **0 Siege kostet ein Item.** Die einzige Stelle, an der ein Item nach dem Showdown noch relevant ist: Es fehlt bei der Kästchen-Öffnung (z. B. Proviant).
-- **Riekes Stimme als Preis.** Der Bund gibt nicht nur Zahlen frei, sondern den Zugang zu Rieke. Das ist die Übersetzung von "Bund verlassen" in etwas, das sich am Gipfel wirklich gut anfühlt.
+- **Rikes Stimme als Preis.** Der Bund gibt nicht nur Zahlen frei, sondern den Zugang zu Rike. Das ist die Übersetzung von "Bund verlassen" in etwas, das sich am Gipfel wirklich gut anfühlt.
 
 ---
 
@@ -125,7 +125,7 @@ Duell 2: Karte ___  Bund schickt ___  Items: ___  Sieger: ___
 Duell 3: Karte ___  Bund schickt ___  Items: ___  Sieger: ___
 Schild eingesetzt? [ ]   Bund-Token eingesetzt? [ ]
 Siege: ___  Urteil: ___________
-[ ] Ziffer 4 / Riekes Botschaft freigegeben?
+[ ] Ziffer 4 / Rikes Botschaft freigegeben?
 [ ] Berry-Transfer im Kontobuch notiert
 [ ] Rucksack-Forfeit verteilt
 ```
@@ -134,6 +134,6 @@ Siege: ___  Urteil: ___________
 
 ## 9. Offen / Entscheidungen für die Runde
 
-- Wird Riekes Botschaft auf dem Gipfel abgespielt oder erst in der Hütte? Vorschlag: Gipfel, direkt nach dem Urteil, dann ist die Stimmung beim Abstieg zur Hütte gesetzt.
+- Wird Rikes Botschaft auf dem Gipfel abgespielt oder erst in der Hütte? Vorschlag: Gipfel, direkt nach dem Urteil, dann ist die Stimmung beim Abstieg zur Hütte gesetzt.
 - Bei sieben oder mehr Teilnehmern: Bund-Deck auf drei von sieben Karten? Nein, lieber zwei Wächter pro Duell als Team bei Karte F. Sechs Karten bleiben.
 - Ob "Eiserne Faust" bei Wind auf dem Gipfel funktioniert: Backup ist Armdrücken auf dem Rucksack.

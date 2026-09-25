@@ -1,22 +1,46 @@
-# Dennis Quest · App v0
+# Dennis Quest · App v1
 
 Zwei Seiten, ein gespeicherter Stand.
 
 | Seite | Wer | Was |
 |---|---|---|
-| `index.html` | Dennis | Pausenmenü. Zeigt Packs, Ziffern, Quests, Items, Karte und die nächste Quest. Schreibt nichts. Tippen auf ein Feld zeigt die Beschreibung. |
-| `admin.html` | Quest Master | Status je Quest (offen, bestanden, verloren), Packs buchen, Ziffern kaufen, Items korrigieren, Zurücksetzen. |
+| `index.html` | Dennis | Menü im N64-Stil: Startbildschirm, drei Seiten KARTE, QUESTS, AUSRÜSTUNG, HUD mit Packs, nächster Quest und Code. Ergebnis-Fenster nach jeder Buchung. Schreibt nur seine Antworten im Log-Buch. |
+| `admin.html` | Quest Master | Nächste Quest mit Bestanden/Verloren, Einsetzen, Showdown-Duellen und Log-Buch-Antworten. Laufende Quests (Prophezeiung mit Zähler, Rikes Amulett), Packs buchen, Ziffern kaufen, Items korrigieren, Zurücksetzen. |
+
+Adressen: Dennis `https://dd-ocarina.netlify.app/`, Quest Master `https://dd-ocarina.netlify.app/admin.html`.
+Zusätze für Dennis' Seite: `?demo` (Beispielstand mit Demo-Knöpfen, ohne Datenbank, auch `?demo=start`, `?demo=ende`), `?direkt` (ohne Startbildschirm), `?onboarding` (Beutel-Onboarding noch einmal), `?schwach` (Sparmodus erzwingen). Die alte Adresse `entwurf.html` leitet auf die Hauptseite um.
 
 ## Dateien
 
 | Datei | Inhalt |
 |---|---|
-| `config.js` | Alles, was das Spiel kennt: Packs (max, Start), Code, Items, Quests mit Sieg und Niederlage, Speicher. **Hier werden Quests und Items ergänzt.** |
-| `engine.js` | Die Logik. Rechnet aus Konfiguration und gespeichertem Stand alles aus, was angezeigt wird. |
-| `store.js` | Speicher. `lokal` (ein Browser, zum Testen) oder `firebase` (zwei Handys). |
-| `app.js`, `styles.css` | Dennis' Menü. Navigation und Optik aus der ursprünglichen Version, Anzeige jetzt aus dem Stand. |
-| `admin.js`, `admin.css` | Quest-Master-Menü. |
-| `engine.test.js` | Test der Logik: `node engine.test.js` |
+| `config.js` | Alles, was das Spiel kennt: Quests (Reihenfolge, Texte, Belohnungen, einsetzbar), Items und Fähigkeiten mit Tarnnamen, Kartenstationen, Log-Buch-Fragen, Code, Packs, Speicher. **Hier wird ergänzt.** |
+| `engine.js` | Die Logik. Rechnet aus Konfiguration und gespeichertem Stand alles aus: Packs, Ziffern, Items, Anzahl Spruchrollen, nächste Quest, laufende Quests, Showdown-Duelle, was wo einsetzbar ist. |
+| `store.js` | Speicher. `lokal` (ein Browser, zum Testen) oder `firebase` (zwei Handys). Dazu der Kanal für Dennis' Log-Buch-Antworten. |
+| `app.js`, `styles.css`, `index.html` | Dennis' Menü. |
+| `admin.js`, `admin.css`, `admin.html` | Quest-Master-Menü. |
+| `sw.js` | Offline-Speicher: Die App startet auch im Funkloch, Rikes Sprachnachrichten werden vorab geladen. |
+| `manifest.webmanifest`, `admin.webmanifest` | Für „Zum Home-Bildschirm". Dennis: grünes Icon, Quest Master: rotes Icon mit QM. |
+| `assets/` | Titelbild (`intro-titel.webp`, Fee separat `intro-fee.png`), Avatar (`avatar-okarina.webp`), Icons (`icons/`), Schriften, `logbuch/` für Rikes Sprachnachrichten. Originale der Bilder liegen außerhalb der App in `quellen/`. |
+| `engine.test.js` | Test der Logik: `node app/engine.test.js` |
+
+## Gespeicherter Stand
+
+```
+/spiele/dennis-jga-2026            { quests, zaehler, schritte, einsaetze, duelle, buchungen, items, stand }   schreibt nur der Admin
+/spiele/dennis-jga-2026-logbuch    { "1": { antwort, zeit }, … }                                              schreibt nur Dennis (Log-Buch)
+```
+
+Die Log-Buch-Antworten liegen bewusst neben dem Spiel, damit das Speichern im Admin sie nie überschreibt.
+
+## Ablauf am Spieltag (Quest Master)
+
+- **Reihe:** Oben steht die nächste Quest. Bestanden oder Verloren tippen. Dennis sieht das Ergebnis-Fenster, danach tritt die nächste Quest aus dem Nebel.
+- **Einsetzen:** Dennis sagt an, was er einsetzt. Unter der nächsten Quest (und bei laufenden Quests) stehen die Knöpfe, aktiv nur, was er hat. Spruchrolle und Schild sind danach weg. Falsch gebucht: im Bereich „Eingesetzt" mit ✕ zurücknehmen.
+- **Prophezeiung:** morgens „Starten", jede erfüllte Vorhersage „+1 Treffer" (gibt eine Spruchrolle), abends „Beenden".
+- **Rikes Amulett:** „Starten", wenn die Brosche versteckt ist, „Gefunden", dann Bestanden oder Verloren.
+- **Showdown:** Die App zeigt die drei Duelle (verlorene Spiele vom Tag zuerst, aufgefüllt mit Wirbel der Götter). Je Duell Sieg oder Niederlage tippen, dann die Prüfung buchen.
+- **Log-Buch:** Dennis' Antworten erscheinen live unter der Quest und unten im Bereich Log-Buch.
 
 ## Lokal ausprobieren
 
@@ -25,42 +49,36 @@ cd app
 python3 -m http.server 8000
 ```
 
-Dann `http://localhost:8000/admin.html` und `http://localhost:8000/` in zwei Tabs desselben Browsers öffnen. Was du im Admin schaltest, erscheint sofort im Menü.
+`http://localhost:8000/?demo` zeigt Dennis' Menü mit Demo-Knöpfen ohne Datenbank. Für Admin und Dennis zusammen in `config.js` `typ: "lokal"` setzen und beide Seiten in zwei Tabs desselben Browsers öffnen.
 
-## Aktueller Stand
+Geräte-Test (iPhone 13 und 15 in Safari und vom Home-Bildschirm, Samsung mit gedrosselter CPU): `tests/geraete.mjs`, siehe Kopf der Datei.
 
-Firebase ist eingerichtet und in `config.js` eingetragen (`dennis-quest-default-rtdb.europe-west1.firebasedatabase.app`, Spiel `dennis-jga-2026`). Lesen und Schreiben aus zwei getrennten Browsern ist getestet. Für einen reinen Test auf einem Gerät ohne Datenbank in `config.js` `typ: "lokal"` setzen.
+## Firebase
 
-Verbindung: Die App nutzt den Live-Stream von Firebase. Kommt der nicht zustande (schwaches Netz), fragt sie alle 4 Sekunden ab. Nicht gesendete Änderungen am Admin-Handy werden gespeichert und automatisch nachgeschickt, auch nach Neuladen der Seite.
+Eingerichtet und in `config.js` eingetragen (`dennis-quest-default-rtdb.europe-west1.firebasedatabase.app`, Spiel `dennis-jga-2026`). Regeln unter „Realtime Database → Regeln":
 
-## Für zwei Handys: Firebase einrichten (einmalig, etwa 20 Minuten)
+Einfach (jeder mit Link könnte technisch schreiben, für einen JGA meist genug):
+```
+{ "rules": { "spiele": { "$spiel": { ".read": true, ".write": true } } } }
+```
 
-1. Auf console.firebase.google.com ein Projekt anlegen (Analytics kann aus bleiben).
-2. Links „Realtime Database" öffnen, „Datenbank erstellen", Standort Europa, im **gesperrten Modus** starten.
-3. Unter „Regeln" eine der beiden Varianten eintragen und veröffentlichen.
+Geschützt (nur der Admin-Link mit Schlüssel schreibt das Spiel, Dennis darf nur ins Log-Buch):
+```
+{ "rules": { "spiele": {
+    "$spiel": { ".read": true, ".write": "$spiel.endsWith('-logbuch')" }
+} } }
+```
+Den Schlüssel findest du unter Projekteinstellungen → Dienstkonten → Datenbank-Secrets. Dein Admin-Link lautet dann `…/admin.html#key=DEIN_SECRET`. Das Handy merkt sich den Schlüssel. Den Link niemandem schicken.
 
-   Einfach (jeder mit Link könnte technisch schreiben, für einen JGA meist genug):
-   ```
-   { "rules": { "spiele": { "$spiel": { ".read": true, ".write": true } } } }
-   ```
-
-   Geschützt (nur der Admin-Link mit Schlüssel schreibt):
-   ```
-   { "rules": { "spiele": { "$spiel": { ".read": true, ".write": false } } } }
-   ```
-   Den Schlüssel findest du unter Projekteinstellungen → Dienstkonten → Datenbank-Secrets. Dein Admin-Link lautet dann `…/admin.html#key=DEIN_SECRET`. Das Handy merkt sich den Schlüssel, der Link wird danach ohne ihn angezeigt. Den Link niemandem schicken.
-4. Oben in der Realtime Database steht die URL (z. B. `https://dennis-quest-default-rtdb.europe-west1.firebasedatabase.app`). In `config.js` eintragen:
-   ```
-   speicher: { typ: "firebase", spielId: "dennis-jga-2026", databaseURL: "https://…firebasedatabase.app" }
-   ```
-5. Ordner neu deployen.
-
-Ohne Netz puffert das Admin-Handy Änderungen und schickt sie nach, sobald wieder Netz da ist. Dennis' Menü zeigt unten rechts „Stand hh:mm" bzw. „Offline".
+Ohne Netz puffert das Admin-Handy Änderungen und schickt sie nach. Dennis' Antworten im Log-Buch werden genauso nachgereicht. Dennis' Menü zeigt unten rechts „Stand hh:mm" bzw. „Offline".
 
 ## Deployen
 
-Den ganzen Ordner `app/` auf denselben Host hochladen wie bisher. Dennis bekommt die Startadresse, du nutzt `/admin.html`.
+Netlify ist mit dem Repo verknüpft: Jeder Push auf `main` ist nach wenigen Sekunden live (`netlify.toml` veröffentlicht den Ordner `app/`).
 
 ## Neue Quests oder Items
 
-Nur `config.js` ändern. Eine Quest hat `typ` (`kern` für die sechs Medaillons, `side` für die Steine), `station` (Punkt auf der Karte), `win` und `lose` mit `packs`, `items` und bei `win` optional `ziffer`. Danach `node engine.test.js` laufen lassen. Die Tests prüfen den Beispielstand aus `05-system-plan.md` und müssen bei Änderungen an Werten angepasst werden.
+Nur `config.js` ändern, danach `node app/engine.test.js`. Die Tests prüfen auch die Konfiguration selbst: jede Quest hat Station und Text, jede Prüfung Farbe und Emblem, jedes Item wird irgendwo gewonnen und irgendwo eingesetzt.
+
+- Quest: `typ` (`kern` Prüfung mit Medaillon, `side` Sidequest, `lauf` läuft neben der Reihe), `station`, `text`, `qm` (Notiz nur für dich), `win`/`lose` mit `packs`, `items`, bei `win` optional `ziffer`, `einsetzbar` (Liste von Item-IDs), `duell`, `revanche` (kommt im Showdown wieder, wenn verloren).
+- Item: `gruppe` (`item` links, `faehigkeit` rechts), `stapel` (mehrfach), `einmalig` (nach dem Einsetzen weg), `symbol`, `farbe`, `text`, `tarn` (Name, bis Dennis es erspielt).

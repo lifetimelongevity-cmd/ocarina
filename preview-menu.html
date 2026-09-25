@@ -343,7 +343,7 @@
     <symbol id="i-cards" viewBox="0 0 32 32"><rect x="4" y="8" width="16" height="22" rx="2" transform="rotate(-12 12 19)" fill="#fff" stroke="#222" stroke-width="1.5"/><rect x="11" y="5" width="16" height="22" rx="2" transform="rotate(6 19 16)" fill="#fff" stroke="#222" stroke-width="1.5"/><rect x="14" y="8" width="10" height="14" transform="rotate(6 19 16)" fill="#d62f2a"/><circle cx="19" cy="15" r="3" transform="rotate(6 19 16)" fill="#e6b422"/></symbol>
     <symbol id="i-cards-a" viewBox="0 0 32 32"><rect x="4" y="8" width="16" height="22" rx="2" transform="rotate(-12 12 19)" fill="#fff" stroke="#1a3aa0" stroke-width="2.5"/><rect x="11" y="5" width="16" height="22" rx="2" transform="rotate(6 19 16)" fill="#fff" stroke="#1a3aa0" stroke-width="2.5"/><rect x="14" y="8" width="10" height="14" transform="rotate(6 19 16)" fill="#d62f2a"/><circle cx="19" cy="15" r="3" transform="rotate(6 19 16)" fill="#e6b422"/><path d="M6 4 l2 -2 M4 8 l-2 0" stroke="#8ee0ff" stroke-width="2" stroke-linecap="round"/></symbol>
     <symbol id="i-token" viewBox="0 0 32 32"><circle cx="16" cy="16" r="13" fill="#e6b422" stroke="#3d2a05" stroke-width="2"/><circle cx="16" cy="16" r="9.5" fill="none" stroke="#3d2a05" stroke-width="1.5"/><path d="M16 8 l2.4 5 5.4.6 -4 3.7 1.1 5.4 -4.9 -2.7 -4.9 2.7 1.1 -5.4 -4 -3.7 5.4 -.6z" fill="#3d2a05"/></symbol>
-    <symbol id="i-ring-rieke" viewBox="0 0 32 32"><circle cx="16" cy="19" r="9" fill="none" stroke="#3d2a05" stroke-width="6"/><circle cx="16" cy="19" r="9" fill="none" stroke="#e6b422" stroke-width="3"/><polygon points="16,2 22,8 16,14 10,8" fill="#8ee0ff" stroke="#0a3a5a" stroke-width="1.5"/><polygon points="16,2 22,8 16,8" fill="#fff"/></symbol>
+    <symbol id="i-ring-rike" viewBox="0 0 32 32"><circle cx="16" cy="19" r="9" fill="none" stroke="#3d2a05" stroke-width="6"/><circle cx="16" cy="19" r="9" fill="none" stroke="#e6b422" stroke-width="3"/><polygon points="16,2 22,8 16,14 10,8" fill="#8ee0ff" stroke="#0a3a5a" stroke-width="1.5"/><polygon points="16,2 22,8 16,8" fill="#fff"/></symbol>
     <symbol id="i-bear" viewBox="0 0 32 32"><circle cx="9" cy="8" r="4" fill="#f28c1e" stroke="#7a3a05" stroke-width="1.5"/><circle cx="23" cy="8" r="4" fill="#f28c1e" stroke="#7a3a05" stroke-width="1.5"/><circle cx="16" cy="14" r="9" fill="#f28c1e" stroke="#7a3a05" stroke-width="1.5"/><rect x="8" y="18" width="16" height="12" rx="6" fill="#f28c1e" stroke="#7a3a05" stroke-width="1.5"/><circle cx="13" cy="13" r="1.3" fill="#3a1a05"/><circle cx="19" cy="13" r="1.3" fill="#3a1a05"/><ellipse cx="16" cy="17" rx="2.4" ry="1.6" fill="#7a3a05"/></symbol>
     <symbol id="i-compass" viewBox="0 0 32 32"><circle cx="16" cy="16" r="13" fill="#e6b422" stroke="#3d2a05" stroke-width="2"/><circle cx="16" cy="16" r="9.5" fill="#f4efe2" stroke="#3d2a05" stroke-width="1.5"/><polygon points="16,7 19,16 16,25 13,16" fill="#d62f2a"/><polygon points="16,16 19,16 16,25 13,16" fill="#2a3a6a"/><circle cx="16" cy="16" r="1.5" fill="#3d2a05"/></symbol>
     <symbol id="i-card-id" viewBox="0 0 32 32"><rect x="2" y="6" width="28" height="20" rx="2" fill="#f4efe2" stroke="#2a1a08" stroke-width="2"/><circle cx="10" cy="14" r="3.5" fill="#f28c1e" stroke="#2a1a08" stroke-width="1.2"/><rect x="5" y="19" width="10" height="4" rx="2" fill="#f28c1e"/><rect x="17" y="10" width="10" height="2.2" fill="#2a1a08"/><rect x="17" y="14.5" width="10" height="2.2" fill="#2a1a08" opacity=".6"/><rect x="17" y="19" width="7" height="2.2" fill="#2a1a08" opacity=".6"/></symbol>
@@ -499,7 +499,7 @@
     trials: { logbuch: 'bestanden', prophezeiung: 'offen', klingen: 'bestanden', auge: 'bestanden', feuerprobe: 'offen', bund: 'offen' },
     rast: { bestellung: 'offen', trank: 'offen', toast: 'offen' },
     items: {
-      ring_rieke: 1, proviant: 1, logpose: 'lost',
+      ring_rike: 1, proviant: 1, logpose: 'lost',
       token: 1, schwert: 0, pistole_klein: 1, pistole_gross: 1,
       ring_klein: 1, ring_gross: 0, karten: 1, karten_gepanzert: 0,
       schild: 0, steckbrief: 1, botschaft: 0, prophezeiung: 1, umschlaege: 0, beutel: 1
@@ -508,12 +508,12 @@
   };
 
   const TRIALS = [
-    { id: 'logbuch',      name: 'Log-Buch',             color: '#f2d24b', reward: 'Ziffer 1',                   when: 'Freitag, Zug',     desc: 'Zehn Fragen über Rieke, ihre Stimme ist der Beweis. Sieben richtige für die Ziffer, jede falsche ab der vierten kostet ein Startitem.', glyph: 'M50 22 l6 18 h18 l-14 11 5 18 -15 -11 -15 11 5 -18 -14 -11 h18z' },
+    { id: 'logbuch',      name: 'Log-Buch',             color: '#f2d24b', reward: 'Ziffer 1',                   when: 'Freitag, Zug',     desc: 'Zehn Fragen über Rike, ihre Stimme ist der Beweis. Sieben richtige für die Ziffer, jede falsche ab der vierten kostet ein Startitem.', glyph: 'M50 22 l6 18 h18 l-14 11 5 18 -15 -11 -15 11 5 -18 -14 -11 h18z' },
     { id: 'prophezeiung', name: 'Prophezeiung',         color: '#3bb35a', reward: 'bis +3 Berry',               when: 'Samstag früh',     desc: 'Zwei Vorhersagen pro Trauzeuge, versiegelt. Abrechnung in der Hütte. Manipulieren erlaubt.', glyph: 'M30 50 q20 -26 40 0 q-20 26 -40 0z M50 42 a8 8 0 1 0 0.1 0z' },
     { id: 'klingen',      name: 'Kreuzung der Klingen', color: '#e04a2f', reward: 'Ziffer 2 + Token',           when: 'vor dem Anstieg',  desc: 'Gegner wählen, ohne die Disziplin zu kennen. Gewinn: Herausforderungs-Token. Verlust: das Token geht an den Bund.', glyph: 'M28 28 l44 44 M72 28 l-44 72 M24 24 l8 0 0 8z M76 24 l-8 0 0 8z' },
     { id: 'auge',         name: 'Auge des Jägers',      color: '#2f7be0', reward: 'Berry, bei 5/5 das Schwert', when: 'erstes Waldstück', desc: 'Wasserpistole auf fünf Teelichter, Tank wie er ist. 0 bis 1 Treffer: Downgrade auf die kleine Pistole.', glyph: 'M50 30 a20 20 0 1 0 0.1 0z M50 40 a10 10 0 1 0 0.1 0z' },
     { id: 'feuerprobe',   name: 'Feuerprobe',           color: '#f08a2a', reward: 'Ziffer 3, Schild, Berry',    when: 'halbe Strecke',    desc: 'Drei versiegelte Umschläge, Dennis sagt vorher, wie viele er nimmt. Scheitert er an einem, verliert er alles aus dieser Prüfung.', glyph: 'M50 22 q18 20 8 34 q6 -4 6 -12 q14 22 -14 32 q-28 -10 -14 -32 q0 8 6 12 q-10 -14 8 -34z' },
-    { id: 'bund',         name: 'Prüfung des Bundes',   color: '#9a4ad6', reward: 'Ziffer 4, Riekes Botschaft', when: 'Gipfel',           desc: 'Der Bund ist Endboss. Drei Duelle, Disziplin wird gezogen, der Bund schickt seinen Besten. Hier zahlt sich jedes Item aus.', glyph: 'M50 24 l22 14 v24 l-22 14 -22 -14 v-24z M50 36 l10 6 v12 l-10 6 -10 -6 v-12z' }
+    { id: 'bund',         name: 'Prüfung des Bundes',   color: '#9a4ad6', reward: 'Ziffer 4, Rikes Botschaft', when: 'Gipfel',           desc: 'Der Bund ist Endboss. Drei Duelle, Disziplin wird gezogen, der Bund schickt seinen Besten. Hier zahlt sich jedes Item aus.', glyph: 'M50 24 l22 14 v24 l-22 14 -22 -14 v-24z M50 36 l10 6 v12 l-10 6 -10 -6 v-12z' }
   ];
   const MEDAL_POS = [[50,6],[88,28],[88,72],[50,94],[12,72],[12,28]];
 
@@ -524,9 +524,9 @@
   ];
 
   const ITEMS = {
-    ring_rieke:       { name: 'Ring der Rieke',           ico: 'i-ring-rieke',    cat: 'Startitem',  desc: 'Einen Encounter ablehnen, ohne Berry zu verlieren. Der Ring wird dabei abgegeben.' },
+    ring_rike:       { name: 'Ring der Rike',           ico: 'i-ring-rike',    cat: 'Startitem',  desc: 'Einen Encounter ablehnen, ohne Berry zu verlieren. Der Ring wird dabei abgegeben.' },
     proviant:         { name: 'Proviant',                 ico: 'i-bear',          cat: 'Startitem',  desc: 'Fünf Gummibärchen. Jedes ist ein freier Fehlversuch am Schloss. Wer eins isst, hat es benutzt.' },
-    logpose:          { name: 'Log-Pose',                 ico: 'i-compass',       cat: 'Startitem',  desc: 'Ein Steckbrief gratis, jederzeit einlösbar. Im Zug verloren: eine Frage über Rieke zu viel daneben.' },
+    logpose:          { name: 'Log-Pose',                 ico: 'i-compass',       cat: 'Startitem',  desc: 'Ein Steckbrief gratis, jederzeit einlösbar. Im Zug verloren: eine Frage über Rike zu viel daneben.' },
     token:            { name: 'Herausforderungs-Token',   ico: 'i-token',         cat: 'Fähigkeit',  desc: 'Ein Duell im Showdown von einem Wächter seiner Wahl austragen lassen. Oder jemanden zu einem Encounter zwingen.' },
     schwert:          { name: 'Schwert der Verdammnis',   ico: 'i-sword',         cat: 'Waffe',      desc: 'Im Showdown pro Duell den nominierten Wächter streichen. Der Bund muss einen anderen schicken.' },
     pistole_klein:    { name: 'Kleine Wasserpistole',     ico: 'i-pistol-s',      cat: 'Waffe',      desc: 'Standard. Reicht für das Auge des Jägers knapp, im Wasserduell ein Nachteil.' },
@@ -537,7 +537,7 @@
     karten_gepanzert: { name: 'Gepanzerte Karten',        ico: 'i-cards-a',       cat: 'Wurf',       desc: 'Dieselben Karten in Sleeves, fliegen stabiler. Beim Kartenwurf-Encounter erspielt.' },
     schild:           { name: 'Schild des Bundes',        ico: 'i-shield',        cat: 'Fähigkeit',  desc: 'Ein verlorenes Duell im Showdown wiederholen. Gibt es nur in der Feuerprobe, wenn Dennis alle drei Umschläge nimmt.' },
     steckbrief:       { name: 'Steckbriefe',              ico: 'i-card-id',       cat: 'Wissen',     desc: 'Stärke, Schwäche und Schnick-Schnack-Schnuck-Eröffnung eines Wächters. 1 Berry pro Stück. Aktuell: Benne.' },
-    botschaft:        { name: 'Riekes Botschaft',         ico: 'i-tape',          cat: 'Belohnung',  desc: 'Eine letzte Sprachnachricht von Rieke. Der Bund gibt sie erst nach dem Showdown frei. Die vierte Ziffer steckt darin.' },
+    botschaft:        { name: 'Rikes Botschaft',         ico: 'i-tape',          cat: 'Belohnung',  desc: 'Eine letzte Sprachnachricht von Rike. Der Bund gibt sie erst nach dem Showdown frei. Die vierte Ziffer steckt darin.' },
     prophezeiung:     { name: 'Prophezeiungen',           ico: 'i-envelope',      cat: 'Prüfung',    desc: 'Sechs versiegelte Umschläge vom Morgen. Werden in der Hütte geöffnet.' },
     umschlaege:       { name: 'Umschläge der Feuerprobe', ico: 'i-envelope-fire', cat: 'Prüfung',    desc: 'Drei Umschläge, werden schwerer. Für 1 Berry verrät der Spielleiter vorher einen Titel.' },
     beutel:           { name: 'Encounter-Beutel',         ico: 'i-pouch',         cat: 'Prüfung',    desc: 'Zehn Karten, blind gezogen. Vier bis fünf Züge über den Tag.' },
@@ -550,9 +550,9 @@
     { label: 'Wurf',  ids: ['karten', 'karten_gepanzert', null] },
     { label: 'Bund',  ids: ['token', 'schild', null] }
   ];
-  const START_IDS = ['ring_rieke', 'proviant', 'logpose'];
+  const START_IDS = ['ring_rike', 'proviant', 'logpose'];
   const INV_IDS = ['token', 'schwert', 'pistole_gross', 'ring_gross', 'karten_gepanzert', 'schild',
-                   'ring_rieke', 'proviant', 'logpose', 'steckbrief', 'botschaft', null,
+                   'ring_rike', 'proviant', 'logpose', 'steckbrief', 'botschaft', null,
                    'prophezeiung', 'umschlaege', 'beutel', null, null, null];
   const NOTE_COLORS = ['#3bb35a', '#e04a2f', '#2f7be0', '#f08a2a'];
 

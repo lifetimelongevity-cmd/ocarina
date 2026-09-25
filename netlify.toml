@@ -2,3 +2,19 @@
 [build]
   publish = "app"
   command = ""
+
+# Der Entwurf ist seit dem 25.09. die Haupt-App. Alte Links (auch mit ?demo) landen dort.
+[[redirects]]
+  from = "/entwurf.html"
+  to = "/"
+  status = 301
+
+# Konfiguration, Logik und Service Worker nie lange zwischenspeichern, damit Änderungen sofort ankommen
+[[headers]]
+  for = "/*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=86400"
