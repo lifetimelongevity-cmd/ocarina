@@ -37,14 +37,22 @@
     bund: ["token", "schwert", "schild", "pistole_gross", "ring_gross", "karten_gepanzert"]
   };
   // Items: links Ausrüstung (Gegenstände), rechts Fähigkeiten (Regeln im Showdown)
+  // tarn: So heißt das Item, solange Dennis es nicht erspielt hat. Beim Gewinnen entpuppt es sich als das echte Ding.
   const ITEM = {
-    beutel:           { gruppe: "item",       kurz: "Beutel",        farbe: "#d9a441", symbol: "i-backpack", text: "Dein Beutel. Hier landet alles, was du dir erspielst." },
-    pistole_gross:    { gruppe: "item",       kurz: "Pistole",       farbe: "#4fb8e8", symbol: "i-pistol",   text: "Dreifacher Tank. Du kannst länger schießen als jeder andere." },
-    ring_gross:       { gruppe: "item",       kurz: "Großer Ring",   farbe: "#d6b278", symbol: "i-ropering", text: "Ein Seilring mit 60 cm. Beim Ringwurf wird dein Ziel größer." },
-    karten_gepanzert: { gruppe: "item",       kurz: "Karten",        farbe: "#9fd0f0", symbol: "i-cards",    text: "Karten in Hüllen. Sie fliegen weiter und stabiler." },
-    token:            { gruppe: "faehigkeit", kurz: "Token",         farbe: "#f2c94c", symbol: "i-token",    text: "Lass im Showdown einen Wächter deiner Wahl für dich kämpfen." },
-    schwert:          { gruppe: "faehigkeit", kurz: "Schwert",       farbe: "#e05a4f", symbol: "i-sword",    text: "Streiche im Showdown den Wächter, den der Bund schickt." },
-    schild:           { gruppe: "faehigkeit", kurz: "Schild",        farbe: "#7aa7ff", symbol: "i-shield",   text: "Wiederhole im Showdown ein verlorenes Duell. Einmal." }
+    beutel:           { gruppe: "item",       name: "Dennis' Eier",  kurz: "Eier",   farbe: "#d9a441", symbol: "i-backpack", text: "Klein, aber oho. Hier landet alles, was du dir erspielst.",
+                        tarn: { name: "Heiliger Beutel des Helden", kurz: "Beutel", text: "Seit jeher an deiner Seite. Was steckt wohl darin?" } },
+    pistole_gross:    { gruppe: "item",       kurz: "Pistole",       farbe: "#4fb8e8", symbol: "i-pistol",   text: "Dreifacher Tank. Du kannst länger schießen als jeder andere.",
+                        tarn: { name: "Zoras Quellstab",        kurz: "Quellstab",  text: "Ein Relikt aus Zoras Reich. Wer es führt, hat den längsten Atem." } },
+    ring_gross:       { gruppe: "item",       kurz: "Großer Ring",   farbe: "#d6b278", symbol: "i-ropering", text: "Ein Seilring mit 60 cm. Beim Ringwurf wird dein Ziel größer.",
+                        tarn: { name: "Reif der Goronen",       kurz: "Reif",       text: "Schwer, rund und größer, als er sein müsste." } },
+    karten_gepanzert: { gruppe: "item",       kurz: "Karten",        farbe: "#9fd0f0", symbol: "i-cards",    text: "Karten in Hüllen. Sie fliegen weiter und stabiler.",
+                        tarn: { name: "Schriftrollen der Shiekah", kurz: "Rollen",  text: "Blätter, die kein Wind aus der Bahn wirft." } },
+    token:            { gruppe: "faehigkeit", kurz: "Token",         farbe: "#f2c94c", symbol: "i-token",    text: "Lass im Showdown einen Wächter deiner Wahl für dich kämpfen.",
+                        tarn: { name: "Leere Maske",            kurz: "Maske",      text: "Wer sie trägt, muss nicht selbst kämpfen." } },
+    schwert:          { gruppe: "faehigkeit", kurz: "Schwert",       farbe: "#e05a4f", symbol: "i-sword",    text: "Streiche im Showdown den Wächter, den der Bund schickt.",
+                        tarn: { name: "Verrostete Klinge",      kurz: "Klinge",     text: "Alt und stumpf. Doch sie wartet auf ihren Moment." } },
+    schild:           { gruppe: "faehigkeit", kurz: "Schild",        farbe: "#7aa7ff", symbol: "i-shield",   text: "Wiederhole im Showdown ein verlorenes Duell. Einmal.",
+                        tarn: { name: "Zerbrochenes Wappen",    kurz: "Wappen",     text: "Ein Bruchstück eines alten Bundes. Es schützt, wer es heilt." } }
   };
   // Stationen auf der Karte in Prozent der Kartenfläche, Reihenfolge = Weg
   const STATIONEN = [
@@ -60,6 +68,10 @@
   /* ---------- Speicher: echt oder Demo ---------- */
   const params = new URLSearchParams(location.search);
   const DEMO = params.has("demo");
+  // Onboarding einmal pro Handy. In der Demo und mit ?onboarding jedes Mal neu.
+  const OB_KEY = "dq-onboarding-v1";
+  let onboarded = false;
+  try { onboarded = !DEMO && !params.has("onboarding") && localStorage.getItem(OB_KEY) === "1"; } catch (e) {}
   const DEMO_DOCS = {
     start: { quests: {}, buchungen: [], items: {} },
     mitte: {                                   // Beispielstand aus 05-system-plan.md A9
@@ -90,6 +102,13 @@
   const questById = id => C.quests.find(q => q.id === id);
   const itemById = id => C.items.find(i => i.id === id);
   const itemInfo = id => ITEM[id] || { gruppe: "item", kurz: itemById(id).name, farbe: "#f2c94c", symbol: "i-backpack", text: itemById(id).wirkung };
+  // Was Dennis von einem Item sieht: vor dem ersten Erspielen die Tarnung mit Truhe, danach das echte Ding
+  // Der Beutel ist Startitem: seine Tarnung fällt beim ersten Besuch der Ausrüstung (Onboarding)
+  const getarnt = id => !!(ITEM[id] && ITEM[id].tarn) && (id === "beutel" ? !onboarded : state.items[id] === "nicht");
+  const itemSicht = id => {
+    const x = itemInfo(id);
+    return getarnt(id) ? { ...x, ...x.tarn, symbol: "i-chest" } : { ...x, name: x.name || itemById(id).name };
+  };
   const useSvg = (id, cls = "") => `<svg class="${cls}" aria-hidden="true"><use href="#${id}"></use></svg>`;
   const cardSvg = (cls = "") => `<svg class="ic-card ${cls}" aria-hidden="true"><use href="#${cls.includes("empty") ? "i-card-empty" : "i-card"}"></use></svg>`;
   const packsWort = n => Math.abs(n) === 1 ? "Pack" : "Packs";
@@ -181,7 +200,7 @@
       out.push(`<span class="chip plus"><span class="mini-tumbler">${v == null ? "?" : v}</span>Ziffer ${effekt.ziffer}</span>`);
     }
     (effekt.items || []).forEach(id => {
-      const x = itemInfo(id);
+      const x = itemSicht(id);
       out.push(`<span class="chip${gewonnen ? "" : " minus"}"><span class="${gewonnen ? "" : "x-over"}" style="color:${x.farbe}">${useSvg(x.symbol)}</span>${esc(x.kurz)}${gewonnen ? "" : " weg"}</span>`);
     });
     return out.length ? out.join("") : `<span class="chip none">nichts</span>`;
@@ -213,7 +232,7 @@
     // Ausrüstung: links Items, rechts Fähigkeiten
     const slot = it => {
       const x = itemInfo(it.id);
-      return `<button type="button" class="slot" data-id="${it.id}"><span class="well" style="--c:${x.farbe}">${useSvg(x.symbol)}</span></button>`;
+      return `<button type="button" class="slot" data-id="${it.id}"><span class="well" style="--c:${x.farbe}">${useSvg(x.symbol)}</span></button>`;  // Symbol setzt renderEquip
     };
     const gear = C.items.filter(it => itemInfo(it.id).gruppe !== "faehigkeit");
     const skill = C.items.filter(it => itemInfo(it.id).gruppe === "faehigkeit");
@@ -317,8 +336,8 @@
     if (!ids) return "";
     const hat = ids.filter(i => state.items[i] === "besitz").length;
     return `<div class="helps"><span class="fx-head">HILFT · ${hat}/${ids.length}</span><span class="helps-row">${ids.map(i => {
-      const x = itemInfo(i), st = state.items[i];
-      return `<span class="well mini st-${st}${st === "verloren" ? " lost" : ""}" style="--c:${x.farbe}" title="${esc(itemById(i).name)}">${useSvg(x.symbol)}</span>`;
+      const x = itemSicht(i), st = state.items[i];
+      return `<span class="well mini st-${st}${st === "verloren" ? " lost" : ""}" style="--c:${x.farbe}" title="${esc(x.name)}">${useSvg(x.symbol)}</span>`;
     }).join("")}</span></div>`;
   }
 
@@ -401,8 +420,9 @@
       b.classList.remove("st-besitz", "st-verloren", "st-nicht");
       b.classList.add("st-" + st);
       b.querySelector(".well").classList.toggle("lost", st === "verloren");
+      b.querySelector("use").setAttribute("href", "#" + itemSicht(b.dataset.id).symbol);
       b.classList.toggle("is-selected", sel[2] === b.dataset.id);
-      b.setAttribute("aria-label", `${itemById(b.dataset.id).name}, ${{ besitz: "im Beutel", verloren: "verloren", nicht: "noch nicht erspielt" }[st]}`);
+      b.setAttribute("aria-label", `${itemSicht(b.dataset.id).name}, ${{ besitz: "im Beutel", verloren: "verloren", nicht: "noch nicht erspielt" }[st]}`);
     });
     renderItemBox(sel[2]);
   }
@@ -410,7 +430,7 @@
   function renderItemBox(id) {
     const box = $("#itemBox");
     if (!id) id = sel[2] = state.erhalten[state.erhalten.length - 1] || C.items[0].id;
-    const it = itemById(id), x = itemInfo(id), st = state.items[id];
+    const x = itemSicht(id), st = state.items[id];
     const tag = st === "besitz" ? `<span class="tag won">IM BEUTEL</span>` : st === "verloren" ? `<span class="tag lost">VERLOREN</span>` : `<span class="tag open">NOCH NICHT</span>`;
     const quelle = C.quests.find(q => (q.win.items || []).includes(id));
     const nahm = C.quests.find(q => (q.lose.items || []).includes(id) && state.quests[q.id] === "verloren");
@@ -420,7 +440,7 @@
     if (st === "verloren" && nahm) extra = ` Verloren bei <em>${esc(nahm.name)}</em>.`;
     if (st === "besitz" && gefahr) extra = ` Vorsicht: <em>${esc(gefahr.name)}</em> kann es dir nehmen.`;
     box.style.setProperty("--c", x.farbe);
-    box.innerHTML = `${useSvg(x.symbol, "ib-icon")}<p class="tb-title">${esc(it.name)}${tag}</p><p class="tb-text">${esc(x.text)}${extra}</p>`;
+    box.innerHTML = `${useSvg(x.symbol, "ib-icon")}<p class="tb-title">${esc(x.name)}${tag}</p><p class="tb-text">${esc(x.text)}${extra}</p>`;
   }
 
   function selectItem(id, play = true) {
@@ -466,7 +486,9 @@
     const itemLines = [];
     C.items.forEach(it => {
       const x = itemInfo(it.id);
-      if (prev.items[it.id] !== "besitz" && next.items[it.id] === "besitz") itemLines.push(`<li class="plus"><span class="ri" style="color:${x.farbe}">${useSvg(x.symbol)}</span>${esc(it.name)}</li>`);
+      // Beim ersten Fund fällt die Tarnung: „Zoras Quellstab … entpuppt sich als Große Wasserpistole"
+      const tarn = x.tarn && prev.items[it.id] === "nicht" ? `<small class="tarn">${esc(x.tarn.name)} entpuppt sich als</small>` : "";
+      if (prev.items[it.id] !== "besitz" && next.items[it.id] === "besitz") itemLines.push(`<li class="plus${tarn ? " reveal" : ""}"><span class="ri" style="color:${x.farbe}">${useSvg(x.symbol)}</span><span>${tarn}${esc(it.name)}</span></li>`);
       if (prev.items[it.id] === "besitz" && next.items[it.id] === "verloren") itemLines.push(`<li class="minus"><span class="ri x-over" style="color:${x.farbe}">${useSvg(x.symbol)}</span>${esc(it.name)} weg</li>`);
     });
     lines.push(...itemLines);
@@ -561,8 +583,51 @@
     flatTimer = setTimeout(() => {
       cube.classList.add("flat");
       if (page === 1) { const row = document.querySelector(".q-row.is-selected"); if (row) scrollIntoList(row); }
+      if (page === 2 && !onboarded && $("#overlay").hidden) onboarding();
     }, 470);
   }
+  /* ---------- Onboarding: erster Besuch der Ausrüstung ---------- */
+  // Erst das Fundfenster mit Enthüllung des Beutels, dann drei kurze Hinweise nacheinander.
+  function onboarding() {
+    const x = ITEM.beutel;
+    melody("pruefung");
+    showOverlay({
+      head: `<span class="medal-stage won" style="--m:${x.farbe}"><span class="medal">${useSvg(x.symbol)}</span></span><p class="big">ERSTES ITEM GEFUNDEN</p><p class="sub">${esc(x.tarn.name)}</p>`,
+      lines: `<li class="plus reveal"><span class="ri" style="color:${x.farbe}">${useSvg(x.symbol)}</span><span><small class="tarn">${esc(x.tarn.name)} entpuppt sich als</small>${esc(x.name)}</span></li>`,
+      next: "", gross: true
+    }, () => {
+      onboarded = true;
+      try { if (!DEMO) localStorage.setItem(OB_KEY, "1"); } catch (e) {}
+      renderEquip();
+      coach([
+        [$("#slotsGear").parentElement, "Hier landet, was dir hilft."],
+        [$("#slotsSkill").parentElement, "Hier landen deine Tricks für den Showdown."],
+        [$(".hud"), "Packs und Ziffern für dein Kästchen."]
+      ]);
+    });
+  }
+  function coach(schritte) {
+    const bubble = $("#coach");
+    let i = -1, ziel = null;
+    const weiter = () => {
+      if (ziel) ziel.classList.remove("coach-focus");
+      if (++i >= schritte.length) { bubble.hidden = true; bubble.onclick = null; return; }
+      const [el, text] = schritte[i];
+      ziel = el; el.classList.add("coach-focus");
+      const b = bubble.querySelector(".coach-bubble");
+      b.firstElementChild.textContent = text;
+      bubble.hidden = false;
+      const box = bubble.getBoundingClientRect(), r = el.getBoundingClientRect(), unten = r.top - box.top < box.height / 2;
+      b.style.left = Math.max(12, Math.min(box.width - 232, r.left - box.left + r.width / 2 - 110)) + "px";
+      b.style.top = unten ? r.bottom - box.top + 10 + "px" : "";
+      b.style.bottom = unten ? "" : box.bottom - r.top + 10 + "px";
+      b.style.animation = "none"; void b.offsetWidth; b.style.animation = "";
+      tone("move");
+    };
+    bubble.onclick = weiter;
+    weiter();
+  }
+
   const turn = d => goTo((page + d + 3) % 3, d);
 
   function showNextQuest() {

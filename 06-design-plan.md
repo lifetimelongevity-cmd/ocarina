@@ -202,6 +202,22 @@ Regeln: Du-Form, höchstens zwei kurze Sätze, keine Gedankenstriche, keine Rege
 | Schwert der Verdammnis | Schwert | Streiche im Showdown den Wächter, den der Bund schickt. |
 | Schild des Bundes | Schild | Wiederhole im Showdown ein verlorenes Duell. Einmal. |
 
+**Onboarding (24.09.):** Beim ersten Besuch der AUSRÜSTUNG erscheint „ERSTES ITEM GEFUNDEN": „Heiliger Beutel des Helden entpuppt sich als Dennis' Eier". Danach leuchten nacheinander Items („Hier landet, was dir hilft."), Fähigkeiten („Hier landen deine Tricks für den Showdown.") und das HUD („Packs und Ziffern für dein Kästchen."). Einmal pro Handy, gemerkt im Browser, im Spielstand ändert sich nichts. Mit `?onboarding` oder in der Demo läuft es jedes Mal.
+
+**Neue Spiele in Planung (24.09.):** Beyblade-Duell und Knobelspiel (eine Brosche zusammensetzen). Beide als Sidequest oder Showdown-Disziplin denkbar. Welche Items sie geben, nehmen oder brauchen, wird zusammen mit den übrigen Items festgelegt.
+
+**Tarnung** (so heißt ein Item, bis Dennis es erspielt; Symbol ist eine Truhe):
+
+| Item | Tarnname | Kurzname | Text |
+|---|---|---|---|
+| Beutel (Anzeige „Dennis' Eier", Text „Klein, aber oho. Hier landet alles, was du dir erspielst.") | Heiliger Beutel des Helden | Beutel | Seit jeher an deiner Seite. Was steckt wohl darin? |
+| Große Wasserpistole | Zoras Quellstab | Quellstab | Ein Relikt aus Zoras Reich. Wer es führt, hat den längsten Atem. |
+| Großer Ring | Reif der Goronen | Reif | Schwer, rund und größer, als er sein müsste. |
+| Gepanzerte Karten | Schriftrollen der Shiekah | Rollen | Blätter, die kein Wind aus der Bahn wirft. |
+| Herausforderungs-Token | Leere Maske | Maske | Wer sie trägt, muss nicht selbst kämpfen. |
+| Schwert der Verdammnis | Verrostete Klinge | Klinge | Alt und stumpf. Doch sie wartet auf ihren Moment. |
+| Schild des Bundes | Zerbrochenes Wappen | Wappen | Ein Bruchstück eines alten Bundes. Es schützt, wer es heilt. |
+
 ---
 
 ## 7. Querformat-Regeln
@@ -231,7 +247,7 @@ Geprüft in allen vier Größen mit Start, Mitte und Ende des Tages: kein Text l
 
 | Datei | Änderung |
 |---|---|
-| `config.js` | Neue Felder. Quest: `beschreibung` (Text aus Abschnitt 6), `farbe`, `emblem`, `hilft` (Liste von Items). Item: `kurz`, `gruppe` (`item` oder `faehigkeit`), `symbol`, `farbe`, `wirkung` (Text aus Abschnitt 6). Neuer Block `karte.stationen` (Name, Ort, Lage in Prozent). `icon` und `glyph` entfallen. |
+| `config.js` | Neue Felder. Quest: `beschreibung` (Text aus Abschnitt 6), `farbe`, `emblem`, `hilft` (Liste von Items). Item: `tarn` (Name, Kurzname, Text), `kurz`, `gruppe` (`item` oder `faehigkeit`), `symbol`, `farbe`, `wirkung` (Text aus Abschnitt 6). Neuer Block `karte.stationen` (Name, Ort, Lage in Prozent). `icon` und `glyph` entfallen. |
 | `index.html`, `app.js`, `styles.css` | werden durch den Entwurf ersetzt. Die Demo-Knöpfe gibt es dann nur mit `?demo`. |
 | `engine.js`, `store.js` | unverändert |
 | `admin.html`, `admin.js`, `admin.css` | unverändert. Der Quest Master sieht die neuen Beschreibungen in der Karte „Nächste Quest". |
@@ -246,7 +262,7 @@ Anschluss an Teil B von `05-system-plan.md`: Stufe 2 (Aktionen von Dennis) bekom
 1. **Drei Seiten plus HUD** wie im Entwurf? Empfehlung: ja.
 2. **Seitennamen** deutsch (KARTE, QUESTS, AUSRÜSTUNG) oder englisch wie im N64-Original (MAP, QUEST LOG, EQUIPMENT)? Empfehlung: deutsch, alles andere ist auch deutsch.
 3. ~~Kommende Quests sichtbar oder verdeckt?~~ **Entschieden am 23.09.: nur die nächste ist sichtbar** (Abschnitt 3.1).
-6. **Noch nicht erspielte Items**: als dunkler Umriss mit Namen zeigen (so im Entwurf, Dennis sieht, was es zu gewinnen gibt) oder ganz leer lassen wie in Ocarina of Time, bis er sie findet?
+6. ~~Noch nicht erspielte Items zeigen oder leer lassen?~~ **Entschieden am 24.09.: sie stehen da, aber getarnt.** Solange Dennis ein Item nicht erspielt hat, sieht er eine dunkle Truhe mit einem Namen aus der Welt (Tabelle „Tarnung" in Abschnitt 6). Beim Gewinnen fällt die Tarnung im Ergebnis-Fenster: „Zoras Quellstab entpuppt sich als Große Wasserpistole". Danach, auch nach einem Verlust, zeigt das Feld das echte Item. Der Quest Master sieht immer die echten Namen.
 4. **Texte** aus Abschnitt 6 so übernehmen oder anpassen?
 5. **Hochformat**: nur Hinweis zum Drehen oder eine eigene Ansicht? Empfehlung: Hinweis.
 
