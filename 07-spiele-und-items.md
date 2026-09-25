@@ -14,7 +14,7 @@ Stand 25.09.2026. Sammelt, was der Nutzer pro Spiel und Item festgelegt hat. Die
 | 4 | Kreuzung der Klingen | Bleibt: erst Gegner wählen, dann kommt die Disziplin. **Kein Topf** (25.09.): Die Disziplin ist fest, Dennis erfährt sie erst nach der Wahl. | Welche Disziplin |
 | 5 | Prüfung des Bundes (Showdown auf dem Gipfel) | **Bleibt sicher** (25.09.). Kein Deck. Idee: Kombi aus Spielen, die Dennis vorher verloren hat (Revanche). | Feste Liste oder Revanche, Ablauf |
 | 6 | Prophezeiung | **Bleibt** (25.09.). Morgens sagt Dennis 2 bis 3 Dinge voraus, die der Bund heute tun wird („Bene wird sich dehnen"). Jede, die in Erfüllung geht, bringt ihm eine **Spruchrolle** (F1). Läuft den ganzen Tag, der Quest Master bucht, sobald sich eine erfüllt. | Anzahl Vorhersagen, Rolle oder Pack pro Treffer |
-| 7 | **RC-Auto-Parcours** (ersetzt Waffenschmied) | Kleines ferngesteuertes Auto, Parcours auf Zeit. Wird eine Prüfung. Name darf auch aus Star Wars oder The Witcher kommen. | Parcours, Name |
+| 7 | **Das Podrennen** (RC-Auto, ersetzt Waffenschmied) | Name steht (25.09.). Kleines ferngesteuertes Auto, Parcours auf Zeit. Wird eine Prüfung. | Parcours |
 | 8 | ~~Ringschmied~~ | **Gestrichen** (25.09.), mit dem Großen Ring. | |
 | 9 | Kartenwurf | Bleibt, **als Duell**, mit Karten aus schon geöffneten Packs, fester Abstand. Start mit 3 Karten, Item gibt +2. Fähigkeiten können helfen (näher ran, nur einer wirft). | Abstand, Ziel |
 | 10 | ~~Nakama-Quiz~~ | **Gestrichen.** | |
@@ -41,7 +41,7 @@ Stand 25.09.2026. Sammelt, was der Nutzer pro Spiel und Item festgelegt hat. Die
 | I3 | ~~Großer Ring~~ | | **Gestrichen** (25.09.) |
 | I4 | Gepanzerte Karten bzw. +2 Karten | 9 | Idee steht |
 | I5 | Beyblade-Vorteil (eigener Kreisel zum Üben oder erste Wahl) | 14 | Name offen |
-| I6 | **Schwert** (war F2, ist jetzt Item, 25.09.) | 12 | Wirkung: ein Schwert mehr, also ein Versuch mehr. Starker Name offen |
+| I6 | **Stich** (Schwert aus Herr der Ringe, war F2, 25.09.) | 12 | Ein Schwert mehr, also ein Versuch mehr |
 
 ## Fähigkeiten (Magie, kein physischer Gegenstand nötig)
 
