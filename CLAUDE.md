@@ -22,6 +22,7 @@ JGA-Wochenende für Dennis, 2. bis 4. Oktober 2026, München und Wanderung am Te
 |---|---|
 | `app/` | **Die App.** `index.html` + `app.js` + `styles.css` (Dennis' Menü, Optik vom Nutzer gebaut), `admin.html` + `admin.js` + `admin.css` (Quest Master), `config.js` (alle Quests, Items, Code, Packs), `engine.js` (Logik), `store.js` (Firebase oder lokal), `README.md` (Einrichtung, Deploy) |
 | `05-system-plan.md` | **Maßgeblicher Plan.** Kernlogik v0, alle Entscheidungen (Tabelle A0), Ausbaustufen (Teil B) |
+| `07-spiele-und-items.md` | **Arbeitsstand Spiele, Items, Fähigkeiten** (ab 25.09.), feste Nummern zum Referenzieren |
 | `06-design-plan.md` | **Design-Plan für Dennis' Menü** (Vorschlag): Befund, Seitenaufbau aus der Spielanleitung, Bildsprache, Texte im Spielton, Querformat-Regeln, Bauplan |
 | `app/assets/intro-titel.webp`, `intro-fee.png`, `hylia-serif.woff2`, `hylian-symbols.woff2`, `SCHRIFTEN.md` | Titelbild des Startbildschirms vom Nutzer (Fee herausgelöst, schwebt separat) und die Zelda-Schriften von zeldauniverse.net: Hylia Serif für PRESS START, Hylian Symbols als Quelle für die Medaillon-Zeichen. Fan-Schriften, nur privat und nicht kommerziell, Details in `SCHRIFTEN.md` |
 | `app/entwurf.html`, `entwurf.css`, `entwurf.js` | Klickbarer Entwurf zu 06. Nutzt `config.js`, `engine.js`, `store.js` unverändert. Neue Texte, Farben und Kartenpunkte stehen oben in `entwurf.js` und wandern beim Bauen nach `config.js` |
