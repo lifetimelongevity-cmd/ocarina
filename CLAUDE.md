@@ -16,6 +16,8 @@ JGA-Wochenende für Dennis, 2. bis 4. Oktober 2026, München und Wanderung am Te
 - **Getestet:** Logik per `node app/engine.test.js`, Synchronisation Admin zu Dennis mit zwei getrennten Browsern über die Live-Adresse. Noch nicht mit zwei echten Handys getestet.
 - **Design (23.09.):** Der Nutzer will Dennis' Menü neu ordnen und im iPhone-Querformat lesbar machen. Plan in `06-design-plan.md`, klickbarer Entwurf in `app/entwurf.html` (mit `?demo` ohne Datenbank). Drei Seiten KARTE, QUESTS, AUSRÜSTUNG, HUD mit Packs als Spielkarten und Code als Zahlenschloss, Ergebnis-Fenster nach jeder Buchung. Entschieden: Dennis sieht nur Erledigtes und die nächste Quest, der Rest liegt im Nebel (`06-design-plan.md` 3.1). Startbildschirm ist das Titelbild des Nutzers (Dennis als Link, Logo rechts), leicht belebt: Licht bewegt sich, die Fee schwebt mit Feenstaub, Glühwürmchen. PRESS START unter dem Logo, Vollbild-Knopf nur dort (`06-design-plan.md` 4.6). Ergebnis-Fenster als großer Moment mit drehendem Medaillon und kurzer Melodie, danach tritt die nächste Quest aus dem Nebel (4.5). Texte überall auf das Nötigste gekürzt (Wunsch des Nutzers: so wenig wie möglich, so viel wie nötig). **Plan noch nicht freigegeben, die App ist unverändert.** Weitere Entscheidungen offen in `06-design-plan.md` Abschnitt 9.
 
+- **Stand 25.09. (Branch `claude/practical-euler-vqcmkx`, noch nicht auf `main`):** Entwurf hat getarnte Items (Truhe + Tarnname, Enthüllung im Ergebnis-Fenster) und das Beutel-Onboarding („Dennis' Eier"). Spiele, Items und Fähigkeiten sind neu entschieden in `07-spiele-und-items.md`, noch nicht in `config.js`.
+
 ## Wo was liegt
 
 | Datei | Inhalt |
