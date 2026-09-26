@@ -80,7 +80,7 @@
     quests: [
       { id: "logbuch", nr: 1, typ: "kern", name: "Log-Buch", ort: "Zug nach München", station: "zug",
         farbe: "#4a8fe8", emblem: "z-water",
-        text: "Rike hat sechs Fragen über dich beantwortet. Schreib, was sie gesagt hat, dann hörst du ihre Antwort.",
+        text: "Rike hat sieben Fragen über dich beantwortet. Schreib, was sie gesagt hat, dann hörst du ihre Antwort.",
         qm: "Dennis tippt seine Antworten im Menü, danach spielt Rikes Sprachnachricht. Seine Antworten stehen unten im Admin.",
         win:  { packs: 1, ziffer: 1 },
         lose: { packs: 0 },
@@ -166,18 +166,19 @@
         einsetzbar: ["spruchrolle"] }
     ],
 
-    /* Log-Buch (Quest 1): Rike beantwortet sechs Fragen über Dennis per Sprachnachricht.
+    /* Log-Buch (Quest 1): Rike beantwortet sieben Fragen über Dennis per Sprachnachricht.
        Dennis tippt in ein bis drei Worten, was sie gesagt hat, besiegelt es, dann spielt ihre Antwort.
        Fragen festgelegt am 26.09. Wie Rike sie gestellt bekommt: app/assets/logbuch/LIESMICH.md.
-       Dateien: app/assets/logbuch/frage1.m4a bis frage6.m4a. Fehlt eine, spielt die App einen Platzhalter-Klang. */
+       Dateien: app/assets/logbuch/frage1.m4a bis frage7.m4a. Fehlt eine, spielt die App einen Platzhalter-Klang. */
     logbuch: {
       fragen: [
         { frage: "Was kannst du laut Rike überhaupt nicht?",                                       audio: "assets/logbuch/frage1.m4a" },
         { frage: "Womit bringst du Rike auf die Palme?",                                           audio: "assets/logbuch/frage2.m4a" },
-        { frage: "Was hast du bei eurem ersten Treffen gesagt oder getan, das Rike nie vergisst?", audio: "assets/logbuch/frage3.m4a" },
-        { frage: "An welchem Ort wusste Rike, dass du der Richtige bist?",                         audio: "assets/logbuch/frage4.m4a" },
-        { frage: "Was sollst du laut Rike in eurer Ehe nie ändern?",                               audio: "assets/logbuch/frage5.m4a" },
-        { frage: "Was schätzt Rike an dir am meisten?",                                            audio: "assets/logbuch/frage6.m4a" }
+        { frage: "Was ist laut Rike deine ulkigste Eigenart?",                                     audio: "assets/logbuch/frage3.m4a" },
+        { frage: "Was hast du bei eurem ersten Treffen gesagt oder getan, das Rike nie vergisst?", audio: "assets/logbuch/frage4.m4a" },
+        { frage: "An welchem Ort wusste Rike, dass du der Richtige bist?",                         audio: "assets/logbuch/frage5.m4a" },
+        { frage: "Was sollst du laut Rike in eurer Ehe nie ändern?",                               audio: "assets/logbuch/frage6.m4a" },
+        { frage: "Was schätzt Rike an dir am meisten?",                                            audio: "assets/logbuch/frage7.m4a" }
       ]
     },
 
