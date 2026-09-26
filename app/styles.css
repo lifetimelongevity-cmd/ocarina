@@ -502,7 +502,7 @@ svg { display: block; }
 
 /* ---------- Log-Buch ---------- */
 .logbuch { position: absolute; left: 0; right: 0; top: var(--vv-top, 0px); height: var(--vv-h, 100%); z-index: 52; display: grid; place-items: center;
-  padding: max(8px, var(--sa-t)) max(16px, var(--sa-r)) max(8px, var(--sa-b)) max(16px, var(--sa-l)); background: rgba(2,3,6,.72); }
+  padding: max(8px, var(--sa-t)) max(16px, var(--sa-r)) max(8px, var(--sa-b)) max(16px, var(--sa-l)); background: rgba(2,3,6,.72); container-type: size; }
 .logbuch[hidden] { display: none; }
 .lb-panel { width: min(560px, 100%); max-height: 100%; overflow-y: auto; display: grid; gap: 8px; padding: 12px 16px 14px; animation: resultIn 260ms steps(4, end); }
 .lb-head { display: grid; grid-template-columns: auto 1fr auto auto; align-items: center; gap: 10px; }
@@ -510,6 +510,8 @@ svg { display: block; }
 .lb-head .tb-title { margin: 0; letter-spacing: .08em; }
 .lb-step { margin: 0; color: #aab3cf; font: 800 var(--fs-small)/1 "Courier New", monospace; letter-spacing: .06em; }
 .lb-close { width: 34px; height: 34px; border: 1px solid #58607a; border-radius: 4px; background: rgba(0,0,0,.35); cursor: pointer; font-size: 16px; }
+/* Tastatur offen (Fenster nur noch etwa halb so hoch): Kopfzeile weg, damit Frage, Eingabe und Knopf sichtbar bleiben */
+@container (max-height: 240px) { .lb-head { display: none; } }
 .lb-frage { margin: 0; font: 700 clamp(15px, 5vh, 20px)/1.3 Georgia, serif; color: #fff7d6; text-wrap: balance; }
 .lb-form { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: stretch; }
 .lb-form[hidden], .lb-sealed[hidden] { display: none; }

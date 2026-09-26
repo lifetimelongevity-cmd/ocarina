@@ -21,7 +21,7 @@ assert.deepStrictEqual(config.quests.map(q => q.nr).sort((a, b) => a - b), [1, 2
 assert.deepStrictEqual(config.items.map(i => i.nr), ["I1", "I2", "I4", "I5", "I6", "F1", "F3"]);
 assert.strictEqual(reihe.filter(q => q.typ === "kern").length, 6, "sechs Medaillons");
 assert.deepStrictEqual(reihe.filter(q => q.win && q.win.ziffer).map(q => q.win.ziffer).sort(), [1, 2, 3, 4], "jede Ziffer genau einmal");
-assert.strictEqual(config.logbuch.fragen.length, 6);
+assert.strictEqual(config.logbuch.fragen.length, 7);
 // Jedes erspielbare Item wird irgendwo gewonnen und irgendwo eingesetzt
 config.items.filter(i => !config.startitems.includes(i.id)).forEach(it => {
   const quelle = config.quests.some(q => (q.win && (q.win.items || []).includes(it.id)) || (q.zaehler && (q.zaehler.proTreffer.items || []).includes(it.id)));

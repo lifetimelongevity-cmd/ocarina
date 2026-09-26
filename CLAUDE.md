@@ -52,7 +52,7 @@ Der Nutzer will es **einfach und in sich geschlossen** halten und schrittweise a
 ## Offene Punkte
 
 1. Reihenfolge und Belohnungskette in `config.js` bestätigen (Vorschlag in `07-spiele-und-items.md`, Abschnitt Umsetzung).
-2. Log-Buch: 6 Fragen mit Rike abstimmen, Sprachnachrichten als `app/assets/logbuch/frage1.m4a` bis `frage6.m4a` ablegen.
+2. Log-Buch: Die 7 Fragen stehen (26.09., Rike antwortet über Dennis, er errät ihre Antwort in ein bis drei Worten). Liste für Rike in `app/assets/logbuch/LIESMICH.md`. An Rike schicken, Sprachnachrichten als `app/assets/logbuch/frage1.m4a` bis `frage7.m4a` ablegen.
 3. Firebase-Regeln setzen (siehe `app/README.md`, Dennis muss ins Log-Buch schreiben dürfen).
 4. Test mit zwei echten Handys (iPhone vom Home-Bildschirm, Samsung).
 5. Anzahl der Packs festlegen, dann Balance anpassen (Faustregel in `05-system-plan.md` A2).

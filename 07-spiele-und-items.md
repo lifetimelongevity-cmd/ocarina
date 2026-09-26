@@ -8,7 +8,7 @@ Stand 25.09.2026. Sammelt, was der Nutzer pro Spiel und Item festgelegt hat. Die
 
 | Nr. | Spiel | Stand | Offen |
 |---|---|---|---|
-| 1 | Log-Buch | **Entschieden (25.09.):** Rike beantwortet vorab 6 Fragen per Sprachnachricht. Dennis sitzt allein im Zug, rät ihre Antwort in der App, danach spielt die App Rikes Sprachnachricht ab (Plan unten). | Fragen, Sprachdateien |
+| 1 | Log-Buch | **Entschieden (25.09.):** Rike beantwortet vorab 7 Fragen (26.09.) per Sprachnachricht. Dennis sitzt allein im Zug, rät ihre Antwort in der App, danach spielt die App Rikes Sprachnachricht ab (Plan unten). | Sprachdateien |
 | 2 | Auge des Jägers | Bleibt: 5 Teelichter, Wasserpistole, ein Tank. | Grenze später |
 | 3 | Feuerprobe | **Entschieden (25.09.):** eine Mutprobe, „Der Ruf": Eine fremde Wandergruppe nimmt mit Dennis ein Video für Rike auf. Keine Umschläge. | |
 | 4 | Kreuzung der Klingen | **Entschieden (25.09.):** Dennis wählt einen Gegner aus dem Bund, erst danach erfährt er die Disziplin: Schnick Schnack Schnuck, Best of 3. | |
@@ -66,10 +66,10 @@ Stand 25.09.2026. Sammelt, was der Nutzer pro Spiel und Item festgelegt hat. Die
 
 ## Log-Buch mit Rikes Sprachnachrichten (gebaut 25.09.)
 
-- Dateien: `app/assets/logbuch/frage1.m4a` bis `frage6.m4a`, Fragen als Text in `config.js`.
+- Dateien: `app/assets/logbuch/frage1.m4a` bis `frage7.m4a`, Fragen als Text in `config.js`.
 - Bei Dennis öffnet die Quest Log-Buch eine eigene Ansicht: Frage 1 erscheint, Dennis tippt seine Antwort ein und „besiegelt" sie. Erst dann spielt Rikes Sprachnachricht. Danach Frage 2 und so weiter.
 - Seine Antworten werden gespeichert (einzige Stelle, an der Dennis etwas schreibt). Der Quest Master sieht sie im Admin neben den Fragen und bucht bestanden oder verloren.
-- Zug-Funklöcher: Die App lädt alle sechs Dateien beim Start vorab, die Antworten werden bei Netz nachgereicht.
+- Zug-Funklöcher: Die App lädt alle Dateien beim Start vorab, die Antworten werden bei Netz nachgereicht.
 - Hinweis: Dateien auf Netlify sind für jeden mit dem Link abrufbar.
 
 ## Umsetzung in der App (25.09.)
@@ -106,6 +106,6 @@ Sechs Prüfungen = sechs Medaillons. Das Podrennen trägt das Schatten-Medaillon
 
 **Showdown:** Revanche möglich bei 2, 4, 7, 9, 12, 14 (Log-Buch und Feuerprobe kommen nicht wieder). Verlorene Spiele in Tagesreihenfolge, höchstens drei, dann mit Wirbel der Götter aufgefüllt. Der Quest Master tippt je Duell Sieg oder Niederlage, die App sagt, wann es reicht (2 von 3).
 
-**Log-Buch:** 6 Fragen als Vorschlag in `config.js` (mit Rike abstimmen). Dateien `app/assets/logbuch/frage1.m4a` bis `frage6.m4a` fehlen noch, bis dahin spielt ein Platzhalter-Klang. Hinweise zum Format in `app/assets/logbuch/LIESMICH.md`.
+**Log-Buch:** Umgedreht am 26.09.: Rike beantwortet 7 Fragen über Dennis, Dennis tippt in ein bis drei Worten, was sie gesagt hat. Fragen stehen fest (in `config.js` an Dennis gerichtet, so wie Rike sie bekommt in `app/assets/logbuch/LIESMICH.md`). Dateien `app/assets/logbuch/frage1.m4a` bis `frage7.m4a` fehlen noch, bis dahin spielt ein Platzhalter-Klang. Hinweise zum Format in `app/assets/logbuch/LIESMICH.md`.
 
 **Offen:** Reihenfolge und Belohnungen bestätigen, Fragen und Sprachdateien, Anzahl Packs, welches Spiel die Schwerter für 12 vergibt, Frist und Versteck für 15.
