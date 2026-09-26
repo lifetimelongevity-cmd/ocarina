@@ -173,7 +173,7 @@
     logbuch: {
       fragen: [
         { frage: "Was kannst du laut Rike überhaupt nicht?",                                       audio: "assets/logbuch/frage1.m4a" },
-        { frage: "Was stört Rike an dir am meisten?",                                              audio: "assets/logbuch/frage2.m4a" },
+        { frage: "Womit bringst du Rike auf die Palme?",                                           audio: "assets/logbuch/frage2.m4a" },
         { frage: "Was hast du bei eurem ersten Treffen gesagt oder getan, das Rike nie vergisst?", audio: "assets/logbuch/frage3.m4a" },
         { frage: "An welchem Ort wusste Rike, dass du der Richtige bist?",                         audio: "assets/logbuch/frage4.m4a" },
         { frage: "Was sollst du laut Rike in eurer Ehe nie ändern?",                               audio: "assets/logbuch/frage5.m4a" },

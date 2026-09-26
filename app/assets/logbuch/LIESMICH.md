@@ -8,7 +8,7 @@ Die Fragen stehen in `app/config.js` unter `logbuch.fragen` (gleiche Reihenfolge
 | Datei | Frage an Rike |
 |---|---|
 | `frage1.m4a` | Was kann Dennis überhaupt nicht? |
-| `frage2.m4a` | Was stört dich an Dennis am meisten? |
+| `frage2.m4a` | Womit bringt dich Dennis auf die Palme? |
 | `frage3.m4a` | Was hat Dennis bei eurem ersten Treffen gesagt oder getan, das du nie vergisst? |
 | `frage4.m4a` | An welchem Ort wusstest du, dass er der Richtige ist? |
 | `frage5.m4a` | Was soll Dennis in eurer Ehe nie ändern? |
