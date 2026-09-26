@@ -154,7 +154,7 @@ Nach dem ersten PRESS START fliegt die Fee ins Bild. Vier Tafeln im Stil der N64
 
 - **Reise:** Das ist der Herzschlag des Tages: neun Quests, zwei laufende, drei Duelle, das Kästchen.
 - **UX:** Nie etwas verpassen, nie aus Versehen verlieren, jede Neuigkeit genau einmal.
-- **Design und UI:** Große Titel in Hylia Serif. Die Schrift hat Ä, Ö und Ü, aber kein ß, deshalb nur in Großbuchstaben. Sidequests und laufende Quests behalten das kompakte Fenster.
+- **Design und UI:** Große Titel in Hylia Serif als Kapitälchen: Ihre großen Umlaute haben keine Punkte, ihre Kleinbuchstaben sind Kapitälchen mit Punkten. Titel werden deshalb klein geschrieben dargestellt, nur der erste Buchstabe groß („Prüfung bestanden"). ß fehlt ganz. Sidequests und laufende Quests behalten das kompakte Fenster.
 - **Erlebnis:** Richtung A und B (Abschnitt 4). Android vibriert beim Sieg kurz, das iPhone kann das im Browser nicht.
 
 ### 3.7 KARTE
@@ -295,7 +295,7 @@ Jede Stufe ist für sich fertig und spielbar. Nichts davon baut die Kernlogik um
 
 | Nr. | Was | Aufwand |
 |---|---|---|
-| G.1 | Stilprobe: QUESTS in der Mitte des Tages im neuen Look, als eigene Seite `app/stilprobe.html`. Die App bleibt live unverändert. | klein |
+| G.1 | Stilprobe: QUESTS in der Mitte des Tages im neuen Look, als eigene Seite `app/stilprobe.html`. Die App bleibt live unverändert. **Gebaut am 26.09.** (10.4) | klein |
 | G.2 | Schriften einbetten, Rollen festlegen, Courier und Trebuchet raus | klein |
 | G.3 | Farben als feste Rollen, Stein je Seite dunkler, helle Schrift darauf, Kontrast gemessen | mittel |
 | G.4 | Steintafeln mit Fase und Titelschild, Mulden, Textbox-Kante | mittel |
@@ -442,7 +442,7 @@ Wunsch vom 26.09.: Das visuelle Design des ganzen Menüs soll besser werden.
 
 | Rolle | Schrift | Wo |
 |---|---|---|
-| Titel | Hylia Serif (hat Ä, Ö, Ü, aber kein ß) | Seitentitel, Quest-Namen auf der Quest-Karte, Ergebnis, Titelkarten, Prolog, Kästchen |
+| Titel | Hylia Serif als Kapitälchen (große Umlaute ohne Punkte, kein ß, siehe 3.6) | Seitentitel, Quest-Namen auf der Quest-Karte, Ergebnis, Titelkarten, Prolog, Kästchen |
 | Text und Beschriftung | eine runde, kräftige Sans wie die Textboxen im Spiel, als eigene Datei in `app/assets/`. Vorschlag: Nunito (frei nutzbar, OFL), zwei Stärken | alles andere. Beschriftungen in Großbuchstaben und leicht gesperrt, Zahlen gleich breit |
 
 Courier New und Trebuchet MS fallen weg, Georgia bleibt nur als Ersatz. Namen mit ß („Große Wasserpistole") stehen immer in der Sans.
@@ -486,6 +486,8 @@ Text mindestens 4,5 : 1, Symbole und Cursor mindestens 3 : 1, gemessen im Test s
 
 ### 10.4 Vorgehen
 
-1. **Stilprobe:** zuerst QUESTS in der Mitte des Tages im neuen Look, als eigene Seite `app/stilprobe.html` neben der App. Die App bleibt live unverändert. Du schaust sie auf dem Handy an und sagst ja oder was anders soll.
+1. **Stilprobe (gebaut am 26.09.):** `app/stilprobe.html` mit `app/stilprobe.css` als Schicht über `styles.css`, gleiche Logik wie die App, die live unverändert bleibt. Ohne Zusatz Mitte des Tages, auch `?demo=start&direkt` und `?demo=ende&direkt`. Umgesetzt sind Schriften (Nunito eingebettet, Hylia Serif als Kapitälchen), Stein je Seite mit Fase, Körnung und Goldleiste, Titelschild, Mulden, Textbox mit Doppelkante, Cursor mit Eckklammern, Medaillons mit Metallrand, HUD-Band mit Kartenrücken, schmalere Z und R mit Zeichen der Nachbarseite. Noch nicht: Pergament-Karte, Bogenfenster, neue Item-Symbole.
+   Gemessen: Kontrast vorher 2,2 bis 3,4 : 1 bei Titeln und Beschriftungen auf dem Stein, nachher mindestens 4,7 : 1, die meisten 7 bis 17 : 1. `tests/geraete.mjs` auf der Stilprobe: 0 Probleme auf allen sechs Geräten. Umblättern auf dem gedrosselten Samsung gleich schnell wie vorher (95 % der Bilder unter 17 ms).
+   Du schaust sie auf dem Handy an und sagst ja oder was anders soll.
 2. **Grunddesign** auf alle Seiten übertragen, parallel zu Stufe 1 (Abschnitt 6, Tabelle G). Alles Neue aus Stufe 1 bis 3 entsteht gleich im neuen Look.
 3. **Prüfen:** Kontrast aller Texte gemessen in `tests/geraete.mjs`, Screenshots auf allen sechs Geräten, Bildrate auf dem gedrosselten Samsung. Danach wird die Stilprobe gelöscht.

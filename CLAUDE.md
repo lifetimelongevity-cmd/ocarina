@@ -20,7 +20,7 @@ JGA-Wochenende für Dennis, 2. bis 4. Oktober 2026, München und Wanderung am Te
 
 | Datei | Inhalt |
 |---|---|
-| `app/` | **Die App.** `index.html` + `app.js` + `styles.css` (Dennis' Menü), `admin.html` + `admin.js` + `admin.css` (Quest Master), `config.js` (alle Quests, Items, Texte, Stationen, Log-Buch-Fragen, Code, Packs), `engine.js` (Logik), `store.js` (Firebase oder lokal, Log-Buch-Kanal), `sw.js` (offline), `README.md` (Einrichtung, Ablauf am Spieltag, Deploy) |
+| `app/` | **Die App.** `index.html` + `app.js` + `styles.css` (Dennis' Menü), `admin.html` + `admin.js` + `admin.css` (Quest Master), `config.js` (alle Quests, Items, Texte, Stationen, Log-Buch-Fragen, Code, Packs), `engine.js` (Logik), `store.js` (Firebase oder lokal, Log-Buch-Kanal), `sw.js` (offline), `README.md` (Einrichtung, Ablauf am Spieltag, Deploy). Dazu bis zur Freigabe `stilprobe.html` + `stilprobe.css`: Stilprobe des Remasters aus `08-erlebnis-plan.md` Abschnitt 10, ändert die App nicht |
 | `05-system-plan.md` | **Maßgeblicher Plan.** Kernlogik v0, alle Entscheidungen (Tabelle A0), Ausbaustufen (Teil B) |
 | `07-spiele-und-items.md` | **Arbeitsstand Spiele, Items, Fähigkeiten** (ab 25.09.), feste Nummern zum Referenzieren |
 | `06-design-plan.md` | **Design-Plan für Dennis' Menü** (gebaut 25.09., Änderungen in Abschnitt 10): Befund, Seitenaufbau, Bildsprache, Texte im Spielton, Querformat-Regeln |
@@ -57,4 +57,4 @@ Der Nutzer will es **einfach und in sich geschlossen** halten und schrittweise a
 5. Anzahl der Packs festlegen, dann Balance anpassen (Faustregel in `05-system-plan.md` A2).
 6. Offene Details aus 07: Parcours Podrennen, Schwerter für 12, Versteck und Frist für 15, Grenzen für bestanden.
 7. Der Code des Kästchens und alle Quest-Namen stehen in `app/config.js`, das jedes Handy lädt. Vor dem Spieltag entscheiden, ob der Code aus der öffentlichen Konfiguration raus soll.
-8. Erlebnis-Plan `08-erlebnis-plan.md`: Entschieden am 26.09.: Overdrive B mit A, Finale mit Rikes Botschaft (siebte Datei `app/assets/botschaft.m4a`), Vorhersagen in der App, die Fee als Rikes Botin, visuelles Remaster. Offen: Name der Fee, Trostzeile, Item-Fund-Bild, Schrift, Zeitplan. Nächster Schritt, sobald der Nutzer es sagt: Stilprobe, dann Grunddesign und Stufe 1.
+8. Erlebnis-Plan `08-erlebnis-plan.md`: Entschieden am 26.09.: Overdrive B mit A, Finale mit Rikes Botschaft (siebte Datei `app/assets/botschaft.m4a`), Vorhersagen in der App, die Fee als Rikes Botin, visuelles Remaster. Offen: Name der Fee, Trostzeile, Item-Fund-Bild, Schrift, Zeitplan. Stilprobe gebaut am 26.09. (`app/stilprobe.html`), wartet auf Freigabe durch den Nutzer. Danach Grunddesign nach `styles.css` übertragen und Stufe 1.
