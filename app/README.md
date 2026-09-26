@@ -5,10 +5,10 @@ Zwei Seiten, ein gespeicherter Stand.
 | Seite | Wer | Was |
 |---|---|---|
 | `index.html` | Dennis | Menü im N64-Stil: Startbildschirm, drei Seiten KARTE, QUESTS, AUSRÜSTUNG, HUD mit Packs, nächster Quest und Code. Ergebnis-Fenster nach jeder Buchung. Schreibt nur seine Antworten im Log-Buch. |
-| `admin.html` | Quest Master | Nächste Quest mit Bestanden/Verloren, Einsetzen, Showdown-Duellen und Log-Buch-Antworten. Laufende Quests (Prophezeiung mit Zähler, Rikes Amulett), Packs buchen, Ziffern kaufen, Items korrigieren, Zurücksetzen. |
+| `admin.html` | Quest Master | Nächste Quest mit Bestanden/Verloren, Einsetzen, Showdown-Duellen und Log-Buch-Antworten. Laufende Quests (Prophezeiung mit Zähler, Rikes Amulett), Packs buchen, Ziffern kaufen, Items korrigieren, Zurücksetzen. Oben rechts **Rückgängig** für jede Änderung. `admin.html?probe` ist der **Probelauf**. |
 
 Adressen: Dennis `https://dd-ocarina.netlify.app/`, Quest Master `https://dd-ocarina.netlify.app/admin.html`.
-Zusätze für Dennis' Seite: `?demo` (Beispielstand mit Demo-Knöpfen, ohne Datenbank, auch `?demo=start`, `?demo=ende`), `?direkt` (ohne Startbildschirm), `?onboarding` (Beutel-Onboarding noch einmal), `?schwach` (Sparmodus erzwingen). Die alte Adresse `entwurf.html` leitet auf die Hauptseite um.
+Zusätze für Dennis' Seite: `?probe` (liest den Probelauf des Quest Masters, roter Rahmen), `?demo` (Beispielstand mit Demo-Knöpfen, ohne Datenbank, auch `?demo=start`, `?demo=ende`), `?direkt` (ohne Startbildschirm), `?onboarding` (Beutel-Onboarding noch einmal), `?schwach` (Sparmodus erzwingen). Die alte Adresse `entwurf.html` leitet auf die Hauptseite um.
 
 ## Dateien
 
@@ -27,13 +27,25 @@ Zusätze für Dennis' Seite: `?demo` (Beispielstand mit Demo-Knöpfen, ohne Date
 ## Gespeicherter Stand
 
 ```
-/spiele/dennis-jga-2026            { quests, zaehler, schritte, einsaetze, duelle, buchungen, items, stand }   schreibt nur der Admin
+/spiele/dennis-jga-2026            { quests, zaehler, schritte, einsaetze, duelle, buchungen, items, zeiten, stand }   schreibt nur der Admin
 /spiele/dennis-jga-2026-logbuch    { "1": { antwort, zeit }, … }                                              schreibt nur Dennis (Log-Buch)
 ```
 
 Die Log-Buch-Antworten liegen bewusst neben dem Spiel, damit das Speichern im Admin sie nie überschreibt.
 
+**Packs** zählen Schritt für Schritt in der Reihenfolge, in der gebucht wurde (`zeiten` je Quest, `zeit` je Buchung), und bleiben immer zwischen 0 und `waehrung.max`: Wer bei 0 verliert, verliert nichts, was über den Deckel geht, verfällt. Dennis sieht dann eine Zeile dazu, der Admin zeigt unter „Packs buchen“, wie viel davon betroffen war. Balance nachrechnen: `node tests/balance.js`.
+
+## Probelauf (zwei Handys, echtes Spiel unberührt)
+
+- Quest Master: `admin.html?probe` (oder im Admin unten „Probelauf öffnen“). Oben steht ein rotes Band.
+- Zweites Handy: `dd-ocarina.netlify.app/?probe`. Dennis' Seite mit rotem Rahmen und „PROBE“ unten links. Vom Home-Bildschirm aus heißt sie „DQ Probe“ und startet wieder im Probelauf.
+- Gespeichert wird in eigenen Pfaden (`/spiele/dennis-jga-2026-probe`, Log-Buch `…-probe-logbuch`), das echte Spiel sieht davon nichts.
+- Sprungknöpfe: Start, Nach dem Zug, Mitte, Vor dem Bund, Ende, Zufall. Danach ganz normal weiterbuchen.
+- Test im Browser: `tests/probe.mjs`.
+
 ## Ablauf am Spieltag (Quest Master)
+
+- **Vertippt:** Oben rechts **Rückgängig**. Darunter steht, was zurückgenommen wird. Nimmt jede Änderung zurück, auch Sprünge und „Alles zurücksetzen“, bis zu 40 Schritte, und merkt sich das auch nach dem Neuladen. Ist bei Dennis das Ergebnis-Fenster noch offen, geht es still zu.
 
 - **Reihe:** Oben steht die nächste Quest. Bestanden oder Verloren tippen. Dennis sieht das Ergebnis-Fenster, danach tritt die nächste Quest aus dem Nebel.
 - **Einsetzen:** Dennis sagt an, was er einsetzt. Unter der nächsten Quest (und bei laufenden Quests) stehen die Knöpfe, aktiv nur, was er hat. Spruchrolle und Schild sind danach weg. Falsch gebucht: im Bereich „Eingesetzt" mit ✕ zurücknehmen.

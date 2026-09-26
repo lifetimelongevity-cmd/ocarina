@@ -17,9 +17,13 @@
 </head>
 <body>
   <header class="top">
+    <p class="probe-band" id="probeBand" hidden>PROBELAUF · das echte Spiel bleibt unberührt <a href="admin.html">Zum echten Spiel</a></p>
     <div class="top-row">
-      <strong class="brand">Quest Master</strong>
-      <span class="sync" id="sync">…</span>
+      <div class="brand-box">
+        <strong class="brand">Quest Master</strong>
+        <span class="sync" id="sync">…</span>
+      </div>
+      <button type="button" class="btn undo" id="undo" disabled><span>↶ Rückgängig</span><small id="undoWas"></small></button>
     </div>
     <div class="top-row stats">
       <div class="stat"><span class="lbl">Packs</span><b id="packs">0</b><small id="packsMax">/ 10</small></div>
@@ -30,6 +34,12 @@
   </header>
 
   <main>
+    <section class="card probe-card" id="probeCard" aria-labelledby="probeTitle" hidden>
+      <h2 id="probeTitle">Probelauf: springen</h2>
+      <p class="hint">Setzt den Probe-Stand auf einen Zeitpunkt des Tages. Ein zweites Handy mit <b id="probeUrl">…/?probe</b> zeigt Dennis' Seite live dazu. Rückgängig geht auch hier.</p>
+      <div class="chips" id="szenarien"></div>
+    </section>
+
     <section class="card next" id="nextCard" aria-labelledby="nextTitle">
       <p class="eyebrow" id="nextEyebrow">Nächste Quest</p>
       <h1 id="nextTitle">…</h1>
@@ -59,6 +69,7 @@
       <h2 id="packsTitle">Packs buchen</h2>
       <div class="chips" id="quick"></div>
       <div class="chips" id="buyDigits"></div>
+      <p class="hint" id="kappung" hidden></p>
       <form class="custom" id="customForm">
         <label for="customAmount">Menge</label>
         <input id="customAmount" type="number" inputmode="numeric" step="1" value="-1">
@@ -90,7 +101,8 @@
       <h2 id="gameTitle">Spiel</h2>
       <p class="hint" id="storageInfo"></p>
       <div class="chips">
-        <a class="btn ghost" href="./" target="_blank" rel="noopener">Dennis' Ansicht öffnen</a>
+        <a class="btn ghost" id="dennisLink" href="./" target="_blank" rel="noopener">Dennis' Ansicht öffnen</a>
+        <a class="btn ghost" id="probeLink" href="admin.html?probe">Probelauf öffnen</a>
         <a class="btn ghost" href="./?demo" target="_blank" rel="noopener">Demo ohne Datenbank</a>
         <button type="button" class="btn danger" id="reset">Alles zurücksetzen</button>
         <button type="button" class="btn danger" id="resetLb">Log-Buch-Antworten löschen</button>

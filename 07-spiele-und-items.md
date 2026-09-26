@@ -79,16 +79,18 @@ Stand 25.09.2026. Sammelt, was der Nutzer pro Spiel und Item festgelegt hat. Die
 | # | Nr. | Quest | Art | Ort | Sieg | Niederlage | Einsetzbar |
 |---|---|---|---|---|---|---|---|
 | 1 | 1 | Log-Buch | Prüfung | Zug | +1, Ziffer 1 | 0 | nichts |
-| 2 | 4 | Kreuzung der Klingen | Prüfung | Wiese | +1, Ziffer 2, Kreisel (I5) | −1 | Spruchrolle, Schild |
+| 2 | 4 | Kreuzung der Klingen | Prüfung | Wiese | +2, Ziffer 2, Kreisel (I5) | −1 | Spruchrolle, Schild |
 | 3 | 14 | Wirbel der Götter | Sidequest | Wiese | +1, Gepanzerte Karten (I4) | −1 | Kreisel, Spruchrolle, Schild |
-| 4 | 7 | Das Podrennen | Prüfung | Wiese | +1, Große Wasserpistole (I2) | 0 | Spruchrolle |
-| 5 | 9 | Kartenwurf | Sidequest | Wald | +1 | −1 | Karten, Spruchrolle, Schild |
-| 6 | 2 | Auge des Jägers | Prüfung | Wald | +1, Stich (I6) | −1 | Wasserpistole, Spruchrolle |
-| 7 | 12 | Klingen des Deku-Baums | Sidequest | Wald | +1 | 0 | Stich, Spruchrolle |
-| 8 | 3 | Feuerprobe | Prüfung | Aussicht | +1, Ziffer 3, Schild (F3) | −1 | Spruchrolle |
-| 9 | 5 | Prüfung des Bundes | Prüfung | Gipfel | +2, Ziffer 4 | −2 | Spruchrolle, Schild, dazu alles, was bei den Spielen der Duelle hilft |
+| 4 | 7 | Das Podrennen | Prüfung | Wiese | +2, Große Wasserpistole (I2) | −1 | Spruchrolle |
+| 5 | 9 | Kartenwurf | Sidequest | Wald | +2 | −1 | Karten, Spruchrolle, Schild |
+| 6 | 2 | Auge des Jägers | Prüfung | Wald | +3, Stich (I6) | −2 | Wasserpistole, Spruchrolle |
+| 7 | 12 | Klingen des Deku-Baums | Sidequest | Wald | +2 | −1 | Stich, Spruchrolle |
+| 8 | 3 | Feuerprobe | Prüfung | Aussicht | +3, Ziffer 3, Schild (F3) | −2 | Spruchrolle |
+| 9 | 5 | Prüfung des Bundes | Prüfung | Gipfel | +5, Ziffer 4 | −4 | Spruchrolle, Schild, dazu alles, was bei den Spielen der Duelle hilft |
 | läuft | 6 | Prophezeiung | Zähler (max. 3) | den ganzen Tag | je Treffer 1 Spruchrolle | | |
-| läuft | 15 | Rikes Amulett | Schritt „Gefunden“ | den ganzen Tag | +2 | 0 | Spruchrolle |
+| läuft | 15 | Rikes Amulett | Schritt „Gefunden“ | den ganzen Tag | +3 | 0 | Spruchrolle |
+
+**Packs (26.09.):** Das Kästchen hat eher 20+ Packs (`waehrung.max` 20). Je weiter der Weg, desto mehr steht auf dem Spiel: vorne 1 bis 2, hinten 3, der Bund +5 / −4. Alle Siege zusammen 24. Packs zählen in der Reihenfolge, in der gebucht wurde, und bleiben immer zwischen 0 und 20: Wer bei 0 verliert, verliert nichts, was über 20 geht, verfällt. Eine fehlende Ziffer kostet 1 Pack. Nachrechnen mit `node tests/balance.js`.
 
 Sechs Prüfungen = sechs Medaillons. Das Podrennen trägt das Schatten-Medaillon (violett), die Prophezeiung ist keine Prüfung mehr, sondern läuft mit Zähler. Items gehen bei Niederlagen nicht mehr verloren, Niederlagen kosten nur Packs.
 
@@ -108,4 +110,4 @@ Sechs Prüfungen = sechs Medaillons. Das Podrennen trägt das Schatten-Medaillon
 
 **Log-Buch:** Umgedreht am 26.09.: Rike beantwortet 7 Fragen über Dennis, Dennis tippt in ein bis drei Worten, was sie gesagt hat. Fragen stehen fest (in `config.js` an Dennis gerichtet, so wie Rike sie bekommt in `app/assets/logbuch/LIESMICH.md`). Dateien `app/assets/logbuch/frage1.m4a` bis `frage7.m4a` fehlen noch, bis dahin spielt ein Platzhalter-Klang. Hinweise zum Format in `app/assets/logbuch/LIESMICH.md`.
 
-**Offen:** Reihenfolge und Belohnungen bestätigen, Fragen und Sprachdateien, Anzahl Packs, welches Spiel die Schwerter für 12 vergibt, Frist und Versteck für 15.
+**Offen:** Reihenfolge und Belohnungen bestätigen, Sprachdateien, genaue Anzahl Packs (20 gesetzt), was passiert, wenn die Packs für die fehlenden Ziffern nicht reichen, welches Spiel die Schwerter für 12 vergibt, Frist und Versteck für 15.

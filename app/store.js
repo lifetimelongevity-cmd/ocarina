@@ -10,7 +10,8 @@
    API: const store = QuestStore.create(config, { key })
         store.subscribe(fn)   fn(doc, info) bei jedem neuen Stand, sofort mit dem letzten bekannten Stand
         store.save(doc)       nur Admin
-        store.onStatus(fn)    fn({ online, pending, stand }) */
+        store.onStatus(fn)    fn({ online, pending, stand })
+   Probelauf (?probe): siehe unten, QuestStore.probe(config). */
 (function (root) {
   const E = root.QuestEngine;
 
@@ -260,5 +261,13 @@
     };
   }
 
-  root.QuestStore = { create, logbuch };
+  /* Probelauf: ?probe in der Adresse (Admin und Dennis). Ein eigenes Spiel neben dem echten
+     (<spielId>-probe, Log-Buch <spielId>-probe-logbuch), gleiche Regeln, das echte Spiel bleibt unberührt.
+     const C = QuestStore.probe(GAME_CONFIG) */
+  const PROBE = new URLSearchParams(location.search).has("probe");
+  function probe(cfg) {
+    return PROBE ? { ...cfg, speicher: { ...cfg.speicher, spielId: (cfg.speicher.spielId || "standard") + "-probe" } } : cfg;
+  }
+
+  root.QuestStore = { create, logbuch, probe, PROBE };
 })(window);

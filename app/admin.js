@@ -2,15 +2,17 @@
   /* Dennis Quest · Quest-Master-Menü
      Schreibt das Dokument: Status je Quest, Zähler, Schritte, Einsätze, Duelle, Buchungen, Item-Korrekturen.
      Alles andere (Packs, Ziffern, Items, nächste Quest) rechnet engine.js daraus.
-     Liest zusätzlich Dennis' Log-Buch-Antworten (eigener Pfad, schreibt dort nur beim Löschen). */
-  const C = window.GAME_CONFIG;
+     Liest zusätzlich Dennis' Log-Buch-Antworten (eigener Pfad, schreibt dort nur beim Löschen).
+     admin.html?probe: Probelauf in einem eigenen Spiel neben dem echten, mit Sprungknöpfen. */
+  const C = window.QuestStore.probe(window.GAME_CONFIG);
+  const PROBE = window.QuestStore.PROBE;
   const E = window.QuestEngine;
 
   // Schlüssel für geschütztes Schreiben (Firebase): admin.html#key=GEHEIM, wird im Gerät gemerkt
   let key = null;
   try {
     const m = location.hash.match(/key=([^&]+)/);
-    if (m) { key = decodeURIComponent(m[1]); localStorage.setItem("dennis-quest-admin-key", key); history.replaceState(null, "", location.pathname); }
+    if (m) { key = decodeURIComponent(m[1]); localStorage.setItem("dennis-quest-admin-key", key); history.replaceState(null, "", location.pathname + location.search); }
     else key = localStorage.getItem("dennis-quest-admin-key");
   } catch (_) {}
 
@@ -39,16 +41,57 @@
     toastTimer = setTimeout(() => t.classList.remove("show"), 1600);
   }
 
+  /* Rückgängig: Vor jeder Änderung wird der Stand gemerkt, mit einem Wort dazu, was passiert ist.
+     Pro Spiel im Gerät gespeichert, weil das iPhone die App oft neu lädt. Die letzten 40 Schritte. */
+  const VERLAUF_KEY = "dennis-quest-verlauf:" + C.speicher.spielId;
+  let verlauf = [];
+  try { verlauf = JSON.parse(localStorage.getItem(VERLAUF_KEY) || "[]"); } catch (_) {}
+  const verlaufMerken = () => { try { localStorage.setItem(VERLAUF_KEY, JSON.stringify(verlauf)); } catch (_) {} };
+  // Vergleichbarer Stand ohne Zeitstempel, Schlüssel sortiert (Firebase liefert sie sortiert zurück)
+  const kanon = d => JSON.stringify({ ...E.normalize(d), stand: 0 }, (k, v) =>
+    v && typeof v === "object" && !Array.isArray(v) ? Object.fromEntries(Object.keys(v).sort().map(x => [x, v[x]])) : v);
+
   function commit(mutate, msg) {
+    const vorher = JSON.parse(JSON.stringify(doc));
     const next = JSON.parse(JSON.stringify(doc));
     mutate(next);
+    verlauf = [...verlauf, { doc: vorher, was: msg || "Änderung", nach: kanon(next) }].slice(-40);
+    verlaufMerken();
     store.save(next);
     if (msg) toast(msg);
+    renderUndo();
   }
 
-  function setQuest(id, v) {
-    commit(d => { if (v === "offen") delete d.quests[id]; else d.quests[id] = v; }, questById(id).name + ": " + STATUS_WORT[v]);
+  function rueckgaengig() {
+    const letzter = verlauf[verlauf.length - 1];
+    if (!letzter) return;
+    // Hat ein anderes Gerät inzwischen etwas geändert, würde Rückgängig das mit überschreiben
+    if (letzter.nach && letzter.nach !== kanon(doc) && !confirm(`Seit „${letzter.was}“ hat sich der Stand geändert, vielleicht auf einem anderen Gerät. Trotzdem zurücknehmen? Die neuere Änderung geht dann verloren.`)) return;
+    verlauf.pop();
+    verlaufMerken();
+    store.save(letzter.doc);
+    toast("Zurückgenommen: " + letzter.was);
+    renderUndo();
   }
+
+  function renderUndo() {
+    const l = verlauf[verlauf.length - 1];
+    $("#undo").disabled = !l;
+    $("#undoWas").textContent = l ? l.was : "";
+    $("#undo").setAttribute("aria-label", l ? "Rückgängig: " + l.was : "Nichts zum Zurücknehmen");
+  }
+
+  // Wann eine Quest entschieden wurde: bestimmt die Reihenfolge der Packs (engine.js). Umbuchen behält die Zeit.
+  const ENTSCHIEDEN = ["bestanden", "verloren", "beendet"];
+  function setQuest(id, v) {
+    commit(d => {
+      const vorher = d.quests[id];
+      if (v === "offen") delete d.quests[id]; else d.quests[id] = v;
+      if (!ENTSCHIEDEN.includes(v)) delete d.zeiten[id];
+      else if (!ENTSCHIEDEN.includes(vorher) || !d.zeiten[id]) d.zeiten[id] = Date.now();
+    }, questById(id).name + ": " + STATUS_WORT[v]);
+  }
+  const buchung = b => ({ id: uid(), zeit: Date.now(), ...b });
 
   function einsetzen(item, quest) {
     const it = itemById(item);
@@ -110,7 +153,7 @@
       b.type = "button";
       b.className = "btn";
       b.textContent = sb.packs ? `${sb.packs > 0 ? "+" : "−"}${Math.abs(sb.packs)} ${sb.grund}` : sb.grund;
-      b.addEventListener("click", () => commit(d => d.buchungen.push({ id: uid(), packs: sb.packs, grund: sb.grund, ...(sb.item ? { item: sb.item, menge: sb.menge } : {}) }), "Gebucht: " + sb.grund));
+      b.addEventListener("click", () => commit(d => d.buchungen.push(buchung({ packs: sb.packs, grund: sb.grund, ...(sb.item ? { item: sb.item, menge: sb.menge } : {}) })), "Gebucht: " + sb.grund));
       quick.appendChild(b);
     });
 
@@ -119,7 +162,7 @@
       const n = parseInt($("#customAmount").value, 10);
       const g = $("#customReason").value.trim() || "Buchung";
       if (!n) { toast("Menge eingeben, z. B. -1 oder 2"); return; }
-      commit(d => d.buchungen.push({ id: uid(), packs: n, grund: g }), "Gebucht: " + g);
+      commit(d => d.buchungen.push(buchung({ packs: n, grund: g })), "Gebucht: " + g);
       $("#customReason").value = "";
     });
 
@@ -144,9 +187,12 @@
     $("#nextWin").addEventListener("click", () => state.next && setQuest(state.next, "bestanden"));
     $("#nextLose").addEventListener("click", () => state.next && setQuest(state.next, "verloren"));
     $("#reset").addEventListener("click", () => {
-      if (!confirm("Wirklich alles zurücksetzen? Alle Quests werden offen, Buchungen, Einsätze und Zähler gelöscht. Die Log-Buch-Antworten bleiben.")) return;
+      if (!confirm("Wirklich alles zurücksetzen? Alle Quests werden offen, Buchungen, Einsätze und Zähler gelöscht. Die Log-Buch-Antworten bleiben. Rückgängig holt den Stand zurück.")) return;
       commit(d => Object.assign(d, E.emptyDoc()), "Zurückgesetzt");
     });
+    $("#undo").addEventListener("click", rueckgaengig);
+    renderUndo();
+    buildProbe();
     $("#resetLb").addEventListener("click", () => {
       if (!confirm("Alle Log-Buch-Antworten von Dennis löschen? Er kann dann neu antworten.")) return;
       lbStore.zuruecksetzen().then(() => toast("Log-Buch geleert"));
@@ -158,9 +204,58 @@
       : "Speicher: nur dieses Gerät (Testmodus). Dennis' Ansicht sieht Änderungen nur im selben Browser.";
   }
 
+  /* ---------- Probelauf (admin.html?probe) ---------- */
+  // Zeitpunkte des Tages, aus der Konfiguration gebaut. Muster: zwei Siege, eine Niederlage (gibt Revanchen im Showdown).
+  const SZENARIEN = [
+    { name: "Start", doc: () => E.emptyDoc() },
+    { name: "Nach dem Zug", doc: () => probeStand(1, { treffer: 0 }) },
+    { name: "Mitte", doc: () => probeStand(Math.ceil(reihe.length / 2), { treffer: 1 }) },
+    { name: "Vor dem Bund", doc: () => probeStand(reihe.length - 1, { treffer: 2, schritte: true }) },
+    { name: "Ende", doc: () => probeStand(reihe.length, { treffer: 2, schritte: true, ende: true }) },
+    { name: "Zufall", doc: () => probeStand(1 + Math.floor(Math.random() * reihe.length), { zufall: true }) }
+  ];
+  function probeStand(n, o) {
+    const d = E.emptyDoc();
+    let t = Date.now() - 3600e3;
+    const zeit = id => { d.zeiten[id] = t; t += 60e3; };
+    const wurf = () => Math.random() < .5 ? "bestanden" : "verloren";
+    reihe.slice(0, n).forEach((q, i) => { d.quests[q.id] = o.zufall ? wurf() : i % 3 === 2 ? "verloren" : "bestanden"; zeit(q.id); });
+    lauf.forEach(q => {
+      const ende = o.ende || (o.zufall && Math.random() < .3);
+      d.quests[q.id] = !ende ? "laeuft" : q.zaehler ? "beendet" : o.zufall ? wurf() : "bestanden";
+      if (ende) zeit(q.id);
+      if (q.zaehler) d.zaehler[q.id] = o.zufall ? Math.floor(Math.random() * ((q.zaehler.max || 3) + 1)) : Math.min(o.treffer, q.zaehler.max || 99);
+      if (q.schritte && (o.schritte || ende || (o.zufall && Math.random() < .5))) d.schritte[q.id] = Object.fromEntries(q.schritte.map(x => [x.id, true]));
+    });
+    return d;
+  }
+
+  function buildProbe() {
+    document.body.classList.toggle("probe", PROBE);
+    $("#probeBand").hidden = !PROBE;
+    $("#probeCard").hidden = !PROBE;
+    $("#dennisLink").href = PROBE ? "./?probe" : "./";
+    $("#probeLink").href = PROBE ? "admin.html" : "admin.html?probe";
+    $("#probeLink").textContent = PROBE ? "Zum echten Spiel" : "Probelauf öffnen";
+    if (!PROBE) return;
+    document.title = "Probe · " + document.title;
+    $("#probeUrl").textContent = location.host + location.pathname.replace(/admin\.html$/, "") + "?probe";
+    SZENARIEN.forEach(sz => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "btn";
+      b.textContent = sz.name;
+      b.addEventListener("click", () => commit(d => Object.assign(d, E.emptyDoc(), sz.doc()), "Probe: " + sz.name));
+      $("#szenarien").appendChild(b);
+    });
+  }
+
   /* ---------- Darstellung ---------- */
   function render() {
     $("#packs").textContent = state.packs;
+    const k = state.kappung;
+    $("#kappung").hidden = !(k.unten || k.oben);
+    $("#kappung").textContent = [k.unten ? `Nicht abgezogen, weil Dennis bei 0 war: ${k.unten}` : "", k.oben ? `Verfallen, weil alle Packs schon seine waren: ${k.oben}` : ""].filter(Boolean).join(" · ");
     $("#done").textContent = state.zaehler.erledigt;
     $("#code").innerHTML = C.code.map((v, i) => `<i class="${state.ziffern[i] != null ? "known" : ""}" title="Ziffer ${i + 1}">${v}</i>`).join("");
     $("#inv").innerHTML = C.items.filter(it => state.items[it.id] !== "nicht").map(it =>
@@ -184,7 +279,7 @@
       b.className = "btn";
       b.textContent = `Ziffer ${i + 1} kaufen (−${C.ziffer_preis})`;
       b.disabled = state.packs < C.ziffer_preis;
-      b.addEventListener("click", () => commit(d => d.buchungen.push({ id: uid(), packs: -C.ziffer_preis, grund: `Ziffer ${i + 1} gekauft`, ziffer: i + 1 }), `Ziffer ${i + 1} gekauft`));
+      b.addEventListener("click", () => commit(d => d.buchungen.push(buchung({ packs: -C.ziffer_preis, grund: `Ziffer ${i + 1} gekauft`, ziffer: i + 1 })), `Ziffer ${i + 1} gekauft`));
       buy.appendChild(b);
     });
 

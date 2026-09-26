@@ -14,13 +14,19 @@ button, input, select { font: inherit; color: inherit; }
 .sync { font-size: 12px; color: var(--muted); }
 .sync.off { color: #f0a43a; }
 .stats { margin-top: 8px; }
-.stat { display: flex; align-items: baseline; gap: 4px; }
-.stat .lbl { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-right: 4px; }
+.stat { display: flex; align-items: baseline; gap: 4px; white-space: nowrap; }
+.stats { gap: 8px; }
+.stat .lbl { font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin-right: 2px; }
 .stat b { font-size: 24px; color: var(--gold); font-variant-numeric: tabular-nums; }
 .stat small { color: var(--muted); font-variant-numeric: tabular-nums; }
 .code { display: inline-flex; gap: 4px; }
 .code i { font-style: normal; width: 24px; height: 28px; display: grid; place-items: center; border-radius: 4px; background: #262b1c; color: var(--muted); font-weight: 700; font-variant-numeric: tabular-nums; }
 .code i.known { background: var(--gold); color: #1d1604; }
+@media (max-width: 380px) {
+  .stat .lbl { font-size: 10px; letter-spacing: .02em; }
+  .stat b { font-size: 22px; }
+  .code i { width: 21px; }
+}
 
 main { max-width: 640px; margin: 0 auto; padding: 16px; display: grid; gap: 14px; }
 .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
@@ -119,3 +125,17 @@ h2 { margin: 0 0 12px; font-size: 15px; letter-spacing: .08em; text-transform: u
 .lb-a.leer { font-weight: 400; color: #6f6b58; font-style: italic; }
 .items .it em { font-style: normal; color: var(--muted); font-size: 12px; }
 .use-btn { min-height: 40px; padding: 0 12px; font-size: 14px; }
+
+/* Rückgängig: oben rechts, zeigt, was es zurücknimmt */
+.brand-box { display: grid; gap: 2px; min-width: 0; }
+.undo { min-height: 44px; max-width: 58%; padding: 4px 12px; flex-direction: column; align-items: flex-end; gap: 1px; line-height: 1.15; border-color: #6b5a1c; background: #2f2a12; }
+.undo span { font-size: 15px; white-space: nowrap; }
+.undo small { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; font-weight: 500; color: var(--muted); }
+.undo small:empty { display: none; }
+
+/* Probelauf: rotes Band, eigene Karte mit Sprungknöpfen */
+.probe-band { margin: -10px -16px 8px; padding: 6px 16px; background: var(--lose); color: #fff; font-size: 12px; font-weight: 800; letter-spacing: .08em; }
+.probe-band a { margin-left: 6px; color: #fff; font-weight: 600; letter-spacing: 0; white-space: nowrap; }
+body.probe .top { border-bottom-color: var(--lose); }
+.probe-card { border-color: #6a2a24; }
+.probe-card b { color: var(--text); word-break: break-all; }
