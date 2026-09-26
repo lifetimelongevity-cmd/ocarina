@@ -18,13 +18,19 @@
   <script>
     // Android (Chrome, Samsung Internet): Angebot zum Installieren früh abfangen, app.js zeigt dafür den Knopf
     addEventListener("beforeinstallprompt", e => { e.preventDefault(); window.__installEvent = e; });
+    // Probelauf: Vom Home-Bildschirm startet die App dann wieder im Probelauf (eigenes Icon „DQ Probe")
+    if (/[?&]probe(&|=|$)/.test(location.search) && !/[?&]demo(&|=|$)/.test(location.search)) {
+      document.querySelector('link[rel="manifest"]').href = "probe.webmanifest";
+      document.querySelector('meta[name="apple-mobile-web-app-title"]').content = "DQ Probe";
+    }
   </script>
 </head>
 <body>
   <!-- Dennis' Menü (06-design-plan.md, 07-spiele-und-items.md)
        /             liest den echten Stand (Firebase), schreibt nur Log-Buch-Antworten
        /?demo        Beispielstand mit Demo-Knöpfen, ohne Firebase (auch ?demo=start, ?demo=ende)
-       /?direkt      ohne Startbildschirm -->
+       /?direkt      ohne Startbildschirm
+       /?probe       Probelauf des Quest Masters (admin.html?probe), roter Rahmen, echtes Spiel unberührt -->
   <div class="game" id="game">
     <img class="world" src="assets/alpine-trail.webp" alt="" decoding="async">
     <div class="world-shade" aria-hidden="true"></div>
@@ -137,6 +143,7 @@
     </div>
 
     <footer class="foot">
+      <b class="probe-tag">PROBE</b>
       <span class="demo-bar" id="demoBar" hidden>
         <b>DEMO</b>
         <button type="button" data-demo="bestanden">Nächste bestanden</button>

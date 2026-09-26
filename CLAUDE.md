@@ -15,6 +15,7 @@ JGA-Wochenende für Dennis, 2. bis 4. Oktober 2026, München und Wanderung am Te
 - **Speicher:** Firebase Realtime Database, Projekt `dennis-quest`, URL `https://dennis-quest-default-rtdb.europe-west1.firebasedatabase.app`, Pfade `/spiele/dennis-jga-2026` (Spiel, schreibt nur der Admin) und `/spiele/dennis-jga-2026-logbuch` (Dennis' Antworten). Zugriff per REST ohne SDK. Datenbank war beim letzten Check im offenen Testmodus, Regeln in `app/README.md`.
 - **Getestet:** Logik per `node app/engine.test.js`. In Playwright (`tests/geraete.mjs`, `tests/nebel.mjs`): iPhone 13 und 15 quer in Safari und vom Home-Bildschirm mit Notch- bzw. Dynamic-Island-Insets, Samsung mit vierfach gedrosselter CPU und langsamem Netz, Admin und Dennis zusammen, Nebel verrät nichts. Noch nicht mit echten Handys getestet.
 - **26.09.:** Erlebnis-Plan `08-erlebnis-plan.md`. Live umgesetzt: KARTE zeigt nur das Wo (volle Breite, alle Medaillons je Station, Kästchen an der Hütte, Tippen auf eine Station öffnet ihre Quest), QUESTS nur das Was (ohne Legende und doppelte Marken), weniger doppelter Text (Abschnitt 11). Stilprobe des Remasters unter `https://dd-ocarina.netlify.app/stilprobe.html`.
+- **26.09. (Branch `claude/charming-goodall-mfq8tn`):** Probelauf `admin.html?probe` plus `/?probe` (eigene Pfade `…-probe`, Sprungknöpfe Start bis Ende, roter Rahmen), Rückgängig im Admin (letzte 40 Änderungen, schließt bei Dennis ein offenes Ergebnis-Fenster still). Packs: 20 im Kästchen, steigend je Station (Bund +5 / −4), gezählt in zeitlicher Reihenfolge zwischen 0 und max (keine Schulden, Überschuss verfällt). Balance-Rechner `node tests/balance.js`, Browser-Test `tests/probe.mjs`.
 - Der Name der Braut ist **Rike** (ohne e).
 
 ## Wo was liegt
@@ -28,7 +29,7 @@ JGA-Wochenende für Dennis, 2. bis 4. Oktober 2026, München und Wanderung am Te
 | `08-erlebnis-plan.md` | **Erlebnis-Plan** (26.09., umgesetzt ist Abschnitt 11 und die Stilprobe): jede Menüseite aus Dennis' Sicht, Fehler, Bauplan (Grunddesign und drei Stufen), Overdrive B mit A, visuelles Remaster (Abschnitt 10), Entscheidungen in Abschnitt 9 |
 | `app/assets/` | Titelbild `intro-titel.webp` (Fee herausgelöst, schwebt als `intro-fee.png`), Avatar `avatar-okarina.webp`, Icons in `icons/`, Zelda-Schriften (Fan-Schriften, nur privat), `logbuch/` für Rikes Sprachnachrichten. Herkunft in `SCHRIFTEN.md` |
 | `quellen/` | Originale der hochgeladenen Bilder (nicht veröffentlicht) |
-| `tests/` | Playwright-Prüfungen für Geräte und Nebel |
+| `tests/` | Playwright-Prüfungen für Geräte, Nebel, Probelauf und Rückgängig (`probe.mjs`), dazu `balance.js` (rechnet 50 000 Tage mit den Werten aus `config.js` durch) |
 | `00-spielanleitung.md` | Ausführliches Regelwerk (Ideen für später: Flüche, Anfragen, Stufen). Spricht noch von „Berry", gemeint sind Packs |
 | `01` bis `04` | Frühe Detailentwürfe: Showdown, Items und Ökonomie, offene Prüfungen, Zeitplan und Packliste. Teilweise überholt durch 05 |
 | `README.md` | Original-Briefing des Nutzers |
@@ -38,12 +39,12 @@ JGA-Wochenende für Dennis, 2. bis 4. Oktober 2026, München und Wanderung am Te
 
 - Begriffe: Quest (offen, bestanden, verloren, bei laufenden auch läuft, beendet), Item (nicht, besitz, verloren, verbraucht), Packs (0 bis `max`, Start 0), Ziffer (unbekannt, bekannt), Spruchrollen (Anzahl).
 - 9 Quests in fester Reihenfolge: 6 Prüfungen (Medaillons, 4 tragen die Ziffern) und 3 Sidequests (Steine). Nächste Quest = erste offene. Dazu 2 laufende Quests (`typ: "lauf"`), sichtbar ab Start.
-- Gespeichert wird nur, was der Quest Master einstellt: `{ quests, zaehler, schritte, einsaetze, duelle, buchungen, items, stand }`. Alles andere berechnet `derive()` in `engine.js`, dazu `einsetzbar()`, `jetztEinsetzbar()`, `showdownDuelle()`.
+- Gespeichert wird nur, was der Quest Master einstellt: `{ quests, zaehler, schritte, einsaetze, duelle, buchungen, items, zeiten, stand }`. Packs zählen in der Reihenfolge von `zeiten` und `buchung.zeit`, nach jedem Schritt zwischen 0 und max. Alles andere berechnet `derive()` in `engine.js`, dazu `einsetzbar()`, `jetztEinsetzbar()`, `showdownDuelle()`.
 - Dennis schreibt nur seine Log-Buch-Antworten (eigener Pfad). Er sieht nur erledigte Quests und die nächste, alles danach ist verdeckt (A0 Nr. 16).
 
 ## Wichtige Entscheidungen des Nutzers
 
-Währung sind direkt Packs (keine Umrechnung), Start 0, nur in der App gezählt. Anzahl der Packs noch offen (`waehrung.max`, derzeit 10). Einziges Startitem ist der Beutel. Verlorenes Item ist weg (derzeit verliert keine Quest ein Item). Nur bestanden oder verloren. Einsetzen: Dennis sagt an, der Quest Master bucht. Noch nicht erspielte Items sind in der Ausrüstung leere Plätze. Der Nutzer ist Quest Master. Für Dennis ist immer nur die nächste Quest sichtbar (erledigte bleiben sichtbar, kommende Prüfungen nur als „?", kommende Sidequests gar nicht).
+Währung sind direkt Packs (keine Umrechnung), Start 0, nur in der App gezählt. Eher 20+ Packs (`waehrung.max` 20), je weiter der Weg, desto mehr Packs pro Aufgabe, und es muss schwer sein (26.09.). Einziges Startitem ist der Beutel. Verlorenes Item ist weg (derzeit verliert keine Quest ein Item). Nur bestanden oder verloren. Einsetzen: Dennis sagt an, der Quest Master bucht. Noch nicht erspielte Items sind in der Ausrüstung leere Plätze. Der Nutzer ist Quest Master. Für Dennis ist immer nur die nächste Quest sichtbar (erledigte bleiben sichtbar, kommende Prüfungen nur als „?", kommende Sidequests gar nicht).
 
 ## Arbeitsweise
 
@@ -55,7 +56,7 @@ Der Nutzer will es **einfach und in sich geschlossen** halten und schrittweise a
 2. Log-Buch: Die 7 Fragen stehen (26.09., Rike antwortet über Dennis, er errät ihre Antwort in ein bis drei Worten). Liste für Rike in `app/assets/logbuch/LIESMICH.md`. An Rike schicken, Sprachnachrichten als `app/assets/logbuch/frage1.m4a` bis `frage7.m4a` ablegen.
 3. Firebase-Regeln setzen (siehe `app/README.md`, Dennis muss ins Log-Buch schreiben dürfen).
 4. Test mit zwei echten Handys (iPhone vom Home-Bildschirm, Samsung).
-5. Anzahl der Packs festlegen, dann Balance anpassen (Faustregel in `05-system-plan.md` A2).
+5. Genaue Anzahl der Packs bestätigen (20 gesetzt, Werte in `07`, Abschnitt Umsetzung). Offen: Was passiert, wenn die Packs am Ende nicht für die fehlenden Ziffern reichen (bei halb gewonnenem Tag etwa jeder vierte Fall, `node tests/balance.js`).
 6. Offene Details aus 07: Parcours Podrennen, Schwerter für 12, Versteck und Frist für 15, Grenzen für bestanden.
 7. Der Code des Kästchens und alle Quest-Namen stehen in `app/config.js`, das jedes Handy lädt. Vor dem Spieltag entscheiden, ob der Code aus der öffentlichen Konfiguration raus soll.
 8. Erlebnis-Plan `08-erlebnis-plan.md`: Entschieden am 26.09.: Overdrive B mit A, Finale mit Rikes Botschaft (achte Aufnahme neben den sieben Log-Buch-Antworten, `app/assets/botschaft.m4a`), Vorhersagen in der App, die Fee als Rikes Botin, visuelles Remaster. Offen: Name der Fee, Trostzeile, Item-Fund-Bild, Schrift, Zeitplan. Stilprobe gebaut am 26.09. und live unter `/stilprobe.html`, wartet auf Freigabe durch den Nutzer. Abschnitt 11 (Aufgabenteilung, weniger Text) ist live. Danach Grunddesign nach `styles.css` übertragen und Stufe 1.

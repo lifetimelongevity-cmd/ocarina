@@ -2,8 +2,10 @@
   /* Dennis Quest · Dennis' Menü (06-design-plan.md, 07-spiele-und-items.md)
      Drei Seiten im Ring: KARTE · QUESTS · AUSRÜSTUNG. HUD: Packs, nächste Quest, Code.
      Liest den Stand. Schreibt nur eins: Dennis' Antworten im Log-Buch (eigener Pfad).
-     ?demo zeigt einen Beispielstand ohne Firebase (auch ?demo=start, ?demo=ende), ?direkt ohne Startbildschirm. */
-  const C = window.GAME_CONFIG;
+     ?demo zeigt einen Beispielstand ohne Firebase (auch ?demo=start, ?demo=ende), ?direkt ohne Startbildschirm,
+     ?probe liest den Probelauf des Quest Masters statt des echten Spiels (roter Rahmen). */
+  const C = window.QuestStore.probe(window.GAME_CONFIG);
+  const PROBE = window.QuestStore.PROBE;
   const E = window.QuestEngine;
 
   const STATIONEN = C.karte.stationen;
@@ -17,10 +19,11 @@
   const SCHWACH = params.has("schwach") || (navigator.hardwareConcurrency || 8) <= 4 || (navigator.deviceMemory || 8) <= 3;
   document.documentElement.classList.toggle("schwach", SCHWACH);
 
-  /* ---------- Speicher: echt oder Demo ---------- */
+  /* ---------- Speicher: echt, Probelauf oder Demo ---------- */
   const DEMO = params.has("demo");
-  // Onboarding einmal pro Handy. In der Demo und mit ?onboarding jedes Mal neu.
-  const OB_KEY = "dq-onboarding-v1";
+  document.documentElement.classList.toggle("probe", PROBE && !DEMO);
+  // Onboarding einmal pro Handy. In der Demo und mit ?onboarding jedes Mal neu. Der Probelauf merkt es sich getrennt.
+  const OB_KEY = "dq-onboarding-v1" + (PROBE ? "-probe" : "");
   let onboarded = false;
   try { onboarded = !DEMO && !params.has("onboarding") && localStorage.getItem(OB_KEY) === "1"; } catch (e) {}
   const DEMO_DOCS = {
@@ -174,7 +177,7 @@
   function build() {
     // HUD: eine Karte pro Pack im Kästchen, ab 10 in zwei Reihen wie Herzen
     const row = $("#packRow"), max = C.waehrung.max;
-    row.style.gridTemplateColumns = `repeat(${Math.min(max, 10)}, auto)`;
+    row.style.gridTemplateColumns = `repeat(${max > 10 ? Math.ceil(max / 2) : max}, auto)`;
     row.classList.toggle("two", max > 10);
     row.innerHTML = Array.from({ length: max }, () => cardSvg("empty")).join("");
     $("#tumblers").innerHTML = C.code.map((_, i) => `<span class="tumbler" data-i="${i}">?</span>`).join("");
@@ -424,6 +427,7 @@
 
   /* ---------- Ergebnis-Fenster ---------- */
   let overlayAfter = null;
+  let fensterQuest = null;                     // { id, status }: Quest, deren Ergebnis das offene Fenster zeigt
   function showOverlay(html, after) {
     const r = $("#overlay .result");
     $("#resultHead").innerHTML = html.head;
@@ -440,9 +444,19 @@
   function closeOverlay() {
     if ($("#overlay").hidden) return;
     $("#overlay").hidden = true;
+    fensterQuest = null;
     const f = overlayAfter; overlayAfter = null;
     if (f) f();
     else if (revealPending) showNextQuest();
+  }
+
+  // Der Quest Master hat das Ergebnis zurückgenommen, solange das Fenster noch offen ist: Fenster still zu, Nebel bleibt
+  function fensterZuruecknehmen() {
+    if (!fensterQuest || $("#overlay").hidden) return;
+    if (state.quests[fensterQuest.id] === fensterQuest.status) return;
+    fensterQuest = null; overlayAfter = null; revealPending = null;
+    $("#overlay").hidden = true;
+    renderHud(); renderQuests();
   }
 
   const itemZeile = (id, text, cls, tarn) => {
@@ -489,6 +503,9 @@
     });
     // Nicht verbrauchende Einsätze (Kreisel, Pistole …) bekommen trotzdem eine Zeile
     neueE.forEach(e => { if (!itemById(e.item).einmalig) lines.push(itemZeile(e.item, `${esc(itemById(e.item).name)} eingesetzt`, "plus")); });
+    // Packs zählen nur zwischen 0 und max (engine.js): sagen, warum sich weniger bewegt hat als gedacht
+    if (next.kappung.unten > prev.kappung.unten) lines.push(`<li><span class="ri">${cardSvg("empty")}</span>${prev.packs ? "Mehr Packs hattest du nicht." : "Du hattest keine Packs mehr, die du verlieren konntest."}</li>`);
+    if (next.kappung.oben > prev.kappung.oben) lines.push(`<li class="plus"><span class="ri">${cardSvg()}</span>Alle Packs im Kästchen gehören schon dir.</li>`);
 
     // Neue Packs und Ziffern im HUD aufblinken lassen
     document.querySelectorAll("#packRow .ic-card").forEach((c, i) => c.classList.toggle("gain", i >= prev.packs && i < next.packs));
@@ -539,6 +556,8 @@
     // Die nächste Quest wird erst nach dem Fenster aufgedeckt, darum steht ihr Name hier nicht
     const warSichtbar = id => prev.quests[id] !== "offen" || prev.next === id;
     if (next.next && !warSichtbar(next.next)) revealPending = next.next;
+    const fq = fertig[0] || gestartet[0];
+    if (fq) fensterQuest = { id: fq.id, status: next.quests[fq.id] };
     melody(klang);
     showOverlay({ head, lines: lines.join(""), next: next.next || !fertig.length ? "" : "Zum Kästchen", gross }, fertig.length || gestartet.length ? showNextQuest : null);
     renderHud(); renderQuests();
@@ -954,7 +973,8 @@
   const IOS = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
   const ANDROID = /Android/i.test(navigator.userAgent);
   let installEvent = window.__installEvent || null, installiert = false;
-  try { installiert = localStorage.getItem("dq-installiert") === "1"; } catch (_) {}
+  const INST_KEY = "dq-installiert" + (PROBE ? "-probe" : "");
+  try { installiert = localStorage.getItem(INST_KEY) === "1"; } catch (_) {}
   function updateInstall() { installBtn.hidden = isStandalone() || (installiert && !installEvent) || !(installEvent || IOS || ANDROID); }
   const iosAnleitung = () => showOverlay({
     head: `<span class="ri-big">${useSvg("i-star")}</span><p class="big">APP INSTALLIEREN</p><p class="sub">Auf dem iPhone in Safari:</p>`,
@@ -966,7 +986,7 @@
   addEventListener("beforeinstallprompt", e => { e.preventDefault(); installEvent = e; updateInstall(); });
   addEventListener("appinstalled", () => {
     installEvent = null; installiert = true;
-    try { localStorage.setItem("dq-installiert", "1"); } catch (_) {}
+    try { localStorage.setItem(INST_KEY, "1"); } catch (_) {}
     updateInstall();
     melody("side");
     showOverlay({ head: `<span class="ri-big">${useSvg("i-check")}</span><p class="big">INSTALLIERT</p><p class="sub">Dennis Quest liegt jetzt auf deinem Startbildschirm.</p>`,
@@ -1031,6 +1051,7 @@
     lastDoc = JSON.parse(JSON.stringify(doc));
     render();
     renderSync();
+    fensterZuruecknehmen();
     // Log-Buch-Sprachnachrichten vorladen, solange das Log-Buch noch nicht entschieden ist
     if (state.quests.logbuch === "offen") logbuch.vorladen();
     if (meta.initial && intro.hidden) requestAnimationFrame(() => { const row = document.querySelector(".q-row.is-selected"); if (row) scrollIntoList(row); });

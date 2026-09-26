@@ -10,7 +10,7 @@
   const GAME_CONFIG = {
     version: "v1",
 
-    waehrung: { name: "Packs", max: 10, start: 0 },    // max ist noch offen, kann größer werden
+    waehrung: { name: "Packs", max: 20, start: 0 },    // Packs im Kästchen, eher 20+ (26.09.). Siege ergeben zusammen 24
 
     code: [7, 4, 2, 9],                                 // geheim, nur der Quest Master sieht alle vier
     ziffer_preis: 1,                                    // Packs für eine fehlende Ziffer am Kästchen
@@ -76,7 +76,10 @@
        einsetzbar: Items und Fähigkeiten, die Dennis hier einsetzen kann (bucht der Quest Master)
        duell:      ein Spiel gegen einen aus dem Bund
        revanche:   kann im Showdown als Revanche wiederkommen, wenn Dennis es verloren hat
-       Belohnungskette (Vorschlag 25.09.): jeder Sieg bringt das Item für ein späteres Spiel. */
+       Belohnungskette (Vorschlag 25.09.): jeder Sieg bringt das Item für ein späteres Spiel.
+       Packs (26.09.): Je weiter der Weg, desto mehr steht auf dem Spiel. Vorne 1 bis 2, hinten 3, der Bund +5 / −4.
+       Alle Siege zusammen 24: Ein perfekter Tag füllt das Kästchen, ein halb gewonnener bringt etwa ein Viertel.
+       Werte ändern, dann node tests/balance.js (rechnet 50 000 Tage durch). */
     quests: [
       { id: "logbuch", nr: 1, typ: "kern", name: "Log-Buch", ort: "Zug nach München", station: "zug",
         farbe: "#4a8fe8", emblem: "z-water",
@@ -90,7 +93,7 @@
         farbe: "#ec8f2e", emblem: "z-spirit",
         text: "Wähle deinen Gegner aus dem Bund. Erst dann erfährst du die Disziplin.",
         qm: "Disziplin nach der Wahl verraten: Schnick Schnack Schnuck, Best of 3.",
-        win:  { packs: 1, ziffer: 2, items: ["kreisel"] },
+        win:  { packs: 2, ziffer: 2, items: ["kreisel"] },
         lose: { packs: -1 },
         einsetzbar: ["spruchrolle", "schild"], duell: true, revanche: true },
 
@@ -105,14 +108,14 @@
         farbe: "#a468e6", emblem: "z-shadow",
         text: "Ein kleiner Gleiter, ein Parcours, eine Uhr. Fahr schneller als die Zeit.",
         qm: "RC-Auto auf Zeit. Parcours und Zeitgrenze legst du fest.",
-        win:  { packs: 1, items: ["pistole_gross"] },
-        lose: { packs: 0 },
+        win:  { packs: 2, items: ["pistole_gross"] },
+        lose: { packs: -1 },
         einsetzbar: ["spruchrolle"], revanche: true },
 
       { id: "kartenwurf", nr: 9, typ: "side", name: "Kartenwurf", ort: "Erstes Waldstück", station: "wald",
         text: "Ein Duell mit Karten aus deinen Packs. Wer mehr ins Ziel bringt, gewinnt.",
         qm: "Duell mit Karten aus schon geöffneten Packs, fester Abstand, je 3 Karten. Gepanzerte Karten geben +2.",
-        win:  { packs: 1 },
+        win:  { packs: 2 },
         lose: { packs: -1 },
         einsetzbar: ["karten_gepanzert", "spruchrolle", "schild"], duell: true, revanche: true },
 
@@ -120,31 +123,31 @@
         farbe: "#48b454", emblem: "z-forest",
         text: "Fünf Flammen, ein Tank. Lösch sie, bevor dir das Wasser ausgeht.",
         qm: "5 Teelichter, Wasserpistole, ein Tank. Grenze für bestanden legst du fest.",
-        win:  { packs: 1, items: ["stich"] },
-        lose: { packs: -1 },
+        win:  { packs: 3, items: ["stich"] },
+        lose: { packs: -2 },
         einsetzbar: ["pistole_gross", "spruchrolle"], revanche: true },
 
       { id: "deku", nr: 12, typ: "side", name: "Klingen des Deku-Baums", ort: "Erstes Waldstück", station: "wald",
         text: "Wirf deine Klingen in den alten Baum. Nur was stecken bleibt, zählt.",
         qm: "Mini-Schwerter auf einen Baum. 1 bis 4 Schwerter je nachdem, wie gut ein anderes Spiel lief (offen). Stich gibt eins mehr.",
-        win:  { packs: 1 },
-        lose: { packs: 0 },
+        win:  { packs: 2 },
+        lose: { packs: -1 },
         einsetzbar: ["stich", "spruchrolle"], revanche: true },
 
       { id: "feuerprobe", nr: 3, typ: "kern", name: "Feuerprobe", ort: "Aussichtspunkt", station: "aussicht",
         farbe: "#e2472f", emblem: "e-flame",
         text: "Der Ruf. Bring eine fremde Wandergruppe dazu, mit dir eine Botschaft für Rike aufzunehmen.",
         qm: "Mutprobe „Der Ruf“: Video mit einer fremden Wandergruppe für Rike.",
-        win:  { packs: 1, ziffer: 3, items: ["schild"] },
-        lose: { packs: -1 },
+        win:  { packs: 3, ziffer: 3, items: ["schild"] },
+        lose: { packs: -2 },
         einsetzbar: ["spruchrolle"] },
 
       { id: "bund", nr: 5, typ: "kern", name: "Prüfung des Bundes", ort: "Gipfel Neureuth", station: "gipfel",
         farbe: "#f2c94c", emblem: "z-triforce",
         text: "Der Bund stellt sich dir auf dem Gipfel. Drei Duelle, zuerst deine Revanchen.",
         qm: "3 Duelle: erst verlorene Spiele vom Tag, aufgefüllt mit Wirbel der Götter. Die App zeigt sie unten.",
-        win:  { packs: 2, ziffer: 4 },
-        lose: { packs: -2 },
+        win:  { packs: 5, ziffer: 4 },
+        lose: { packs: -4 },
         einsetzbar: ["spruchrolle", "schild"],
         showdown: { duelle: 3, auffuellen: "wirbel" } },
 
@@ -161,7 +164,7 @@
         text: "Rikes Brosche ist versteckt. Finde sie rechtzeitig und setz sie zusammen, bevor der Tag endet.",
         qm: "Erst finden (Frist), dann den ganzen Tag knobeln. Gelöst = bestanden. Versteck, Frist und Packs offen.",
         schritte: [{ id: "gefunden", name: "Gefunden" }],
-        win:  { packs: 2 },
+        win:  { packs: 3 },
         lose: { packs: 0 },
         einsetzbar: ["spruchrolle"] }
     ],

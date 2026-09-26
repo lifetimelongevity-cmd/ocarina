@@ -8,10 +8,15 @@
      schritte:  { [questId]: { [schrittId]: true } }  // Zwischenschritte einer laufenden Quest (Amulett gefunden)
      einsaetze: [ { id, item, quest } ]               // Dennis hat ein Item oder eine Fähigkeit eingesetzt
      duelle:    { "1": "sieg" | "niederlage", ... }    // Ergebnisse der Showdown-Duelle
-     buchungen: [ { id, packs, grund, ziffer?, item?, menge? } ]   // ziffer = gekauft, item/menge = Spruchrolle o. Ä.
+     buchungen: [ { id, packs, grund, zeit?, ziffer?, item?, menge? } ]   // ziffer = gekauft, item/menge = Spruchrolle o. Ä.
      items:     { [itemId]: "besitz" | "verloren" | "nicht" }      // manuelle Korrektur, schlägt die Regel
+     zeiten:    { [questId]: Zeitstempel }             // wann die Quest entschieden wurde (für die Reihenfolge der Packs)
      stand:     Zeitstempel der letzten Änderung
-   } */
+   }
+
+   Packs zählen Schritt für Schritt in der Reihenfolge, in der sie passiert sind (zeiten, buchung.zeit),
+   und bleiben dabei immer zwischen 0 und max: Wer bei 0 verliert, verliert nichts, was über den Deckel geht, verfällt.
+   Ohne Zeit (ältere Stände, Demo) gilt die Reihenfolge der Konfiguration, danach die Buchungen. */
 (function (root) {
   const STATUS = ["offen", "bestanden", "verloren"];
   const STATUS_LAUF = ["offen", "laeuft", "bestanden", "verloren", "beendet"];
@@ -20,7 +25,7 @@
   const list = x => (Array.isArray(x) ? x.filter(Boolean) : x && typeof x === "object" ? Object.values(x).filter(Boolean) : []);
 
   function emptyDoc() {
-    return { quests: {}, zaehler: {}, schritte: {}, einsaetze: [], duelle: {}, buchungen: [], items: {}, stand: 0 };
+    return { quests: {}, zaehler: {}, schritte: {}, einsaetze: [], duelle: {}, buchungen: [], items: {}, zeiten: {}, stand: 0 };
   }
 
   function normalize(doc) {
@@ -37,6 +42,7 @@
       duelle,
       buchungen: list(d.buchungen),
       items: obj(d.items),
+      zeiten: obj(d.zeiten),
       stand: Number(d.stand) || 0
     };
   }
@@ -47,7 +53,7 @@
   function derive(config, rawDoc) {
     const doc = normalize(rawDoc);
     const max = config.waehrung.max;
-    let packs = config.waehrung.start || 0;
+    const schrittePacks = [];                   // { t, seq, packs }: jede Änderung der Packs mit ihrem Zeitpunkt
     const items = {}, anzahl = {}, jeHatte = {};
     const erhalten = [];                        // Reihenfolge, in der Items ins Inventar kamen
     const ziffern = config.code.map(() => null);
@@ -73,7 +79,7 @@
     };
     (config.startitems || []).forEach(id => geben(id));
 
-    config.quests.forEach(q => {
+    config.quests.forEach((q, i) => {
       const erlaubt = q.typ === "lauf" ? STATUS_LAUF : STATUS;
       const status = erlaubt.includes(doc.quests[q.id]) ? doc.quests[q.id] : "offen";
       quests[q.id] = status;
@@ -81,21 +87,23 @@
         if (status === "bestanden") bestanden++;
         if (status === "verloren") verloren++;
       }
+      let dp = 0;
       if (status === "bestanden" && q.win) {
-        packs += q.win.packs || 0;
+        dp += q.win.packs || 0;
         (q.win.items || []).forEach(id => geben(id));
         if (q.win.ziffer) ziffern[q.win.ziffer - 1] = config.code[q.win.ziffer - 1];
       } else if (status === "verloren" && q.lose) {
-        packs += q.lose.packs || 0;
+        dp += q.lose.packs || 0;
         (q.lose.items || []).forEach(nehmen);
       }
       if (q.zaehler) {
         const n = status === "offen" ? 0 : Math.max(0, Math.min(q.zaehler.max || 99, Math.floor(Number(doc.zaehler[q.id]) || 0)));
         treffer[q.id] = n;
         const pro = q.zaehler.proTreffer || {};
-        packs += n * (pro.packs || 0);
+        dp += n * (pro.packs || 0);
         if (n) (pro.items || []).forEach(id => geben(id, n));
       }
+      if (dp) schrittePacks.push({ t: Number(doc.zeiten[q.id]) || 0, seq: i, packs: dp });
       if (q.schritte) {
         const s = obj(doc.schritte[q.id]);
         schritte[q.id] = {};
@@ -103,8 +111,8 @@
       }
     });
 
-    doc.buchungen.forEach(b => {
-      packs += Number(b.packs) || 0;
+    doc.buchungen.forEach((b, i) => {
+      if (Number(b.packs)) schrittePacks.push({ t: Number(b.zeit) || 0, seq: config.quests.length + i, packs: Number(b.packs) });
       const z = Number(b.ziffer);
       if (z >= 1 && z <= config.code.length) {
         ziffern[z - 1] = config.code[z - 1];
@@ -140,14 +148,22 @@
       }
     });
 
-    packs = Math.max(0, Math.min(max, packs));
+    // Packs in zeitlicher Reihenfolge, nach jedem Schritt zwischen 0 und max
+    let packs = Math.max(0, Math.min(max, config.waehrung.start || 0));
+    const kappung = { unten: 0, oben: 0 };      // was bei 0 nicht mehr abgezogen wurde, was über den Deckel verfallen ist
+    schrittePacks.sort((a, b) => a.t - b.t || a.seq - b.seq).forEach(x => {
+      const roh = packs + x.packs;
+      if (roh < 0) kappung.unten -= roh;
+      if (roh > max) kappung.oben += roh - max;
+      packs = Math.max(0, Math.min(max, roh));
+    });
     const r = reihe(config);
     const nextQuest = r.find(q => quests[q.id] === "offen") || null;
     const duelle = {};
     Object.keys(doc.duelle).forEach(k => { if (doc.duelle[k] === "sieg" || doc.duelle[k] === "niederlage") duelle[k] = doc.duelle[k]; });
 
     return {
-      packs, max, items, anzahl, erhalten: erhalten.filter(id => items[id] !== "nicht"),
+      packs, max, kappung, items, anzahl, erhalten: erhalten.filter(id => items[id] !== "nicht"),
       ziffern, gekauft, quests, treffer, schritte, eingesetzt, duelle,
       next: nextQuest ? nextQuest.id : null,
       laufend: config.quests.filter(q => q.typ === "lauf" && quests[q.id] !== "offen").map(q => q.id),

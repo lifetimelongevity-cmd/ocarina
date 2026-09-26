@@ -41,12 +41,16 @@ assert.strictEqual(s.next, "logbuch");
 assert.deepStrictEqual(s.laufend, []);
 assert.strictEqual(s.zaehler.gesamt, 9);
 
+// Packs einer Quest laut Konfiguration, und Packs Schritt für Schritt zwischen 0 und max
+const P = (id, k) => (config.quests.find(q => q.id === id)[k] || {}).packs || 0;
+const stufen = xs => xs.reduce((n, x) => Math.max(0, Math.min(config.waehrung.max, n + x)), 0);
+
 // 2. Belohnungskette und feste Reihenfolge
 s = derive(config, {
   quests: { logbuch: "bestanden", klingen: "bestanden", wirbel: "verloren", podrennen: "bestanden", kartenwurf: "verloren" },
   buchungen: [{ id: "b1", packs: -1, grund: "Strafe" }]
 });
-assert.strictEqual(s.packs, 1 + 1 - 1 + 1 - 1 - 1);
+assert.strictEqual(s.packs, stufen([P("logbuch", "win"), P("klingen", "win"), P("wirbel", "lose"), P("podrennen", "win"), P("kartenwurf", "lose"), -1]));
 assert.deepStrictEqual(s.ziffern, [7, 4, null, null]);
 assert.strictEqual(s.items.kreisel, "besitz");
 assert.strictEqual(s.items.karten_gepanzert, "nicht");   // Wirbel verloren
@@ -145,6 +149,28 @@ assert.deepStrictEqual(einsetzbar(config, s, "bund"), ["pistole_gross", "kreisel
 s = derive(config, { quests: { amulett: "laeuft" }, schritte: { amulett: { gefunden: true } } });
 assert.strictEqual(s.schritte.amulett.gefunden, true);
 assert.strictEqual(derive(config, { schritte: { amulett: { gefunden: true } } }).schritte.amulett.gefunden, false);
-assert.strictEqual(derive(config, { quests: { amulett: "bestanden" } }).packs, 2);
+assert.strictEqual(derive(config, { quests: { amulett: "bestanden" } }).packs, P("amulett", "win"));
+
+// 13. Keine Schulden: Wer bei 0 verliert, verliert nichts. Der nächste Sieg zählt voll.
+s = derive(config, { quests: { logbuch: "verloren", klingen: "verloren", wirbel: "bestanden" } });
+assert.strictEqual(s.packs, P("wirbel", "win"));
+assert.strictEqual(s.kappung.unten, -P("klingen", "lose"));
+assert.strictEqual(s.kappung.oben, 0);
+
+// 14. Deckel: Was über max geht, verfällt. Eine Strafe danach zählt sofort.
+s = derive(config, { quests: alle, zeiten: Object.fromEntries(reihe.map((q, i) => [q.id, i + 1])), buchungen: [{ id: "b", packs: -1, grund: "Strafe", zeit: 99 }] });
+const siege = reihe.reduce((n, q) => n + P(q.id, "win"), 0);
+assert.ok(siege > config.waehrung.max, "Test braucht mehr Siege als Platz im Kästchen");
+assert.strictEqual(s.packs, config.waehrung.max - 1);
+assert.strictEqual(s.kappung.oben, siege - config.waehrung.max);
+
+// 15. Reihenfolge nach Zeit: dieselbe Strafe vor oder nach dem Sieg
+const strafe = zeit => derive(config, { quests: { klingen: "bestanden" }, zeiten: { klingen: 200 }, buchungen: [{ id: "b", packs: -1, grund: "Strafe", zeit }] }).packs;
+assert.strictEqual(strafe(100), P("klingen", "win"));        // bei 0: verpufft
+assert.strictEqual(strafe(300), P("klingen", "win") - 1);    // danach: zieht ab
+// Ohne Zeit (ältere Stände, Demo): erst Quests in Spielreihenfolge, dann Buchungen, danach alles mit Zeit
+assert.strictEqual(derive(config, { quests: { klingen: "bestanden" }, buchungen: [{ id: "b", packs: -1, grund: "x" }] }).packs, P("klingen", "win") - 1);
+assert.strictEqual(derive(config, { quests: { klingen: "bestanden" }, buchungen: [{ id: "b", packs: -1, grund: "x", zeit: 5 }] }).packs, P("klingen", "win") - 1);
+assert.deepStrictEqual(normalize({}).zeiten, {});
 
 console.log("Alle Tests bestanden.");
