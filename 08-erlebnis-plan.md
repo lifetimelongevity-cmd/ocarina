@@ -121,12 +121,14 @@ Nach dem ersten PRESS START fliegt die Fee ins Bild. Vier Tafeln im Stil der N64
 
 ### 3.5 Log-Buch (Freitag im Zug)
 
+Seit 26.09. umgedreht (Branch `elegant-ramanujan`, auf `main`): Rike beantwortet sieben Fragen über Dennis, er tippt in ein bis drei Worten, was sie gesagt hat, dann hört er ihre Antwort. Der Plan unten gilt unverändert.
+
 **Heute:** ein Fenster über der Quest-Seite. Frage, Textfeld, BESIEGELN, dann Wachssiegel, Abspielknopf mit tanzenden Balken und RIKE, WEITER. Am Ende „Alle Antworten sind besiegelt. Der Quest Master entscheidet."
 
 | Dennis fragt sich | Heute da | Plan |
 |---|---|---|
 | Was muss ich tun? | Frage und Textfeld. | bleibt |
-| Werde ich Rike hören? | nichts bis zur ersten Antwort | Vorher eine Tafel: „Setz Kopfhörer auf. Rike spricht gleich zu dir." Mit Tonprobe und dem Hinweis „Rikes Stimme ist bereit", sobald alle sechs Dateien geladen sind. Wichtig für Funklöcher im Zug. |
+| Werde ich Rike hören? | nichts bis zur ersten Antwort | Vorher eine Tafel: „Setz Kopfhörer auf. Rike spricht gleich zu dir." Mit Tonprobe und dem Hinweis „Rikes Stimme ist bereit", sobald alle sieben Dateien geladen sind. Wichtig für Funklöcher im Zug. |
 | Spricht sie gerade? | tanzende Balken, immer gleich | Wellenform aus der echten Datei, ein Lichtpunkt läuft mit. |
 | Nochmal hören, zurück zu Frage 2? | nur die aktuelle Nachricht, zurück geht nicht | Blättern vor und zurück durch besiegelte Seiten. Die Antwort bleibt fest, jede Nachricht lässt sich wieder abspielen. |
 | Und jetzt? | ein Satz | Das Buch schließt sich, das große Siegel prägt sich ein, die Fee sagt: „Jetzt urteilt der Quest Master." |
@@ -185,7 +187,7 @@ Nach dem ersten PRESS START fliegt die Fee ins Bild. Vier Tafeln im Stil der N64
 | Was ist das? | Textbox nach Tippen | bleibt. Dazu „Erbeutet bei Kreuzung der Klingen". |
 | Wofür ist es gut? | „Hier gerade nicht einsetzbar." | Der Satz entfällt, das graue Feld sagt es (umgesetzt 26.09.). Nennt eine Quest nur, wenn sie schon sichtbar ist. |
 | Der Beutel | Das Symbol liest sich eher als Laterne. | neues Beutel-Symbol |
-| Warum spielt er Okarina? | Noten schweben | Tippen auf Dennis spielt eine kurze Melodie. Nach dem Log-Buch spielt die Okarina Rikes Lieder: die sechs Sprachnachrichten, einzeln wählbar. |
+| Warum spielt er Okarina? | Noten schweben | Tippen auf Dennis spielt eine kurze Melodie. Nach dem Log-Buch spielt die Okarina Rikes Lieder: die sieben Sprachnachrichten, einzeln wählbar. |
 | Neues Item bekommen | Zeile im Ergebnis-Fenster | Das Item fliegt in sein Feld, das Feld blitzt auf. Optional hält Dennis es über den Kopf (braucht ein Bild, Entscheidung 8). |
 
 - **Reise:** Hier wird der Roguelike-Gedanke sichtbar: was er hat, was er verbraucht hat, was er noch gewinnen kann (die leeren Plätze).
@@ -376,8 +378,8 @@ Beim Grunddesign zusätzlich: Kontrast aller Texte messen (mindestens 4,5 : 1) u
 
 **Dateien von dir:**
 
-- Rikes sechs Sprachnachrichten (stehen schon aus).
-- Rikes Botschaft als siebte Datei, `app/assets/botschaft.m4a` (entschieden am 26.09.).
+- Rikes sieben Sprachnachrichten `frage1.m4a` bis `frage7.m4a` (Fragen seit 26.09. fest, Liste für Rike in `app/assets/logbuch/LIESMICH.md`).
+- Rikes Botschaft als achte Aufnahme, `app/assets/botschaft.m4a` (entschieden am 26.09.).
 - Optional ein zweites Avatar-Bild: Dennis hält mit beiden Händen etwas über den Kopf, wie Link beim Item-Fund (Entscheidung 8).
 
 ---
@@ -400,7 +402,7 @@ Beim Grunddesign zusätzlich: Kontrast aller Texte messen (mindestens 4,5 : 1) u
 **Entschieden am 26.09.:**
 
 1. **Overdrive:** B „Das Menü lebt" als Grundlage, A „Kammer der Weisen" für die sechs Medaillons, den Bund und das Kästchen (Abschnitt 4).
-2. **Finale mit Rikes Botschaft:** Rike nimmt eine siebte Nachricht auf. Sie spielt nach dem gewonnenen Bund, erst danach rollt die vierte Ziffer ins Schloss. Dann Kästchen-Ansicht, Öffnen-Moment und Abspann (3.9, 3.10).
+2. **Finale mit Rikes Botschaft:** Rike nimmt zusätzlich zu den sieben Log-Buch-Antworten eine Botschaft auf. Sie spielt nach dem gewonnenen Bund, erst danach rollt die vierte Ziffer ins Schloss. Dann Kästchen-Ansicht, Öffnen-Moment und Abspann (3.9, 3.10).
 3. **Prophezeiung in der App:** Dennis tippt seine Vorhersagen morgens ein und besiegelt sie wie im Log-Buch. Der Quest Master bucht Treffer je Vorhersage, bei Dennis bricht genau dieses Siegel.
 4. **Die Fee führt Dennis,** als Rikes Botin (3.2).
 5. **Das visuelle Design des ganzen Menüs wird überarbeitet** (Abschnitt 10).
