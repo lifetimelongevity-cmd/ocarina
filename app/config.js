@@ -55,15 +55,36 @@
         tarn: { name: "Zerbrochenes Wappen", kurz: "Wappen", text: "Ein Bruchstück eines alten Bundes. Es schützt, wer es heilt." } }
     ],
 
-    /* Stationen auf der Karte: Lage in Prozent der Kartenfläche, Reihenfolge = Weg */
+    /* Karte
+       stationen: Lage in Prozent der Kartenfläche, Reihenfolge = Weg.
+                  gps: echte Stelle am Weg [Breite, Länge], ungefähr. Wo der Quest Master am Samstag wirklich
+                  aufbaut, kann er hier nachtragen (auf dem Handy lange auf die Stelle in Google Maps drücken).
+                  hoehe: nur, wenn das Schild etwas anderes sagt als das Höhenmodell.
+       weg:       der echte Weg vom Bahnhof Tegernsee über den Wanderweg 681a zum Gipfel und zum Berggasthof,
+                  [Breite, Länge, Höhe in m]. Quelle: © OpenStreetMap-Mitwirkende (ODbL), Höhen EU-DEM (opentopodata.org).
+                  Für GPS, Höhe und Strecke auf der Karte. */
     karte: {
       stationen: [
         { id: "zug",      name: "ZUG",      ort: "Freitag im Zug",   x: 10, y: 79 },
-        { id: "wiese",    name: "WIESE",    ort: "Wiese am Anstieg", x: 27, y: 66 },
-        { id: "wald",     name: "WALD",     ort: "Erstes Waldstück", x: 45, y: 55 },
-        { id: "aussicht", name: "AUSSICHT", ort: "Aussichtspunkt",   x: 62, y: 43 },
-        { id: "gipfel",   name: "GIPFEL",   ort: "Gipfel Neureuth",  x: 78, y: 28 },
-        { id: "huette",   name: "HÜTTE",    ort: "Berggasthaus",     x: 91, y: 52 }
+        { id: "wiese",    name: "WIESE",    ort: "Wiese am Anstieg", x: 27, y: 66, gps: [47.71836, 11.75569] },
+        { id: "wald",     name: "WALD",     ort: "Erstes Waldstück", x: 45, y: 55, gps: [47.72257, 11.75415] },
+        { id: "aussicht", name: "AUSSICHT", ort: "Aussichtspunkt",   x: 62, y: 43, gps: [47.72736, 11.76612] },
+        { id: "gipfel",   name: "GIPFEL",   ort: "Gipfel Neureuth",  x: 78, y: 28, gps: [47.72846, 11.77209], hoehe: 1261 },
+        { id: "huette",   name: "HÜTTE",    ort: "Berggasthaus",     x: 91, y: 52, gps: [47.72858, 11.77199] }
+      ],
+      start: "Bahnhof Tegernsee",
+      weg: [
+        [47.71437, 11.75690, 763], [47.71772, 11.75551, 796], [47.71836, 11.75569, 815], [47.71903, 11.75531, 821], [47.72086, 11.75377, 852], [47.72158, 11.75364, 869],
+        [47.72190, 11.75427, 891], [47.72218, 11.75449, 906], [47.72248, 11.75434, 912], [47.72271, 11.75385, 907], [47.72269, 11.75411, 913], [47.72293, 11.75381, 913],
+        [47.72326, 11.75383, 925], [47.72329, 11.75396, 930], [47.72306, 11.75419, 929], [47.72310, 11.75444, 938], [47.72368, 11.75433, 956], [47.72351, 11.75454, 956],
+        [47.72363, 11.75456, 961], [47.72356, 11.75481, 966], [47.72413, 11.75459, 977], [47.72389, 11.75524, 988], [47.72388, 11.75574, 997], [47.72403, 11.75547, 996],
+        [47.72394, 11.75631, 1007], [47.72417, 11.75589, 1006], [47.72460, 11.75563, 1010], [47.72424, 11.75675, 1027], [47.72419, 11.75699, 1033], [47.72432, 11.75695, 1035],
+        [47.72416, 11.75736, 1043], [47.72466, 11.75709, 1048], [47.72434, 11.75784, 1063], [47.72482, 11.75767, 1068], [47.72460, 11.75810, 1076], [47.72486, 11.75797, 1077],
+        [47.72472, 11.75823, 1082], [47.72490, 11.75818, 1083], [47.72479, 11.75847, 1089], [47.72496, 11.75837, 1089], [47.72483, 11.75877, 1098], [47.72510, 11.75866, 1098],
+        [47.72468, 11.75950, 1119], [47.72478, 11.75957, 1123], [47.72480, 11.75996, 1136], [47.72469, 11.76014, 1140], [47.72536, 11.75969, 1134], [47.72521, 11.76013, 1147],
+        [47.72527, 11.76082, 1161], [47.72509, 11.76092, 1162], [47.72534, 11.76176, 1169], [47.72541, 11.76273, 1175], [47.72555, 11.76305, 1177], [47.72662, 11.76403, 1201],
+        [47.72683, 11.76460, 1204], [47.72708, 11.76488, 1204], [47.72727, 11.76605, 1204], [47.72764, 11.76723, 1205], [47.72777, 11.76855, 1216], [47.72812, 11.77032, 1238],
+        [47.72863, 11.77094, 1248], [47.72850, 11.77144, 1252], [47.72851, 11.77187, 1255], [47.72837, 11.77192, 1253], [47.72846, 11.77209, 1255], [47.72858, 11.77199, 1256]
       ]
     },
 

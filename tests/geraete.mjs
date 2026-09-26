@@ -55,20 +55,20 @@ async function pruefen(page, g, name) {
     const sichtbar = el => { const s = getComputedStyle(el); if (s.visibility === 'hidden' || s.display === 'none' || +s.opacity === 0) return false; const b = el.getBoundingClientRect(); return b.width > 0 && b.height > 0; };
     const inAktiv = el => !el.closest('.face') || el.closest('.face.active');
     const bereich = el => !el.closest('[hidden]') && inAktiv(el) && !el.closest('.intro-screen') ;
-    for (const el of document.querySelectorAll('.hud button, .shoulder, .foot .sync, .face.active button, .face.active p, .result, .lb-panel, .qc-action')) {
+    for (const el of document.querySelectorAll('.hud button, .shoulder, .foot .sync, .face.active button, .face.active p, .result, .lb-panel, .qc-action, .prolog-skip, .prolog-box, .coach-bubble')) {
       if (!bereich(el) || !sichtbar(el)) continue;
       const b = el.getBoundingClientRect();
       if (b.left < sa.l - 1 || b.right > W - sa.r + 1 || (b.bottom > H - sa.b + 1 && !el.classList.contains('sync'))) out.inset.push(`${el.className || el.tagName} [${Math.round(b.left)},${Math.round(b.right)},${Math.round(b.bottom)}]`);
       if (b.right > W + 1 || b.bottom > H + 1) out.ausserhalb.push(el.className);
     }
-    for (const el of document.querySelectorAll('.face.active *, .hud *, .result *, .lb-panel *')) {
+    for (const el of document.querySelectorAll('.face.active *, .hud *, .result *, .lb-panel *, .prolog *, .coach-bubble *')) {
       if (!bereich(el) || !sichtbar(el)) continue;
       const s = getComputedStyle(el);
       const hatText = [...el.childNodes].some(n => n.nodeType === 3 && n.textContent.trim());
       if (hatText && parseFloat(s.fontSize) < 10) out.klein.push(`${el.className || el.tagName} ${s.fontSize} "${el.textContent.trim().slice(0, 20)}"`);
       if (hatText && s.overflow !== 'visible' && s.textOverflow !== 'ellipsis' && el.scrollWidth > el.clientWidth + 2 && !['TEXTAREA'].includes(el.tagName)) out.ueberlauf.push(`${el.className || el.tagName} "${el.textContent.trim().slice(0, 24)}"`);
     }
-    for (const el of document.querySelectorAll('.face.active button:not([disabled]), .hud button, .shoulder, .lb-panel button:not([disabled])')) {
+    for (const el of document.querySelectorAll('.face.active button:not([disabled]), .hud button, .shoulder, .lb-panel button:not([disabled]), .prolog button')) {
       if (!bereich(el) || !sichtbar(el) || el.closest('.slot.empty')) continue;
       const b = el.getBoundingClientRect();
       if (Math.min(b.width, b.height) < 28) out.tipp.push(`${el.className} ${Math.round(b.width)}x${Math.round(b.height)}`);
@@ -89,7 +89,8 @@ async function pruefen(page, g, name) {
 }
 
 const shot = (page, g, name) => page.screenshot({ path: `${OUT}/${g.id}-${name}.png` });
-const seite = async (page, n) => { for (let i = 0; i < 3; i++) { const p = await page.evaluate(() => +document.querySelector('.face.active').dataset.page); if (p === n) break; await page.click((n - p + 3) % 3 === 1 ? '.shoulder-right' : '.shoulder-left'); await page.waitForTimeout(650); } };
+const weiterTippen = async page => { while (await page.$('#coach:not([hidden])')) { await page.click('#coach'); await page.waitForTimeout(200); } };
+const seite = async (page, n) => { await weiterTippen(page); for (let i = 0; i < 3; i++) { const p = await page.evaluate(() => +document.querySelector('.face.active').dataset.page); if (p === n) break; await page.click((n - p + 3) % 3 === 1 ? '.shoulder-right' : '.shoulder-left'); await page.waitForTimeout(650); } };
 
 const browser = await chromium.launch();
 let alleProbleme = 0;
@@ -106,10 +107,27 @@ for (const g of GERAETE) {
   if (pressStart.r > g.w - g.sa.r || pressStart.b > g.h - g.sa.b) { log('  PROBLEM: PRESS START in Safe Area', JSON.stringify(pressStart)); alleProbleme++; }
   await page.click('#introScreen');
   await page.waitForTimeout(700);
+  // Prolog der Fee (in der Demo jedes Mal): vier Tafeln, dann ein kurzer Rundgang
+  await page.waitForTimeout(1700); await shot(page, g, '0b-prolog');
+  alleProbleme += (await pruefen(page, g, 'PROLOG')).length;
+  for (let i = 0; i < 12 && await page.isVisible('#prolog'); i++) { await page.click('#prolog'); await page.waitForTimeout(300); }
+  await page.waitForTimeout(500);
+  if (await page.$('#coach:not([hidden])')) { await shot(page, g, '0c-rundgang'); alleProbleme += (await pruefen(page, g, 'RUNDGANG')).length; }
+  await weiterTippen(page);
   await shot(page, g, '1-quests');
   alleProbleme += (await pruefen(page, g, 'QUESTS')).length;
   await seite(page, 0); await shot(page, g, '2-karte');
   alleProbleme += (await pruefen(page, g, 'KARTE')).length;
+  await weiterTippen(page);
+  // Stationstafel: Wiese (Tafel rechts) und Hütte mit dem Kästchen (Tafel links)
+  await page.click('.mark[data-station="wiese"]'); await page.waitForTimeout(300);
+  await shot(page, g, '2b-tafel-wiese');
+  alleProbleme += (await pruefen(page, g, 'STATIONSTAFEL')).length;
+  await page.click('.sc-close'); await page.waitForTimeout(200);
+  await page.click('.mark[data-station="huette"]'); await page.waitForTimeout(300);
+  await shot(page, g, '2c-tafel-huette');
+  alleProbleme += (await pruefen(page, g, 'KÄSTCHEN-TAFEL')).length;
+  await page.click('.sc-close'); await page.waitForTimeout(200);
   await seite(page, 2); await page.waitForTimeout(300);
   // Onboarding durchklicken
   if (!(await page.$('#overlay[hidden]'))) { await shot(page, g, '3a-onboarding'); await page.click('#overlay'); await page.waitForTimeout(400); }
@@ -188,6 +206,7 @@ for (const g of GERAETE) {
   liste.forEach(([n, b]) => log(`    ${(b / 1024).toFixed(0).padStart(5)} KB  ${n}`));
   // Seitenwechsel: längster Frame während der Drehung
   await page.click('#introScreen'); await page.waitForTimeout(800);
+  if (await page.isVisible('#prolog')) { await page.click('#prologSkip'); await page.waitForTimeout(300); }
   const frames = await page.evaluate(async () => {
     const lang = []; let last = performance.now(), on = true;
     const f = t => { lang.push(t - last); last = t; if (on) requestAnimationFrame(f); };

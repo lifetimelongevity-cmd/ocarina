@@ -1,6 +1,6 @@
 # Erlebnis-Plan: Dennis' Menü Seite für Seite
 
-Stand 26.09.2026. **Vorschlag, noch nicht gebaut.** Entscheidungen vom 26.09. sind eingetragen (Abschnitt 9), dazu der Teil zum visuellen Design (Abschnitt 10). **Umgesetzt am 26.09.:** Aufgabenteilung von KARTE und QUESTS und weniger Text (Abschnitt 11), Stilprobe (10.4). Grundlage ist ein Rundgang durch die App v1, so wie Dennis sie erlebt: iPhone 15 vom Home-Bildschirm und in Safari, jeweils am Anfang, in der Mitte, am Gipfel und am Ende des Tages, dazu Log-Buch, alle Ergebnis-Fenster und die Fenster für Packs und Code. Nachstellen mit `?demo=start`, `?demo` und `?demo=ende`.
+Stand 26.09.2026. **Vorschlag, in Teilen gebaut** (Prolog 3.2 und Karte 3.7 seit dem 26.09., siehe Abschnitt 12). Entscheidungen vom 26.09. sind eingetragen (Abschnitt 9), dazu der Teil zum visuellen Design (Abschnitt 10). **Umgesetzt am 26.09.:** Aufgabenteilung von KARTE und QUESTS und weniger Text (Abschnitt 11), Stilprobe (10.4). Grundlage ist ein Rundgang durch die App v1, so wie Dennis sie erlebt: iPhone 15 vom Home-Bildschirm und in Safari, jeweils am Anfang, in der Mitte, am Gipfel und am Ende des Tages, dazu Log-Buch, alle Ergebnis-Fenster und die Fenster für Packs und Code. Nachstellen mit `?demo=start`, `?demo` und `?demo=ende`.
 
 Der Plan baut auf `06-design-plan.md` und `07-spiele-und-items.md` auf und ändert keine Entscheidung von dort.
 
@@ -530,3 +530,18 @@ Wunsch vom 26.09.: KARTE und QUESTS überschneiden sich inhaltlich. Dazu überal
 **Nebenbei:** An einer Station stehen jetzt alle Prüfungen (Fehler 3 in Abschnitt 5), ein verlorener Stein ist auf der Karte grau statt rot, die Karte hat die volle Breite, Enter öffnet auf dem Laptop die gewählte Station.
 
 **Geprüft:** `node app/engine.test.js`, `tests/nebel.mjs` (verrät nichts), `tests/geraete.mjs` für App und Stilprobe ohne Probleme auf allen sechs Geräten, Admin und Dennis zusammen wie vorher, Klicktest der Stationen (Wiese öffnet Kreuzung der Klingen, Wald die nächste Quest, Gipfel den Nebel, Hütte den Code).
+
+---
+
+## 12. Onboarding und Karte (umgesetzt am 26.09., zweiter Teil)
+
+Auf Wunsch des Nutzers: „am Anfang noch einen Ticken mehr Onboarding“ und mehr Interaktion und Funktion auf der Karte. Gewählt: Karte lebt, Stationen antippen, echte Position per GPS, Höhe und Strecke.
+
+- **Prolog (3.2):** nach dem ersten PRESS START, einmal pro Handy (Demo und `?onboarding` jedes Mal). Rikes Fee fliegt ein, vier Tafeln wie in 3.2 (Text erscheint Buchstabe für Buchstabe, erster Tipp zeigt alles), Punkte zeigen den Fortschritt, ÜBERSPRINGEN oben rechts. Danach ein Rundgang in vier Schritten: Packs, Code, Z und R, Quest-Karte. Die Fee hat keinen Namen („Rike schickt mich“), Entscheidung 6 bleibt offen.
+- **Die Fee spricht alle Hinweise** (3.12): Sie sitzt in jeder Hinweisblase, auch im Onboarding der Ausrüstung. Freigestellt als `assets/fee.png`.
+- **Karte (3.7, Richtung B):** gegangener Weg golden, Dennis läuft zur neuen Station, sobald er die Karte ansieht (Rückgängig springt ohne Laufen), der Nebel treibt.
+- **Stationstafel:** Tippen auf eine Station zeigt Ort, Höhe, Kilometer ab Bahnhof, die Quests mit Status und im Nebel nur „1 Prüfung im Nebel“. Zeile oder zweites Tippen öffnet die Quest. An der Hütte das Kästchen mit Code, Packs und fehlenden Ziffern. Die Tafel liegt immer auf der anderen Seite als die Station.
+- **Kartusche:** Höhe, Strecke und Höhenmeter bis zum Gipfel, Höhenprofil des echten Wegs mit den Stationen.
+- **GPS:** freiwillig per Knopf, nur solange die Karte offen ist. Feenlicht auf dem Weg, weit weg die Luftlinie, ohne Erlaubnis ein Hinweis.
+- **Getestet:** `tests/karte.mjs`, `tests/nebel.mjs` prüft auch alle Stationstafeln, `tests/geraete.mjs` mit Prolog, Rundgang und Tafeln auf allen sechs Geräten.
+

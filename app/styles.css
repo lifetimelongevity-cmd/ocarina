@@ -293,6 +293,85 @@ svg { display: block; }
 
 .map-lake-label { position: absolute; left: 13%; bottom: 5%; color: #e7f1f3; font: italic 900 var(--fs-tiny)/1 Georgia, serif; letter-spacing: .14em; opacity: .85; text-shadow: 1px 1px 0 #2d5a66; pointer-events: none; }
 
+/* Die Karte lebt: gegangener Weg in Gold über dem gestrichelten, Nebel treibt, Dennis läuft (app.js, spieleLauf) */
+.t-done { fill: none; stroke: #f2c94c; stroke-width: 4; stroke-linecap: round; vector-effect: non-scaling-stroke; filter: drop-shadow(0 0 2px rgba(143,106,18,.9)); }
+.map-fog { animation: fogDrift 17s ease-in-out infinite alternate; }
+@keyframes fogDrift { from { transform: translateX(-10px); } to { transform: translate(14px, -4px); } }
+.map-walker { position: absolute; z-index: 3; width: 26px; height: 26px; transform: translate(-50%, calc(-100% - 12px)); border-radius: 50%; border: 2px solid var(--cursor); box-shadow: 0 0 0 1.5px #1b1e16, 0 2px 4px #000; pointer-events: none;
+  background: #2b3522 url("assets/avatar-okarina.webp") no-repeat; background-size: 70px auto; background-position: -25px -15px; animation: walkBob 260ms steps(2, end) infinite; }
+.map-walker::after { content: ""; position: absolute; left: 50%; top: 100%; margin-left: -4px; border: 4px solid transparent; border-top-color: var(--cursor); }
+.map-walker[hidden] { display: none; }
+@keyframes walkBob { 50% { margin-top: -3px; } }
+.map-sheet.walking .mark .you { display: none; }
+
+/* GPS: ein Feenlicht dort, wo Dennis wirklich am Weg steht */
+.map-gps { position: absolute; z-index: 3; width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 50%; pointer-events: none;
+  background: radial-gradient(circle at 40% 35%, #fff, #8fe3ff 45%, #2aa6d8); box-shadow: 0 0 0 2px #0d3a4c, 0 0 12px 4px rgba(120,220,255,.75); transition: left .8s ease-out, top .8s ease-out; }
+.map-gps::after { content: ""; position: absolute; inset: -6px; border-radius: 50%; border: 2px solid rgba(120,220,255,.8); animation: gpsPing 1.8s ease-out infinite; }
+.map-gps[hidden] { display: none; }
+@keyframes gpsPing { from { transform: scale(.5); opacity: 1; } to { transform: scale(1.8); opacity: 0; } }
+
+/* Kartusche oben links: Höhe, Weg bis zum Gipfel, Höhenprofil des echten Wegs */
+.map-legend { position: absolute; z-index: 2; top: 6px; left: 6px; width: clamp(196px, 31%, 244px); padding: 5px 8px 6px; color: #2c2418;
+  background: linear-gradient(#f3ead0, #e6d9a8); border: 2px solid #513e20; outline: 1px solid rgba(81,62,32,.35); outline-offset: -5px; box-shadow: 0 2px 5px rgba(60,40,10,.45); transition: opacity .2s; }
+.map-legend.verdeckt { opacity: 0; pointer-events: none; }
+.ml-top { display: flex; align-items: center; gap: 6px; }
+.ml-ico { width: 18px; height: 18px; flex: none; color: #513e20; }
+.ml-now { flex: 1; min-width: 0; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font: 800 var(--fs-tiny)/1.1 "Courier New", monospace; letter-spacing: .04em; color: #5a4a2c; }
+.ml-now b { font: 900 clamp(15px, 5vh, 19px)/1 Georgia, serif; letter-spacing: 0; color: #2c2418; font-variant-numeric: tabular-nums; }
+.ml-gps { display: inline-flex; align-items: center; gap: 4px; flex: none; min-height: 30px; padding: 0 7px; border: 2px solid #513e20; border-radius: 3px; background: #f8f1d8; color: #2c2418; cursor: pointer;
+  font: 900 var(--fs-tiny)/1 "Courier New", monospace; letter-spacing: .06em; }
+.ml-gps svg { width: 15px; height: 15px; }
+.ml-gps[aria-pressed="true"] { background: #16435a; border-color: #0b2633; color: #bff0ff; box-shadow: 0 0 8px rgba(120,220,255,.6); }
+.ml-gps.sucht svg { animation: gpsSucht 1s steps(2, end) infinite; }
+@keyframes gpsSucht { 50% { opacity: .35; } }
+.ml-gps[hidden] { display: none; }
+.ml-rest { margin: 3px 0 4px; font: 700 var(--fs-tiny)/1.25 "Trebuchet MS", sans-serif; color: #3d321e; }
+.ml-profil { position: relative; height: clamp(22px, 8vh, 34px); border-bottom: 1px solid rgba(81,62,32,.45); }
+.ml-profil svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.p-area { fill: rgba(113,137,75,.45); }
+.p-line { fill: none; stroke: #513e20; stroke-width: 1.5; vector-effect: non-scaling-stroke; stroke-linejoin: round; }
+.ml-profil i { position: absolute; transform: translate(-50%, -50%); pointer-events: none; }
+.p-st { width: 7px; height: 7px; rotate: 45deg; background: #f8f1d8; border: 1.5px solid #513e20; }
+.p-st.done { background: var(--gold); }
+.p-st.hier { background: var(--cursor); }
+.p-du { width: 10px; height: 10px; border-radius: 50%; background: var(--cursor); border: 2px solid #2c2418; box-shadow: 0 0 0 2px rgba(250,242,110,.45); }
+.p-du.gps { background: #8fe3ff; box-shadow: 0 0 6px 2px rgba(120,220,255,.8); }
+.p-du[hidden] { display: none; }
+
+/* Stationstafel: oben links über der Kartusche, Zeilen öffnen die Quest */
+.station-card { position: absolute; z-index: 4; top: 6px; left: 6px; width: min(46%, 350px); max-height: calc(100% - 12px); overflow: auto; overscroll-behavior: contain; padding: 7px 10px 8px; animation: cardIn 180ms ease-out both; scrollbar-width: thin; scrollbar-color: #71788d transparent; }
+.station-card[hidden] { display: none; }
+.station-card.rechts { left: auto; right: 6px; }
+@keyframes cardIn { from { opacity: 0; transform: translateY(-6px); } }
+.sc-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: start; margin-bottom: 4px; }
+.sc-titel .tb-title { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 0 0 2px; }
+.sc-titel .tb-title .tag { font-family: "Courier New", monospace; text-shadow: none; }
+.sc-titel .tb-meta { margin: 0; text-transform: none; letter-spacing: .02em; }
+.sc-close { display: grid; place-items: center; width: 32px; height: 32px; margin: -3px -5px 0 0; padding: 0; border: 0; background: none; color: #aab3cf; cursor: pointer; }
+.sc-close svg { width: 14px; height: 14px; }
+.sc-rows { display: grid; gap: 2px; }
+.sc-row { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; align-items: center; gap: 8px; width: 100%; min-height: 38px; padding: 3px 6px; border: 1px solid transparent; border-radius: 3px;
+  background: rgba(255,255,255,.05); color: #f4f0dc; text-align: left; cursor: pointer; font: 700 var(--fs-body)/1.15 "Trebuchet MS", sans-serif; }
+.sc-row:hover, .sc-row:focus-visible { border-color: var(--cursor); background: rgba(250,242,110,.1); outline: none; }
+.sc-row .ic { display: grid; place-items: center; }
+.sc-row .medal, .sc-row .gem { --sz: 24px; }
+.sc-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sc-name small { display: block; margin-top: 2px; color: #aab3cf; font: 700 var(--fs-tiny)/1.2 "Courier New", monospace; letter-spacing: .02em; white-space: normal; }
+.sc-row.nebel { color: #c8cbd8; font-style: italic; }
+.sc-st svg { width: 16px; height: 16px; }
+.sc-st.won { color: var(--gold); } .sc-st.lost { color: #ff6b5e; }
+.sc-chest .ic { color: var(--gold); } .sc-chest .ic svg { width: 24px; height: 24px; }
+.sc-code { display: flex; gap: 3px; --hud-h: 28px; }
+.sc-code .tumbler { width: 17px; height: 22px; font-size: 14px; }
+
+/* Schwache Handys und weniger Bewegung: kein Treiben, kein Hüpfen, kein Pulsieren */
+html.schwach .map-fog, html.schwach .map-gps::after { animation: none; }
+@media (prefers-reduced-motion: reduce) {
+  .map-fog, .map-walker, .map-gps::after, .ml-gps.sucht svg, .station-card { animation: none !important; }
+  .map-gps { transition: none; }
+}
+
 /* ---------- Seite AUSRÜSTUNG ---------- */
 .equip-body { display: grid; grid-template-columns: minmax(0, 1fr) clamp(150px, 30%, 250px) minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; gap: 8px 14px; min-height: 0; }
 .equip-group { display: grid; align-content: center; justify-items: center; gap: 6px; min-height: 0; }
@@ -464,6 +543,48 @@ html.probe body::after { content: ""; position: fixed; inset: 0; z-index: 9999; 
 @keyframes coachIn { from { opacity: 0; transform: translateY(6px); } }
 .coach-focus { outline: 2px solid var(--gold); outline-offset: 4px; border-radius: 4px; box-shadow: 0 0 22px rgba(242,201,76,.6); animation: coachGlow 1.4s ease-in-out infinite; }
 @keyframes coachGlow { 50% { box-shadow: 0 0 8px rgba(242,201,76,.25); } }
+/* Die Fee spricht jeden Hinweis (08-erlebnis-plan.md, 3.12) */
+.coach-bubble { padding-left: 48px; }
+.coach-fee { position: absolute; left: 4px; top: 50%; width: 40px; height: auto; margin-top: -22px; pointer-events: none; filter: drop-shadow(0 0 6px rgba(160,220,255,.9)); animation: feeHover 2.2s ease-in-out infinite; }
+
+/* ---------- Prolog: Rikes Fee, vier Tafeln, einmal pro Handy ---------- */
+.prolog { position: absolute; inset: 0; z-index: 58; display: grid; grid-template-rows: minmax(0, 1fr) auto; justify-items: center; gap: 8px; cursor: pointer;
+  padding: calc(var(--pad-t) + 10px) calc(var(--pad-r) + 12px) calc(var(--foot-h) + 10px) calc(var(--pad-l) + 12px);
+  background: radial-gradient(ellipse 55% 60% at 50% 36%, rgba(34,48,78,.9), rgba(4,6,12,.97) 75%), #030405; animation: prologIn 420ms ease-out both; }
+.prolog[hidden] { display: none; }
+@keyframes prologIn { from { opacity: 0; } }
+.prolog-skip { position: absolute; z-index: 2; top: calc(var(--pad-t) + 6px); right: calc(var(--pad-r) + 6px); min-height: 36px; padding: 0 14px; border: 2px solid #080a10; outline: 1.5px solid var(--gold); border-radius: 4px; cursor: pointer;
+  background: rgba(8,10,16,.8); color: var(--gold); font: 900 var(--fs-tiny)/1 "Courier New", monospace; letter-spacing: .08em; }
+.prolog-stage { position: relative; display: flex; align-items: center; justify-content: center; gap: clamp(12px, 4vw, 40px); width: 100%; min-height: 0; }
+.prolog-fee { width: clamp(64px, 22vh, 100px); height: auto; flex: none; filter: drop-shadow(0 0 14px rgba(160,220,255,.95)) drop-shadow(0 0 30px rgba(255,160,220,.5)); animation: feeFly 900ms cubic-bezier(.16,1,.3,1) both, feeHover 2.4s ease-in-out 900ms infinite; }
+.prolog[data-tafel="bild"] .prolog-fee { width: clamp(46px, 15vh, 70px); animation: feeHover 2.4s ease-in-out infinite; }
+@keyframes feeFly { from { opacity: 0; transform: translate(40vw, -30vh) scale(.3) rotate(25deg); } 70% { opacity: 1; } }
+@keyframes feeHover { 50% { transform: translateY(-6px) rotate(-3deg); } }
+.prolog-bild { display: flex; align-items: center; justify-content: center; gap: clamp(10px, 3vw, 26px); min-width: 0; animation: bildIn 380ms ease-out both; }
+.prolog-bild:empty { display: none; }
+@keyframes bildIn { from { opacity: 0; transform: translateY(8px) scale(.96); } }
+.pb-chest { position: relative; display: grid; place-items: center; width: clamp(60px, 20vh, 96px); aspect-ratio: 1; border-radius: 50%; color: var(--gold);
+  background: radial-gradient(circle at 35% 28%, #5d4b22, #2b200c 64%, #120d05); border: 3px solid #1a1206; box-shadow: 0 0 0 2px rgba(242,201,76,.5), 0 4px 10px #000; }
+.pb-chest > svg:first-child { width: 58%; height: 58%; filter: drop-shadow(0 2px 0 #000); }
+.pb-lock { position: absolute; right: -4px; bottom: -2px; width: 34%; height: 34%; color: #c9c3a2; filter: drop-shadow(1px 1px 0 #000); }
+.pb-cards { display: grid; grid-template-columns: repeat(var(--n), auto); gap: 3px; }
+.pb-cards svg { width: clamp(12px, 4.4vh, 20px); height: auto; aspect-ratio: 22 / 30; filter: drop-shadow(1px 1px 0 rgba(0,0,0,.8)); }
+.pb-gain { position: relative; display: grid; place-items: center; }
+.pb-gain svg { width: clamp(30px, 10vh, 46px); height: auto; aspect-ratio: 22 / 30; filter: drop-shadow(0 0 10px rgba(242,201,76,.7)); }
+.pb-gain b { position: absolute; right: -14px; top: -8px; color: var(--gold); font: 900 clamp(20px, 7vh, 30px)/1 Georgia, serif; text-shadow: 2px 2px 0 #3c2600; }
+.pb-tumblers { display: flex; gap: 5px; --hud-h: clamp(40px, 13vh, 58px); }
+.pb-split { display: grid; justify-items: center; gap: 6px; }
+.pb-split small { color: #cfd5e8; font: 800 var(--fs-tiny)/1 "Courier New", monospace; letter-spacing: .1em; text-transform: uppercase; }
+.pb-split .pb-cards.mine svg { filter: drop-shadow(0 0 6px rgba(242,201,76,.8)); }
+.prolog-box { width: min(640px, 100%); padding: 12px 18px 24px; cursor: pointer; }
+.prolog-text { min-height: 2.7em; margin: 0; font: 700 clamp(14px, 4.6vh, 18px)/1.35 "Trebuchet MS", sans-serif; color: #f8f5e4; text-wrap: pretty; }
+.prolog-dots { position: absolute; left: 50%; bottom: 8px; display: flex; gap: 6px; transform: translateX(-50%); }
+.prolog-dots i { width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,.22); }
+.prolog-dots i.done { background: rgba(242,201,76,.55); }
+.prolog-dots i.on { background: var(--gold); box-shadow: 0 0 6px rgba(242,201,76,.8); }
+@media (prefers-reduced-motion: reduce) {
+  .prolog, .prolog-fee, .prolog-bild, .coach-fee { animation: none !important; }
+}
 
 /* ---------- v1: leere Plätze, Einsetzbar, laufende Quests (07-spiele-und-items.md) ---------- */
 /* Noch nicht erspielt: einfach ein leerer Platz */

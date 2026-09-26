@@ -96,9 +96,26 @@
                   <path class="t-lake" d="M0 336 C110 318 210 342 300 328 C380 316 440 352 480 420 H0Z"/>
                   <path class="t-rail" d="M0 392 C40 376 70 352 100 332"/>
                   <path class="t-route" id="mapRoute" d=""/>
+                  <path class="t-done" id="mapDone" d=""/>
                 </svg>
                 <div class="map-fog" id="mapFog" hidden></div>
                 <div class="map-marks" id="mapMarks"></div>
+                <span class="map-walker" id="mapWalker" hidden aria-hidden="true"></span>
+                <span class="map-gps" id="mapGps" hidden title="Hier bist du laut GPS"></span>
+                <!-- Kartusche: Höhe, Strecke bis zum Gipfel, Höhenprofil des echten Wegs, GPS -->
+                <div class="map-legend" id="mapLegend">
+                  <div class="ml-top">
+                    <svg class="ml-ico" aria-hidden="true"><use href="#i-mountain"></use></svg>
+                    <p class="ml-now"><b id="mlWert">–</b> <span id="mlWo"></span></p>
+                    <button class="ml-gps" id="gpsBtn" type="button" aria-pressed="false" aria-label="GPS: zeig mir, wo ich am Weg bin"><svg aria-hidden="true"><use href="#i-gps"></use></svg><span>GPS</span></button>
+                  </div>
+                  <p class="ml-rest" id="mlRest"></p>
+                  <div class="ml-profil" id="mlProfil" aria-hidden="true">
+                    <svg viewBox="0 0 200 40" preserveAspectRatio="none"><path class="p-area" id="mlArea" d=""/><path class="p-line" id="mlLine" d=""/></svg>
+                  </div>
+                </div>
+                <!-- Stationstafel: erscheint beim Antippen einer Station -->
+                <div class="station-card textbox" id="stationCard" hidden aria-live="polite"></div>
               </div>
             </div>
           </section>
@@ -157,7 +174,21 @@
     </footer>
 
     <!-- Ergebnis-Fenster: erscheint, wenn der Quest Master etwas bucht -->
-    <div class="coach" id="coach" hidden><p class="coach-bubble" role="status"><span></span><span class="result-more" aria-hidden="true">▼</span></p></div>
+    <div class="coach" id="coach" hidden><p class="coach-bubble" role="status"><img class="coach-fee" src="assets/fee.png" loading="lazy" alt="" aria-hidden="true"><span class="coach-text"></span><span class="result-more" aria-hidden="true">▼</span></p></div>
+
+    <!-- Prolog: einmal pro Handy nach dem ersten PRESS START. Rikes Fee erklärt in vier Tafeln, worum es geht. -->
+    <section class="prolog" id="prolog" hidden aria-label="Prolog">
+      <button class="prolog-skip" id="prologSkip" type="button">ÜBERSPRINGEN</button>
+      <div class="prolog-stage">
+        <img class="prolog-fee" id="prologFee" src="assets/fee.png" loading="lazy" alt="" draggable="false">
+        <div class="prolog-bild" id="prologBild" aria-hidden="true"></div>
+      </div>
+      <div class="prolog-box textbox" role="dialog" aria-modal="true" aria-labelledby="prologText">
+        <p class="prolog-text" id="prologText"></p>
+        <span class="prolog-dots" id="prologDots" aria-hidden="true"></span>
+        <span class="result-more" aria-hidden="true">▼</span>
+      </div>
+    </section>
     <div class="overlay" id="overlay" hidden>
       <div class="result textbox" role="dialog" aria-modal="true" aria-labelledby="resultTitle">
         <div class="result-head" id="resultHead"></div>
@@ -241,6 +272,8 @@
     <!-- Zeichen -->
     <symbol id="i-check" viewBox="0 0 16 16"><path d="M2.6 8.6 6.3 12l7.1-8" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
     <symbol id="i-x" viewBox="0 0 16 16"><path d="m4 4 8 8m0-8-8 8" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"/></symbol>
+    <symbol id="i-mountain" viewBox="0 0 32 32"><path fill="currentColor" d="M2 27 12.5 9l4.6 7.6 3.4-4.8L30 27Z"/><path fill="rgba(255,255,255,.55)" d="m12.5 9 3 5.1-1.7-.9-1.3 1.6-1.4-1.6-1.9 1Z"/></symbol>
+    <symbol id="i-gps" viewBox="0 0 32 32"><circle cx="16" cy="16" r="8.5" fill="none" stroke="currentColor" stroke-width="2.6"/><circle cx="16" cy="16" r="3.6" fill="currentColor"/><path d="M16 2v6M16 24v6M2 16h6M24 16h6" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></symbol>
     <symbol id="i-hut" viewBox="0 0 32 32"><path fill="currentColor" d="M3 15 16 4l13 11h-3v12H6V15Z"/><path d="M13.5 27v-7h5v7" fill="#2c2418"/></symbol>
     <symbol id="i-train" viewBox="0 0 32 32"><path fill="currentColor" d="M8 4h16a3 3 0 0 1 3 3v15a3 3 0 0 1-3 3l2.5 4h-3.2L21 25H11l-2.3 4H5.5L8 25a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3Z"/><path d="M8 8h16v7H8Z" fill="#cfe3e8"/><circle cx="10.5" cy="20" r="1.8" fill="#f2c94c"/><circle cx="21.5" cy="20" r="1.8" fill="#f2c94c"/></symbol>
     <!-- Neue Items und Fähigkeiten (07-spiele-und-items.md) -->
@@ -256,6 +289,7 @@
   <script src="config.js"></script>
   <script src="engine.js"></script>
   <script src="store.js"></script>
+  <script src="weg.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

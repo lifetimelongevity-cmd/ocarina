@@ -190,13 +190,21 @@
     document.querySelectorAll(".q-row").forEach(b => b.addEventListener("click", () => { followNext = b.dataset.id === state.next; selectQuest(b.dataset.id); }));
     $("#questCard").addEventListener("click", e => { if (e.target.closest("[data-logbuch]")) logbuch.oeffnen(); });
 
-    // Karte: Weg durch die Stationen, eine Marke pro Station. Tippen öffnet die Quest der Station auf QUESTS.
-    const pts = STATIONEN.map(s => [s.x * 10, s.y * 4.2]);
-    $("#mapRoute").setAttribute("d", smoothPath(pts));
+    // Karte: Weg durch die Stationen, eine Marke pro Station. Tippen zeigt die Stationstafel, zweites Tippen die Quest.
+    $("#mapRoute").setAttribute("d", pfad(ABSCHNITTE.length));
     $("#mapMarks").innerHTML = STATIONEN.map(s =>
       `<button type="button" class="mark" data-station="${s.id}" style="left:${s.x}%;top:${s.y}%" aria-label="${esc(s.ort)}"><span class="m-medal"></span><span class="gems"></span><span class="m-label">${esc(s.name)}</span></button>`).join("")
       + `<span class="map-lake-label">TEGERNSEE</span>`;
-    document.querySelectorAll(".mark").forEach(b => b.addEventListener("click", () => oeffneStation(b.dataset.station)));
+    document.querySelectorAll(".mark").forEach(b => b.addEventListener("click", e => { e.stopPropagation(); tippeStation(b.dataset.station); }));
+    $("#mapSheet").addEventListener("click", e => { if (!e.target.closest(".station-card, .map-legend")) schliesseStationstafel(); });
+    $("#stationCard").addEventListener("click", e => {
+      e.stopPropagation();
+      const q = e.target.closest("[data-quest]"), zu = e.target.closest(".sc-close");
+      if (zu) return schliesseStationstafel();
+      if (e.target.closest("[data-code]")) { tone("confirm"); return explainCode(); }
+      if (q) oeffneQuest(q.dataset.quest);
+    });
+    buildLegende();
 
     // Ausrüstung: links Items, rechts Fähigkeiten. Noch nicht Erspieltes ist ein leerer Platz.
     const slot = it => `<button type="button" class="slot" data-id="${it.id}"><span class="well" style="--c:${it.farbe}">${useSvg(it.symbol)}<b class="count"></b></span></button>`;
@@ -206,16 +214,31 @@
     document.querySelectorAll(".slot").forEach(b => b.addEventListener("click", () => { if (!b.classList.contains("empty")) selectItem(b.dataset.id); }));
   }
 
-  function smoothPath(p) {
-    let d = `M${p[0][0]} ${p[0][1]}`;
-    for (let i = 0; i < p.length - 1; i++) {
-      const p0 = p[i - 1] || p[i], p1 = p[i], p2 = p[i + 1], p3 = p[i + 2] || p2;
-      const c1 = [p1[0] + (p2[0] - p0[0]) / 6, p1[1] + (p2[1] - p0[1]) / 6];
-      const c2 = [p2[0] - (p3[0] - p1[0]) / 6, p2[1] - (p3[1] - p1[1]) / 6];
-      d += ` C${c1[0].toFixed(1)} ${c1[1].toFixed(1)} ${c2[0].toFixed(1)} ${c2[1].toFixed(1)} ${p2[0]} ${p2[1]}`;
-    }
+  /* ---------- Weg auf der Karte ---------- */
+  // Je Abschnitt zwischen zwei Stationen eine kubische Kurve (Catmull-Rom), in Koordinaten der Karten-SVG (1000 × 420).
+  // So lassen sich der gegangene Weg, das Laufen und der GPS-Punkt genau auf die Linie legen.
+  const PUNKTE = STATIONEN.map(s => [s.x * 10, s.y * 4.2]);
+  const ABSCHNITTE = PUNKTE.slice(0, -1).map((p1, i) => {
+    const p0 = PUNKTE[i - 1] || p1, p2 = PUNKTE[i + 1], p3 = PUNKTE[i + 2] || p2;
+    return [p1, [p1[0] + (p2[0] - p0[0]) / 6, p1[1] + (p2[1] - p0[1]) / 6], [p2[0] - (p3[0] - p1[0]) / 6, p2[1] - (p3[1] - p1[1]) / 6], p2];
+  });
+  const bez = (a, t) => { const u = 1 - t; return [0, 1].map(k => u * u * u * a[0][k] + 3 * u * u * t * a[1][k] + 3 * u * t * t * a[2][k] + t * t * t * a[3][k]); };
+  // Erster Teil einer Kurve bis t (de Casteljau)
+  function teil(a, t) {
+    const L = (p, q) => [p[0] + (q[0] - p[0]) * t, p[1] + (q[1] - p[1]) * t];
+    const ab = L(a[0], a[1]), bc = L(a[1], a[2]), cd = L(a[2], a[3]), abc = L(ab, bc), bcd = L(bc, cd);
+    return [a[0], ab, abc, L(abc, bcd)];
+  }
+  // Pfad von der ersten Station: Abschnitte 0 bis bis-1 ganz, Abschnitt bis zum Anteil t
+  function pfad(bis, t = 0) {
+    if (!bis && !t) return "";
+    const c = a => ` C${a[1][0].toFixed(1)} ${a[1][1].toFixed(1)} ${a[2][0].toFixed(1)} ${a[2][1].toFixed(1)} ${a[3][0].toFixed(1)} ${a[3][1].toFixed(1)}`;
+    let d = `M${PUNKTE[0][0]} ${PUNKTE[0][1]}`;
+    for (let i = 0; i < bis; i++) d += c(ABSCHNITTE[i]);
+    if (t > 0 && ABSCHNITTE[bis]) d += c(teil(ABSCHNITTE[bis], Math.min(1, t)));
     return d;
   }
+  const alsProzent = ([x, y]) => [x / 10, y / 4.2];
 
   /* ---------- Darstellung ---------- */
   function render() {
@@ -341,11 +364,18 @@
     if (r.top < l.top + 4 || r.bottom > l.bottom - 4) list.scrollTop += (r.top - l.top) - (l.height - r.height) / 2;
   }
 
+  /* ---------- KARTE: Weg, Dennis läuft, Stationstafel, Höhe und Strecke, GPS ---------- */
+  // Wo Dennis steht: Station der nächsten Quest, am Ende die Hütte. Die Karte zeigt die zuletzt erreichte Station,
+  // bis sie den Weg dorthin einmal gezeigt hat: Dennis läuft, sobald er die Karte ansieht.
+  const STILL = matchMedia("(prefers-reduced-motion: reduce)");
+  const hierIndex = () => { const nq = state.next ? questById(state.next) : null; return STATIONEN.findIndex(x => x.id === (nq ? nq.station : ZIEL)); };
+  let kartenHier = null, laufFrame = null;
+
   function renderMap() {
-    const s = state;
-    const nq = s.next ? questById(s.next) : null;
-    const hier = nq ? nq.station : ZIEL;
-    if (followHier || !sel[0]) sel[0] = hier;
+    const s = state, hi = hierIndex();
+    if (kartenHier === null || hi < kartenHier) kartenHier = hi;          // Start und Rückgängig: ohne Laufen
+    const hier = STATIONEN[kartenHier].id;
+    if (followHier || !sel[0]) sel[0] = STATIONEN[hi].id;
     document.querySelectorAll(".mark").forEach(m => {
       const id = m.dataset.station;
       const kerne = REIHE.filter(q => q.station === id && q.typ === "kern");
@@ -358,32 +388,218 @@
       m.querySelector(".you")?.remove();
       if (id === hier) m.insertAdjacentHTML("afterbegin", `<span class="you" title="Du bist hier"></span>`);
     });
-    // Nebel liegt über dem Weg ab der Mitte zur nächsten Station
-    const hi = STATIONEN.findIndex(x => x.id === hier), weiter = STATIONEN[hi + 1];
+    // Gegangener Weg golden, Nebel über dem Weg ab der Mitte zur nächsten Station
+    if (!laufFrame) $("#mapDone").setAttribute("d", pfad(kartenHier));
+    const weiter = STATIONEN[kartenHier + 1];
     $("#mapFog").hidden = !(s.next && weiter);
-    if (s.next && weiter) $("#mapFog").style.left = ((STATIONEN[hi].x + weiter.x) / 2) + "%";
+    if (s.next && weiter) $("#mapFog").style.left = ((STATIONEN[kartenHier].x + weiter.x) / 2) + "%";
+    renderLegende();
+    renderGpsPunkt();
+    if (!$("#stationCard").hidden) renderStationstafel();
+    if (page === 0) spieleLauf();
+  }
+
+  // Dennis läuft von der zuletzt gezeigten Station zur neuen, der Weg hinter ihm wird golden
+  function spieleLauf() {
+    const hi = hierIndex(), von = kartenHier;
+    if (laufFrame || von === null || hi <= von) return;
+    if (page !== 0 || !$("#introScreen").hidden || !$("#overlay").hidden || !$("#prolog").hidden) return;
+    if (STILL.matches || hi - von > 3) { kartenHier = hi; renderMap(); return; }
+    const walker = $("#mapWalker"), sheet = $("#mapSheet");
+    const abschnitte = hi - von, dauer = Math.min(2600, 1300 * abschnitte), t0 = performance.now();
+    const ease = x => x < .5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2;
+    sheet.classList.add("walking");
+    walker.hidden = false;
+    const schritt = jetzt => {
+      const g = Math.min(1, (jetzt - t0) / dauer), x = ease(g) * abschnitte;
+      const i = Math.min(von + Math.floor(x), hi - 1), f = Math.min(1, von + x - i);
+      const [px, py] = alsProzent(bez(ABSCHNITTE[i], f));
+      walker.style.left = px + "%"; walker.style.top = py + "%";
+      $("#mapDone").setAttribute("d", pfad(i, f));
+      if (g < 1) { laufFrame = requestAnimationFrame(schritt); return; }
+      laufFrame = null; kartenHier = hi;
+      walker.hidden = true; sheet.classList.remove("walking");
+      renderMap();
+      melody("plus");
+      kartenHinweis();
+    };
+    laufFrame = requestAnimationFrame(schritt);
   }
 
   function selectStation(id, play = true) {
     sel[0] = id;
     document.querySelectorAll(".mark").forEach(m => m.classList.toggle("is-selected", m.dataset.station === id));
+    if (!$("#stationCard").hidden) renderStationstafel();
     if (play) tone("move");
   }
 
-  // Die Karte zeigt nur das Wo. Tippen auf eine Station öffnet ihre Quest auf QUESTS:
-  // die nächste, wenn sie hier ist, sonst die erste erledigte, sonst den Nebel. Am Ziel steht das Kästchen: Code zeigen.
+  // Erstes Tippen zeigt die Stationstafel, zweites Tippen auf dieselbe Station öffnet ihre Quest
+  function tippeStation(id) {
+    followHier = false;
+    if (!$("#stationCard").hidden && sel[0] === id) return oeffneStation(id);
+    selectStation(id, false);
+    tone("move");
+    $("#stationCard").hidden = false;
+    renderStationstafel();
+  }
+  function schliesseStationstafel() {
+    if ($("#stationCard").hidden) return;
+    $("#stationCard").hidden = true;
+    $("#mapLegend").classList.remove("verdeckt");
+  }
+
+  // Die Quest der Station auf QUESTS: die nächste, wenn sie hier ist, sonst die erste erledigte, sonst den Nebel.
+  // Am Ziel steht das Kästchen: Code zeigen.
   function oeffneStation(id) {
     followHier = false;
     selectStation(id, false);
     const qs = REIHE.filter(q => q.station === id);
     if (!qs.length) { tone("confirm"); return explainCode(); }
     const q = qs.find(x => x.id === state.next) || qs.find(x => aufgedeckt(x.id));
-    const qid = q ? q.id : NEBEL;
+    oeffneQuest(q ? q.id : NEBEL);
+  }
+  function oeffneQuest(qid) {
     followNext = qid === state.next;
     sel[1] = qid;
     renderQuests();
     if (page !== 1) goTo(1); else tone("move");
   }
+
+  const zahl = (n, stellen = 0) => n.toLocaleString("de-DE", { minimumFractionDigits: stellen, maximumFractionDigits: stellen });
+  const meter = m => zahl(Math.round(m)) + " m";
+  const km = m => zahl(m / 1000, 1) + " km";
+
+  // Stationstafel: was hier war und was hier wartet. Im Nebel nur, was die Karte ohnehin zeigt.
+  function renderStationstafel() {
+    const id = sel[0], st = STATIONEN.find(x => x.id === id), idx = STATIONEN.indexOf(st), hi = hierIndex();
+    const w = WEG && WEG.station[id];
+    const lage = idx === hi ? `<span class="tag now">DU BIST HIER</span>` : idx < hi ? `<span class="tag won">GESCHAFFT</span>` : `<span class="tag open">NOCH VOR DIR</span>`;
+    const zahlen = w ? `${meter(w.hoehe)} · ${km(w.s)} ab Bahnhof` : "";
+    const qs = REIHE.filter(q => q.station === id), sicht = qs.filter(q => aufgedeckt(q.id));
+    const imNebel = qs.filter(q => q.typ === "kern" && !aufgedeckt(q.id)).length;
+    const status = qid => qid === state.next ? `<span class="tag now">JETZT</span>`
+      : state.quests[qid] === "bestanden" ? `<span class="sc-st won">${useSvg("i-check")}</span>`
+      : state.quests[qid] === "verloren" ? `<span class="sc-st lost">${useSvg("i-x")}</span>` : "";
+    const zeilen = sicht.map(q => `<button type="button" class="sc-row" data-quest="${q.id}"><span class="ic">${questIcon(q, state.quests[q.id], false)}</span><span class="sc-name">${esc(q.name)}</span>${status(q.id)}</button>`);
+    if (imNebel) zeilen.push(`<button type="button" class="sc-row nebel" data-quest="${NEBEL}"><span class="ic">${coveredMedal()}</span><span class="sc-name">${pruefungen(imNebel)} im Nebel</span></button>`);
+    if (!qs.length) {
+      const fehlt = state.ziffern.filter(v => v == null).length;
+      zeilen.push(`<button type="button" class="sc-row sc-chest" data-code><span class="ic">${useSvg("i-chest")}</span><span class="sc-name">Das Kästchen<small>${state.packs} von ${state.max} Packs gehören dir${fehlt ? ` · ${fehlt === 1 ? "eine Ziffer fehlt" : fehlt + " Ziffern fehlen"}` : ""}</small></span>`
+        + `<span class="sc-code">${state.ziffern.map(v => `<span class="tumbler${v == null ? "" : " known"}">${v == null ? "?" : v}</span>`).join("")}</span></button>`);
+    }
+    // Die Tafel liegt auf der anderen Seite als die Station, damit sie die Station nicht verdeckt
+    const rechts = st.x < 50;
+    $("#stationCard").classList.toggle("rechts", rechts);
+    $("#mapLegend").classList.toggle("verdeckt", !rechts);
+    $("#stationCard").innerHTML = `<div class="sc-head"><div class="sc-titel"><p class="tb-title">${esc(st.name)} ${lage}</p><p class="tb-meta">${esc(st.ort)}${zahlen ? " · " + zahlen : ""}</p></div>`
+      + `<button type="button" class="sc-close" aria-label="Tafel schließen">${useSvg("i-x")}</button></div>`
+      + `<div class="sc-rows">${zeilen.join("")}</div>`;
+  }
+
+  /* Kartusche: Höhe, Strecke bis zum Gipfel und das Höhenprofil des echten Wegs (weg.js, config.karte.weg) */
+  const WEG = window.QuestWeg ? window.QuestWeg.aufbauen(C.karte) : null;
+  const GPS_KEY = "dq-gps" + (PROBE ? "-probe" : "");
+  const gps = { an: false, watch: null, lage: null, genau: null, hinweis: "" };
+  try { gps.an = localStorage.getItem(GPS_KEY) === "1"; } catch (_) {}
+  let profilY = null;
+
+  function buildLegende() {
+    if (!WEG) { $("#mapLegend").hidden = true; return; }
+    if (!("geolocation" in navigator)) $("#gpsBtn").hidden = true;
+    const hs = WEG.weg.map(p => p[2]), lo = Math.min(...hs) - 25, top = Math.max(WEG.ziel.hoehe, ...hs) + 12;
+    const X = s => s / WEG.laenge * 200;
+    profilY = h => 40 - (h - lo) / (top - lo) * 38;
+    const pts = WEG.weg.map((p, i) => `${X(WEG.cum[i]).toFixed(1)} ${profilY(p[2]).toFixed(1)}`);
+    $("#mlLine").setAttribute("d", "M" + pts.join(" L"));
+    $("#mlArea").setAttribute("d", "M0 40 L" + pts.join(" L") + " L200 40Z");
+    // Stationen als Rauten auf dem Profil, dazu der Punkt, wo Dennis gerade ist
+    $("#mlProfil").insertAdjacentHTML("beforeend", STATIONEN.filter(st => WEG.station[st.id]).map(st =>
+      `<i class="p-st" data-station="${st.id}" style="left:${X(WEG.station[st.id].s) / 2}%;top:${profilY(WEG.station[st.id].hoehe) / 40 * 100}%"></i>`).join("") + `<i class="p-du" id="mlDu"></i>`);
+    $("#gpsBtn").addEventListener("click", e => { e.stopPropagation(); gpsUmschalten(); });
+  }
+
+  function renderLegende() {
+    if (!WEG) return;
+    let wert, wo, rest, s = null;
+    const hi = kartenHier ?? hierIndex(), st = STATIONEN[hi], w = WEG.station[st.id];
+    const bisGipfel = (s, h) => s >= WEG.ziel.s - 40 ? "Gipfel erreicht." : `Noch ${km(WEG.ziel.s - s)} · ${zahl(Math.max(0, WEG.ziel.hoehe - h))} Hm bis zum Gipfel`;
+    if (gps.an && gps.lage) {
+      const { abstand, luft } = gps.lage;
+      if (abstand <= 250) { s = gps.lage.s; const h = WEG.hoeheBei(s); wert = meter(h); wo = gps.genau > 60 ? `GPS ±${Math.round(gps.genau)} m` : "GPS"; rest = bisGipfel(s, h); }
+      else if (luft > 2000) { wert = km(luft); wo = "Luftlinie"; rest = `bis zum ${C.karte.start}`; }
+      else { wert = meter(abstand); wo = "neben dem Weg"; rest = "Am Weg zeigt dich die Karte."; }
+    } else if (w) { s = w.s; wert = meter(w.hoehe); wo = st.name; rest = bisGipfel(w.s, w.hoehe); }
+    else { wert = km(WEG.ziel.s); wo = "am Samstag"; rest = `${zahl(WEG.ziel.hoehe - WEG.hoeheBei(0))} Hm vom ${C.karte.start} zum Gipfel`; }
+    if (gps.an && !gps.lage) rest = "GPS sucht dich …";
+    if (gps.hinweis) rest = gps.hinweis;
+    $("#mlWert").textContent = wert;
+    $("#mlWo").textContent = wo;
+    $("#mlRest").textContent = rest;
+    const b = $("#gpsBtn");
+    b.setAttribute("aria-pressed", String(gps.an));
+    b.classList.toggle("sucht", gps.an && !gps.lage);
+    document.querySelectorAll("#mlProfil .p-st").forEach(el => {
+      const i = STATIONEN.findIndex(x => x.id === el.dataset.station);
+      el.classList.toggle("done", i < hi);
+      el.classList.toggle("hier", i === hi);
+    });
+    const du = $("#mlDu");
+    du.hidden = s == null;
+    du.classList.toggle("gps", !!(gps.an && gps.lage && gps.lage.abstand <= 250));
+    if (s != null) { du.style.left = s / WEG.laenge * 100 + "%"; du.style.top = profilY(WEG.hoeheBei(s)) / 40 * 100 + "%"; }
+  }
+
+  // GPS-Stelle am Weg (Meter ab Bahnhof) auf die gezeichnete Karte: zwischen zwei Stationen anteilig auf ihrem Abschnitt.
+  // Vom Bahnhof bis zur ersten Station liegt der Punkt auf der zweiten Hälfte des Abschnitts davor (Anreise).
+  function kartenPunkt(s) {
+    const mit = STATIONEN.map((st, i) => ({ i, s: WEG.station[st.id] && WEG.station[st.id].s })).filter(x => x.s != null);
+    const erste = mit[0];
+    if (s <= erste.s) return erste.i ? bez(ABSCHNITTE[erste.i - 1], .5 + .5 * Math.max(0, s) / erste.s) : PUNKTE[erste.i];
+    for (let k = 0; k < mit.length - 1; k++) {
+      const a = mit[k], b = mit[k + 1];
+      if (s > b.s) continue;
+      const x = a.i + (s - a.s) / (b.s - a.s) * (b.i - a.i), i = Math.min(Math.floor(x), ABSCHNITTE.length - 1);
+      return bez(ABSCHNITTE[i], x - i);
+    }
+    return PUNKTE[mit[mit.length - 1].i];
+  }
+  function renderGpsPunkt() {
+    const p = $("#mapGps"), l = gps.lage;
+    p.hidden = !(WEG && gps.an && l && l.abstand <= 250);
+    if (p.hidden) return;
+    const [x, y] = alsProzent(kartenPunkt(l.s));
+    p.style.left = x + "%"; p.style.top = y + "%";
+  }
+
+  // GPS läuft nur, solange die Karte offen ist (Akku). Die Wahl merkt sich das Handy.
+  function gpsStart() {
+    if (!WEG || !gps.an || gps.watch !== null || !("geolocation" in navigator)) return;
+    gps.watch = navigator.geolocation.watchPosition(pos => {
+      const { latitude: la, longitude: lo, accuracy } = pos.coords, p = WEG.projizieren(la, lo);
+      gps.lage = { s: p.s, abstand: p.abstand, luft: WEG.luftlinie(la, lo) };
+      gps.genau = accuracy; gps.hinweis = "";
+      renderLegende(); renderGpsPunkt();
+    }, err => {
+      if (err.code === 1) {
+        gpsStopp(); gps.an = false; gps.lage = null;
+        gps.hinweis = "Standort ist aus. Erlaube ihn in den Einstellungen.";
+        try { localStorage.setItem(GPS_KEY, "0"); } catch (_) {}
+      } else if (!gps.lage) gps.hinweis = "Kein GPS-Signal. Ich suche weiter.";
+      renderLegende(); renderGpsPunkt();
+    }, { enableHighAccuracy: true, maximumAge: 15000, timeout: 30000 });
+  }
+  function gpsStopp() {
+    if (gps.watch !== null) navigator.geolocation.clearWatch(gps.watch);
+    gps.watch = null;
+  }
+  function gpsUmschalten() {
+    gps.an = !gps.an; gps.hinweis = "";
+    try { localStorage.setItem(GPS_KEY, gps.an ? "1" : "0"); } catch (_) {}
+    if (gps.an) { tone("confirm"); gpsStart(); }
+    else { tone("move"); gpsStopp(); gps.lage = null; }
+    renderLegende(); renderGpsPunkt();
+  }
+  document.addEventListener("visibilitychange", () => { if (document.hidden) gpsStopp(); else if (page === 0) gpsStart(); });
 
   // Ausrüstung: leerer Platz, bis ein Item erspielt ist. Bei der aktuellen Quest leuchtet, was dort einsetzbar ist,
   // alles andere, was Dennis besitzt, ist ausgegraut.
@@ -617,12 +833,14 @@
     cube.style.transform = `translateZ(calc(-1 * var(--apo))) rotateY(${-angle}deg)`;
     page = target;
     setActiveFace();
+    if (page !== 0) { gpsStopp(); schliesseStationstafel(); }
     tone("move");
     clearTimeout(flatTimer);
     flatTimer = setTimeout(() => {
       cube.classList.add("flat");
       if (page === 1) { const row = document.querySelector(".q-row.is-selected"); if (row) scrollIntoList(row); }
       if (page === 2 && !onboarded && $("#overlay").hidden) onboarding();
+      if (page === 0) { gpsStart(); spieleLauf(); if (!laufFrame) kartenHinweis(); }
     }, 470);
   }
 
@@ -647,6 +865,93 @@
       ]);
     });
   }
+  /* ---------- Onboarding: erster Besuch der Karte ---------- */
+  // Zwei Hinweise der Fee, einmal pro Handy (Demo und ?onboarding: jedes Mal)
+  const KARTE_KEY = "dq-karte-v1" + (PROBE ? "-probe" : "");
+  let karteGesehen = false;
+  try { karteGesehen = !DEMO && !params.has("onboarding") && localStorage.getItem(KARTE_KEY) === "1"; } catch (e) {}
+  function kartenHinweis() {
+    if (karteGesehen || page !== 0 || !$("#overlay").hidden || !$("#prolog").hidden || !$("#coach").hidden) return;
+    karteGesehen = true;
+    try { if (!DEMO) localStorage.setItem(KARTE_KEY, "1"); } catch (e) {}
+    const hier = document.querySelector(`.mark[data-station="${STATIONEN[kartenHier ?? hierIndex()].id}"]`);
+    coach([
+      [hier, "Hier stehst du. Tippe eine Station an: Du siehst, was dort war und was dort wartet."],
+      ...(WEG ? [[$("#mapLegend"), "Höhe und Weg bis zum Gipfel. Tippe GPS, dann zeigt dir die Karte am Berg, wo du wirklich bist."]] : [])
+    ]);
+  }
+
+  /* ---------- Prolog: einmal pro Handy nach dem ersten PRESS START (08-erlebnis-plan.md, 3.2) ---------- */
+  // Rikes Fee erklärt in vier Tafeln, worum es geht, danach zeigt sie kurz das Menü. Tippen blättert, ÜBERSPRINGEN beendet.
+  const PROLOG_KEY = "dq-prolog-v1" + (PROBE ? "-probe" : "");
+  const prolog = (() => {
+    const el = $("#prolog"), text = $("#prologText"), bild = $("#prologBild"), dots = $("#prologDots");
+    let gesehen = false, i = -1, tippen = null;
+    try { gesehen = !DEMO && !params.has("onboarding") && localStorage.getItem(PROLOG_KEY) === "1"; } catch (e) {}
+    const karten = (n, cls = "") => Array.from({ length: n }, () => cardSvg(cls)).join("");
+    const TAFELN = () => {
+      const max = C.waehrung.max, halb = Math.round(max / 2);
+      return [
+        { bild: "fee", text: "Hey, wach auf, Dennis! Rike schickt mich, ich begleite dich bis zum Kästchen." },
+        { bild: `<span class="pb-chest">${useSvg("i-chest")}${useSvg("i-lock", "pb-lock")}</span><span class="pb-cards${max > 10 ? " two" : ""}" style="--n:${max > 10 ? Math.ceil(max / 2) : max}">${karten(max)}</span>`,
+          text: `Der Bund hat ein Kästchen verschlossen. Darin liegen ${max} Packs.` },
+        { bild: `<span class="pb-gain">${cardSvg()}<b>+</b></span><span class="pb-tumblers">${C.code.map(() => `<span class="tumbler">?</span>`).join("")}</span>`,
+          text: "Jede Prüfung bringt dir Packs, manche eine Ziffer des Codes. Verlierst du, holt sich der Bund Packs zurück." },
+        { bild: `<span class="pb-split"><span class="pb-cards mine" style="--n:${Math.min(halb, 10)}">${karten(halb)}</span><small>deins</small></span><span class="pb-split"><span class="pb-cards" style="--n:${Math.min(max - halb, 10)}">${karten(max - halb, "empty")}</span><small>beim Bund</small></span>`,
+          text: `Was am Ende dir gehört, nimmst du mit. Deine ${state && state.zaehler.erledigt ? "nächste" : "erste"} Prüfung wartet schon.` }
+      ];
+    };
+    let tafeln = [];
+
+    // Text erscheint Buchstabe für Buchstabe wie in der N64-Textbox. Erster Tipp zeigt alles, zweiter blättert.
+    function schreibe(t) {
+      clearInterval(tippen);
+      if (STILL.matches) { text.textContent = t; tippen = null; return; }
+      let n = 0;
+      text.textContent = "";
+      tippen = setInterval(() => { n += 2; text.textContent = t.slice(0, n); if (n >= t.length) { clearInterval(tippen); tippen = null; } }, 28);
+    }
+    function zeige() {
+      const t = tafeln[i];
+      el.dataset.tafel = i === 0 ? "fee" : "bild";
+      bild.innerHTML = i === 0 ? "" : t.bild;
+      bild.style.animation = "none"; void bild.offsetWidth; bild.style.animation = "";
+      dots.innerHTML = tafeln.map((_, k) => `<i class="${k === i ? "on" : k < i ? "done" : ""}"></i>`).join("");
+      schreibe(t.text);
+      if (i === 0) melody("zauber"); else tone("move");
+    }
+    function weiter() {
+      if (tippen) { clearInterval(tippen); tippen = null; text.textContent = tafeln[i].text; return; }
+      if (++i >= tafeln.length) return ende(false);
+      zeige();
+    }
+    function ende(uebersprungen) {
+      clearInterval(tippen); tippen = null;
+      el.hidden = true;
+      gesehen = true;
+      try { if (!DEMO) localStorage.setItem(PROLOG_KEY, "1"); } catch (e) {}
+      if (uebersprungen) return tone("move");
+      tone("confirm");
+      // Kurzer Rundgang durch das Menü, gesprochen von der Fee
+      setTimeout(() => coach([
+        [$("#hudPacks"), "Deine Packs. Jede Karte, die leuchtet, gehört dir."],
+        [$("#hudCode"), "Der Code des Kästchens. Hier rastet jede Ziffer ein."],
+        [$(".shoulder-right"), "Mit Z und R oder Wischen blätterst du: Karte, Quests, Ausrüstung."],
+        [$("#questCard"), "Hier steht, was jetzt dran ist und was auf dem Spiel steht."]
+      ]), 250);
+    }
+    function start() {
+      if (gesehen) return false;
+      tafeln = TAFELN(); i = -1;
+      el.hidden = false;
+      weiter();
+      return true;
+    }
+    el.addEventListener("click", e => { if (!e.target.closest(".prolog-skip")) weiter(); });
+    $("#prologSkip").addEventListener("click", e => { e.stopPropagation(); ende(true); });
+    return { start, weiter, ende };
+  })();
+
   function coach(schritte) {
     const bubble = $("#coach");
     let i = -1, ziel = null;
@@ -656,11 +961,13 @@
       const [el, text] = schritte[i];
       ziel = el; el.classList.add("coach-focus");
       const b = bubble.querySelector(".coach-bubble");
-      b.firstElementChild.textContent = text;
+      b.querySelector(".coach-text").textContent = text;
       bubble.hidden = false;
       const box = bubble.getBoundingClientRect(), r = el.getBoundingClientRect(), unten = r.top - box.top < box.height / 2;
       const w = b.offsetWidth || 240;
-      b.style.left = Math.max(12, Math.min(box.width - w - 12, r.left - box.left + r.width / 2 - w / 2)) + "px";
+      // Nicht in die Notch oder die Dynamic Island: Rand wie das Spielfeld (Safe Area)
+      const rand = getComputedStyle($("#game")), links = Math.max(12, parseFloat(rand.paddingLeft) || 0), rechts = Math.max(12, parseFloat(rand.paddingRight) || 0);
+      b.style.left = Math.max(links, Math.min(box.width - w - rechts, r.left - box.left + r.width / 2 - w / 2)) + "px";
       b.style.top = unten ? Math.min(box.height - b.offsetHeight - 8, r.bottom - box.top + 10) + "px" : "";
       b.style.bottom = unten ? "" : Math.min(box.height - b.offsetHeight - 8, box.bottom - r.top + 10) + "px";
       if (el.classList.contains("equip-body")) { b.style.top = ""; b.style.bottom = "12px"; }
@@ -718,10 +1025,12 @@
   window.addEventListener("keydown", e => {
     if (!$("#introScreen").hidden || !$("#logbuch").hidden) return;
     const k = e.key.toLowerCase();
+    if (!$("#prolog").hidden) { if (["enter", " ", "a"].includes(k)) { e.preventDefault(); prolog.weiter(); } else if (k === "escape") prolog.ende(true); return; }
     if (!$("#overlay").hidden) { if (["enter", " ", "escape", "a"].includes(k)) { e.preventDefault(); closeOverlay(); } return; }
+    if (page === 0 && k === "escape") return schliesseStationstafel();
     if (k === "z" || k === "q") return turn(-1);
     if (k === "r" || k === "e") return turn(1);
-    if (page === 0 && k === "enter" && !e.target.closest("button")) { e.preventDefault(); return oeffneStation(sel[0]); }
+    if (page === 0 && k === "enter" && !e.target.closest("button")) { e.preventDefault(); return tippeStation(sel[0]); }
     const step = { arrowdown: 1, arrowright: 1, arrowup: -1, arrowleft: -1 }[k];
     if (!step) return;
     e.preventDefault();
@@ -844,6 +1153,7 @@
       setPlayable(true);
       const row = document.querySelector(".q-row.is-selected");
       if (row) scrollIntoList(row);
+      prolog.start();                 // beim ersten Mal: Rikes Fee erklärt, worum es geht
     }, 500);
   }
   intro.addEventListener("click", beginQuest);        // PRESS START: Tippen irgendwo startet
