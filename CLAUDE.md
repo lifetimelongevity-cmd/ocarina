@@ -23,6 +23,7 @@ JGA-Wochenende für Dennis, 2. bis 4. Oktober 2026, München und Wanderung am Te
 | `app/` | **Die App.** `index.html` + `app.js` + `styles.css` (Dennis' Menü), `admin.html` + `admin.js` + `admin.css` (Quest Master), `config.js` (alle Quests, Items, Texte, Stationen, Log-Buch-Fragen, Code, Packs), `engine.js` (Logik), `store.js` (Firebase oder lokal, Log-Buch-Kanal), `sw.js` (offline), `README.md` (Einrichtung, Ablauf am Spieltag, Deploy) |
 | `05-system-plan.md` | **Maßgeblicher Plan.** Kernlogik v0, alle Entscheidungen (Tabelle A0), Ausbaustufen (Teil B) |
 | `07-spiele-und-items.md` | **Arbeitsstand Spiele, Items, Fähigkeiten** (ab 25.09.), feste Nummern zum Referenzieren |
+| `08-erlebnis-plan.md` | **Erlebnis-Plan (26.09., noch nicht gebaut):** jede Seite aus Dennis' Sicht, Befund, Reise über das Wochenende, drei Bau-Pakete, 8 Entscheidungen |
 | `06-design-plan.md` | **Design-Plan für Dennis' Menü** (gebaut 25.09., Änderungen in Abschnitt 10): Befund, Seitenaufbau, Bildsprache, Texte im Spielton, Querformat-Regeln |
 | `app/assets/` | Titelbild `intro-titel.webp` (Fee herausgelöst, schwebt als `intro-fee.png`), Avatar `avatar-okarina.webp`, Icons in `icons/`, Zelda-Schriften (Fan-Schriften, nur privat), `logbuch/` für Rikes Sprachnachrichten. Herkunft in `SCHRIFTEN.md` |
 | `quellen/` | Originale der hochgeladenen Bilder (nicht veröffentlicht) |
