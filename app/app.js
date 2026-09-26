@@ -2,7 +2,7 @@
   /* Dennis Quest · Dennis' Menü (06-design-plan.md, 07-spiele-und-items.md)
      Drei Seiten im Ring: KARTE · QUESTS · AUSRÜSTUNG. HUD: Packs, nächste Quest, Code.
      Liest den Stand. Schreibt nur eins: Dennis' Antworten im Log-Buch (eigener Pfad).
-     ?demo zeigt einen Beispielstand ohne Firebase (auch ?demo=start, ?demo=ende), ?direkt ohne Startbildschirm,
+     ?demo zeigt einen Beispielstand ohne Firebase (auch ?demo=start, ?demo=bund, ?demo=ende), ?direkt ohne Startbildschirm,
      ?probe liest den Probelauf des Quest Masters statt des echten Spiels (roter Rahmen). */
   const C = window.QuestStore.probe(window.GAME_CONFIG);
   const PROBE = window.QuestStore.PROBE;
@@ -33,6 +33,13 @@
       zaehler: { prophezeiung: 1 },
       einsaetze: [{ id: "e1", item: "kreisel", quest: "wirbel" }],
       buchungen: [{ id: "b1", packs: -1, grund: "Strafe vom Quest Master" }]
+    },
+    // Kurz vor dem Ende: alles gespielt bis auf den Bund, zwei Revanchen stehen an, Amulett gefunden
+    bund: {
+      quests: { logbuch: "bestanden", klingen: "verloren", wirbel: "bestanden", podrennen: "bestanden", kartenwurf: "bestanden",
+                auge: "verloren", deku: "bestanden", feuerprobe: "bestanden", prophezeiung: "laeuft", amulett: "laeuft" },
+      zaehler: { prophezeiung: 2 }, schritte: { amulett: { gefunden: true } },
+      einsaetze: [{ id: "e1", item: "spruchrolle", quest: "auge" }]
     },
     ende: {
       quests: Object.fromEntries(C.quests.map(q => [q.id, q.zaehler ? "beendet" : ["wirbel", "auge"].includes(q.id) ? "verloren" : "bestanden"])),
