@@ -251,16 +251,11 @@ svg { display: block; }
 .well.mini.st-verloren { color: #5d5d55; }
 .well.mini.lost::after { min-width: 10px; min-height: 10px; right: -3px; bottom: -3px; }
 .fx-head { margin: 0 0 2px; color: #aab3cf; font: 800 var(--fs-tiny)/1 "Courier New", monospace; letter-spacing: .1em; }
-.list-col { display: grid; grid-template-rows: auto minmax(0, 1fr); gap: 5px; min-height: 0; }
-.list-legend { display: flex; gap: 18px; margin: 0; padding: 0 2px; color: #e6dfbd; font: 800 var(--fs-tiny)/1 "Courier New", monospace; letter-spacing: .06em; text-shadow: 1px 1px 0 #000; }
-.list-legend span { display: inline-flex; align-items: center; gap: 6px; }
-.list-legend b { color: var(--gold); }
-.list-legend .medal { --sz: 16px; border-width: 1px; }
-.list-legend .gem { --sz: 14px; }
+.list-col { display: grid; grid-template-rows: minmax(0, 1fr); min-height: 0; }
 .quest-list { -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 10px, #000 calc(100% - 10px), transparent 100%); mask-image: linear-gradient(to bottom, transparent 0, #000 10px, #000 calc(100% - 10px), transparent 100%); }
 
 /* ---------- Seite KARTE ---------- */
-.map-body { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr); gap: 12px; min-height: 0; }
+.map-body { display: grid; grid-template-columns: minmax(0, 1fr); min-height: 0; }
 .map-sheet { position: relative; min-height: 0; overflow: hidden; background: #ded39b; border: 4px solid #513e20; box-shadow: inset 0 0 16px #756532, 2px 3px 0 #000; }
 .map-terrain { position: absolute; inset: 0; width: 100%; height: 100%; }
 .t-sky { fill: #e3d8a2; } .t-back { fill: #a7ad73; } .t-front { fill: #71894b; } .t-forest { fill: #3f5a2c; } .t-lake { fill: #5f9aaa; }
@@ -276,40 +271,25 @@ svg { display: block; }
 .map-marks { position: absolute; inset: 0; }
 .mark { position: absolute; transform: translate(-50%, -50%); display: grid; justify-items: center; gap: 2px; padding: 4px; min-width: 36px; min-height: 36px; align-content: center; border: 0; background: none; cursor: pointer; }
 .mark .medal { --sz: clamp(24px, 7.6vh, 30px); }
-.mark .m-medal { display: grid; place-items: center; }
-.mark .no-medal { display: block; width: 12px; height: 12px; border-radius: 50%; background: #e1b32d; border: 2px solid #2d2116; }
+.mark .m-medal { display: flex; gap: 3px; justify-content: center; }
+.mark .m-chest { display: grid; place-items: center; width: clamp(26px, 8vh, 32px); aspect-ratio: 1; border-radius: 50%; color: var(--gold);
+  background: radial-gradient(circle at 35% 28%, #5d4b22, #2b200c 64%, #120d05); border: 2px solid #1a1206; box-shadow: 0 2px 3px rgba(0,0,0,.7); }
+.mark .m-chest svg { width: 62%; height: 62%; filter: drop-shadow(0 1px 0 #000); }
+.mark .m-chest.open { box-shadow: 0 0 0 2px var(--gold), 0 0 14px rgba(242,201,76,.75); }
 .mark .gems { display: flex; gap: 1px; margin-top: 1px; }
 .mark .gems .gem { --sz: 11px; }
 .mark .gems .gem.lost::after { display: none; }
-.mark .gems .gem.lost { color: #9a4038; }
+.mark .gems .gem.lost { color: #8b887c; }
 .mark .m-label { position: absolute; top: 100%; left: 50%; transform: translateX(-50%); margin-top: -2px; white-space: nowrap; color: #2c2418; font: 900 var(--fs-tiny)/1 "Courier New", monospace; letter-spacing: .04em;
   text-shadow: 1px 0 #e3d8a2, -1px 0 #e3d8a2, 0 1px #e3d8a2, 0 -1px #e3d8a2; }
 .mark.label-top .m-label { top: auto; bottom: 100%; margin: 0 0 -2px; }
-.mark.is-selected .medal, .mark.is-selected .no-medal { outline: 2px solid #fff; outline-offset: 3px; border-radius: 50%; }
+.mark.is-selected .medal, .mark.is-selected .m-chest { outline: 2px solid #fff; outline-offset: 3px; border-radius: 50%; }
 .mark .you { position: absolute; left: 50%; bottom: calc(100% - 4px); width: 26px; height: 26px; margin-left: -13px; border-radius: 50%; border: 2px solid var(--cursor); box-shadow: 0 0 0 1.5px #1b1e16, 0 2px 4px #000;
   background: #2b3522 url("assets/avatar-okarina.webp") no-repeat; background-size: 70px auto; background-position: -25px -15px; animation: youBob 900ms steps(3, end) infinite; }
 .mark .you::after { content: ""; position: absolute; left: 50%; top: 100%; margin-left: -4px; border: 4px solid transparent; border-top-color: var(--cursor); }
 @keyframes youBob { 50% { transform: translateY(-3px); } }
 .map-icon { position: absolute; width: 18px; height: 18px; transform: translate(-50%, -50%); color: #4a3622; pointer-events: none; }
 
-.map-side { display: grid; grid-template-rows: auto minmax(0, 1fr); gap: 8px; min-height: 0; }
-.progress-block { display: grid; gap: 4px; padding: 6px 8px 7px; background: rgba(4,7,5,.34); box-shadow: inset 2px 2px 5px rgba(0,0,0,.6); }
-.progress-block .lbl { display: flex; justify-content: space-between; color: #e6dfbd; text-shadow: 1px 1px 0 #000; }
-.progress-block .lbl b { color: var(--gold); }
-.pips { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 3px; }
-.pips .medal { --sz: clamp(17px, 5.4vh, 24px); border-width: 1.5px; }
-.pips .gem { --sz: clamp(13px, 4.4vh, 19px); }
-.pips .medal.lost::after, .pips .gem.lost::after { min-width: 8px; min-height: 8px; right: -2px; bottom: -2px; }
-.station-box { overflow: hidden; padding: 7px 10px; }
-.station-box .tb-title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.station-box .st-list { list-style: none; margin: 4px 0 0; padding: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: clamp(2px, .9vh, 5px); }
-.station-box .st-list li { display: flex; align-items: center; gap: 7px; font: 600 var(--fs-small)/1.1 "Trebuchet MS", sans-serif; }
-.station-box .st-list li > span:nth-child(2) { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.station-box .st-list .medal { --sz: 18px; border-width: 1.5px; }
-.station-box .st-list .gem { --sz: 15px; }
-.station-box .st-list .st, .station-box .st-list .tag { margin-left: auto; flex: none; }
-.station-box .st-list .st svg { width: 14px; height: 14px; }
-.st.won { color: var(--gold); } .st.lost { color: #ff8a7e; } .st.now { color: var(--cursor); } .st.open { color: #9aa2bd; }
 
 .map-lake-label { position: absolute; left: 13%; bottom: 5%; color: #e7f1f3; font: italic 900 var(--fs-tiny)/1 Georgia, serif; letter-spacing: .14em; opacity: .85; text-shadow: 1px 1px 0 #2d5a66; pointer-events: none; }
 
@@ -513,7 +493,7 @@ svg { display: block; }
 .medal.running svg { opacity: .95; }
 .medal.lauf { border-radius: 30%; }
 .q-sep[hidden] { display: none; }
-.leg-roll svg { width: 15px; height: 15px; color: #c9a4ff; }
+.quest-list li.q-div { height: 0; padding: 0; margin: 5px 8px; border-top: 2px solid rgba(233, 213, 150, .28); }
 .fx.treffer { gap: 4px; }
 .fx.treffer .pip { display: grid; place-items: center; width: 22px; height: 22px; color: #3d3a52; }
 .fx.treffer .pip svg { width: 100%; height: 100%; filter: drop-shadow(1px 1px 0 #000); }

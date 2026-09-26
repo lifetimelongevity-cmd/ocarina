@@ -45,9 +45,9 @@
 
 /* ---------- Schrift: überall die runde Sans, Titel in Hylia Serif ---------- */
 .game, .game *, .coach-bubble, .rotate-hint { font-family: var(--font-ui) !important; }
-.game .face-head h2, .game .result-head .big, .game .quest-card .tb-title, .game .station-box .tb-title, .game #lbTitle,
+.game .face-head h2, .game .result-head .big, .game .quest-card .tb-title, .game #lbTitle,
 .game .start-quest, .game .map-lake-label { font-family: var(--font-title) !important; }
-.hud-num, .tumbler, .list-legend b, .progress-block .lbl b, .well .count, .fx.treffer, .tag { font-variant-numeric: tabular-nums; }
+.hud-num, .tumbler, .well .count, .fx.treffer, .tag { font-variant-numeric: tabular-nums; }
 ::selection { background: rgba(236, 197, 90, .45); color: #fff; }
 /* Hylia Serif zeichnet große Umlaute ohne Punkte, ihre Kleinbuchstaben sind Kapitälchen mit Punkten.
    Darum Titel klein schreiben lassen und nur den ersten Buchstaben groß: „Ausrüstung", „Prüfung bestanden". */
@@ -115,8 +115,8 @@
 .lbl { color: var(--cream-2); font-weight: 800; letter-spacing: .14em; text-shadow: 0 1px 2px rgba(0, 0, 0, .7); }
 .lbl b { color: var(--gold); }
 
-/* Mulden: Liste, Fortschritt, Kartenrahmen */
-.quest-list, .progress-block { border-radius: 3px; border: 1px solid rgba(0, 0, 0, .55);
+/* Mulden: Liste, Kartenrahmen */
+.quest-list { border-radius: 3px; border: 1px solid rgba(0, 0, 0, .55);
   background: linear-gradient(rgba(0, 0, 0, .46), rgba(0, 0, 0, .32));
   box-shadow: inset 0 2px 7px rgba(0, 0, 0, .8), 0 1px 0 rgba(255, 255, 255, .08); }
 .map-sheet { border-radius: 3px; box-shadow: inset 0 0 16px #756532, 0 3px 8px rgba(0, 0, 0, .6); }
@@ -125,17 +125,12 @@
 .textbox { border-radius: 3px; color: #f4efdc; background: linear-gradient(var(--box-top), var(--box-mid) 48%, var(--box-bot));
   border: 2px solid #05070e; outline: 0; box-shadow: inset 0 0 0 1px var(--box-line), inset 0 2px 0 rgba(255, 255, 255, .12), 0 4px 10px rgba(0, 0, 0, .55); }
 .tb-title { color: #ffd866; font-weight: 900; text-shadow: 0 1px 0 #3c2600, 0 2px 6px rgba(0, 0, 0, .5); }
-.quest-card .tb-title, .station-box .tb-title, #lbTitle { font-weight: 400; letter-spacing: .01em; }
+.quest-card .tb-title, #lbTitle { font-weight: 400; letter-spacing: .01em; }
 .tb-meta { color: #bcc6e6; font-weight: 800; letter-spacing: .1em; }
 .tb-text { font-weight: 600; line-height: 1.38; }
 
 /* ---------- QUESTS ---------- */
 .quests-body { gap: 14px; }
-.list-legend { gap: 20px; color: var(--cream); font-weight: 800; }
-.list-legend .medal { --sz: 18px; }
-.list-legend .gem { --sz: 16px; }
-.list-legend b { color: #ffd76b; font-size: calc(var(--fs-tiny) * 1.1); text-shadow: 0 1px 2px rgba(0, 0, 0, .8); }
-.leg-roll svg { width: 16px; height: 16px; color: #c9a4ff; }
 .quest-list { padding: 4px 6px; scrollbar-color: rgba(236, 197, 90, .45) transparent; }
 .q-row { grid-template-columns: 32px minmax(0, 1fr) auto; gap: 10px; padding: 2px 10px 2px 6px; border-radius: 2px; color: var(--cream); font-weight: 700; }
 .quest-list li + li { border-top-color: rgba(255, 255, 255, .07); }
@@ -148,6 +143,7 @@
 .q-row .q-mark.won { color: var(--gold); } .q-row .q-mark.lost { color: var(--red-text); }
 .q-row.nebel .q-name { font-style: normal; color: #c2b994; }
 .q-sep { padding: 8px 8px 3px; color: #ebdfae; opacity: 1; font-weight: 800; letter-spacing: .16em; }
+.quest-list li.q-div { margin: 6px 10%; border-top: 1px solid transparent; border-image: linear-gradient(90deg, transparent, rgba(236, 197, 90, .6), transparent) 1; }
 
 /* Cursor: Eckklammern, die atmen, dazu ein warmer Schimmer */
 .q-row.is-selected { background: linear-gradient(90deg, rgba(255, 228, 92, .17), rgba(255, 228, 92, .05)); box-shadow: none; }
@@ -155,7 +151,9 @@
   content: ""; position: absolute; inset: 0; pointer-events: none; background: var(--brackets);
   filter: drop-shadow(0 1px 1px rgba(0, 0, 0, .85)); animation: cursorBreathe 1.5s ease-in-out infinite; }
 .mark.is-selected::before { inset: -2px; }
-.mark.is-selected .medal, .mark.is-selected .no-medal { outline: 0; }
+.mark.is-selected .medal, .mark.is-selected .m-chest { outline: 0; }
+.mark .m-chest { border-color: #0d0e0a; box-shadow: 0 0 0 1.5px rgba(214, 200, 150, .45), 0 2px 4px rgba(0, 0, 0, .75); }
+.mark .m-chest.open { box-shadow: 0 0 0 1.5px rgba(255, 222, 128, .9), 0 0 14px rgba(236, 197, 90, .75); }
 .slot { position: relative; }
 .slot.is-selected::before { inset: -6px; }
 .slot.is-selected .well { outline: 0; animation: none; }
@@ -196,7 +194,6 @@
 @keyframes nextGlow { 50% { opacity: .35; box-shadow: 0 0 2px var(--cursor); } }
 
 /* ---------- KARTE und AUSRÜSTUNG: nur die gemeinsamen Teile ---------- */
-.progress-block .lbl { color: var(--cream); }
 .m-label { font-weight: 900; }
 .map-lake-label { font-weight: 400; font-style: normal; letter-spacing: .2em; color: #0f2c35; opacity: 1; text-shadow: 0 1px 0 rgba(255, 255, 255, .35); }
 .equip-group .lbl { color: var(--cream); }

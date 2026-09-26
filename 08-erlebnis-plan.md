@@ -1,6 +1,6 @@
 # Erlebnis-Plan: Dennis' Menü Seite für Seite
 
-Stand 26.09.2026. **Vorschlag, noch nicht gebaut.** Entscheidungen vom 26.09. sind eingetragen (Abschnitt 9), dazu der Teil zum visuellen Design (Abschnitt 10). Grundlage ist ein Rundgang durch die App v1, so wie Dennis sie erlebt: iPhone 15 vom Home-Bildschirm und in Safari, jeweils am Anfang, in der Mitte, am Gipfel und am Ende des Tages, dazu Log-Buch, alle Ergebnis-Fenster und die Fenster für Packs und Code. Nachstellen mit `?demo=start`, `?demo` und `?demo=ende`.
+Stand 26.09.2026. **Vorschlag, noch nicht gebaut.** Entscheidungen vom 26.09. sind eingetragen (Abschnitt 9), dazu der Teil zum visuellen Design (Abschnitt 10). **Umgesetzt am 26.09.:** Aufgabenteilung von KARTE und QUESTS und weniger Text (Abschnitt 11), Stilprobe (10.4). Grundlage ist ein Rundgang durch die App v1, so wie Dennis sie erlebt: iPhone 15 vom Home-Bildschirm und in Safari, jeweils am Anfang, in der Mitte, am Gipfel und am Ende des Tages, dazu Log-Buch, alle Ergebnis-Fenster und die Fenster für Packs und Code. Nachstellen mit `?demo=start`, `?demo` und `?demo=ende`.
 
 Der Plan baut auf `06-design-plan.md` und `07-spiele-und-items.md` auf und ändert keine Entscheidung von dort.
 
@@ -165,13 +165,13 @@ Nach dem ersten PRESS START fliegt die Fee ins Bild. Vier Tafeln im Stil der N64
 |---|---|---|
 | Wo bin ich? | Kopf über der Station | bleibt. Nach einem Ergebnis läuft er den Weg zur nächsten Station. |
 | Wie weit noch? | Zähler, Nebel ab der Mitte zur nächsten Station | Gegangener Weg golden, kommender gestrichelt. Der Nebel treibt langsam und zieht beim Fortschritt sichtbar ab. |
-| Welche Prüfung war wo? | pro Station nur ein Medaillon | Stationen mit zwei Prüfungen zeigen beide. Heute fehlt das Medaillon des Podrennens auf der Karte, weil die Wiese zwei Prüfungen hat. |
-| Was ist dort passiert? | Liste der Quests der Station | dazu die Uhrzeit (Chronik) |
+| Welche Prüfung war wo? | pro Station nur ein Medaillon | Stationen mit zwei Prüfungen zeigen beide (umgesetzt 26.09.). Vorher fehlte das Medaillon des Podrennens, weil die Wiese zwei Prüfungen hat. |
+| Was ist dort passiert? | Liste der Quests der Station | Tippen auf die Station öffnet die Quest auf QUESTS, dort steht die Chronik (umgesetzt 26.09., Abschnitt 11) |
 | Wo endet der Weg? | Hütte als kleiner Punkt | Das Kästchen steht an der Hütte, als Ziel des Wegs. Es zeigt, wie viele Ziffern schon bekannt sind, und leuchtet, wenn der Weg dort ankommt. |
-| Verlorener Stein | roter Stein ohne X, sieht aus wie ein Herz | grau mit kleinem X wie überall |
+| Verlorener Stein | roter Stein ohne X, sieht aus wie ein Herz | grau (umgesetzt 26.09.) |
 
 - **Reise:** Die Karte ist Rückblick und Vorfreude. Hier sieht Dennis, wie weit er gekommen ist.
-- **UX:** Die Stationsbox nutzt den leeren Platz: an der aktuellen Station die nächste Quest mit Knopf „zur Quest".
+- **UX:** Umgesetzt am 26.09. (Abschnitt 11): keine Stationsbox mehr. Tippen auf eine Station öffnet ihre Quest auf QUESTS, die Karte hat die volle Breite.
 - **Design und UI:** Optional die sechs Medaillons wie im Quest-Status von Ocarina of Time: fünf im Kreis um das Triforce des Bundes statt einer Reihe.
 - **Erlebnis:** lebender Nebel, Dennis läuft (Richtung B).
 
@@ -183,7 +183,7 @@ Nach dem ersten PRESS START fliegt die Fee ins Bild. Vier Tafeln im Stil der N64
 |---|---|---|
 | Was habe ich? | Besitz, der gerade nicht hilft, ist so stark ausgegraut, dass er wie „nicht da" wirkt. | drei klare Zustände: leuchtet mit JETZT (einsetzbar), in Farbe ohne Leuchten (im Beutel), grau (verbraucht oder verloren) |
 | Was ist das? | Textbox nach Tippen | bleibt. Dazu „Erbeutet bei Kreuzung der Klingen". |
-| Wofür ist es gut? | „Hier gerade nicht einsetzbar." | bleibt. Nennt eine Quest nur, wenn sie schon sichtbar ist. |
+| Wofür ist es gut? | „Hier gerade nicht einsetzbar." | Der Satz entfällt, das graue Feld sagt es (umgesetzt 26.09.). Nennt eine Quest nur, wenn sie schon sichtbar ist. |
 | Der Beutel | Das Symbol liest sich eher als Laterne. | neues Beutel-Symbol |
 | Warum spielt er Okarina? | Noten schweben | Tippen auf Dennis spielt eine kurze Melodie. Nach dem Log-Buch spielt die Okarina Rikes Lieder: die sechs Sprachnachrichten, einzeln wählbar. |
 | Neues Item bekommen | Zeile im Ergebnis-Fenster | Das Item fliegt in sein Feld, das Feld blitzt auf. Optional hält Dennis es über den Kopf (braucht ein Bild, Entscheidung 8). |
@@ -279,7 +279,7 @@ Was heißt hier außergewöhnlich? Das Handy liegt draußen in der Sonne, fünf 
 
 1. **Verpasste Ergebnisse.** Ist der Startbildschirm offen oder die App zu, wenn der Quest Master bucht, erscheint kein Ergebnis-Fenster, die Werte springen still um (`app/app.js` Z. 1059, nur wenn `intro.hidden`). Eine App vom Home-Bildschirm lädt auf dem iPhone nach einem Wechsel oft neu und zeigt dann den Startbildschirm. Der Fall ist also häufig.
 2. **Das Ergebnis-Fenster schließt beim ersten Tippen**, auch nach 0,1 Sekunden (`app/app.js` Z. 707). Wenn fünf Leute aufs Handy schauen, ist der Moment schnell weg.
-3. **Das Podrennen fehlt auf der Karte.** Pro Station zeigt die Karte nur die erste Prüfung (`app/app.js` Z. 365), die Wiese hat zwei.
+3. **Das Podrennen fehlt auf der Karte.** Pro Station zeigte die Karte nur die erste Prüfung, die Wiese hat zwei. **Behoben am 26.09.**
 4. **Laufende Quests aus dem Blick.** Die Liste springt zur nächsten Quest, der Abschnitt LÄUFT liegt dann darüber.
 5. **Das Log-Buch ist nach dem Urteil weg.** Der Knopf erscheint nur, solange das Log-Buch die nächste Quest ist (`app/app.js` Z. 308). Rikes Nachrichten sind danach nicht mehr zu hören.
 6. **Showdown ohne Tafel.** Dennis sieht nicht, welche drei Duelle kommen.
@@ -312,7 +312,7 @@ Alles Neue aus Stufe 1 bis 3 entsteht gleich im neuen Look.
 |---|---|---|---|
 | 1.1 | Verpasste Momente nachholen: Warteschlange, gemerkt pro Handy, die Fee leuchtet auf dem Startbildschirm | 3.1, 3.6 | mittel |
 | 1.2 | Ergebnis-Fenster wie eine N64-Textbox: erster Tipp zeigt alles, zweiter schließt | 3.6 | klein |
-| 1.3 | Karte: mehrere Medaillons pro Station, verlorener Stein grau mit X | 3.7 | klein |
+| 1.3 | Karte: mehrere Medaillons pro Station, verlorener Stein grau. **Umgesetzt 26.09.** | 3.7 | klein |
 | 1.4 | Laufende Quests als feste Zeile über der Liste | 3.4 | klein |
 | 1.5 | Einsetzbar mit Namen und dem Hinweis an den Quest Master | 3.4 | klein |
 | 1.6 | Duell-Tafel am Gipfel | 3.9 | mittel |
@@ -491,3 +491,40 @@ Text mindestens 4,5 : 1, Symbole und Cursor mindestens 3 : 1, gemessen im Test s
    Du schaust sie auf dem Handy an und sagst ja oder was anders soll.
 2. **Grunddesign** auf alle Seiten übertragen, parallel zu Stufe 1 (Abschnitt 6, Tabelle G). Alles Neue aus Stufe 1 bis 3 entsteht gleich im neuen Look.
 3. **Prüfen:** Kontrast aller Texte gemessen in `tests/geraete.mjs`, Screenshots auf allen sechs Geräten, Bildrate auf dem gedrosselten Samsung. Danach wird die Stilprobe gelöscht.
+
+---
+
+## 11. Aufgabenteilung und weniger Text (umgesetzt am 26.09.)
+
+Wunsch vom 26.09.: KARTE und QUESTS überschneiden sich inhaltlich. Dazu überall prüfen, welcher Text wegfallen kann, weil er sich von selbst erklärt oder doppelt ist. Gilt für die App und die Stilprobe (gemeinsamer Code).
+
+**Regel: Die Karte zeigt nur das Wo, QUESTS nur das Was.** Die Karte ist zugleich der Fortschritt: Medaillons, Steine, Nebel und Dennis' Kopf zeigen, wie weit er ist. Alles zum Inhalt einer Quest steht auf QUESTS. Tippen auf eine Station öffnet dort ihre Quest: die nächste, wenn sie an dieser Station ist, sonst die erste erledigte, im Nebel die Nebel-Karte. An der Hütte steht das Kästchen, Tippen zeigt den Code.
+
+| Information | Bisher an | Jetzt nur noch |
+|---|---|---|
+| Wie viele Prüfungen geschafft | Legende auf QUESTS (3/6), Zähler neben der Karte mit Medaillon-Reihe, Medaillons auf der Karte, Liste | Liste (Haken und „Noch 3 Prüfungen") und Medaillons auf der Karte |
+| Sidequests geschafft | Legende, Zähler neben der Karte, Karte, Liste | Liste und Karte |
+| Welche Quests an einer Station, mit Ergebnis | Stationsbox neben der Karte, Liste | Liste. Die Station auf der Karte führt dorthin |
+| Du bist hier | Kopf auf der Karte und „DU BIST HIER" in der Stationsbox | Kopf auf der Karte |
+| Im Nebel | Nebel und „?" auf der Karte, „Im Nebel" in der Stationsbox | Karte |
+| Anzahl Spruchrollen | Legende, Feld in der Ausrüstung, Einsetzbar | Feld in der Ausrüstung und Einsetzbar |
+| Status der gewählten Quest | Haken, X oder JETZT in der Liste, dazu eine Marke auf der Quest-Karte | Liste und Medaillon |
+| Läuft | Überschrift LÄUFT und Marke LÄUFT in Zeile und Quest-Karte | Überschrift. Die Prophezeiung behält ihren Zähler (1/3) |
+| Dein Weg | Überschrift | feine Linie |
+| Im Beutel | Feld zeigt das Item, dazu Marke IM BEUTEL | Feld |
+| Anzahl eines Items | „×1" im Feld und in der Textbox | Feld |
+| Gerade nicht einsetzbar | graues Feld und Satz „Hier gerade nicht einsetzbar." | graues Feld |
+| Stand hh:mm | immer unten rechts | nur ohne Netz: „Offline · Stand 11:42" |
+
+**Bewusst geblieben:**
+
+- Name der nächsten Quest im HUD: auf KARTE und AUSRÜSTUNG der einzige Hinweis, Tippen springt zu QUESTS.
+- Zahl neben den Pack-Karten: zehn Karten zählt niemand auf einen Blick.
+- SIEG und NIEDERLAGE: der einzige Ort, der zeigt, was auf dem Spiel steht.
+- EINSETZBAR: Symbole allein sind mehrdeutig.
+- ITEMS und FÄHIGKEITEN: erklären die zwei Gruppen.
+- Ort auf der Quest-Karte: steht nirgends sonst.
+
+**Nebenbei:** An einer Station stehen jetzt alle Prüfungen (Fehler 3 in Abschnitt 5), ein verlorener Stein ist auf der Karte grau statt rot, die Karte hat die volle Breite, Enter öffnet auf dem Laptop die gewählte Station.
+
+**Geprüft:** `node app/engine.test.js`, `tests/nebel.mjs` (verrät nichts), `tests/geraete.mjs` für App und Stilprobe ohne Probleme auf allen sechs Geräten, Admin und Dennis zusammen wie vorher, Klicktest der Stationen (Wiese öffnet Kreuzung der Klingen, Wald die nächste Quest, Gipfel den Nebel, Hütte den Code).

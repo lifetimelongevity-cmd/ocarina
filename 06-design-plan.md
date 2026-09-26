@@ -276,3 +276,5 @@ Anschluss an Teil B von `05-system-plan.md`: Stufe 2 (Aktionen von Dennis) bekom
 4. ~~`CLAUDE.md` und `app/README.md` nachziehen, `entwurf.*` löschen.~~ Erledigt.
 
 **Änderungen gegenüber diesem Plan (25.09.):** Noch nicht erspielte Items sind in der AUSRÜSTUNG ein **leerer Platz** (Wunsch des Nutzers). Die Tarnnamen erscheinen nur noch in der Vorschau einer Belohnung und bei der Enthüllung im Ergebnis-Fenster. Bei der aktuellen Quest **leuchtet**, was dort einsetzbar ist, alles andere im Besitz ist ausgegraut. Die Quest-Karte zeigt statt „Hilft" die Zeile „Einsetzbar". Laufende Quests stehen oben in der Liste unter LÄUFT. Der Avatar ist das Okarina-Bild. Die Liste „Hilft" (`HILFT`) und die Items Großer Ring, Token und Schwert der Verdammnis sind entfallen.
+
+**Änderungen am 26.09.:** KARTE ohne Seitenleiste (Fortschritt und Stationsbox entfallen), Tippen auf eine Station öffnet ihre Quest auf QUESTS, an der Hütte steht das Kästchen. QUESTS ohne Legende, Quest-Karte ohne Status-Marke. Weniger doppelter Text in Ausrüstung und Fuß. Details in `08-erlebnis-plan.md` Abschnitt 11.

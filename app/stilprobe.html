@@ -81,7 +81,8 @@
       <div class="menu-viewport">
         <div class="menu-cube flat" id="menuCube">
 
-          <!-- Seite 0: KARTE · Wo stehe ich, was liegt noch vor mir? -->
+          <!-- Seite 0: KARTE · Nur das Wo: Weg, Stationen, Nebel, Dennis. Die Karte ist zugleich der Fortschritt.
+               Tippen auf eine Station öffnet ihre Quest auf QUESTS, die Hütte zeigt den Code (08-erlebnis-plan.md, Abschnitt 11). -->
           <section class="face face-map" data-page="0" aria-label="Karte">
             <header class="face-head">
               <h2>KARTE</h2>
@@ -100,26 +101,16 @@
                 <div class="map-fog" id="mapFog" hidden></div>
                 <div class="map-marks" id="mapMarks"></div>
               </div>
-              <aside class="map-side">
-                <div class="progress-block">
-                  <p class="lbl">PRÜFUNGEN <b id="cntKern">0/6</b></p>
-                  <div class="pips" id="pipsKern"></div>
-                  <p class="lbl">SIDEQUESTS <b id="cntSide">0</b></p>
-                  <div class="pips" id="pipsSide"></div>
-                </div>
-                <div class="station-box textbox" id="stationBox"></div>
-              </aside>
             </div>
           </section>
 
-          <!-- Seite 1: QUESTS · Was ist dran, was ist geschafft? (Startseite) -->
+          <!-- Seite 1: QUESTS · Nur das Was: was dran ist, was geschafft ist, was auf dem Spiel steht (Startseite) -->
           <section class="face face-quests" data-page="1" aria-label="Quests">
             <header class="face-head">
               <h2>QUESTS</h2>
             </header>
             <div class="quests-body">
               <div class="list-col">
-                <p class="list-legend" id="listLegend"></p>
                 <ol class="quest-list" id="questList"></ol>
               </div>
               <article class="quest-card textbox" id="questCard" aria-live="polite"></article>

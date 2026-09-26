@@ -10,6 +10,7 @@
   const REIHE = C.quests.filter(q => q.typ !== "lauf");
   const LAUF = C.quests.filter(q => q.typ === "lauf");
   const START_PAGE = 1;
+  const ZIEL = STATIONEN[STATIONEN.length - 1].id;   // letzte Station: dort steht das Kästchen
 
   /* ---------- Gerät: schwächere Handys bekommen weniger Effekte ---------- */
   const params = new URLSearchParams(location.search);
@@ -181,18 +182,18 @@
     // Quests: oben was gerade läuft, dann die feste Reihe, am Ende der Nebel
     const zeile = q => `<li><button type="button" class="q-row ${q.typ}" data-id="${q.id}"><span class="ic"></span><span class="q-name">${esc(q.name)}</span><span class="q-mark"></span></button></li>`;
     $("#questList").innerHTML = `<li class="q-sep" data-sep="lauf">LÄUFT</li>` + LAUF.map(zeile).join("")
-      + `<li class="q-sep" data-sep="reihe">DEIN WEG</li>` + REIHE.map(zeile).join("")
+      + `<li class="q-sep q-div" data-sep="reihe" aria-hidden="true"></li>` + REIHE.map(zeile).join("")
       + `<li><button type="button" class="q-row nebel" data-id="${NEBEL}"><span class="ic">${coveredMedal()}</span><span class="q-name"></span><span class="q-mark"></span></button></li>`;
     document.querySelectorAll(".q-row").forEach(b => b.addEventListener("click", () => { followNext = b.dataset.id === state.next; selectQuest(b.dataset.id); }));
     $("#questCard").addEventListener("click", e => { if (e.target.closest("[data-logbuch]")) logbuch.oeffnen(); });
 
-    // Karte: Weg durch die Stationen, eine Marke pro Station
+    // Karte: Weg durch die Stationen, eine Marke pro Station. Tippen öffnet die Quest der Station auf QUESTS.
     const pts = STATIONEN.map(s => [s.x * 10, s.y * 4.2]);
     $("#mapRoute").setAttribute("d", smoothPath(pts));
     $("#mapMarks").innerHTML = STATIONEN.map(s =>
       `<button type="button" class="mark" data-station="${s.id}" style="left:${s.x}%;top:${s.y}%" aria-label="${esc(s.ort)}"><span class="m-medal"></span><span class="gems"></span><span class="m-label">${esc(s.name)}</span></button>`).join("")
       + `<span class="map-lake-label">TEGERNSEE</span>`;
-    document.querySelectorAll(".mark").forEach(b => b.addEventListener("click", () => { followHier = false; selectStation(b.dataset.station, true); }));
+    document.querySelectorAll(".mark").forEach(b => b.addEventListener("click", () => oeffneStation(b.dataset.station)));
 
     // Ausrüstung: links Items, rechts Fähigkeiten. Noch nicht Erspieltes ist ein leerer Platz.
     const slot = it => `<button type="button" class="slot" data-id="${it.id}"><span class="well" style="--c:${it.farbe}">${useSvg(it.symbol)}<b class="count"></b></span></button>`;
@@ -253,7 +254,7 @@
       const mark = b.querySelector(".q-mark");
       mark.className = "q-mark" + (st === "bestanden" || st === "beendet" ? " won" : st === "verloren" ? " lost" : "");
       mark.innerHTML = isNext ? `<span class="tag now">JETZT</span>`
-        : st === "laeuft" ? (q.zaehler ? `<span class="tag run">${state.treffer[q.id]}/${q.zaehler.max}</span>` : `<span class="tag run">LÄUFT</span>`)
+        : st === "laeuft" ? (q.zaehler ? `<span class="tag run">${state.treffer[q.id]}/${q.zaehler.max}</span>` : "")
         : st === "bestanden" || st === "beendet" ? useSvg("i-check") : st === "verloren" ? useSvg("i-x") : "";
       b.setAttribute("aria-label", `${q.name}, ${artWort(q)}, ${statusWort(q.id)}`);
     });
@@ -265,13 +266,6 @@
     nebel.querySelector(".q-name").textContent = nk ? `Noch ${pruefungen(nk)}` : "Im Nebel";
     nebel.classList.toggle("is-selected", sel[1] === NEBEL);
     nebel.setAttribute("aria-label", nebel.querySelector(".q-name").textContent);
-    // Prüfungen mit Gesamtzahl, Sidequests nur die erledigten (wie viele noch kommen, bleibt offen)
-    const kern = REIHE.filter(q => q.typ === "kern"), side = REIHE.filter(q => q.typ === "side");
-    const done = list => list.filter(q => state.quests[q.id] !== "offen").length;
-    const rollen = state.anzahl.spruchrolle || 0;
-    $("#listLegend").innerHTML = `<span title="Prüfungen"><span class="medal won" style="--m:#d9b54a"></span><b>${done(kern)}/${kern.length}</b></span>`
-      + `<span title="Sidequests">${gemHtml("bestanden", false)}<b>${done(side)}</b></span>`
-      + (rollen ? `<span title="Spruchrollen" class="leg-roll">${useSvg("i-scroll")}<b>${rollen}</b></span>` : "");
     renderQuestCard(sel[1]);
   }
 
@@ -285,9 +279,6 @@
       return;
     }
     const q = questById(id), st = state.quests[id], isNext = id === state.next;
-    const tag = isNext ? `<span class="tag now">JETZT</span>` : st === "laeuft" ? `<span class="tag run">LÄUFT</span>`
-      : st === "bestanden" ? `<span class="tag won">BESTANDEN</span>` : st === "beendet" ? `<span class="tag won">BEENDET</span>`
-      : st === "verloren" ? `<span class="tag lost">VERLOREN</span>` : `<span class="tag open">NOCH OFFEN</span>`;
     let unten;
     if (q.zaehler) {
       const n = state.treffer[id] || 0, max = q.zaehler.max;
@@ -303,7 +294,7 @@
       </div>`;
     }
     card.innerHTML = `
-      <div class="qc-head">${questIcon(q, st, false)}<div><p class="tb-title">${esc(q.name)}</p><p class="tb-meta">${tag} ${esc(q.ort)}</p></div></div>
+      <div class="qc-head">${questIcon(q, st, false)}<div><p class="tb-title">${esc(q.name)}</p><p class="tb-meta">${esc(q.ort)}</p></div></div>
       <p class="tb-text">${esc(q.text)}</p>
       ${q.logbuch && isNext ? logbuchKnopf() : ""}
       ${einsatzHtml(id)}
@@ -349,22 +340,16 @@
 
   function renderMap() {
     const s = state;
-    const kern = REIHE.filter(q => q.typ === "kern"), side = REIHE.filter(q => q.typ === "side");
-    $("#pipsKern").innerHTML = kern.map(q => aufgedeckt(q.id) ? medalHtml(q, s.quests[q.id], q.id === s.next) : coveredMedal()).join("");
-    const sichtbareSide = side.filter(q => aufgedeckt(q.id));
-    $("#pipsSide").innerHTML = sichtbareSide.map(q => gemHtml(s.quests[q.id], q.id === s.next)).join("");
-    const offenK = kern.filter(q => s.quests[q.id] === "offen").length, offenS = side.filter(q => s.quests[q.id] === "offen").length;
-    $("#cntKern").textContent = `${kern.length - offenK}/${kern.length}`;
-    $("#cntSide").textContent = `${side.length - offenS}`;
-
     const nq = s.next ? questById(s.next) : null;
-    const hier = nq ? nq.station : STATIONEN[STATIONEN.length - 1].id;
+    const hier = nq ? nq.station : ZIEL;
     if (followHier || !sel[0]) sel[0] = hier;
     document.querySelectorAll(".mark").forEach(m => {
       const id = m.dataset.station;
-      const k = REIHE.find(q => q.station === id && q.typ === "kern");
+      const kerne = REIHE.filter(q => q.station === id && q.typ === "kern");
       const sides = REIHE.filter(q => q.station === id && q.typ === "side");
-      m.querySelector(".m-medal").innerHTML = !k ? `<span class="no-medal"></span>` : aufgedeckt(k.id) ? medalHtml(k, s.quests[k.id], k.id === s.next) : coveredMedal();
+      m.querySelector(".m-medal").innerHTML = id === ZIEL && !kerne.length
+        ? `<span class="m-chest${s.next ? "" : " open"}">${useSvg("i-chest")}</span>`
+        : kerne.map(k => aufgedeckt(k.id) ? medalHtml(k, s.quests[k.id], k.id === s.next) : coveredMedal()).join("");
       m.querySelector(".gems").innerHTML = sides.filter(q => aufgedeckt(q.id)).map(q => gemHtml(s.quests[q.id], q.id === s.next)).join("");
       m.classList.toggle("is-selected", id === sel[0]);
       m.querySelector(".you")?.remove();
@@ -374,34 +359,27 @@
     const hi = STATIONEN.findIndex(x => x.id === hier), weiter = STATIONEN[hi + 1];
     $("#mapFog").hidden = !(s.next && weiter);
     if (s.next && weiter) $("#mapFog").style.left = ((STATIONEN[hi].x + weiter.x) / 2) + "%";
-    renderStationBox(sel[0]);
-  }
-
-  function renderStationBox(id) {
-    const st = STATIONEN.find(x => x.id === id);
-    const qs = REIHE.filter(q => q.station === id);
-    const nq = state.next ? questById(state.next) : null;
-    const sichtbar = qs.filter(q => aufgedeckt(q.id));
-    const kernImNebel = qs.some(q => q.typ === "kern" && !aufgedeckt(q.id));
-    const hierText = nq && nq.station === id ? "DU BIST HIER" : !nq && id === STATIONEN[STATIONEN.length - 1].id ? "ZUM KÄSTCHEN" : "";
-    if (!sichtbar.length) {
-      $("#stationBox").innerHTML = `<p class="tb-title">${esc(st.ort)}</p><p class="tb-meta">${hierText}</p>
-        <p class="tb-text">${qs.length ? "Im Nebel" : "Hier wird abgerechnet und das Kästchen geöffnet."}</p>`;
-      return;
-    }
-    $("#stationBox").innerHTML = `<p class="tb-title">${esc(st.ort)}</p><p class="tb-meta">${hierText}</p>
-      <ul class="st-list">${sichtbar.map(q => {
-        const w = state.quests[q.id], isNext = q.id === state.next;
-        const mark = isNext ? `<span class="tag now">JETZT</span>` : w === "bestanden" ? `<span class="st won">${useSvg("i-check")}</span>` : `<span class="st lost">${useSvg("i-x")}</span>`;
-        return `<li>${questIcon(q, w, false)}<span>${esc(q.name)}</span>${mark}</li>`;
-      }).join("")}${kernImNebel ? `<li>${coveredMedal()}<span>Im Nebel</span></li>` : ""}</ul>`;
   }
 
   function selectStation(id, play = true) {
     sel[0] = id;
     document.querySelectorAll(".mark").forEach(m => m.classList.toggle("is-selected", m.dataset.station === id));
-    renderStationBox(id);
     if (play) tone("move");
+  }
+
+  // Die Karte zeigt nur das Wo. Tippen auf eine Station öffnet ihre Quest auf QUESTS:
+  // die nächste, wenn sie hier ist, sonst die erste erledigte, sonst den Nebel. Am Ziel steht das Kästchen: Code zeigen.
+  function oeffneStation(id) {
+    followHier = false;
+    selectStation(id, false);
+    const qs = REIHE.filter(q => q.station === id);
+    if (!qs.length) { tone("confirm"); return explainCode(); }
+    const q = qs.find(x => x.id === state.next) || qs.find(x => aufgedeckt(x.id));
+    const qid = q ? q.id : NEBEL;
+    followNext = qid === state.next;
+    sel[1] = qid;
+    renderQuests();
+    if (page !== 1) goTo(1); else tone("move");
   }
 
   // Ausrüstung: leerer Platz, bis ein Item erspielt ist. Bei der aktuellen Quest leuchtet, was dort einsetzbar ist,
@@ -425,13 +403,11 @@
   function renderItemBox(id) {
     const box = $("#itemBox");
     const x = itemSicht(id), st = state.items[id], jetzt = E.jetztEinsetzbar(C, state);
-    const tag = st === "besitz" ? (x.stapel ? `<span class="tag won">×${state.anzahl[id]}</span>` : `<span class="tag won">IM BEUTEL</span>`)
-      : st === "verloren" ? `<span class="tag lost">VERLOREN</span>` : st === "verbraucht" ? `<span class="tag open">VERBRAUCHT</span>` : "";
+    const tag = st === "verloren" ? `<span class="tag lost">VERLOREN</span>` : st === "verbraucht" ? `<span class="tag open">VERBRAUCHT</span>` : "";
     let extra = "";
     if (st === "besitz") {
       const wo = E.aktuelleQuests(C, state).filter(qid => E.einsetzbar(C, state, qid).includes(id)).map(qid => questById(qid).name);
       if (jetzt.has(id)) extra = `<span class="ib-use">Einsetzbar bei <em>${wo.map(esc).join("</em> und <em>")}</em>. Sag es dem Quest Master.</span>`;
-      else if (id !== "beutel") extra = `<span class="ib-use dim">Hier gerade nicht einsetzbar.</span>`;
     }
     const nahm = C.quests.find(q => (q.lose && q.lose.items || []).includes(id) && state.quests[q.id] === "verloren");
     if (st === "verloren" && nahm) extra = `<span class="ib-use">Verloren bei <em>${esc(nahm.name)}</em>.</span>`;
@@ -726,6 +702,7 @@
     if (!$("#overlay").hidden) { if (["enter", " ", "escape", "a"].includes(k)) { e.preventDefault(); closeOverlay(); } return; }
     if (k === "z" || k === "q") return turn(-1);
     if (k === "r" || k === "e") return turn(1);
+    if (page === 0 && k === "enter" && !e.target.closest("button")) { e.preventDefault(); return oeffneStation(sel[0]); }
     const step = { arrowdown: 1, arrowright: 1, arrowup: -1, arrowleft: -1 }[k];
     if (!step) return;
     e.preventDefault();
@@ -1042,8 +1019,9 @@
   updateFs();
   function renderSync() {
     const el = $("#sync");
-    const t = state && state.stand ? new Date(state.stand).toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" }) : "–";
-    el.textContent = (syncInfo.demo ? "Demo · Stand " : syncInfo.online ? "Stand " : "Offline · Stand ") + t;
+    const t = state && state.stand ? new Date(state.stand).toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" }) : "";
+    // Mit Netz ist der Stand aktuell, dann steht hier nichts
+    el.textContent = syncInfo.online || syncInfo.demo ? "" : t ? "Offline · Stand " + t : "Offline";
     el.classList.toggle("offline", !syncInfo.online && !syncInfo.demo);
   }
   store.onStatus(st => { syncInfo = st; renderSync(); });
