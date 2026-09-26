@@ -9,7 +9,7 @@ const err = []; p.on('pageerror', e => err.push(e.message));
 await p.goto('http://localhost:8765/?demo=start&direkt&schwach');
 await p.waitForTimeout(500);
 const C = await p.evaluate(() => window.GAME_CONFIG.quests.filter(q => q.typ !== 'lauf').map(q => q.name));
-let fund = [];
+let fund = [], tafeln = 0;
 for (let schritt = 0; schritt < C.length; schritt++) {
   for (let seite = 0; seite < 3; seite++) {
     const text = await p.evaluate(() => [...document.querySelectorAll('.face.active, .hud, #overlay:not([hidden])')].map(e => e.innerText).join(' '));
@@ -18,10 +18,20 @@ for (let schritt = 0; schritt < C.length; schritt++) {
     while (await p.$('#overlay:not([hidden])')) { await p.click('#overlay'); await p.waitForTimeout(250); }
     while (await p.$('#coach:not([hidden])')) { await p.click('#coach'); await p.waitForTimeout(150); }
   }
+  // Stationstafeln auf der Karte: jede Station antippen, der Text darf nichts aus dem Nebel nennen
+  while (await p.evaluate(() => document.querySelector('.face.active').dataset.page !== '0')) { await p.evaluate(() => document.querySelector('.shoulder-right').click()); await p.waitForTimeout(550); }
+  while (await p.$('#coach:not([hidden])')) { await p.click('#coach'); await p.waitForTimeout(150); }
+  for (const st of await p.$$eval('.mark', els => els.map(e => e.dataset.station))) {
+    await p.evaluate(id => document.querySelector(`.mark[data-station="${id}"]`).click(), st); await p.waitForTimeout(120);
+    const t = await p.evaluate(() => document.querySelector('#stationCard').innerText);
+    if (t.trim()) tafeln++;
+    C.slice(schritt + 1).forEach(n => { if (t.includes(n)) fund.push(`Schritt ${schritt}, Tafel ${st}: ${n}`); });
+    await p.evaluate(() => document.querySelector('#mapSheet').click());
+  }
   await p.click('[data-demo="bestanden"]'); await p.waitForTimeout(300);
   const t = await p.evaluate(() => document.querySelector('#overlay').innerText);
   C.slice(schritt + 2).forEach(n => { if (t.includes(n)) fund.push(`Ergebnis ${schritt}: ${n}`); });
   await p.click('#overlay'); await p.waitForTimeout(900);
 }
-console.log('Nebel verraten:', fund.length ? fund : 'nichts', '| schwach-Klasse:', await p.evaluate(() => document.documentElement.className), '| Fehler:', err.length ? err : 'keine');
+console.log('Nebel verraten:', fund.length ? fund : 'nichts', '| Stationstafeln geprüft:', tafeln, '| schwach-Klasse:', await p.evaluate(() => document.documentElement.className), '| Fehler:', err.length ? err : 'keine');
 await b.close();

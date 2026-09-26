@@ -4,17 +4,18 @@ Zwei Seiten, ein gespeicherter Stand.
 
 | Seite | Wer | Was |
 |---|---|---|
-| `index.html` | Dennis | Menü im N64-Stil: Startbildschirm, drei Seiten KARTE, QUESTS, AUSRÜSTUNG, HUD mit Packs, nächster Quest und Code. Ergebnis-Fenster nach jeder Buchung. Schreibt nur seine Antworten im Log-Buch. |
+| `index.html` | Dennis | Menü im N64-Stil: Startbildschirm, beim ersten Start der Prolog mit Rikes Fee, drei Seiten KARTE, QUESTS, AUSRÜSTUNG, HUD mit Packs, nächster Quest und Code. Ergebnis-Fenster nach jeder Buchung. Schreibt nur seine Antworten im Log-Buch. |
 | `admin.html` | Quest Master | Nächste Quest mit Bestanden/Verloren, Einsetzen, Showdown-Duellen und Log-Buch-Antworten. Laufende Quests (Prophezeiung mit Zähler, Rikes Amulett), Packs buchen, Ziffern kaufen, Items korrigieren, Zurücksetzen. Oben rechts **Rückgängig** für jede Änderung. `admin.html?probe` ist der **Probelauf**. |
 
 Adressen: Dennis `https://dd-ocarina.netlify.app/`, Quest Master `https://dd-ocarina.netlify.app/admin.html`.
-Zusätze für Dennis' Seite: `?probe` (liest den Probelauf des Quest Masters, roter Rahmen), `?demo` (Beispielstand mit Demo-Knöpfen, ohne Datenbank, auch `?demo=start`, `?demo=ende`), `?direkt` (ohne Startbildschirm), `?onboarding` (Beutel-Onboarding noch einmal), `?schwach` (Sparmodus erzwingen). Die alte Adresse `entwurf.html` leitet auf die Hauptseite um.
+Zusätze für Dennis' Seite: `?probe` (liest den Probelauf des Quest Masters, roter Rahmen), `?demo` (Beispielstand mit Demo-Knöpfen, ohne Datenbank, auch `?demo=start`, `?demo=ende`), `?direkt` (ohne Startbildschirm), `?onboarding` (Prolog, Hinweise auf der Karte und Beutel-Onboarding noch einmal), `?schwach` (Sparmodus erzwingen). Die alte Adresse `entwurf.html` leitet auf die Hauptseite um.
 
 ## Dateien
 
 | Datei | Inhalt |
 |---|---|
 | `config.js` | Alles, was das Spiel kennt: Quests (Reihenfolge, Texte, Belohnungen, einsetzbar), Items und Fähigkeiten mit Tarnnamen, Kartenstationen, Log-Buch-Fragen, Code, Packs, Speicher. **Hier wird ergänzt.** |
+| `weg.js` | Der echte Weg (Bahnhof Tegernsee, Wanderweg 681a, Neureuth): Stelle am Weg aus GPS, Höhe an jeder Stelle, Strecke bis zum Gipfel. Reine Funktionen, getestet in `engine.test.js`. |
 | `engine.js` | Die Logik. Rechnet aus Konfiguration und gespeichertem Stand alles aus: Packs, Ziffern, Items, Anzahl Spruchrollen, nächste Quest, laufende Quests, Showdown-Duelle, was wo einsetzbar ist. |
 | `store.js` | Speicher. `lokal` (ein Browser, zum Testen) oder `firebase` (zwei Handys). Dazu der Kanal für Dennis' Log-Buch-Antworten. |
 | `app.js`, `styles.css`, `index.html` | Dennis' Menü. |
@@ -23,6 +24,15 @@ Zusätze für Dennis' Seite: `?probe` (liest den Probelauf des Quest Masters, ro
 | `manifest.webmanifest`, `admin.webmanifest` | Für „Zum Home-Bildschirm". Dennis: grünes Icon, Quest Master: rotes Icon mit QM. |
 | `assets/` | Titelbild (`intro-titel.webp`, Fee separat `intro-fee.png`), Avatar (`avatar-okarina.webp`), Icons (`icons/`), Schriften, `logbuch/` für Rikes Sprachnachrichten. Originale der Bilder liegen außerhalb der App in `quellen/`. |
 | `engine.test.js` | Test der Logik: `node app/engine.test.js` |
+
+## Karte (seit 26.09.)
+
+- **Weg:** gegangener Weg golden, der Rest gestrichelt. Nach jedem Ergebnis läuft Dennis zur nächsten Station, sobald er die Karte ansieht. Der Nebel treibt und zieht beim Weiterkommen ab.
+- **Station antippen:** Tafel mit Ort, Höhe, Kilometer ab Bahnhof und den Quests der Station (Nebel bleibt dicht, verdeckte Sidequests fehlen ganz). Eine Zeile antippen öffnet die Quest, zweites Tippen auf die Station ebenso. An der Hütte: das Kästchen mit Code und Packs.
+- **Kartusche oben links:** Höhe, „Noch 2,5 km · 351 Hm bis zum Gipfel“ und das Höhenprofil des echten Wegs.
+- **GPS:** Knopf in der Kartusche. Läuft nur, solange die Karte offen ist. Am Weg (bis 250 m daneben) zeigt ein Feenlicht die echte Stelle, weit weg steht die Luftlinie zum Bahnhof Tegernsee. Ohne Erlaubnis ein Hinweis auf die Einstellungen.
+- **Daten:** `config.karte.weg` (OpenStreetMap, Höhen EU-DEM) und je Station `gps`. Wo der Quest Master am Samstag wirklich aufbaut, kann er dort nachtragen.
+- Test im Browser: `tests/karte.mjs` (GPS gefälscht, Laufen, Tafeln, Prolog).
 
 ## Gespeicherter Stand
 
@@ -71,7 +81,7 @@ python3 -m http.server 8000
 
 `http://localhost:8000/?demo` zeigt Dennis' Menü mit Demo-Knöpfen ohne Datenbank. Für Admin und Dennis zusammen in `config.js` `typ: "lokal"` setzen und beide Seiten in zwei Tabs desselben Browsers öffnen.
 
-Geräte-Test (iPhone 13 und 15 in Safari und vom Home-Bildschirm, Samsung mit gedrosselter CPU): `tests/geraete.mjs`, siehe Kopf der Datei.
+Geräte-Test (iPhone 13 und 15 in Safari und vom Home-Bildschirm, Samsung mit gedrosselter CPU): `tests/geraete.mjs`, siehe Kopf der Datei. Dazu `tests/nebel.mjs` (verrät nichts, auch nicht in den Stationstafeln), `tests/probe.mjs` (Probelauf, Rückgängig) und `tests/karte.mjs` (Karte, GPS, Prolog).
 
 ## Firebase
 
