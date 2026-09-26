@@ -1,6 +1,6 @@
 # Erlebnis-Plan: Dennis' Menü Seite für Seite
 
-Stand 26.09.2026. **Vorschlag, noch nicht gebaut.** Grundlage ist ein Rundgang durch die App v1, so wie Dennis sie erlebt: iPhone 15 vom Home-Bildschirm und in Safari, jeweils am Anfang, in der Mitte, am Gipfel und am Ende des Tages, dazu Log-Buch, alle Ergebnis-Fenster und die Fenster für Packs und Code. Nachstellen mit `?demo=start`, `?demo` und `?demo=ende`.
+Stand 26.09.2026. **Vorschlag, noch nicht gebaut.** Entscheidungen vom 26.09. sind eingetragen (Abschnitt 9), dazu der Teil zum visuellen Design (Abschnitt 10). Grundlage ist ein Rundgang durch die App v1, so wie Dennis sie erlebt: iPhone 15 vom Home-Bildschirm und in Safari, jeweils am Anfang, in der Mitte, am Gipfel und am Ende des Tages, dazu Log-Buch, alle Ergebnis-Fenster und die Fenster für Packs und Code. Nachstellen mit `?demo=start`, `?demo` und `?demo=ende`.
 
 Der Plan baut auf `06-design-plan.md` und `07-spiele-und-items.md` auf und ändert keine Entscheidung von dort.
 
@@ -13,8 +13,9 @@ Der Plan baut auf `06-design-plan.md` und `07-spiele-und-items.md` auf und ände
 - **Befund:** Das Menü sieht stark aus und ist klar. Was fehlt, ist der Bogen des Tages: Dennis erfährt nirgends, worum es geht, der Showdown findet in seiner App nicht statt, und nach der letzten Quest steht nur „Zum Kästchen" im HUD. Der wichtigste Moment, das Ergebnis, geht verloren, wenn der Quest Master bucht, während Dennis' App zu ist oder den Startbildschirm zeigt.
 - **Leitidee:** Jede Buchung wird ein Moment aus Ocarina of Time, der dort landet, wo er hingehört. Rike ist den ganzen Tag hörbar dabei.
 - **Neu:** Prolog mit der Fee, Duell-Tafel am Gipfel, Rikes Botschaft, Kästchen-Ansicht mit Öffnen und Abspann. Dazu verpasste Momente nachholen, Rikes Stimme später wieder anhören, eine Chronik für jede erledigte Quest.
-- **Overdrive, Empfehlung:** Richtung B „Das Menü lebt" als Grundlage, Richtung A „Kammer der Weisen" nur für die sechs Medaillons, den Bund und das Kästchen (Abschnitt 4).
-- **Reihenfolge:** Stufe 1 (Fundament) vor dem Test mit echten Handys, danach Stufe 2 und 3, soweit Zeit ist. Stand am Donnerstag, 1.10., einfrieren (Abschnitt 6).
+- **Overdrive, entschieden:** Richtung B „Das Menü lebt" als Grundlage, Richtung A „Kammer der Weisen" nur für die sechs Medaillons, den Bund und das Kästchen (Abschnitt 4).
+- **Visuelles Design:** Remaster statt Neubau. Dieselbe Welt, aber zwei eingebettete Schriften, sonnenfester Kontrast, klare Steintafeln mit Titelschild, ein Cursor für alles, ein Satz Symbole (Abschnitt 10).
+- **Reihenfolge:** zuerst eine Stilprobe des neuen Looks, dann Grunddesign und Stufe 1 (Fundament) vor dem Test mit echten Handys, danach Stufe 2 und 3, soweit Zeit ist. Stand am Donnerstag, 1.10., einfrieren (Abschnitt 6).
 
 ---
 
@@ -39,7 +40,7 @@ Sechs Regeln daraus:
 |---|---|---|---|---|
 | Vor dem Start | bekommt den Link, installiert | verstehen, worum es geht | Titelbild, Installieren, dann direkt das Menü | Prolog der Fee (einmal), Ton-Knopf |
 | Freitag, Zug | allein mit dem Log-Buch | Fragen, Rikes Stimme, die Gewissheit, dass alles klappt | Fenster mit Frage und Textfeld, Platzhalter-Klang | Kopfhörer-Tafel, Buch mit Seiten, echte Wellenform, zurückblättern, Warten auf das Urteil |
-| Samstagmorgen | Prophezeiung | seine Vorhersagen im Blick | nur der Zähler | Vorhersagen in der App (Entscheidung 3) |
+| Samstagmorgen | Prophezeiung | seine Vorhersagen im Blick | nur der Zähler | Vorhersagen in der App, versiegelt, Treffer je Vorhersage |
 | Aufstieg | Quest für Quest, Handy zwischendurch | was ist dran, was hilft, wie stehe ich, und der Moment beim Ergebnis | Quest-Karte, Ergebnis-Fenster (nur wenn die App gerade offen ist) | verpasste Momente, Beute fliegt an ihren Platz, Titelkarte für jede neue Quest, Chronik |
 | Gipfel | Showdown gegen den Bund | welche Duelle, Spielstand, was hilft | Text „Drei Duelle" und einzelne Fenster | Boss-Titelkarte, Duell-Tafel, Kammer der Weisen, Rikes Botschaft |
 | Hütte | Abrechnung, Kästchen | Code groß, fehlende Ziffern, Packs, Öffnen | „Zum Kästchen" im HUD | Kästchen-Ansicht, Öffnen-Moment, Abspann |
@@ -79,7 +80,7 @@ Nach dem ersten PRESS START fliegt die Fee ins Bild. Vier Tafeln im Stil der N64
 | 3 | Gewinnst du, bekommst du Packs und die Ziffern des Codes. | Eine Karte fliegt ins HUD, eine Ziffer rastet ein. |
 | 4 | Was am Ende dir gehört, nimmst du mit. Deine erste Prüfung wartet. | Das Menü öffnet sich auf QUESTS. |
 
-- **Wer ist die Fee?** Vorschlag: Rikes Botin. Dann trägt „A Link to Rike" durch den ganzen Tag, und die Fee leuchtet rosa, wenn Rike spricht. Name offen (Entscheidung 4).
+- **Wer ist die Fee?** Entschieden am 26.09.: Rikes Botin. So trägt „A Link to Rike" durch den ganzen Tag, und die Fee leuchtet rosa, wenn Rike spricht. Name offen (Entscheidung 6).
 - Die Fee spricht auch das Onboarding der Ausrüstung (heute neutrale blaue Blasen) und die wenigen Hinweise danach.
 
 ### 3.3 HUD
@@ -147,7 +148,7 @@ Nach dem ersten PRESS START fliegt die Fee ins Bild. Vier Tafeln im Stil der N64
 | Ich habe gerade nicht aufs Handy geschaut. | Der Moment ist weg (3.1). | Warteschlange: Jedes Handy merkt sich, was Dennis zuletzt gesehen hat. Verpasste Momente laufen einzeln in Spielreihenfolge, kleine Änderungen gesammelt in einem Fenster „Außerdem". |
 | Aus Versehen weggetippt | Das Fenster schließt beim ersten Tippen, auch nach 0,1 Sekunden. | wie eine N64-Textbox: Der erste Tipp zeigt sofort alles, der zweite schließt. Später „▶ Moment ansehen". |
 | Drei Dinge auf einmal gebucht | ein Fenster „… und 2 weitere" | jede Quest ihr eigener Moment |
-| Verloren, und jetzt? | rot, „−1 Pack" | eine Zeile Trost: „Das ist noch nicht vorbei." bei Spielen, die als Revanche wiederkommen können, sonst „Kopf hoch. Weiter geht's." (Entscheidung 5) |
+| Verloren, und jetzt? | rot, „−1 Pack" | eine Zeile Trost: „Das ist noch nicht vorbei." bei Spielen, die als Revanche wiederkommen können, sonst „Kopf hoch. Weiter geht's." (Entscheidung 7) |
 | Spruchrolle eingesetzt | rote Zeile „Spruchrolle eingesetzt", als wäre es ein Verlust | violett, Titel ZAUBER GEWIRKT, die Rolle entrollt sich, Runen glühen auf |
 | Was kommt jetzt? | Der Nebel lichtet sich über der Zeile. | Dazu eine Titelkarte wie beim Betreten eines Ortes: groß „ERSTES WALDSTÜCK", darunter „Auge des Jägers". 1,5 Sekunden, verschwindet von selbst. |
 
@@ -185,7 +186,7 @@ Nach dem ersten PRESS START fliegt die Fee ins Bild. Vier Tafeln im Stil der N64
 | Wofür ist es gut? | „Hier gerade nicht einsetzbar." | bleibt. Nennt eine Quest nur, wenn sie schon sichtbar ist. |
 | Der Beutel | Das Symbol liest sich eher als Laterne. | neues Beutel-Symbol |
 | Warum spielt er Okarina? | Noten schweben | Tippen auf Dennis spielt eine kurze Melodie. Nach dem Log-Buch spielt die Okarina Rikes Lieder: die sechs Sprachnachrichten, einzeln wählbar. |
-| Neues Item bekommen | Zeile im Ergebnis-Fenster | Das Item fliegt in sein Feld, das Feld blitzt auf. Optional hält Dennis es über den Kopf (braucht ein Bild, Entscheidung 6). |
+| Neues Item bekommen | Zeile im Ergebnis-Fenster | Das Item fliegt in sein Feld, das Feld blitzt auf. Optional hält Dennis es über den Kopf (braucht ein Bild, Entscheidung 8). |
 
 - **Reise:** Hier wird der Roguelike-Gedanke sichtbar: was er hat, was er verbraucht hat, was er noch gewinnen kann (die leeren Plätze).
 - **UX:** Onboarding bleibt, gesprochen von der Fee.
@@ -202,11 +203,11 @@ Nach dem ersten PRESS START fliegt die Fee ins Bild. Vier Tafeln im Stil der N64
 | Welche Duelle? | nichts | Duell-Tafel auf der Quest-Karte: drei Felder mit Spiel, Symbol und der Marke REVANCHE. Die Logik rechnet das schon aus (`showdownDuelle()` in `engine.js`). |
 | Wie steht es? | einzelne Fenster | Spielstand „1 : 0", jedes Feld bekommt Haken oder X, darunter „Noch ein Sieg". |
 | Was hilft mir? | EINSETZBAR | bleibt, mit Namen |
-| Und dann? | Ergebnis-Fenster | Kammer der Weisen mit dem Triforce, danach Rikes Botschaft (Entscheidung 2). |
+| Und dann? | Ergebnis-Fenster | Kammer der Weisen mit dem Triforce, danach Rikes Botschaft (entschieden am 26.09.). |
 
 - **Reise:** Der Endkampf, auf den der ganze Tag zuläuft („Der Bund steht als Endboss auf dem Gipfel", `01-showdown-pruefung-des-bundes.md` §1).
 - **UX:** Die Tafel zeigt nur, was feststeht, und erst, wenn der Bund dran ist.
-- **Erlebnis:** Rikes Botschaft als Lohn des Endkampfs, so wie in `01` §1 und `04` §4 schon geplant. Die vierte Ziffer rollt erst nach ihrer Nachricht ins Schloss.
+- **Erlebnis:** Rikes Botschaft als Lohn des Endkampfs, so wie in `01` §1 und `04` §4 schon geplant (entschieden am 26.09.). Die vierte Ziffer rollt erst nach ihrer Nachricht ins Schloss.
 
 ### 3.10 Hütte: Kästchen und Abspann (neu)
 
@@ -234,10 +235,10 @@ Nach dem ersten PRESS START fliegt die Fee ins Bild. Vier Tafeln im Stil der N64
 | Hochformat | „Handy quer halten" auf Schwarz | dazu die Fee und das Titelbild im Hintergrund |
 | Bewegung reduzieren, schwache Handys | beachtet | Jede neue Wirkung bekommt eine stille und eine leichte Fassung (Abschnitt 8). |
 
-### 3.12 Bildsprache nachschärfen
+### 3.12 Bildsprache
 
-- **Titel:** Große Titel (Ergebnis, Titelkarten, Prolog, Kästchen) in Hylia Serif, der Rest bleibt wie heute.
-- **Symbole:** ein Satz im N64-Stil. Neu: Beutel, Truhe für das Kästchen, Symbole der drei Seiten für Z und R.
+Seit dem 26.09. ein eigener Teil: Abschnitt 10 (Remaster des ganzen Menüs). Zwei Regeln gelten dort und hier:
+
 - **Zustände überall gleich:** leuchtet = jetzt, Farbe = deins, grau = verbraucht oder verloren, „?" = im Nebel. Gilt in Liste, Karte, Ausrüstung und HUD.
 - **Die Fee** ist die einzige Stimme für Hinweise. Keine anonymen Sprechblasen mehr.
 
@@ -268,7 +269,7 @@ Was heißt hier außergewöhnlich? Das Handy liegt draußen in der Sonne, fünf 
 - **Technik:** WebGL mit eigenen Shadern.
 - **Aufwand** groß, **Risiko** hoch eine Woche vor dem JGA (Kontextverlust auf dem iPhone, Akku am Berg, Lesbarkeit in der Sonne), **Rückfall** das heutige Menü.
 
-### Empfehlung
+### Entschieden am 26.09.
 
 **B als Grundlage, A für die sechs Medaillons, den Bund und das Kästchen. C nicht vor dem JGA.** So gibt es je Prüfung genau einen großen Moment, und die Effekte machen sich keine Konkurrenz. B löst nebenbei ein echtes UX-Problem: Heute springen Werte still um.
 
@@ -289,6 +290,21 @@ Was heißt hier außergewöhnlich? Das Handy liegt draußen in der Sonne, fünf 
 ## 6. Bauplan
 
 Jede Stufe ist für sich fertig und spielbar. Nichts davon baut die Kernlogik um: `derive()` bleibt, neu ist fast nur Darstellung in `app.js`, `styles.css` und `index.html`.
+
+### Grunddesign (Abschnitt 10, parallel zu Stufe 1)
+
+| Nr. | Was | Aufwand |
+|---|---|---|
+| G.1 | Stilprobe: QUESTS in der Mitte des Tages im neuen Look, als eigene Seite `app/stilprobe.html`. Die App bleibt live unverändert. | klein |
+| G.2 | Schriften einbetten, Rollen festlegen, Courier und Trebuchet raus | klein |
+| G.3 | Farben als feste Rollen, Stein je Seite dunkler, helle Schrift darauf, Kontrast gemessen | mittel |
+| G.4 | Steintafeln mit Fase und Titelschild, Mulden, Textbox-Kante | mittel |
+| G.5 | Ein Cursor (goldene Eckklammern) für Liste, Karte, Ausrüstung | klein |
+| G.6 | Symbole neu: Beutel, Truhe, Hütte, Seitenzeichen, Medaillons mit Metallrand | mittel |
+| G.7 | HUD-Band, größere Pack-Karten, schmalere Z- und R-Tasten | klein |
+| G.8 | Karte als Pergament mit Tinte, Ausrüstung mit Bogenfenster | mittel |
+
+Alles Neue aus Stufe 1 bis 3 entsteht gleich im neuen Look.
 
 ### Stufe 1: Fundament (vor dem Test mit echten Handys)
 
@@ -318,9 +334,9 @@ Jede Stufe ist für sich fertig und spielbar. Nichts davon baut die Kernlogik um
 | 2.7 | Log-Buch als Buch mit echter Wellenform und Umblättern | 3.5 | mittel |
 | 2.8 | Trostzeile bei Niederlagen | 3.6 | klein |
 | 2.9 | Rikes Botschaft nach dem Bund und der Abspann | 3.9, 3.10 | mittel, braucht die Aufnahme |
-| 2.10 | Vorhersagen in der App (nur bei Entscheidung 3) | 2 | mittel, dazu Admin |
+| 2.10 | Vorhersagen in der App, versiegelt, Treffer je Vorhersage | 2 | mittel, dazu Admin |
 
-### Stufe 3: Overdrive (nach deiner Wahl in Abschnitt 4)
+### Stufe 3: Overdrive (B und A, entschieden in Abschnitt 4)
 
 | Nr. | Was | Richtung | Aufwand |
 |---|---|---|---|
@@ -332,7 +348,9 @@ Jede Stufe ist für sich fertig und spielbar. Nichts davon baut die Kernlogik um
 
 Nach jeder Stufe: `node app/engine.test.js`, dazu `tests/geraete.mjs` und `tests/nebel.mjs` erweitern (Warteschlange, Duell-Tafel, Kästchen, Nebel bleibt dicht in allen neuen Ansichten) und Screenshots auf allen sechs Geräten.
 
-**Vorschlag zum Zeitplan:** Stufe 1 bis Dienstag, 29.09., dann der Test mit zwei echten Handys (offener Punkt 4 in `CLAUDE.md`). Stufe 2 und 3 nach Lust und Zeit. Am Donnerstag, 1.10., einfrieren, danach nur noch Inhalte in `config.js`.
+Beim Grunddesign zusätzlich: Kontrast aller Texte messen (mindestens 4,5 : 1) und die Bildrate auf dem gedrosselten Samsung.
+
+**Vorschlag zum Zeitplan:** zuerst die Stilprobe zum Absegnen. Dann Grunddesign und Stufe 1 bis Dienstag, 29.09., danach der Test mit zwei echten Handys (offener Punkt 4 in `CLAUDE.md`). Stufe 2 und 3 nach Lust und Zeit. Am Donnerstag, 1.10., einfrieren, danach nur noch Inhalte in `config.js`.
 
 ---
 
@@ -349,13 +367,18 @@ Nach jeder Stufe: `node app/engine.test.js`, dazu `tests/geraete.mjs` und `tests
 **Im gespeicherten Dokument:**
 
 - `zeiten: { [questId]: Zeitstempel }`, schreibt der Admin beim Buchen. Die Logik reicht es nur durch. Das entspricht Stufe 7 (Karte und Chronik) in `05-system-plan.md` Teil B.
-- Nur bei Entscheidung 3: die Vorhersagen als eigener Pfad neben dem Spiel, wie beim Log-Buch, und Treffer je Vorhersage statt nur „+1".
+- Die Vorhersagen als eigener Pfad neben dem Spiel, wie beim Log-Buch (`/spiele/dennis-jga-2026-prophezeiung`), und Treffer je Vorhersage statt nur „+1". Die geschützte Firebase-Regel in `app/README.md` muss Dennis dann auch dort schreiben lassen.
+
+**Dateien, die ich besorge oder zeichne:**
+
+- eine runde Sans für Text und Beschriftungen als `woff2` in `app/assets/` (frei nutzbar, Vorschlag Nunito, OFL), Herkunft in `SCHRIFTEN.md`.
+- neue Symbole als Vektor im Sprite von `index.html`, keine Bilddateien.
 
 **Dateien von dir:**
 
 - Rikes sechs Sprachnachrichten (stehen schon aus).
-- Rikes Botschaft als siebte Datei (Entscheidung 2).
-- Optional ein zweites Avatar-Bild: Dennis hält mit beiden Händen etwas über den Kopf, wie Link beim Item-Fund (Entscheidung 6).
+- Rikes Botschaft als siebte Datei, `app/assets/botschaft.m4a` (entschieden am 26.09.).
+- Optional ein zweites Avatar-Bild: Dennis hält mit beiden Händen etwas über den Kopf, wie Link beim Item-Fund (Entscheidung 8).
 
 ---
 
@@ -366,17 +389,103 @@ Nach jeder Stufe: `node app/engine.test.js`, dazu `tests/geraete.mjs` und `tests
 - **Bewegung reduzieren:** gleiche Information, keine Flüge, kein Drehen, Farben und Zustände bleiben.
 - **Schwache Handys** (`html.schwach`): halbe Teilchen, kein Canvas-Nebel, keine 3D-Kanten.
 - **Nebel:** `tests/nebel.mjs` prüft jede neue Ansicht: Titelkarten, Chronik, Kassenbuch, Duell-Tafel, Abspann.
+- **Lesbar in der Sonne:** Text mindestens 4,5 : 1, Symbole und Cursor mindestens 3 : 1, gemessen im Test.
 - **Texte:** Du-Form, höchstens zwei kurze Sätze, keine Gedankenstriche, keine Quest-Namen in Item-Texten.
 - **Technik:** keine neue Bibliothek, kein Build-Schritt, alles läuft wie heute direkt aus `app/`.
 
 ---
 
-## 9. Entscheidungen für dich
+## 9. Entscheidungen
 
-1. **Overdrive-Richtung** (Abschnitt 4). Empfehlung: B mit A für die großen Momente.
-2. **Rikes Botschaft und Finale.** Soll Rike eine siebte Nachricht aufnehmen, die nach dem Bund freigeschaltet wird? Empfehlung: ja, und die vierte Ziffer rollt erst nach ihrer Nachricht ins Schloss. Heraushören wie in `01` §6 wäre stärker, braucht aber eine Änderung am Bund in `config.js`.
-3. **Prophezeiung.** Schreibt Dennis seine Vorhersagen morgens in die App, versiegelt wie im Log-Buch, oder bleiben sie auf Papier? Empfehlung: in die App. Dann bricht bei jedem Treffer genau dieses Siegel.
-4. **Die Fee.** Soll sie Rikes Botin sein, und wie heißt sie?
-5. **Trostzeile.** „Das ist noch nicht vorbei." deutet die Revanche an, ohne den Showdown zu nennen. Passt das zur Nebel-Regel?
-6. **Item-Fund-Bild.** Lieferst du ein zweites Avatar-Bild, auf dem Dennis etwas über den Kopf hält?
-7. **Zeitplan.** Stufe 1 bis 29.09., Einfrieren am 1.10.?
+**Entschieden am 26.09.:**
+
+1. **Overdrive:** B „Das Menü lebt" als Grundlage, A „Kammer der Weisen" für die sechs Medaillons, den Bund und das Kästchen (Abschnitt 4).
+2. **Finale mit Rikes Botschaft:** Rike nimmt eine siebte Nachricht auf. Sie spielt nach dem gewonnenen Bund, erst danach rollt die vierte Ziffer ins Schloss. Dann Kästchen-Ansicht, Öffnen-Moment und Abspann (3.9, 3.10).
+3. **Prophezeiung in der App:** Dennis tippt seine Vorhersagen morgens ein und besiegelt sie wie im Log-Buch. Der Quest Master bucht Treffer je Vorhersage, bei Dennis bricht genau dieses Siegel.
+4. **Die Fee führt Dennis,** als Rikes Botin (3.2).
+5. **Das visuelle Design des ganzen Menüs wird überarbeitet** (Abschnitt 10).
+
+**Noch offen:**
+
+6. **Name der Fee.**
+7. **Trostzeile.** „Das ist noch nicht vorbei." deutet die Revanche an, ohne den Showdown zu nennen. Passt das zur Nebel-Regel?
+8. **Item-Fund-Bild.** Lieferst du ein zweites Avatar-Bild, auf dem Dennis etwas über den Kopf hält?
+9. **Schrift für Text.** Nunito oder eine andere runde Sans. Die Stilprobe zeigt den Vorschlag.
+10. **Zeitplan.** Erst die Stilprobe, dann Grunddesign und Stufe 1 bis 29.09., Einfrieren am 1.10.?
+
+---
+
+## 10. Visuelles Design: Remaster (neu, 26.09.)
+
+Wunsch vom 26.09.: Das visuelle Design des ganzen Menüs soll besser werden.
+
+**Richtung: Remaster, kein Neubau.** So wie Ocarina of Time 3D das N64-Original neu gebaut hat: dieselbe Welt, dieselben drei Seiten, dieselben Farben der Medaillons, aber klare Materialien, eigene Schriften, saubere Symbole und genug Kontrast für die Sonne am Berg. Wer das Menü heute kennt, erkennt alles wieder. Titelbild und Avatar bleiben, wie sie sind.
+
+### 10.1 Befund
+
+| Bereich | Heute | Problem |
+|---|---|---|
+| Schrift | drei Systemschriften: Georgia (Titel), Trebuchet MS (Text), Courier New (Beschriftungen). Die Zelda-Schrift Hylia Serif nur bei PRESS START. | Auf dem Samsung gibt es keine der drei. Dort springt alles auf Ersatzschriften, das Menü sieht anders aus als auf dem iPhone. Courier wirkt nach Büro, nicht nach Hyrule. |
+| Kontrast | gemessen: Seitentitel QUESTS und KARTE etwa 3 : 1, auf AUSRÜSTUNG noch weniger. Abschnitte wie DEIN WEG 2,2 : 1, Zahlen der Legende 3 : 1, TEGERNSEE 2,4 : 1. | Draußen in der Sonne kaum lesbar. Ziel für Text: mindestens 4,5 : 1. |
+| Stein | olivgrüne Verläufe mit Punktraster, dunkle Schrift direkt darauf | wirkt matt, fast schmutzig. Die drei Seiten (Ocker, Oliv, Graugrün) unterscheiden sich kaum. |
+| Seitentitel | dunkle Serifenschrift direkt auf dem Stein | kein Gewicht, kein Schild, geht unter |
+| Auswahl | vier verschiedene Zeichen: gelber Rahmen (Liste), weißer Ring (Karte), weiß blinkender Rahmen (Ausrüstung), gelb blinkender Ring (JETZT) | Das Auge muss auf jeder Seite neu lernen, was gewählt ist. |
+| HUD | Pack-Karten 13 × 18 px, leere als dünne gestrichelte Umrisse | Der Kontostand des Tages ist das kleinste Element am Bildschirm. |
+| Z und R | große graue Keile | nehmen Platz und sagen nichts über die Nachbarseite |
+| Karte | flache Flächen, Hütte als Punkt, Weg überall gleich gestrichelt | sieht nach Skizze aus, nicht nach Schatzkarte |
+| Ausrüstung | Avatar in einem harten schwarzen Rechteck, leere Felder als dunkle Quadrate, viel leerer Stein | Der Held wirkt ausgeschnitten, die Seite leer. |
+| Symbole | gemischte Herkunft und Strichstärken, der Beutel liest sich als Laterne | kein einheitlicher Satz |
+
+### 10.2 Die Bausteine
+
+**Schrift: zwei Familien, eingebettet, gleich auf iPhone und Samsung**
+
+| Rolle | Schrift | Wo |
+|---|---|---|
+| Titel | Hylia Serif (hat Ä, Ö, Ü, aber kein ß) | Seitentitel, Quest-Namen auf der Quest-Karte, Ergebnis, Titelkarten, Prolog, Kästchen |
+| Text und Beschriftung | eine runde, kräftige Sans wie die Textboxen im Spiel, als eigene Datei in `app/assets/`. Vorschlag: Nunito (frei nutzbar, OFL), zwei Stärken | alles andere. Beschriftungen in Großbuchstaben und leicht gesperrt, Zahlen gleich breit |
+
+Courier New und Trebuchet MS fallen weg, Georgia bleibt nur als Ersatz. Namen mit ß („Große Wasserpistole") stehen immer in der Sans.
+
+**Farben: feste Rollen**
+
+| Rolle | Farbe |
+|---|---|
+| Stein je Seite | dunkler und klar getrennt: KARTE warmes Braun, QUESTS Moosgrün, AUSRÜSTUNG Schiefer. Schrift darauf immer hell (Creme), nie mehr dunkel auf Stein. |
+| Gold | gewonnen, Rahmen, Titelschild |
+| Gelb | Cursor und JETZT |
+| Rot | verloren |
+| Violett | Magie und laufende Quests |
+| Rosa | Rike |
+| Blau | Textbox, Erklärung |
+
+Text mindestens 4,5 : 1, Symbole und Cursor mindestens 3 : 1, gemessen im Test statt nach Augenmaß.
+
+**Material**
+
+- **Tafeln:** Stein mit Fase (heller Rand oben links, dunkler unten rechts) und feiner Körnung statt Punktraster, innen eine dünne Goldleiste.
+- **Titelschild:** Jede Seite trägt ihren Namen auf einer kleinen Plakette mit Goldrand, oben in der Mitte, in Hylia Serif.
+- **Mulden:** Liste, Item-Felder, Kartenrahmen und Stationsbox als eingelassene Mulden mit Innenschatten, überall gleich.
+- **Textbox:** bleibt blau, mit sauberer Doppelkante.
+
+**Ein Cursor für alles:** die vier goldenen Eckklammern aus Ocarina of Time, die sanft atmen. Gleich in Liste, Karte, Ausrüstung, Log-Buch und Kästchen. Die nächste Quest leuchtet, statt zu blinken.
+
+**Ein Satz Symbole:** eine Strichstärke, zwei Töne, dunkle Kontur, wie die Item-Symbole im Spiel. Neu gezeichnet: Beutel, Truhe für das Kästchen, Hütte, die Zeichen der drei Seiten für Z und R. Medaillons bekommen einen Metallrand mit Glanz.
+
+### 10.3 Seite für Seite
+
+| Seite | Heute | Remaster |
+|---|---|---|
+| HUD | kleine Karten, blaue Box, Schloss | dunkles Band über die ganze Breite, Karten 1,5-mal so groß mit Kartenrücken, Name der Quest mit Medaillon, Schloss mit Metallglanz |
+| QUESTS | Liste und Karte auf Oliv | Liste in einer Mulde, Zeilen etwas höher, Medaillons größer, Haken in Gold. Quest-Karte mit großem Medaillon und dem Namen in Hylia Serif. |
+| KARTE | flache Skizze | Pergament mit Papierstruktur und Tintenlinien, Höhenlinien, kleine Tannen, See mit Wellenlinien, Gipfelkreuz auf der Neureuth, Hütte als Zeichen, das Kästchen am Ende des Wegs. Stationsnamen auf kleinen Schildern, TEGERNSEE lesbar. |
+| AUSRÜSTUNG | Avatar im Rechteck, leere Quadrate | Avatar in einem Bogenfenster mit Steinrahmen und Licht von oben. Felder als Steinmulden, Besitz mit Goldrand. ITEMS und FÄHIGKEITEN auf kleinen Plaketten. Avatar und Felder werden größer, der leere Stein schrumpft. |
+| Z und R | große graue Keile | schmaler, mit dem Zeichen der Nachbarseite |
+| Fenster | schwarzer Kasten mit Goldrand, Titel in Georgia | Titel in Hylia Serif, Kante wie das Titelschild |
+| Log-Buch | blaues Fenster | Pergament und Tinte (3.5) |
+
+### 10.4 Vorgehen
+
+1. **Stilprobe:** zuerst QUESTS in der Mitte des Tages im neuen Look, als eigene Seite `app/stilprobe.html` neben der App. Die App bleibt live unverändert. Du schaust sie auf dem Handy an und sagst ja oder was anders soll.
+2. **Grunddesign** auf alle Seiten übertragen, parallel zu Stufe 1 (Abschnitt 6, Tabelle G). Alles Neue aus Stufe 1 bis 3 entsteht gleich im neuen Look.
+3. **Prüfen:** Kontrast aller Texte gemessen in `tests/geraete.mjs`, Screenshots auf allen sechs Geräten, Bildrate auf dem gedrosselten Samsung. Danach wird die Stilprobe gelöscht.

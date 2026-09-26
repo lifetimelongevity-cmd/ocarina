@@ -24,7 +24,7 @@ JGA-Wochenende für Dennis, 2. bis 4. Oktober 2026, München und Wanderung am Te
 | `05-system-plan.md` | **Maßgeblicher Plan.** Kernlogik v0, alle Entscheidungen (Tabelle A0), Ausbaustufen (Teil B) |
 | `07-spiele-und-items.md` | **Arbeitsstand Spiele, Items, Fähigkeiten** (ab 25.09.), feste Nummern zum Referenzieren |
 | `06-design-plan.md` | **Design-Plan für Dennis' Menü** (gebaut 25.09., Änderungen in Abschnitt 10): Befund, Seitenaufbau, Bildsprache, Texte im Spielton, Querformat-Regeln |
-| `08-erlebnis-plan.md` | **Erlebnis-Plan** (26.09., noch nicht gebaut): jede Menüseite aus Dennis' Sicht, Fehler, Bauplan in drei Stufen, drei Overdrive-Richtungen, Entscheidungen in Abschnitt 9 |
+| `08-erlebnis-plan.md` | **Erlebnis-Plan** (26.09., noch nicht gebaut): jede Menüseite aus Dennis' Sicht, Fehler, Bauplan (Grunddesign und drei Stufen), Overdrive B mit A, visuelles Remaster (Abschnitt 10), Entscheidungen in Abschnitt 9 |
 | `app/assets/` | Titelbild `intro-titel.webp` (Fee herausgelöst, schwebt als `intro-fee.png`), Avatar `avatar-okarina.webp`, Icons in `icons/`, Zelda-Schriften (Fan-Schriften, nur privat), `logbuch/` für Rikes Sprachnachrichten. Herkunft in `SCHRIFTEN.md` |
 | `quellen/` | Originale der hochgeladenen Bilder (nicht veröffentlicht) |
 | `tests/` | Playwright-Prüfungen für Geräte und Nebel |
@@ -57,4 +57,4 @@ Der Nutzer will es **einfach und in sich geschlossen** halten und schrittweise a
 5. Anzahl der Packs festlegen, dann Balance anpassen (Faustregel in `05-system-plan.md` A2).
 6. Offene Details aus 07: Parcours Podrennen, Schwerter für 12, Versteck und Frist für 15, Grenzen für bestanden.
 7. Der Code des Kästchens und alle Quest-Namen stehen in `app/config.js`, das jedes Handy lädt. Vor dem Spieltag entscheiden, ob der Code aus der öffentlichen Konfiguration raus soll.
-8. Erlebnis-Plan `08-erlebnis-plan.md`: Entscheidungen in Abschnitt 9, dann Stufe 1 bauen (verpasste Ergebnisse nachholen, Podrennen auf der Karte, Duell-Tafel, Kästchen-Ansicht).
+8. Erlebnis-Plan `08-erlebnis-plan.md`: Entschieden am 26.09.: Overdrive B mit A, Finale mit Rikes Botschaft (siebte Datei `app/assets/botschaft.m4a`), Vorhersagen in der App, die Fee als Rikes Botin, visuelles Remaster. Offen: Name der Fee, Trostzeile, Item-Fund-Bild, Schrift, Zeitplan. Nächster Schritt, sobald der Nutzer es sagt: Stilprobe, dann Grunddesign und Stufe 1.
