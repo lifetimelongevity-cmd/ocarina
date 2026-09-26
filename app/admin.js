@@ -239,7 +239,7 @@
     $("#probeLink").textContent = PROBE ? "Zum echten Spiel" : "Probelauf öffnen";
     if (!PROBE) return;
     document.title = "Probe · " + document.title;
-    $("#probeUrl").textContent = location.host + location.pathname.replace(/admin\.html$/, "") + "?probe";
+    $("#probeUrl").textContent = location.host + location.pathname.replace(/admin(\.html)?$/, "") + "?probe";   // Netlify kürzt admin.html zu /admin
     SZENARIEN.forEach(sz => {
       const b = document.createElement("button");
       b.type = "button";
