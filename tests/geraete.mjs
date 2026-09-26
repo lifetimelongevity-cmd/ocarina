@@ -138,14 +138,21 @@ for (const g of GERAETE) {
   await page.click('#lbSeal'); await page.waitForTimeout(900);
   await shot(page, g, '8-logbuch-besiegelt');
   alleProbleme += (await pruefen(page, g, 'LOG-BUCH BESIEGELT')).length;
-  // Tastatur offen: sichtbarer Bereich nur etwa die Hälfte der Höhe
+  // Tastatur offen: sichtbarer Bereich nur etwa die Hälfte der Höhe, geprüft bei jeder weiteren Frage (lange Fragen brechen um)
   if (g.ios) {
     await page.click('#lbNext'); await page.waitForTimeout(200);
     await page.evaluate(() => { const el = document.querySelector('#logbuch'); el.style.setProperty('--vv-h', Math.round(innerHeight * .47) + 'px'); });
-    await page.focus('#lbInput'); await page.waitForTimeout(200);
-    await shot(page, g, '9-logbuch-tastatur');
-    const passt = await page.evaluate(() => { const b = document.querySelector('#lbInput').getBoundingClientRect(), s = document.querySelector('#lbSeal').getBoundingClientRect(); return b.bottom <= innerHeight * .47 + 1 && s.bottom <= innerHeight * .47 + 1; });
-    log(`  Log-Buch mit Tastatur: Eingabe und Knopf sichtbar: ${passt ? 'ja' : 'NEIN'}`); if (!passt) alleProbleme++;
+    const abgeschnitten = [];
+    for (let erste = true; await page.isVisible('#lbForm'); erste = false) {
+      await page.focus('#lbInput'); await page.waitForTimeout(200);
+      if (erste) await shot(page, g, '9-logbuch-tastatur');
+      const passt = await page.evaluate(() => { const f = document.querySelector('#lbFrage').getBoundingClientRect(), b = document.querySelector('#lbInput').getBoundingClientRect(), s = document.querySelector('#lbSeal').getBoundingClientRect(); return f.top >= 0 && b.bottom <= innerHeight * .47 + 1 && s.bottom <= innerHeight * .47 + 1; });
+      if (!passt) abgeschnitten.push(await page.textContent('#lbStep'));
+      await page.fill('#lbInput', 'Test'); await page.click('#lbSeal'); await page.waitForTimeout(300);
+      await page.click('#lbNext'); await page.waitForTimeout(200);
+    }
+    log(`  Log-Buch mit Tastatur: Frage, Eingabe und Knopf sichtbar: ${abgeschnitten.length ? 'NEIN bei ' + abgeschnitten.join(', ') : 'ja, bei allen Fragen'}`);
+    alleProbleme += abgeschnitten.length;
   }
   await ctx.close();
 

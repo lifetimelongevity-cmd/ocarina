@@ -106,6 +106,6 @@ Sechs Prüfungen = sechs Medaillons. Das Podrennen trägt das Schatten-Medaillon
 
 **Showdown:** Revanche möglich bei 2, 4, 7, 9, 12, 14 (Log-Buch und Feuerprobe kommen nicht wieder). Verlorene Spiele in Tagesreihenfolge, höchstens drei, dann mit Wirbel der Götter aufgefüllt. Der Quest Master tippt je Duell Sieg oder Niederlage, die App sagt, wann es reicht (2 von 3).
 
-**Log-Buch:** 6 Fragen als Vorschlag in `config.js` (mit Rike abstimmen). Dateien `app/assets/logbuch/frage1.m4a` bis `frage6.m4a` fehlen noch, bis dahin spielt ein Platzhalter-Klang. Hinweise zum Format in `app/assets/logbuch/LIESMICH.md`.
+**Log-Buch:** Umgedreht am 26.09.: Rike beantwortet 6 Fragen über Dennis, Dennis tippt in ein bis drei Worten, was sie gesagt hat. Fragen stehen fest (in `config.js` an Dennis gerichtet, so wie Rike sie bekommt in `app/assets/logbuch/LIESMICH.md`). Dateien `app/assets/logbuch/frage1.m4a` bis `frage6.m4a` fehlen noch, bis dahin spielt ein Platzhalter-Klang. Hinweise zum Format in `app/assets/logbuch/LIESMICH.md`.
 
 **Offen:** Reihenfolge und Belohnungen bestätigen, Fragen und Sprachdateien, Anzahl Packs, welches Spiel die Schwerter für 12 vergibt, Frist und Versteck für 15.
