@@ -73,6 +73,12 @@ async function pruefen(page, g, name) {
       const b = el.getBoundingClientRect();
       if (Math.min(b.width, b.height) < 28) out.tipp.push(`${el.className} ${Math.round(b.width)}x${Math.round(b.height)}`);
     }
+    // Demo-Knöpfe: groß genug und nicht im Streifen des Home-Balkens am unteren Rand
+    out.demo = [];
+    for (const el of document.querySelectorAll('.demo-bar:not([hidden]) button')) {
+      const b = el.getBoundingClientRect();
+      if (b.height < 28 || b.bottom > H - sa.b - 6) out.demo.push(`${el.textContent} ${Math.round(b.height)}px hoch, ${Math.round(H - b.bottom)}px über dem Rand`);
+    }
     // Seite scrollt nicht quer
     out.quer = document.documentElement.scrollWidth > W + 1;
     return out;
@@ -83,6 +89,7 @@ async function pruefen(page, g, name) {
   if (r.klein.length) probleme.push('Schrift < 10px: ' + r.klein.slice(0, 5).join('; '));
   if (r.ueberlauf.length) probleme.push('Überlauf: ' + r.ueberlauf.slice(0, 5).join('; '));
   if (r.tipp.length) probleme.push('Tippfläche < 28px: ' + r.tipp.slice(0, 6).join('; '));
+  if (r.demo.length) probleme.push('Demo-Knöpfe: ' + r.demo.slice(0, 3).join('; '));
   if (r.quer) probleme.push('Seite scrollt quer');
   log(`  ${name}: ${probleme.length ? 'PROBLEME\n    ' + probleme.join('\n    ') : 'ok'}`);
   return probleme;
@@ -135,8 +142,8 @@ for (const g of GERAETE) {
   for (let i = 0; i < 4; i++) { if (await page.$('#coach:not([hidden])')) { if (i === 2) await shot(page, g, '3b-coach'); await page.click('#coach'); await page.waitForTimeout(300); } }
   await shot(page, g, '3-ausruestung');
   alleProbleme += (await pruefen(page, g, 'AUSRÜSTUNG')).length;
-  // Buchung: nächste Quest bestanden → Ergebnis-Fenster
-  await page.click('[data-demo="bestanden"]');
+  // Buchung: nächste Quest bestanden → Ergebnis-Fenster, per Finger getippt wie auf dem Handy
+  await page.tap('[data-demo="bestanden"]');
   await page.waitForTimeout(1600);
   await shot(page, g, '4-ergebnis');
   alleProbleme += (await pruefen(page, g, 'ERGEBNIS')).length;

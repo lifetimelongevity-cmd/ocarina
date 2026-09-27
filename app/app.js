@@ -23,6 +23,7 @@
   /* ---------- Speicher: echt, Probelauf oder Demo ---------- */
   const DEMO = params.has("demo");
   document.documentElement.classList.toggle("probe", PROBE && !DEMO);
+  document.documentElement.classList.toggle("demo", DEMO);
   // Onboarding (Prolog, Beutel, Hinweise der Fee) nur am Anfang des Spiels und einmal pro Handy. Ist schon eine Quest
   // entschieden, kennt Dennis das Menü: Ein neues Handy, ein anderer Browser oder der Home-Bildschirm statt Safari
   // (eigener Speicher) zeigen es dann nicht noch einmal. Die Demo merkt sich nichts, zeigt es also nur mit ?demo=start.
