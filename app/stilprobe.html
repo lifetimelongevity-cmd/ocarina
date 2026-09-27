@@ -31,6 +31,7 @@
        Dennis' Menü (06-design-plan.md, 07-spiele-und-items.md)
        /             liest den echten Stand (Firebase), schreibt nur Log-Buch-Antworten
        /?demo        Beispielstand mit Demo-Knöpfen, ohne Firebase (auch ?demo=start, ?demo=bund, ?demo=ende)
+       /?onboarding  Prolog und Hinweise der Fee auch später am Tag (sonst nur, solange noch keine Quest entschieden ist)
        /?direkt      ohne Startbildschirm
        /?probe       Probelauf des Quest Masters (admin.html?probe), roter Rahmen, echtes Spiel unberührt -->
   <div class="game" id="game">
@@ -225,6 +226,24 @@
             <span class="lb-who" id="lbWho">RIKE</span>
           </div>
           <button type="button" class="lb-btn" id="lbNext">WEITER</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Siegel: Dennis besiegelt selbst (Ergebnis, Einsatz, Duell, Amulett, Ziffer). Gedrückt halten, bis der Ring zu ist (app.js, Abschnitt Siegel). -->
+    <div class="schwur" id="schwur" hidden>
+      <div class="sw-panel textbox" role="dialog" aria-modal="true" aria-labelledby="swArt">
+        <p class="sw-art" id="swArt"></p>
+        <div class="sw-kopf" id="swKopf"></div>
+        <ul class="sw-folgen" id="swFolgen"></ul>
+        <div class="sw-wahl" id="swWahl"></div>
+        <div class="sw-unten">
+          <button type="button" class="sw-zurueck" id="swZurueck">ZURÜCK</button>
+          <p class="sw-hinweis">Siegel gedrückt halten</p>
+          <button type="button" class="sw-siegel" id="swSiegel" aria-label="Siegel gedrückt halten zum Besiegeln">
+            <svg class="sw-ring" viewBox="0 0 100 100" aria-hidden="true"><circle class="sw-ring-bg" cx="50" cy="50" r="44"/><circle class="sw-ring-voll" cx="50" cy="50" r="44" pathLength="100"/></svg>
+            <svg class="sw-wachs" aria-hidden="true"><use href="#i-seal"></use></svg>
+          </button>
         </div>
       </div>
     </div>

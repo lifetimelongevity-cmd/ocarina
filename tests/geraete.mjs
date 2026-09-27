@@ -55,20 +55,20 @@ async function pruefen(page, g, name) {
     const sichtbar = el => { const s = getComputedStyle(el); if (s.visibility === 'hidden' || s.display === 'none' || +s.opacity === 0) return false; const b = el.getBoundingClientRect(); return b.width > 0 && b.height > 0; };
     const inAktiv = el => !el.closest('.face') || el.closest('.face.active');
     const bereich = el => !el.closest('[hidden]') && inAktiv(el) && !el.closest('.intro-screen') ;
-    for (const el of document.querySelectorAll('.hud button, .shoulder, .foot .sync, .face.active button, .face.active p, .result, .lb-panel, .qc-action, .prolog-skip, .prolog-box, .coach-bubble')) {
+    for (const el of document.querySelectorAll('.hud button, .shoulder, .foot .sync, .face.active button, .face.active p, .result, .lb-panel, .qc-action, .prolog-skip, .prolog-box, .coach-bubble, .sw-panel')) {
       if (!bereich(el) || !sichtbar(el)) continue;
       const b = el.getBoundingClientRect();
       if (b.left < sa.l - 1 || b.right > W - sa.r + 1 || (b.bottom > H - sa.b + 1 && !el.classList.contains('sync'))) out.inset.push(`${el.className || el.tagName} [${Math.round(b.left)},${Math.round(b.right)},${Math.round(b.bottom)}]`);
       if (b.right > W + 1 || b.bottom > H + 1) out.ausserhalb.push(el.className);
     }
-    for (const el of document.querySelectorAll('.face.active *, .hud *, .result *, .lb-panel *, .prolog *, .coach-bubble *')) {
+    for (const el of document.querySelectorAll('.face.active *, .hud *, .result *, .lb-panel *, .prolog *, .coach-bubble *, .sw-panel *')) {
       if (!bereich(el) || !sichtbar(el)) continue;
       const s = getComputedStyle(el);
       const hatText = [...el.childNodes].some(n => n.nodeType === 3 && n.textContent.trim());
       if (hatText && parseFloat(s.fontSize) < 10) out.klein.push(`${el.className || el.tagName} ${s.fontSize} "${el.textContent.trim().slice(0, 20)}"`);
       if (hatText && s.overflow !== 'visible' && s.textOverflow !== 'ellipsis' && el.scrollWidth > el.clientWidth + 2 && !['TEXTAREA'].includes(el.tagName)) out.ueberlauf.push(`${el.className || el.tagName} "${el.textContent.trim().slice(0, 24)}"`);
     }
-    for (const el of document.querySelectorAll('.face.active button:not([disabled]), .hud button, .shoulder, .lb-panel button:not([disabled]), .prolog button')) {
+    for (const el of document.querySelectorAll('.face.active button:not([disabled]), .hud button, .shoulder, .lb-panel button:not([disabled]), .prolog button, .sw-panel button')) {
       if (!bereich(el) || !sichtbar(el)) continue;
       const b = el.getBoundingClientRect();
       if (Math.min(b.width, b.height) < 28) out.tipp.push(`${el.className} ${Math.round(b.width)}x${Math.round(b.height)}`);
@@ -142,6 +142,14 @@ for (const g of GERAETE) {
   for (let i = 0; i < 4; i++) { if (await page.$('#coach:not([hidden])')) { if (i === 2) await shot(page, g, '3b-coach'); await page.click('#coach'); await page.waitForTimeout(300); } }
   await shot(page, g, '3-ausruestung');
   alleProbleme += (await pruefen(page, g, 'AUSRÜSTUNG')).length;
+  // Dennis trägt selbst ein: Siegel-Fenster auf der Quest-Karte
+  await seite(page, 1); await weiterTippen(page);
+  if (await page.$('#questCard [data-ergebnis="bestanden"]')) {
+    await page.tap('#questCard [data-ergebnis="bestanden"]'); await page.waitForTimeout(400);
+    await shot(page, g, '3c-siegel');
+    alleProbleme += (await pruefen(page, g, 'SIEGEL')).length;
+    await page.click('#swZurueck'); await page.waitForTimeout(200);
+  } else { log('  PROBLEM: kein Knopf zum Eintragen auf der Quest-Karte'); alleProbleme++; }
   // Buchung: nächste Quest bestanden → Ergebnis-Fenster, per Finger getippt wie auf dem Handy
   await page.tap('[data-demo="bestanden"]');
   await page.waitForTimeout(1600);

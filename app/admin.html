@@ -49,10 +49,17 @@
       <div class="use" id="nextUse"></div>
       <div class="duels" id="duels" hidden></div>
       <div class="lb" id="nextLogbuch" hidden></div>
+      <p class="hint notfall">Dennis trägt das Ergebnis selbst ein. Diese Knöpfe sind für den Notfall, zum Beispiel wenn sein Akku leer ist.</p>
       <div class="big-actions">
         <button type="button" class="btn win" id="nextWin">Bestanden</button>
         <button type="button" class="btn lose" id="nextLose">Verloren</button>
       </div>
+    </section>
+
+    <section class="card" aria-labelledby="dennisTitle">
+      <h2 id="dennisTitle">Dennis trägt selbst ein</h2>
+      <p class="hint">Ergebnisse, Einsätze, Duelle, Rikes Amulett und Ziffern am Kästchen besiegelt Dennis in seiner App. Du siehst es hier live. <b>Zurücknehmen</b>: Es ist wieder offen, und die Fee sagt es ihm. Rückgängig oben holt es zurück.</p>
+      <ul class="ledger" id="dennisListe"></ul>
     </section>
 
     <section class="card" aria-labelledby="laufTitle">
@@ -82,7 +89,7 @@
 
     <section class="card" aria-labelledby="useTitle">
       <h2 id="useTitle">Eingesetzt</h2>
-      <p class="hint">Dennis sagt an, du buchst. Spruchrolle und Schild sind danach weg. Falsch gebucht: ✕ macht es rückgängig.</p>
+      <p class="hint">Dennis setzt selbst ein, die Knöpfe unter der Quest sind für den Notfall. Spruchrolle und Schild sind danach weg. ✕ nimmt einen Einsatz zurück.</p>
       <ul class="ledger" id="einsaetze"></ul>
     </section>
 

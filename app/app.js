@@ -70,6 +70,10 @@
   const store = DEMO ? demoStore() : window.QuestStore.create(C);
   const lbStore = window.QuestStore.logbuch(DEMO ? { ...C, speicher: { typ: "lokal", spielId: "demo" } } : C);
   if (DEMO && params.get("demo") !== "logbuch") lbStore.zuruecksetzen();
+  // Was Dennis selbst besiegelt (Ergebnis, Einsatz, Duell, Amulett, Ziffer): eigener Kanal, engine.js rechnet es ein
+  const einStore = window.QuestStore.eintraege(DEMO ? { ...C, speicher: { typ: "lokal", spielId: "demo" } } : C);
+  if (DEMO) einStore.zuruecksetzen();
+  const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 
   /* ---------- Kleinkram ---------- */
   const $ = s => document.querySelector(s);
@@ -93,7 +97,7 @@
   const packsWort = n => Math.abs(n) === 1 ? "Pack" : "Packs";
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 
-  let state = null, lastDoc = null, syncInfo = { online: true }, antworten = {};
+  let state = null, lastDoc = null, syncInfo = { online: true }, antworten = {}, adminDoc = null, eintraege = {};
   let page = START_PAGE, angle = START_PAGE * 120, flatTimer = null;
   const sel = { 0: null, 1: null, 2: null };  // Auswahl je Seite: Station, Quest, Item
   let followNext = true;                        // Quest-Seite folgt der nächsten Quest, bis Dennis selbst etwas antippt
@@ -211,7 +215,16 @@
       + `<li class="q-sep q-div" data-sep="reihe" aria-hidden="true"></li>` + REIHE.map(zeile).join("")
       + `<li><button type="button" class="q-row nebel" data-id="${NEBEL}"><span class="ic">${coveredMedal()}</span><span class="q-name"></span><span class="q-mark"></span></button></li>`;
     document.querySelectorAll(".q-row").forEach(b => b.addEventListener("click", () => { followNext = b.dataset.id === state.next; selectQuest(b.dataset.id); }));
-    $("#questCard").addEventListener("click", e => { if (e.target.closest("[data-logbuch]")) logbuch.oeffnen(); });
+    $("#questCard").addEventListener("click", e => {
+      if (e.target.closest("[data-logbuch]")) return logbuch.oeffnen();
+      const t = e.target.closest("[data-ergebnis], [data-schritt], [data-duell], [data-einsetzen]");
+      if (!t) return;
+      if (t.dataset.ergebnis) schwurErgebnis(sel[1], t.dataset.ergebnis);
+      else if (t.dataset.schritt) schwurSchritt(sel[1], t.dataset.schritt);
+      else if (t.dataset.duell) schwurDuell(t.dataset.duell, t.dataset.v);
+      else schwurEinsatz(t.dataset.einsetzen, t.dataset.quest);
+    });
+    $("#itemBox").addEventListener("click", e => { const b = e.target.closest("[data-einsetzen]"); if (b) schwurEinsatz(b.dataset.einsetzen); });
 
     // Karte: Weg durch die Stationen, eine Marke pro Station. Tippen zeigt die Stationstafel, zweites Tippen die Quest.
     $("#mapRoute").setAttribute("d", pfad(ABSCHNITTE.length));
@@ -334,18 +347,23 @@
     }
     const q = questById(id), st = state.quests[id], isNext = id === state.next;
     let unten;
+    card.classList.remove("showdown");
     if (q.zaehler) {
       const n = state.treffer[id] || 0, max = q.zaehler.max;
       unten = `<div class="fx-rows"><div class="fx-row"><span class="fx-lbl win">${esc(q.zaehler.name.toUpperCase())}</span><span class="fx treffer">${
         Array.from({ length: max }, (_, i) => `<span class="pip${i < n ? " on" : ""}">${useSvg("i-star")}</span>`).join("")}</span></div>
         <div class="fx-row"><span class="fx-lbl win">JE ${esc(q.zaehler.name.toUpperCase())}</span><span class="fx">${fxChips(q.zaehler.proTreffer, true)}</span></div></div>`;
     } else {
+      const ein = eintragbar(id), kann = v => (ein.ergebnis || []).includes(v);
+      const knopf = (cls, attr, text) => `<button type="button" class="qc-eintrag ${cls}" ${attr}>${esc(text)}</button>`;
       const schritte = (q.schritte || []).map(sx => `<span class="chip${state.schritte[id][sx.id] ? " plus" : " none"}">${state.schritte[id][sx.id] ? useSvg("i-check") : "○"} ${esc(sx.name)}</span>`).join("");
       unten = `<div class="fx-rows">
-        ${schritte ? `<div class="fx-row"><span class="fx-lbl">STAND</span><span class="fx">${schritte}</span></div>` : ""}
-        <div class="fx-row${st === "verloren" ? " dim" : ""}"><span class="fx-lbl win">SIEG</span><span class="fx">${fxChips(q.win, true)}</span></div>
-        <div class="fx-row${st === "bestanden" ? " dim" : ""}"><span class="fx-lbl lose">NIEDERLAGE</span><span class="fx">${fxChips(q.lose, false)}</span></div>
+        ${schritte ? `<div class="fx-row"><span class="fx-lbl">STAND</span><span class="fx">${schritte}</span>${ein.schritt ? knopf("", `data-schritt="${ein.schritt.id}"`, ein.schritt.name.toUpperCase()) : ""}</div>` : ""}
+        <div class="fx-row${st === "verloren" ? " dim" : ""}"><span class="fx-lbl win">SIEG</span><span class="fx">${fxChips(q.win, true)}</span>${kann("bestanden") ? knopf("win", `data-ergebnis="bestanden"`, (q.ergebnisWort || "Bestanden").toUpperCase()) : ""}</div>
+        <div class="fx-row${st === "bestanden" ? " dim" : ""}"><span class="fx-lbl lose">NIEDERLAGE</span><span class="fx">${fxChips(q.lose, false)}</span>${kann("verloren") ? knopf("lose", `data-ergebnis="verloren"`, "VERLOREN") : ""}</div>
       </div>`;
+      if (ein.duelle) unten = duellTafel(ein.duelle) + unten;
+      card.classList.toggle("showdown", !!ein.duelle);
     }
     card.innerHTML = `
       <div class="qc-head">${questIcon(q, st, false)}<div><p class="tb-title">${esc(q.name)}</p><p class="tb-meta">${esc(q.ort)}</p></div></div>
@@ -353,6 +371,45 @@
       ${q.logbuch && isNext ? logbuchKnopf() : ""}
       ${einsatzHtml(id)}
       ${unten}`;
+    // Kleine Handys: Ist der Knopf zum Eintragen unter dem Rand, rollt die Karte hin
+    const knopf = card.querySelector(".duell.jetzt, .qc-eintrag");
+    card.scrollTop = 0;
+    if (knopf) {
+      const k = knopf.getBoundingClientRect(), c = card.getBoundingClientRect();
+      if (k.bottom > c.bottom - 8) card.scrollTop += k.bottom - c.bottom + 12;
+    }
+  }
+
+  /* Was Dennis bei einer Quest selbst eintragen kann (er besiegelt, der Quest Master kann zurücknehmen):
+     die nächste Quest (das Log-Buch erst, wenn alle Antworten besiegelt sind), am Gipfel erst die Duelle,
+     bei laufenden Quests mit Schritten den nächsten Schritt und dann das Ergebnis. Treffer der Prophezeiung bucht der Quest Master. */
+  const logbuchFertig = () => C.logbuch.fragen.every((_, i) => antworten[String(i + 1)]);
+  function showdownStand() {
+    const liste = E.showdownDuelle(C, state), noetig = Math.floor(liste.length / 2) + 1;
+    const siege = liste.filter(d => d.ergebnis === "sieg").length, nied = liste.filter(d => d.ergebnis === "niederlage").length;
+    return { liste, siege, nied, entschieden: siege >= noetig ? "bestanden" : nied >= noetig ? "verloren" : null };
+  }
+  function eintragbar(id) {
+    const q = questById(id), st = state.quests[id];
+    if (q.typ === "lauf") {
+      if (st !== "laeuft" || !q.schritte) return {};
+      const offen = q.schritte.find(sx => !state.schritte[id][sx.id]);
+      return offen ? { schritt: offen } : { ergebnis: ["bestanden"] };
+    }
+    if (id !== state.next || (q.logbuch && !logbuchFertig())) return {};
+    if (q.showdown) { const sd = showdownStand(); return { duelle: sd, ergebnis: sd.entschieden ? [sd.entschieden] : [] }; }
+    return { ergebnis: ["bestanden", "verloren"] };
+  }
+
+  // Duell-Tafel am Gipfel (08-erlebnis-plan.md, 3.9): drei Duelle, Revanchen zuerst. Das nächste offene trägt Dennis ein.
+  function duellTafel(sd) {
+    const erstes = sd.entschieden ? null : sd.liste.find(d => !d.ergebnis);
+    return `<div class="duelle"><p class="fx-head">DIE ${sd.liste.length} DUELLE · ${sd.siege} : ${sd.nied}</p><ol>${sd.liste.map(d => {
+      const dq = questById(d.quest);
+      const st = d.ergebnis === "sieg" ? `<span class="d-st won">${useSvg("i-check")}</span>` : d.ergebnis === "niederlage" ? `<span class="d-st lost">${useSvg("i-x")}</span>` : "";
+      const knoepfe = d === erstes ? `<button type="button" class="qc-eintrag win" data-duell="${d.nr}" data-v="sieg">SIEG</button><button type="button" class="qc-eintrag lose" data-duell="${d.nr}" data-v="niederlage">NIEDERLAGE</button>` : "";
+      return `<li class="duell${d.ergebnis ? " " + d.ergebnis : d === erstes ? " jetzt" : " spaeter"}"><span class="d-nr">${d.nr}</span><span class="d-name">${esc(dq.name)} <small>${d.art === "revanche" ? "REVANCHE" : "DAZU"}</small></span>${st}${knoepfe}</li>`;
+    }).join("")}</ol></div>`;
   }
 
   // Einsetzbar: nur bei der Quest, die gerade dran ist oder läuft. Leuchtet, was Dennis dabeihat.
@@ -364,7 +421,7 @@
       const hier = E.einsetzbar(C, state, id).filter(i => state.items[i] === "besitz");
       if (hier.length) teile.push(`<div class="helps"><span class="fx-head">EINSETZBAR</span><span class="helps-row">${hier.map(i => {
         const x = itemById(i);
-        return `<span class="well mini usable" style="--c:${x.farbe}" title="${esc(x.name)}">${useSvg(x.symbol)}${x.stapel ? `<b class="count">${state.anzahl[i]}</b>` : ""}</span>`;
+        return `<button type="button" class="well mini usable" data-einsetzen="${i}" data-quest="${id}" style="--c:${x.farbe}" aria-label="${esc(x.name)} einsetzen" title="${esc(x.name)}">${useSvg(x.symbol)}${x.stapel ? `<b class="count">${state.anzahl[i]}</b>` : ""}</button>`;
       }).join("")}</span></div>`);
     }
     if (schon.length) teile.push(`<p class="used-line">${useSvg("i-star")}Eingesetzt: ${schon.map(i => esc(itemById(i).name)).join(", ")}</p>`);
@@ -665,13 +722,15 @@
     } else if (jetzt.has(id)) {
       tag = `<span class="tag now">JETZT</span>`;
       const wo = E.aktuelleQuests(C, state).filter(qid => E.einsetzbar(C, state, qid).includes(id));
-      extra = `Einsetzbar bei ${wo.map(em).join(" und ")}. Sag es dem Quest Master.`;
+      extra = `Einsetzbar bei ${wo.map(em).join(" und ")}.`;
     } else if (q && state.quests[q.id] !== "offen") extra = `Erbeutet bei ${em(q.id)}.`;
     if (!schatten && neuMarke.has(id)) tag = `<span class="tag won">NEU</span>` + tag;
     box.style.setProperty("--c", x.farbe);
     box.classList.toggle("schatten", schatten);
     box.innerHTML = `<span class="ib-stage">${useSvg(x.symbol, "ib-icon")}</span><p class="tb-title">${esc(x.name)}${tag}</p>`
-      + `<p class="tb-text">${esc(x.text)}${extra ? ` <span class="ib-use">${extra}</span>` : ""}</p>`;
+      + `<p class="tb-text">${esc(x.text)}${extra ? ` <span class="ib-use">${extra}</span>` : ""}</p>`
+      + (!schatten && jetzt.has(id) ? `<button type="button" class="qc-action ib-einsetzen" data-einsetzen="${id}">${useSvg("i-seal")}EINSETZEN</button>` : "");
+    box.classList.toggle("mit-knopf", !schatten && jetzt.has(id));
   }
 
   function selectItem(id, play = true) {
@@ -727,10 +786,52 @@
     $("#overlay").hidden = true;
     fensterQuest = null;
     const f = overlayAfter; overlayAfter = null;
+    if (schlange.length) { setTimeout(naechsterMoment, 220); return; }   // nachgeholte Momente: der nächste
     if (f) f();
     else if (revealPending) showNextQuest();
     // Kam etwas dazu, während Dennis in der Ausrüstung steht (Treffer, Geschenk): gleich hier aus dem Schatten holen
     if (page === 2 && onboarded() && $("#overlay").hidden) funde();
+  }
+
+  /* ---------- Verpasste Momente nachholen (08-erlebnis-plan.md, 3.6) ---------- */
+  // Jedes Handy merkt sich den Stand, den Dennis zuletzt im Menü gesehen hat. Ist seitdem etwas passiert (App war zu,
+  // Startbildschirm offen, kein Netz), laufen die Momente nach PRESS START nacheinander: jede Quest einzeln in der
+  // Reihenfolge, in der sie entschieden wurde, danach alles andere. Die nächste Quest tritt erst am Ende aus dem Nebel.
+  const GESEHEN_KEY = "dq-gesehen-v1" + (PROBE ? "-probe" : "");
+  let gesehenDoc = null, schlange = [];
+  try { if (!DEMO) gesehenDoc = JSON.parse(localStorage.getItem(GESEHEN_KEY) || "null"); } catch (e) {}
+  function merkeGesehen() {
+    gesehenDoc = lastDoc;
+    try { if (!DEMO && lastDoc) localStorage.setItem(GESEHEN_KEY, JSON.stringify(lastDoc)); } catch (e) {}
+  }
+  function nachholen() {
+    const alt = gesehenDoc && E.normalize(gesehenDoc), neu = lastDoc && E.normalize(lastDoc);
+    merkeGesehen();
+    if (!alt || !neu || JSON.stringify({ ...alt, stand: 0 }) === JSON.stringify({ ...neu, stand: 0 })) return;
+    const reihe = C.quests.map(q => q.id), zeit = id => Number(neu.zeiten[id]) || 9e15;
+    const ids = reihe.filter(id => (alt.quests[id] || "offen") !== (neu.quests[id] || "offen"))
+      .sort((x, y) => zeit(x) - zeit(y) || reihe.indexOf(x) - reihe.indexOf(y));
+    const docs = [alt];
+    ids.forEach(id => {
+      const d = JSON.parse(JSON.stringify(docs[docs.length - 1]));
+      if (neu.quests[id]) d.quests[id] = neu.quests[id]; else delete d.quests[id];
+      if (neu.zeiten[id]) d.zeiten[id] = neu.zeiten[id]; else delete d.zeiten[id];
+      docs.push(d);
+    });
+    docs.push(neu);
+    schlange = docs.slice(1).map((d, i) => [docs[i], d]);
+    // Die neue nächste Quest bleibt im Nebel, bis alle Momente gelaufen sind
+    const vorher = E.derive(C, alt);
+    if (state.next && vorher.quests[state.next] === "offen" && vorher.next !== state.next) revealPending = state.next;
+    renderHud(); renderQuests();
+    naechsterMoment();
+  }
+  function naechsterMoment() {
+    while (schlange.length) {
+      const [p, q] = schlange.shift();
+      if (announce(E.derive(C, p), E.derive(C, q), p, q, { kette: true })) return;
+    }
+    if (revealPending && $("#overlay").hidden) showNextQuest();
   }
 
   // Der Quest Master hat das Ergebnis zurückgenommen, solange das Fenster noch offen ist: Fenster still zu, Nebel bleibt
@@ -751,8 +852,10 @@
   // Was hat der Quest Master gerade geändert? Nur echte Neuigkeiten melden:
   // Quest entschieden oder gestartet, Treffer, Schritt, Einsatz, Duell, neue Buchung, Item von Hand.
   // Zurückstellen oder Löschen aktualisiert still.
-  function announce(prev, next, prevDoc, doc) {
-    prevDoc = E.normalize(prevDoc);
+  // Zeigt den Moment und gibt true zurück, wenn ein Fenster aufgeht. opt.kette: nachgeholter Moment in einer Reihe,
+  // dann tritt die nächste Quest erst am Ende der Reihe aus dem Nebel.
+  function announce(prev, next, prevDoc, doc, opt = {}) {
+    prevDoc = E.normalize(prevDoc); doc = E.normalize(doc);
     const fertig = C.quests.filter(q => prev.quests[q.id] !== next.quests[q.id] && ["bestanden", "verloren", "beendet"].includes(next.quests[q.id]));
     const gestartet = LAUF.filter(q => prev.quests[q.id] === "offen" && next.quests[q.id] === "laeuft");
     const treffer = LAUF.filter(q => q.zaehler && (next.treffer[q.id] || 0) > (prev.treffer[q.id] || 0));
@@ -761,9 +864,19 @@
     const neueD = Object.keys(next.duelle).filter(k => next.duelle[k] !== prev.duelle[k]);
     const alteB = new Set(prevDoc.buchungen.map(b => b.id)), neueB = doc.buchungen.filter(b => !alteB.has(b.id));
     const handItems = JSON.stringify(prevDoc.items) !== JSON.stringify(doc.items);
-    const zurueck = C.quests.some(q => prev.quests[q.id] !== "offen" && next.quests[q.id] === "offen");
-    if (zurueck && !fertig.length) return;
-    if (!fertig.length && !gestartet.length && !treffer.length && !schritte.length && !neueE.length && !neueD.length && !neueB.length && !handItems) return;
+    // Zurückgenommen (vom Quest Master): Ergebnis, Einsatz, Duell, Schritt oder Buchung ist wieder weg
+    const neuIds = liste => new Set(liste.map(x => x.id));
+    const nE = neuIds(doc.einsaetze), nB = neuIds(doc.buchungen), ENTSCH = ["bestanden", "verloren", "beendet"];
+    const weg = {
+      q: C.quests.filter(q => ENTSCH.includes(prev.quests[q.id]) && !ENTSCH.includes(next.quests[q.id])),
+      e: prevDoc.einsaetze.filter(e => !nE.has(e.id)),
+      d: Object.keys(prev.duelle).filter(k => !next.duelle[k]),
+      s: LAUF.filter(q => q.schritte && q.schritte.some(sx => prev.schritte[q.id][sx.id] && !next.schritte[q.id][sx.id])),
+      b: prevDoc.buchungen.filter(b => !nB.has(b.id))
+    };
+    const vorwaerts = fertig.length || gestartet.length || treffer.length || schritte.length || neueE.length || neueD.length || neueB.length;
+    if (!vorwaerts && Object.values(weg).some(x => x.length)) return zurueckgenommen(prev, next, weg);
+    if (!vorwaerts && !handItems) return false;
 
     // Zeilen: Packs, Ziffern, Items (mit Enthüllung beim ersten Fund)
     const lines = [];
@@ -834,16 +947,36 @@
       if (!lines.length) lines.push(`<li><span class="ri"></span>Du hattest keine Packs mehr, es bleibt bei 0.</li>`);
     } else {
       head = `<span class="ri-big">${useSvg("i-beutel")}</span><p class="big">DEIN BEUTEL</p><p class="sub">Der Quest Master hat etwas geändert.</p>`;
-      if (!lines.length) return;
+      if (!lines.length) return false;
     }
     // Die nächste Quest wird erst nach dem Fenster aufgedeckt, darum steht ihr Name hier nicht
     const warSichtbar = id => prev.quests[id] !== "offen" || prev.next === id;
-    if (next.next && !warSichtbar(next.next)) revealPending = next.next;
+    if (!opt.kette && next.next && !warSichtbar(next.next)) revealPending = next.next;
     const fq = fertig[0] || gestartet[0];
     if (fq) fensterQuest = { id: fq.id, status: next.quests[fq.id] };
     melody(klang);
-    showOverlay({ head, lines: lines.join(""), next: next.next || !fertig.length ? "" : "Zum Kästchen", gross }, fertig.length || gestartet.length ? showNextQuest : null);
+    showOverlay({ head, lines: lines.join(""), next: next.next || !fertig.length ? "" : "Zum Kästchen", gross }, !opt.kette && (fertig.length || gestartet.length) ? showNextQuest : null);
     renderHud(); renderQuests();
+    return true;
+  }
+
+  // Der Quest Master hat etwas zurückgenommen: Die Fee sagt es Dennis. Packs, Items und Nebel springen still mit zurück.
+  function zurueckgenommen(prev, next, weg) {
+    const zeilen = [];
+    weg.q.forEach(q => zeilen.push([questIcon(q, "offen", false), `Der Quest Master hat das Ergebnis von <b>${esc(q.name)}</b> zurückgenommen.`
+      + (q.id === next.next ? " Trag es neu ein." : next.quests[q.id] === "laeuft" ? " Die Quest läuft wieder." : "")]));
+    weg.d.forEach(k => zeilen.push([useSvg("z-triforce"), `Duell ${esc(k)} ist wieder offen. Trag es neu ein.`]));
+    weg.s.forEach(q => q.schritte.filter(sx => prev.schritte[q.id][sx.id] && !next.schritte[q.id][sx.id])
+      .forEach(sx => zeilen.push([questIcon(q, "laeuft", false), `${esc(q.name)}: „${esc(sx.name)}“ ist zurückgenommen.`])));
+    weg.e.forEach(e => { const it = itemById(e.item); if (it) zeilen.push([`<span style="color:${it.farbe}">${useSvg(it.symbol)}</span>`, `Der Einsatz von <b>${esc(it.name)}</b> ist zurückgenommen.`]); });
+    weg.b.forEach(b => zeilen.push([cardSvg(), b.ziffer ? `Der Kauf von Ziffer ${esc(b.ziffer)} ist zurückgenommen.` : `Die Buchung „${esc(b.grund || "Buchung")}“ ist zurückgenommen.`]));
+    const mehr = zeilen.length > 4 ? zeilen.length - 3 : 0;
+    const lines = zeilen.slice(0, mehr ? 3 : 4).map(([ic, t]) => `<li><span class="ri">${ic}</span><span>${t}</span></li>`).join("")
+      + (mehr ? `<li><span class="ri"></span><span>und ${mehr} weitere Einträge</span></li>` : "");
+    melody("minus");
+    showOverlay({ head: `<span class="ri-big fee"><img src="assets/fee.png" alt=""></span><p class="big">ZURÜCKGENOMMEN</p><p class="sub">vom Quest Master</p>`, lines, next: "" });
+    renderHud(); renderQuests();
+    return true;
   }
 
   function explainPacks() {
@@ -864,7 +997,10 @@
       const wo = q ? esc(q.name) : "?";
       const offen = !q || !aufgedeckt(q.id) ? "im Nebel"
         : s.quests[q.id] === "verloren" ? `verloren, am Kästchen ${C.ziffer_preis} ${packsWort(C.ziffer_preis)}` : `jetzt: ${wo}`;
-      return `<li class="${v == null ? "" : "plus"}"><span class="ri"><span class="tumbler${v == null ? "" : " known"}" style="--hud-h:30px">${v == null ? "?" : v}</span></span>${v == null ? offen : s.gekauft[i] ? "gekauft" : wo}</li>`;
+      // Nach der letzten Quest tauscht Dennis fehlende Ziffern selbst gegen Packs
+      const kauf = v == null && !s.next ? (s.packs >= C.ziffer_preis
+        ? `<button type="button" class="qc-eintrag win kauf" data-kauf="${i + 1}">KAUFEN · ${C.ziffer_preis} ${packsWort(C.ziffer_preis).toUpperCase()}</button>` : `<small class="kauf-fehlt">zu wenig Packs</small>`) : "";
+      return `<li class="${v == null ? "" : "plus"}"><span class="ri"><span class="tumbler${v == null ? "" : " known"}" style="--hud-h:30px">${v == null ? "?" : v}</span></span><span>${v == null ? (s.next ? offen : "fehlt") : s.gekauft[i] ? "gekauft" : wo}</span>${kauf}</li>`;
     }).join("");
     showOverlay({
       head: `<span class="ri-big lock">${useSvg("i-lock")}</span><p class="big">CODE</p>`,
@@ -928,7 +1064,7 @@
       setTimeout(() => coach([
         [$("#slotsGear").parentElement, "Hier landet, was du dir erspielst. Die Schatten zeigen, was noch zu holen ist."],
         [$("#slotsSkill").parentElement, "Hier ruhen Flüche und Segen, sobald du sie dir verdient hast."],
-        [$(".equip-body"), "Was leuchtet, kannst du bei der aktuellen Quest einsetzen. Sag es dem Quest Master."],
+        [$(".equip-body"), "Was leuchtet, kannst du bei der aktuellen Quest einsetzen: antippen, dann das Siegel halten."],
         [$(".hud"), "Packs und Ziffern für dein Kästchen."]
       ]), STILL.matches ? 0 : 1100);
     });
@@ -1005,7 +1141,7 @@
         [$("#hudPacks"), "Deine Packs. Jede Karte, die leuchtet, gehört dir."],
         [$("#hudCode"), "Der Code des Kästchens. Hier rastet jede Ziffer ein."],
         [$(".shoulder-right"), "Mit Z und R oder Wischen blätterst du: Karte, Quests, Ausrüstung."],
-        [$("#questCard"), "Hier steht, was jetzt dran ist und was auf dem Spiel steht."]
+        [$("#questCard"), "Hier steht, was jetzt dran ist und was auf dem Spiel steht. Dein Ergebnis trägst du hier selbst ein."]
       ]), 250);
     }
     function start() {
@@ -1074,10 +1210,14 @@
   }
 
   document.querySelectorAll("[data-nav]").forEach(b => b.addEventListener("click", e => { e.stopPropagation(); turn(b.dataset.nav === "next" ? 1 : -1); }));
-  $("#hudNext").addEventListener("click", showNextQuest);
+  $("#hudNext").addEventListener("click", () => { if (state && !state.next) { tone("confirm"); explainCode(); } else showNextQuest(); });   // am Ende: zum Kästchen
   $("#hudPacks").addEventListener("click", explainPacks);
   $("#hudCode").addEventListener("click", explainCode);
-  $("#overlay").addEventListener("click", closeOverlay);
+  $("#overlay").addEventListener("click", e => {
+    const k = e.target.closest("[data-kauf]");
+    closeOverlay();
+    if (k) schwurZiffer(+k.dataset.kauf);
+  });
 
   // Wischen: nur waagerecht zählt, senkrecht scrollt die Liste
   let touch = null, swiped = false;
@@ -1096,6 +1236,7 @@
   window.addEventListener("keydown", e => {
     if (!$("#introScreen").hidden || !$("#logbuch").hidden) return;
     const k = e.key.toLowerCase();
+    if (!$("#schwur").hidden) { if (k === "escape") schwur.schliessen(); return; }
     if (!$("#prolog").hidden) { if (["enter", " ", "a"].includes(k)) { e.preventDefault(); prolog.weiter(); } else if (k === "escape") prolog.ende(true); return; }
     if (!$("#overlay").hidden) { if (["enter", " ", "escape", "a"].includes(k)) { e.preventDefault(); closeOverlay(); } return; }
     if (page === 0 && k === "escape") return schliesseStationstafel();
@@ -1133,7 +1274,7 @@
       const fertig = nr > fragen.length;
       $("#lbStep").textContent = fertig ? "" : `${nr} / ${fragen.length}`;
       if (fertig) {
-        $("#lbFrage").textContent = "Alle Antworten sind besiegelt. Der Quest Master entscheidet.";
+        $("#lbFrage").textContent = "Alle Antworten sind besiegelt. Trag jetzt auf der Quest-Karte ein, ob du bestanden hast.";
         $("#lbForm").hidden = true; $("#lbSealed").hidden = true;
         return;
       }
@@ -1210,6 +1351,122 @@
     return { oeffnen, schliessen, vorladen };
   })();
 
+  /* ---------- Siegel: Dennis besiegelt selbst (Ergebnis, Einsatz, Duell, Amulett, Ziffer) ---------- */
+  // Das Fenster zeigt, was passiert. Das Siegel muss gedrückt gehalten werden, bis sich der Ring schließt: Ein versehentlicher
+  // Tipp löst nichts aus. Danach läuft sofort der Moment, auch ohne Netz (der Eintrag wird nachgeschickt).
+  // Der Quest Master kann jeden Eintrag im Admin zurücknehmen.
+  const schwur = (() => {
+    const el = $("#schwur"), siegel = $("#swSiegel"), DAUER = 900;
+    let aktuell = null, timer = null, wahl = null;
+    function oeffnen(o) {
+      aktuell = o; wahl = o.wahlen ? o.wahlen[0].id : null;
+      $("#swArt").textContent = o.art;
+      $("#swKopf").innerHTML = `<span class="sw-ic">${o.icon}</span><div><p class="tb-title">${esc(o.titel)}</p>${o.sub ? `<p class="sw-sub ${o.ton || ""}">${esc(o.sub)}</p>` : ""}</div>`;
+      $("#swFolgen").innerHTML = (o.folgen || []).map(f => `<li>${f}</li>`).join("");
+      $("#swWahl").innerHTML = o.wahlen && o.wahlen.length > 1
+        ? o.wahlen.map(w => `<button type="button" class="sw-w${w.id === wahl ? " an" : ""}" data-w="${w.id}">${esc(w.name)}</button>`).join("") : "";
+      el.dataset.ton = o.ton || "";
+      el.classList.remove("halten", "besiegelt");
+      el.hidden = false;
+      tone("confirm");
+    }
+    function schliessen() { abbrechen(); el.hidden = true; aktuell = null; }
+    function start(e) {
+      if (!aktuell || timer || el.classList.contains("besiegelt")) return;
+      if (e) e.preventDefault();
+      el.classList.add("halten"); tone("move");
+      timer = setTimeout(fertig, STILL.matches ? DAUER / 2 : DAUER);
+    }
+    function abbrechen() { clearTimeout(timer); timer = null; el.classList.remove("halten"); }
+    function fertig() {
+      timer = null;
+      const o = aktuell, w = wahl;
+      el.classList.add("besiegelt");
+      melody("siegel");
+      setTimeout(() => { el.hidden = true; el.classList.remove("halten", "besiegelt"); aktuell = null; o.ausfuehren(w); }, 380);
+    }
+    // Ist der Anlass inzwischen weg (der Quest Master hat schon gebucht, das Item ist verbraucht), geht das Fenster still zu
+    function pruefen() { if (aktuell && !timer && !el.classList.contains("besiegelt") && aktuell.gueltig && !aktuell.gueltig()) schliessen(); }
+    siegel.addEventListener("pointerdown", start);
+    ["pointerup", "pointerleave", "pointercancel"].forEach(t => siegel.addEventListener(t, () => { if (timer) abbrechen(); }));
+    siegel.addEventListener("contextmenu", e => e.preventDefault());
+    siegel.addEventListener("keydown", e => { if ((e.key === "Enter" || e.key === " ") && !e.repeat) start(e); });
+    siegel.addEventListener("keyup", e => { if ((e.key === "Enter" || e.key === " ") && timer) abbrechen(); });
+    $("#swZurueck").addEventListener("click", () => { schliessen(); tone("move"); });
+    $("#swWahl").addEventListener("click", e => {
+      const b = e.target.closest("[data-w]");
+      if (!b) return;
+      wahl = b.dataset.w;
+      document.querySelectorAll("#swWahl .sw-w").forEach(x => x.classList.toggle("an", x === b));
+      tone("move");
+    });
+    el.addEventListener("click", e => { if (e.target === el) { schliessen(); tone("move"); } });
+    return { oeffnen, schliessen, pruefen };
+  })();
+
+  const eintrag = (schluessel, e) => einStore.setzen(schluessel, { ...e, zeit: Date.now() });
+  const fxZeile = (lbl, cls, inhalt) => `<span class="fx-lbl ${cls}">${lbl}</span><span class="fx">${inhalt}</span>`;
+
+  function schwurErgebnis(qid, status) {
+    const q = questById(qid), won = status === "bestanden";
+    if (!(eintragbar(qid).ergebnis || []).includes(status)) return;
+    schwur.oeffnen({
+      art: q.typ === "kern" ? "PRÜFUNG" : q.typ === "side" ? "SIDEQUEST" : "QUEST",
+      icon: questIcon(q, won ? "bestanden" : "verloren", false), titel: q.name,
+      sub: (won ? q.ergebnisWort || "Bestanden" : "Verloren").toUpperCase(), ton: won ? "win" : "lose",
+      folgen: [fxZeile(won ? "SIEG" : "NIEDERLAGE", won ? "win" : "lose", fxChips(won ? q.win : q.lose, won))],
+      gueltig: () => (eintragbar(qid).ergebnis || []).includes(status),
+      ausfuehren: () => eintrag("q_" + qid, { status })
+    });
+  }
+  function schwurSchritt(qid, schritt) {
+    const q = questById(qid), sx = (q.schritte || []).find(x => x.id === schritt);
+    if (!sx || eintragbar(qid).schritt !== sx) return;
+    schwur.oeffnen({
+      art: "LÄUFT DEN GANZEN TAG", icon: medalHtml(q, "laeuft", false), titel: q.name, sub: sx.name.toUpperCase(), ton: "win",
+      gueltig: () => eintragbar(qid).schritt === sx,
+      ausfuehren: () => eintrag(`s_${qid}_${schritt}`, {})
+    });
+  }
+  function schwurDuell(nr, v) {
+    const sd = showdownStand(), d = sd.liste.find(x => String(x.nr) === String(nr)), sieg = v === "sieg";
+    if (!d || d.ergebnis || sd.entschieden) return;
+    const dq = questById(d.quest), folgen = [fxZeile("STAND DANACH", "", `${sd.siege + (sieg ? 1 : 0)} : ${sd.nied + (sieg ? 0 : 1)}`)];
+    if (!sieg && state.items.schild === "besitz") folgen.push(`<span class="fx">Du hast den Schild des Bundes. Setz ihn vorher ein, dann spielst du das Duell noch einmal.</span>`);
+    schwur.oeffnen({
+      art: `DUELL ${d.nr} VON ${sd.liste.length}`, icon: questIcon(dq, sieg ? "bestanden" : "verloren", false), titel: dq.name,
+      sub: sieg ? "SIEG" : "NIEDERLAGE", ton: sieg ? "win" : "lose", folgen,
+      gueltig: () => { const x = showdownStand(); return state.next && questById(state.next).showdown && !x.entschieden && !state.duelle[String(nr)]; },
+      ausfuehren: () => eintrag("d_" + d.nr, { ergebnis: v })
+    });
+  }
+  function schwurEinsatz(item, quest) {
+    const x = itemById(item);
+    const orte = E.aktuelleQuests(C, state).filter(qid => (!quest || qid === quest) && E.einsetzbar(C, state, qid).includes(item));
+    if (!x || !orte.length || state.items[item] !== "besitz") return;
+    const n = state.anzahl[item];
+    const folgen = [`<span class="fx">${esc(x.einsatz || x.text)}</span>`,
+      `<span class="fx dim">${x.einmalig ? (x.stapel ? `Du hast ${n}, danach ${n - 1}.` : "Einmalig, danach verbraucht.") : "Bleibt in deinem Beutel."}</span>`];
+    schwur.oeffnen({
+      art: x.gruppe === "faehigkeit" ? "FÄHIGKEIT EINSETZEN" : "ITEM EINSETZEN",
+      icon: `<span class="sw-item" style="color:${x.farbe}">${useSvg(x.symbol)}</span>`, titel: x.name,
+      sub: orte.length === 1 ? "bei " + questById(orte[0]).name : "Wo setzt du es ein?", ton: "magie",
+      wahlen: orte.map(id => ({ id, name: questById(id).name })), folgen,
+      gueltig: () => state.items[item] === "besitz",
+      ausfuehren: w => eintrag("e_" + uid(), { item, quest: w || orte[0] })
+    });
+  }
+  function schwurZiffer(nr) {
+    if (state.next || state.ziffern[nr - 1] != null || state.packs < C.ziffer_preis) return;
+    schwur.oeffnen({
+      art: "AM KÄSTCHEN", icon: `<span class="sw-item lock">${useSvg("i-lock")}</span>`, titel: `Ziffer ${nr} kaufen`,
+      sub: `für ${C.ziffer_preis} ${packsWort(C.ziffer_preis)}`, ton: "win",
+      folgen: [`<span class="fx"><span class="chip minus">${cardSvg()}−${C.ziffer_preis} ${packsWort(C.ziffer_preis)}</span><span class="chip plus"><span class="mini-tumbler">?</span>Ziffer ${nr}</span></span>`],
+      gueltig: () => !state.next && state.ziffern[nr - 1] == null && state.packs >= C.ziffer_preis,
+      ausfuehren: () => eintrag("z_" + nr, {})
+    });
+  }
+
   /* ---------- Startbildschirm und Vollbild ---------- */
   const intro = $("#introScreen");
   const playElements = [...document.querySelectorAll(".hud, .shoulder, .stage, .foot")];
@@ -1224,7 +1481,8 @@
       setPlayable(true);
       const row = document.querySelector(".q-row.is-selected");
       if (row) scrollIntoList(row);
-      prolog.start();                 // beim ersten Mal: Rikes Fee erklärt, worum es geht
+      // Beim ersten Mal erklärt Rikes Fee, worum es geht. Sonst laufen die Momente, die Dennis verpasst hat.
+      if (prolog.start()) merkeGesehen(); else nachholen();
     }, 500);
   }
   intro.addEventListener("click", beginQuest);        // PRESS START: Tippen irgendwo startet
@@ -1389,12 +1647,14 @@
   /* ---------- Demo: Buchungen simulieren, ohne Firebase ---------- */
   if (DEMO) {
     $("#demoBar").hidden = false;
-    const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
     $("#demoBar").addEventListener("click", e => {
       const a = e.target.closest("[data-demo]")?.dataset.demo;
       if (!a) return;
       const d = JSON.parse(JSON.stringify(store.doc));
       if (a === "zurueck") {
+        // Wie der Quest Master: erst Dennis' letzten eigenen Eintrag zurücknehmen, sonst die letzte gebuchte Quest
+        const neuester = Object.keys(eintraege).sort((x, y) => (eintraege[y].zeit || 0) - (eintraege[x].zeit || 0))[0];
+        if (neuester) return einStore.loeschen(neuester);
         const last = [...REIHE].reverse().find(q => d.quests[q.id]);
         if (last) delete d.quests[last.id];
       } else if (a === "treffer") {
@@ -1426,7 +1686,12 @@
     el.classList.toggle("offline", !syncInfo.online && !syncInfo.demo);
   }
   store.onStatus(st => { syncInfo = st; renderSync(); });
-  store.subscribe((doc, meta) => {
+  // Der Stand kommt aus zwei Quellen: dem Dokument des Quest Masters und Dennis' eigenen Einträgen.
+  // Ändert sich eins davon, wird neu gerechnet. Ist das Menü offen, zeigt announce() den Moment,
+  // sonst holt nachholen() ihn nach PRESS START nach.
+  function neuBerechnen(meta) {
+    if (!adminDoc) return;
+    const doc = E.mitEintraegen(C, adminDoc, eintraege);
     const prev = state, prevDoc = lastDoc;
     state = E.derive(C, doc);
     lastDoc = JSON.parse(JSON.stringify(doc));
@@ -1434,11 +1699,14 @@
     renderSync();
     fensterZuruecknehmen();
     prolog.pruefen();
+    if (!$("#schwur").hidden) schwur.pruefen();
     // Log-Buch-Sprachnachrichten vorladen, solange das Log-Buch noch nicht entschieden ist
     if (state.quests.logbuch === "offen") logbuch.vorladen();
-    if (meta.initial && intro.hidden) requestAnimationFrame(() => { const row = document.querySelector(".q-row.is-selected"); if (row) scrollIntoList(row); });
-    if (prev && !meta.initial && intro.hidden) announce(prev, state, prevDoc, doc);
-  });
+    if (meta.initial && intro.hidden) { requestAnimationFrame(() => { const row = document.querySelector(".q-row.is-selected"); if (row) scrollIntoList(row); }); nachholen(); }
+    if (prev && !meta.initial && intro.hidden) { announce(prev, state, prevDoc, doc); merkeGesehen(); }
+  }
+  einStore.subscribe(e => { eintraege = e; neuBerechnen({}); });
+  store.subscribe((doc, meta) => { adminDoc = doc; neuBerechnen(meta); });
   lbStore.subscribe(a => { antworten = a; if (state) { const id = sel[1]; if (id && questById(id)?.logbuch) renderQuestCard(id); } });
 
   // Offline-Speicher für Funklöcher (sw.js). Lokal beim Entwickeln nicht nötig.

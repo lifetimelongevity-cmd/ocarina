@@ -2,7 +2,9 @@
   /* Dennis Quest · Quest-Master-Menü
      Schreibt das Dokument: Status je Quest, Zähler, Schritte, Einsätze, Duelle, Buchungen, Item-Korrekturen.
      Alles andere (Packs, Ziffern, Items, nächste Quest) rechnet engine.js daraus.
-     Liest zusätzlich Dennis' Log-Buch-Antworten (eigener Pfad, schreibt dort nur beim Löschen).
+     Liest zusätzlich Dennis' Log-Buch-Antworten (eigener Pfad, schreibt dort nur beim Löschen) und Dennis' eigene Einträge
+     (Ergebnis, Einsatz, Duell, Amulett, Ziffer, Kanal „dennis"). engine.js rechnet sie ein, deine Buchung gilt vor.
+     Zurücknehmen löscht seinen Eintrag, Rückgängig stellt ihn wieder her.
      admin.html?probe: Probelauf in einem eigenen Spiel neben dem echten, mit Sprungknöpfen. */
   const C = window.QuestStore.probe(window.GAME_CONFIG);
   const PROBE = window.QuestStore.PROBE;
@@ -18,6 +20,8 @@
 
   const store = window.QuestStore.create(C, { key });
   const lbStore = window.QuestStore.logbuch(C);
+  const einStore = window.QuestStore.eintraege(C);
+  let eintraege = {}, mdoc = E.emptyDoc();     // Dennis' Einträge und das Dokument mit ihnen (so sieht Dennis es)
   const $ = s => document.querySelector(s);
   let doc = E.emptyDoc();
   let state = E.derive(C, doc);
@@ -51,13 +55,17 @@
   const kanon = d => JSON.stringify({ ...E.normalize(d), stand: 0 }, (k, v) =>
     v && typeof v === "object" && !Array.isArray(v) ? Object.fromEntries(Object.keys(v).sort().map(x => [x, v[x]])) : v);
 
-  function commit(mutate, msg) {
+  // o.dennis: Schlüssel von Dennis' Einträgen, die mit weg sollen (Zurücknehmen). Rückgängig schreibt sie wieder.
+  function commit(mutate, msg, o = {}) {
     const vorher = JSON.parse(JSON.stringify(doc));
     const next = JSON.parse(JSON.stringify(doc));
     mutate(next);
-    verlauf = [...verlauf, { doc: vorher, was: msg || "Änderung", nach: kanon(next) }].slice(-40);
+    const weg = {};
+    (o.dennis || []).forEach(k => { if (eintraege[k]) weg[k] = eintraege[k]; });
+    verlauf = [...verlauf, { doc: vorher, was: msg || "Änderung", nach: kanon(next), dennis: weg }].slice(-40);
     verlaufMerken();
-    store.save(next);
+    if (kanon(vorher) !== kanon(next)) store.save(next);
+    Object.keys(weg).forEach(k => einStore.loeschen(k).catch(() => toast("Kein Netz: Dennis' Eintrag ist noch nicht gelöscht. Bitte nochmal.")));
     if (msg) toast(msg);
     renderUndo();
   }
@@ -70,6 +78,7 @@
     verlauf.pop();
     verlaufMerken();
     store.save(letzter.doc);
+    Object.entries(letzter.dennis || {}).forEach(([k, e]) => einStore.setzen(k, e));
     toast("Zurückgenommen: " + letzter.was);
     renderUndo();
   }
@@ -83,13 +92,16 @@
 
   // Wann eine Quest entschieden wurde: bestimmt die Reihenfolge der Packs (engine.js). Umbuchen behält die Zeit.
   const ENTSCHIEDEN = ["bestanden", "verloren", "beendet"];
+  // Offen oder „läuft“ nimmt auch Dennis' Ergebnis zurück (bei „offen“ auch seine Schritte). Bestanden oder Verloren
+  // von dir gilt vor seinem Eintrag.
   function setQuest(id, v) {
+    const dennis = ENTSCHIEDEN.includes(v) ? [] : ["q_" + id, ...(v === "offen" ? Object.keys(eintraege).filter(k => k.startsWith(`s_${id}_`)) : [])];
     commit(d => {
       const vorher = d.quests[id];
       if (v === "offen") delete d.quests[id]; else d.quests[id] = v;
       if (!ENTSCHIEDEN.includes(v)) delete d.zeiten[id];
       else if (!ENTSCHIEDEN.includes(vorher) || !d.zeiten[id]) d.zeiten[id] = Date.now();
-    }, questById(id).name + ": " + STATUS_WORT[v]);
+    }, questById(id).name + ": " + STATUS_WORT[v], { dennis });
   }
   const buchung = b => ({ id: uid(), zeit: Date.now(), ...b });
 
@@ -188,7 +200,7 @@
     $("#nextLose").addEventListener("click", () => state.next && setQuest(state.next, "verloren"));
     $("#reset").addEventListener("click", () => {
       if (!confirm("Wirklich alles zurücksetzen? Alle Quests werden offen, Buchungen, Einsätze und Zähler gelöscht. Die Log-Buch-Antworten bleiben. Rückgängig holt den Stand zurück.")) return;
-      commit(d => Object.assign(d, E.emptyDoc()), "Zurückgesetzt");
+      commit(d => Object.assign(d, E.emptyDoc()), "Zurückgesetzt", { dennis: Object.keys(eintraege) });
     });
     $("#undo").addEventListener("click", rueckgaengig);
     renderUndo();
@@ -245,7 +257,7 @@
       b.type = "button";
       b.className = "btn";
       b.textContent = sz.name;
-      b.addEventListener("click", () => commit(d => Object.assign(d, E.emptyDoc(), sz.doc()), "Probe: " + sz.name));
+      b.addEventListener("click", () => commit(d => Object.assign(d, E.emptyDoc(), sz.doc()), "Probe: " + sz.name, { dennis: Object.keys(eintraege) }));
       $("#szenarien").appendChild(b);
     });
   }
@@ -285,24 +297,28 @@
 
     const ledger = $("#ledger");
     ledger.innerHTML = "";
-    if (!doc.buchungen.length) ledger.innerHTML = '<li class="empty">Noch keine Buchungen.</li>';
-    doc.buchungen.slice().reverse().forEach(b => {
+    if (!mdoc.buchungen.length) ledger.innerHTML = '<li class="empty">Noch keine Buchungen.</li>';
+    mdoc.buchungen.slice().reverse().forEach(b => {
       const li = document.createElement("li");
       const amt = Number(b.packs) || 0;
       li.innerHTML = `<span class="amt ${amt >= 0 ? "plus" : "minus"}">${amt > 0 ? "+" : amt < 0 ? "−" : ""}${Math.abs(amt)}</span><span class="why"></span><button type="button" class="del" aria-label="Buchung löschen">✕</button>`;
-      li.querySelector(".why").textContent = (b.grund || "") + (b.item ? ` (${b.menge > 0 ? "+" : ""}${b.menge} ${itemById(b.item)?.name || b.item})` : "");
-      li.querySelector(".del").addEventListener("click", () => commit(d => { d.buchungen = d.buchungen.filter(x => x.id !== b.id); }, "Buchung gelöscht"));
+      li.querySelector(".why").textContent = (b.grund || "") + (b.item ? ` (${b.menge > 0 ? "+" : ""}${b.menge} ${itemById(b.item)?.name || b.item})` : "") + (b.von === "dennis" ? " · von Dennis" : "");
+      li.querySelector(".del").addEventListener("click", () => b.von === "dennis"
+        ? commit(() => {}, "Zurückgenommen: " + b.grund, { dennis: [b.id] })
+        : commit(d => { d.buchungen = d.buchungen.filter(x => x.id !== b.id); }, "Buchung gelöscht"));
       ledger.appendChild(li);
     });
 
     const eins = $("#einsaetze");
     eins.innerHTML = "";
-    if (!doc.einsaetze.length) eins.innerHTML = '<li class="empty">Noch nichts eingesetzt.</li>';
-    doc.einsaetze.slice().reverse().forEach(e => {
+    if (!mdoc.einsaetze.length) eins.innerHTML = '<li class="empty">Noch nichts eingesetzt.</li>';
+    mdoc.einsaetze.slice().reverse().forEach(e => {
       const li = document.createElement("li");
       li.innerHTML = `<span class="why"></span><button type="button" class="del" aria-label="Einsatz rückgängig">✕</button>`;
-      li.querySelector(".why").textContent = `${itemById(e.item)?.name || e.item} bei ${questById(e.quest)?.name || e.quest}`;
-      li.querySelector(".del").addEventListener("click", () => commit(d => { d.einsaetze = d.einsaetze.filter(x => x.id !== e.id); }, "Einsatz rückgängig"));
+      li.querySelector(".why").textContent = `${itemById(e.item)?.name || e.item} bei ${questById(e.quest)?.name || e.quest}${e.von === "dennis" ? " · von Dennis" : ""}`;
+      li.querySelector(".del").addEventListener("click", () => e.von === "dennis"
+        ? commit(() => {}, "Einsatz zurückgenommen", { dennis: [e.id] })
+        : commit(d => { d.einsaetze = d.einsaetze.filter(x => x.id !== e.id); }, "Einsatz rückgängig"));
       eins.appendChild(li);
     });
 
@@ -344,14 +360,14 @@
           </span></li>`).join("")}</ol><p class="hint">${rat} Schild: verlorenes Duell auf offen stellen und neu spielen.</p>`;
       duels.querySelectorAll("button").forEach(b => b.addEventListener("click", () => {
         const nr = b.dataset.nr, v = b.dataset.v;
-        commit(d => { if (d.duelle[nr] === v) delete d.duelle[nr]; else d.duelle[nr] = v; }, `Duell ${nr}: ${d0(v, doc.duelle[nr])}`);
+        const an = state.duelle[nr] === v;
+        commit(d => { if (an) delete d.duelle[nr]; else d.duelle[nr] = v; }, `Duell ${nr}: ${an ? "zurückgesetzt" : v === "sieg" ? "Sieg" : "Niederlage"}`, { dennis: an ? ["d_" + nr] : [] });
       }));
     }
     const lb = $("#nextLogbuch");
     lb.hidden = !(n && n.logbuch);
     if (n && n.logbuch) lb.innerHTML = `<p class="sub-h">Dennis' Antworten (live)</p>` + logbuchHtml();
   }
-  const d0 = (v, alt) => alt === v ? "zurückgesetzt" : v === "sieg" ? "Sieg" : "Niederlage";
 
   function renderLauf() {
     const box = $("#lauf");
@@ -387,7 +403,9 @@
           commit(d => { d.zaehler[id] = n; }, `${q.name}: ${n} ${q.zaehler.name}`);
         } else if (a === "schritt") {
           const s = b.dataset.s;
-          commit(d => { d.schritte[id] = d.schritte[id] || {}; if (d.schritte[id][s]) delete d.schritte[id][s]; else d.schritte[id][s] = true; }, `${q.name}: ${q.schritte.find(x => x.id === s).name}`);
+          const an = state.schritte[id][s];
+          commit(d => { d.schritte[id] = d.schritte[id] || {}; if (an) delete d.schritte[id][s]; else d.schritte[id][s] = true; },
+            `${q.name}: ${q.schritte.find(x => x.id === s).name}${an ? " zurückgenommen" : ""}`, { dennis: an ? [`s_${id}_${s}`] : [] });
         } else if (a === "start") setQuest(id, "laeuft");
         else setQuest(id, a);
       }));
@@ -416,7 +434,46 @@
     el.classList.toggle("off", !st.lokal && (!st.online || st.pending));
   });
 
+  /* Was Dennis selbst besiegelt hat: live mit Uhrzeit, jeder Eintrag lässt sich zurücknehmen */
+  function eintragText(k, e) {
+    const i = k.indexOf("_"), art = k.slice(0, i), rest = k.slice(i + 1);
+    if (art === "q") return `${questById(rest)?.name || rest}: ${STATUS_WORT[e.status] || e.status}`;
+    if (art === "e") return `${itemById(e.item)?.name || e.item} eingesetzt bei ${questById(e.quest)?.name || e.quest}`;
+    if (art === "d") return `Duell ${rest}: ${e.ergebnis === "sieg" ? "Sieg" : "Niederlage"}`;
+    if (art === "s") { const j = rest.indexOf("_"), q = questById(rest.slice(0, j)), sx = q && (q.schritte || []).find(x => x.id === rest.slice(j + 1)); return `${q ? q.name : rest}: ${sx ? sx.name : rest}`; }
+    if (art === "z") return `Ziffer ${rest} gekauft (−${C.ziffer_preis})`;
+    return k;
+  }
+  // Gilt der Eintrag, oder hast du selbst schon anders gebucht?
+  function eintragGilt(k, e) {
+    const i = k.indexOf("_"), art = k.slice(0, i), rest = k.slice(i + 1);
+    if (art === "q") return !ENTSCHIEDEN.includes(doc.quests[rest]) || doc.quests[rest] === e.status;
+    if (art === "d") return !doc.duelle[rest] || doc.duelle[rest] === e.ergebnis;
+    return true;
+  }
+  function renderDennis() {
+    const liste = $("#dennisListe"), keys = Object.keys(eintraege).sort((a, b) => (eintraege[b].zeit || 0) - (eintraege[a].zeit || 0));
+    liste.innerHTML = keys.length ? "" : '<li class="empty">Noch nichts eingetragen.</li>';
+    keys.forEach(k => {
+      const e = eintraege[k], li = document.createElement("li");
+      const zeit = e.zeit ? new Date(e.zeit).toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" }) : "";
+      li.innerHTML = `<span class="amt zeit">${zeit}</span><span class="why"></span><button type="button" class="btn ghost zurueck">Zurücknehmen</button>`;
+      li.querySelector(".why").textContent = eintragText(k, e) + (eintragGilt(k, e) ? "" : " · gilt nicht, du hast anders gebucht");
+      li.querySelector(".zurueck").addEventListener("click", () => commit(() => {}, "Zurückgenommen: " + eintragText(k, e), { dennis: [k] }));
+      liste.appendChild(li);
+    });
+  }
+
+  function neuRechnen() { mdoc = E.mitEintraegen(C, doc, eintraege); state = E.derive(C, mdoc); render(); renderDennis(); }
   build();
-  store.subscribe(d => { doc = d; state = E.derive(C, doc); render(); });
+  let einGelesen = false;
+  einStore.subscribe(e => {
+    // Neue Einträge von Dennis kurz melden (nicht beim ersten Laden)
+    if (einGelesen) Object.keys(e).filter(k => !eintraege[k] || eintraege[k].zeit !== e[k].zeit).forEach(k => toast("Dennis: " + eintragText(k, e[k])));
+    einGelesen = true;
+    eintraege = e;
+    neuRechnen();
+  });
+  store.subscribe(d => { doc = d; neuRechnen(); });
   lbStore.subscribe(a => { antworten = a; renderLogbuch(); });
 })();

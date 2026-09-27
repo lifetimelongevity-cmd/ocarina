@@ -4,8 +4,8 @@ Zwei Seiten, ein gespeicherter Stand.
 
 | Seite | Wer | Was |
 |---|---|---|
-| `index.html` | Dennis | Menü im N64-Stil: Startbildschirm, beim ersten Start der Prolog mit Rikes Fee, drei Seiten KARTE, QUESTS, AUSRÜSTUNG, HUD mit Packs, nächster Quest und Code. Ergebnis-Fenster nach jeder Buchung. Schreibt nur seine Antworten im Log-Buch. |
-| `admin.html` | Quest Master | Nächste Quest mit Bestanden/Verloren, Einsetzen, Showdown-Duellen und Log-Buch-Antworten. Laufende Quests (Prophezeiung mit Zähler, Rikes Amulett), Packs buchen, Ziffern kaufen, Items korrigieren, Zurücksetzen. Oben rechts **Rückgängig** für jede Änderung. `admin.html?probe` ist der **Probelauf**. |
+| `index.html` | Dennis | Menü im N64-Stil: Startbildschirm, beim ersten Start der Prolog mit Rikes Fee, drei Seiten KARTE, QUESTS, AUSRÜSTUNG, HUD mit Packs, nächster Quest und Code. **Trägt selbst ein** (seit 27.09.): Ergebnis, Einsatz, Duelle, Rikes Amulett, Ziffern am Kästchen, jeweils mit gedrückt gehaltenem Siegel. Ergebnis-Fenster sofort, auch ohne Netz, verpasste Momente nach PRESS START. Schreibt dazu seine Log-Buch-Antworten. |
+| `admin.html` | Quest Master | Schiedsrichter: sieht live, was Dennis einträgt, und kann jeden Eintrag **zurücknehmen** (die Fee sagt es Dennis). Nächste Quest mit Bestanden/Verloren als Notlösung, Einsetzen, Showdown-Duelle und Log-Buch-Antworten. Laufende Quests (Prophezeiung mit Zähler, Rikes Amulett), Packs buchen, Ziffern kaufen, Items korrigieren, Zurücksetzen. Oben rechts **Rückgängig** für jede Änderung. `admin.html?probe` ist der **Probelauf**. |
 
 Adressen: Dennis `https://dd-ocarina.netlify.app/`, Quest Master `https://dd-ocarina.netlify.app/admin.html`.
 Zusätze für Dennis' Seite: `?probe` (liest den Probelauf des Quest Masters, roter Rahmen), `?demo` (Beispielstand mit Demo-Knöpfen, ohne Datenbank, auch `?demo=start`, `?demo=bund` kurz vor dem Showdown, `?demo=ende`), `?direkt` (ohne Startbildschirm), `?onboarding` (Prolog, Hinweise auf der Karte und Beutel-Onboarding noch einmal, auch später am Tag. Ohne diesen Zusatz kommt das Onboarding nur am Anfang des Spiels, solange noch keine Quest entschieden ist, in der Demo also nur mit `?demo=start`), `?schwach` (Sparmodus erzwingen). Die alte Adresse `entwurf.html` leitet auf die Hauptseite um.
@@ -17,7 +17,7 @@ Zusätze für Dennis' Seite: `?probe` (liest den Probelauf des Quest Masters, ro
 | `config.js` | Alles, was das Spiel kennt: Quests (Reihenfolge, Texte, Belohnungen, einsetzbar), Items und Fähigkeiten mit Tarnnamen, Kartenstationen, Log-Buch-Fragen, Code, Packs, Speicher. **Hier wird ergänzt.** |
 | `weg.js` | Der echte Weg (Bahnhof Tegernsee, Wanderweg 681a, Neureuth): Stelle am Weg aus GPS, Höhe an jeder Stelle, Strecke bis zum Gipfel. Reine Funktionen, getestet in `engine.test.js`. |
 | `engine.js` | Die Logik. Rechnet aus Konfiguration und gespeichertem Stand alles aus: Packs, Ziffern, Items, Anzahl Spruchrollen, nächste Quest, laufende Quests, Showdown-Duelle, was wo einsetzbar ist. |
-| `store.js` | Speicher. `lokal` (ein Browser, zum Testen) oder `firebase` (zwei Handys). Dazu der Kanal für Dennis' Log-Buch-Antworten. |
+| `store.js` | Speicher. `lokal` (ein Browser, zum Testen) oder `firebase` (zwei Handys). Dazu die Kanäle, in die Dennis schreibt: Log-Buch-Antworten und seine Einträge. |
 | `app.js`, `styles.css`, `index.html` | Dennis' Menü. |
 | `admin.js`, `admin.css`, `admin.html` | Quest-Master-Menü. |
 | `sw.js` | Offline-Speicher: Die App startet auch im Funkloch, Rikes Sprachnachrichten werden vorab geladen. |
@@ -38,10 +38,12 @@ Zusätze für Dennis' Seite: `?probe` (liest den Probelauf des Quest Masters, ro
 
 ```
 /spiele/dennis-jga-2026            { quests, zaehler, schritte, einsaetze, duelle, buchungen, items, zeiten, stand }   schreibt nur der Admin
-/spiele/dennis-jga-2026-logbuch    { "1": { antwort, zeit }, … }                                              schreibt nur Dennis (Log-Buch)
+/spiele/dennis-jga-2026-logbuch    { "1": { antwort, zeit }, … }                                              schreibt Dennis (Log-Buch)
+/spiele/dennis-jga-2026-dennis     { q_klingen: { status, zeit }, e_…: { item, quest, zeit }, d_2: { ergebnis, zeit },
+                                     s_amulett_gefunden: { zeit }, z_3: { zeit } }                            schreibt Dennis, der Admin löscht
 ```
 
-Die Log-Buch-Antworten liegen bewusst neben dem Spiel, damit das Speichern im Admin sie nie überschreibt.
+Dennis' Antworten und Einträge liegen bewusst neben dem Spiel, damit das Speichern im Admin sie nie überschreibt. Jeder Eintrag wird einzeln geschrieben, ohne Netz im Handy gepuffert und nachgeschickt. `engine.js` (`mitEintraegen`) rechnet die Einträge in das Dokument des Admins ein. Hat der Admin selbst etwas entschieden, gilt seine Buchung.
 
 **Packs** zählen Schritt für Schritt in der Reihenfolge, in der gebucht wurde (`zeiten` je Quest, `zeit` je Buchung), und bleiben immer zwischen 0 und `waehrung.max`: Wer bei 0 verliert, verliert nichts, was über den Deckel geht, verfällt. Dennis sieht dann eine Zeile dazu, der Admin zeigt unter „Packs buchen“, wie viel davon betroffen war. Balance nachrechnen: `node tests/balance.js`.
 
@@ -57,12 +59,14 @@ Die Log-Buch-Antworten liegen bewusst neben dem Spiel, damit das Speichern im Ad
 
 - **Vertippt:** Oben rechts **Rückgängig**. Darunter steht, was zurückgenommen wird. Nimmt jede Änderung zurück, auch Sprünge und „Alles zurücksetzen“, bis zu 40 Schritte, und merkt sich das auch nach dem Neuladen. Ist bei Dennis das Ergebnis-Fenster noch offen, geht es still zu.
 
-- **Reihe:** Oben steht die nächste Quest. Bestanden oder Verloren tippen. Dennis sieht das Ergebnis-Fenster, danach tritt die nächste Quest aus dem Nebel.
-- **Einsetzen:** Dennis sagt an, was er einsetzt. Unter der nächsten Quest (und bei laufenden Quests) stehen die Knöpfe, aktiv nur, was er hat. Spruchrolle und Schild sind danach weg. Falsch gebucht: im Bereich „Eingesetzt" mit ✕ zurücknehmen.
-- **Prophezeiung:** morgens „Starten", jede erfüllte Vorhersage „+1 Treffer" (gibt eine Spruchrolle), abends „Beenden".
-- **Rikes Amulett:** „Starten", wenn die Brosche versteckt ist, „Gefunden", dann Bestanden oder Verloren.
-- **Showdown:** Die App zeigt die drei Duelle (verlorene Spiele vom Tag zuerst, aufgefüllt mit Wirbel der Götter). Je Duell Sieg oder Niederlage tippen, dann die Prüfung buchen.
-- **Log-Buch:** Dennis' Antworten erscheinen live unter der Quest und unten im Bereich Log-Buch.
+- **Dennis trägt selbst ein** (seit 27.09.): Auf seiner Quest-Karte stehen BESTANDEN und VERLOREN, er hält das Siegel gedrückt, bis sich der Ring schließt, dann läuft sofort der Moment. Genauso setzt er Items und Fähigkeiten ein (antippen, Siegel halten), trägt am Gipfel jedes Duell ein, meldet bei Rikes Amulett „Gefunden“ und „Zusammengesetzt“ und kauft am Ende fehlende Ziffern am Kästchen. Du siehst alles im Admin unter „Dennis trägt selbst ein“ mit Uhrzeit, dazu eine kurze Meldung unten.
+- **Zurücknehmen:** Stimmt etwas nicht, tippst du bei seinem Eintrag auf **Zurücknehmen**. Die Quest ist wieder offen, Packs und Items springen zurück, und die Fee sagt es Dennis („Der Quest Master hat das Ergebnis von Kartenwurf zurückgenommen. Trag es neu ein.“). Rückgängig oben holt den Eintrag zurück. Auch „Offen“ bei einer Quest, ein zweiter Tipp auf ein gesetztes Duell und das Ausschalten von „Gefunden“ nehmen seinen Eintrag mit zurück.
+- **Notlösung:** Alle Knöpfe von früher gibt es weiter (Bestanden, Verloren, Einsetzen, Duelle), zum Beispiel wenn sein Akku leer ist. Was du buchst, gilt vor seinem Eintrag.
+- **Prophezeiung:** morgens „Starten", jede erfüllte Vorhersage „+1 Treffer" (gibt eine Spruchrolle), abends „Beenden". Das bleibt bei dir.
+- **Rikes Amulett:** „Starten", wenn die Brosche versteckt ist. Dennis meldet „Gefunden“ und „Zusammengesetzt“. Verpasst er die Frist, buchst du Verloren.
+- **Showdown:** Dennis sieht am Gipfel die Duell-Tafel (verlorene Spiele vom Tag zuerst, aufgefüllt mit Wirbel der Götter) und trägt jedes Duell ein. Nach der Mehrheit trägt er die Prüfung ein. Den Schild setzt er vor dem Besiegeln einer Niederlage ein und spielt das Duell noch einmal.
+- **Log-Buch:** Dennis' Antworten erscheinen live unter der Quest und unten im Bereich Log-Buch. Sind alle sieben besiegelt, trägt er das Ergebnis selbst ein.
+- **Verpasste Momente:** War Dennis' App zu oder ohne Netz, laufen die Momente nach PRESS START nacheinander ab. Die nächste Quest tritt erst danach aus dem Nebel.
 
 ## Auf den Startbildschirm (App installieren)
 
@@ -81,7 +85,7 @@ python3 -m http.server 8000
 
 `http://localhost:8000/?demo` zeigt Dennis' Menü mit Demo-Knöpfen ohne Datenbank. Für Admin und Dennis zusammen in `config.js` `typ: "lokal"` setzen und beide Seiten in zwei Tabs desselben Browsers öffnen.
 
-Geräte-Test (iPhone 13 und 15 in Safari und vom Home-Bildschirm, Samsung mit gedrosselter CPU): `tests/geraete.mjs`, siehe Kopf der Datei. Dazu `tests/nebel.mjs` (verrät nichts, auch nicht in den Stationstafeln), `tests/probe.mjs` (Probelauf, Rückgängig) und `tests/karte.mjs` (Karte, GPS, Prolog).
+Geräte-Test (iPhone 13 und 15 in Safari und vom Home-Bildschirm, Samsung mit gedrosselter CPU): `tests/geraete.mjs`, siehe Kopf der Datei. Dazu `tests/nebel.mjs` (verrät nichts, auch nicht in den Stationstafeln und der Ausrüstung), `tests/probe.mjs` (Probelauf, Rückgängig), `tests/karte.mjs` (Karte, GPS, Prolog) und `tests/selbst.mjs` (Dennis trägt selbst ein, Zurücknehmen, verpasste Momente, Duelle, Kästchen).
 
 ## Firebase
 
@@ -92,15 +96,15 @@ Einfach (jeder mit Link könnte technisch schreiben, für einen JGA meist genug)
 { "rules": { "spiele": { "$spiel": { ".read": true, ".write": true } } } }
 ```
 
-Geschützt (nur der Admin-Link mit Schlüssel schreibt das Spiel, Dennis darf nur ins Log-Buch):
+Geschützt (nur der Admin-Link mit Schlüssel schreibt das Spiel, Dennis darf nur ins Log-Buch und in seine Einträge):
 ```
 { "rules": { "spiele": {
-    "$spiel": { ".read": true, ".write": "$spiel.endsWith('-logbuch')" }
+    "$spiel": { ".read": true, ".write": "$spiel.endsWith('-logbuch') || $spiel.endsWith('-dennis')" }
 } } }
 ```
 Den Schlüssel findest du unter Projekteinstellungen → Dienstkonten → Datenbank-Secrets. Dein Admin-Link lautet dann `…/admin.html#key=DEIN_SECRET`. Das Handy merkt sich den Schlüssel. Den Link niemandem schicken.
 
-Ohne Netz puffert das Admin-Handy Änderungen und schickt sie nach. Dennis' Antworten im Log-Buch werden genauso nachgereicht. Dennis' Menü zeigt unten rechts „Stand hh:mm" bzw. „Offline".
+Ohne Netz puffert das Admin-Handy Änderungen und schickt sie nach. Dennis' Antworten im Log-Buch und seine Einträge werden genauso nachgereicht. Zurücknehmen braucht Netz, sonst meldet der Admin es und du tippst noch einmal. Dennis' Menü zeigt unten rechts „Stand hh:mm" bzw. „Offline".
 
 ## Deployen
 
