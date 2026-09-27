@@ -1,7 +1,7 @@
 /* Dennis Quest · Stilprobe „Remaster" (08-erlebnis-plan.md, Abschnitt 10)
    Liegt als Schicht über styles.css und ändert nur das Aussehen, nicht die Logik.
    Schwerpunkt: QUESTS und alles, was jede Seite teilt (Schrift, Stein, Titelschild, Textbox, Cursor, HUD, Z und R).
-   KARTE und AUSRÜSTUNG bekommen nur diese gemeinsamen Teile, ihr eigener Umbau folgt nach der Freigabe.
+   KARTE bekommt nur diese gemeinsamen Teile, ihr eigener Umbau folgt nach der Freigabe. AUSRÜSTUNG ist seit dem 27.09. in styles.css umgebaut.
    Wird die Stilprobe freigegeben, wandert das hier nach styles.css und die Datei entfällt. */
 
 @font-face { font-family: "Nunito"; src: url("assets/nunito.woff2") format("woff2"); font-weight: 200 1000; font-display: swap; }

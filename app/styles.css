@@ -186,7 +186,7 @@ svg { display: block; }
 .medal.covered { color: #d8d1ae; background: radial-gradient(circle at 35% 28%, #4c4b3f, #1d1f18 62%, #0a0c08); }
 .medal.covered b { font: 900 calc(var(--sz, 28px) * .56)/1 Georgia, serif; opacity: .8; text-shadow: 1px 1px 0 #000; }
 /* verloren: rotes X, jetzt: pulsierender Ring */
-.medal.lost::after, .gem.lost::after, .well.lost::after { content: ""; position: absolute; right: -3px; bottom: -3px; width: 44%; height: 44%; min-width: 11px; min-height: 11px; border-radius: 50%;
+.medal.lost::after, .gem.lost::after, .well.lost::after, .slot.st-verloren::after { content: ""; position: absolute; right: -3px; bottom: -3px; width: 44%; height: 44%; min-width: 11px; min-height: 11px; border-radius: 50%;
   background: #c3261d url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='m4.5 4.5 7 7m0-7-7 7' stroke='%23fff' stroke-width='2.6' stroke-linecap='round'/%3E%3C/svg%3E") center/80% no-repeat; box-shadow: 0 0 0 1.5px #1a0605; }
 .is-next.medal::before, .is-next.gem::before { content: ""; position: absolute; inset: -5px; border-radius: 50%; border: 2px solid var(--cursor); box-shadow: 0 0 6px var(--cursor); animation: nextPulse 700ms steps(2, end) infinite; }
 @keyframes nextPulse { 50% { opacity: .2; } }
@@ -372,25 +372,123 @@ html.schwach .map-fog, html.schwach .map-gps::after { animation: none; }
   .map-gps { transition: none; }
 }
 
-/* ---------- Seite AUSRÜSTUNG ---------- */
-.equip-body { display: grid; grid-template-columns: minmax(0, 1fr) clamp(150px, 30%, 250px) minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; gap: 8px 14px; min-height: 0; }
-.equip-group { display: grid; align-content: center; justify-items: center; gap: 6px; min-height: 0; }
-.equip-group .lbl { color: #e6dfbd; text-shadow: 1px 1px 0 #000; }
-.slots { display: grid; grid-template-columns: repeat(2, var(--slot)); gap: 6px 12px; justify-content: center; }
-.slot { display: grid; justify-items: center; gap: 3px; width: var(--slot); padding: 0; border: 0; background: none; cursor: pointer; }
-.slot.solo { grid-column: 1 / -1; }
-#slotsGear { grid-template-columns: repeat(3, var(--slot)); gap: 6px 8px; }
-#slotsGear .slot.solo { grid-column: auto; }
+/* ---------- Seite AUSRÜSTUNG: links der Lederbeutel, Mitte Dennis im Bogenfenster, rechts Runenkreise ---------- */
+/* Vier Zustände je Feld: Schatten = noch nicht erspielt (die Form ist zu erkennen), Farbe mit Goldrand = deins,
+   leuchtet = jetzt einsetzbar, grau = verbraucht oder verloren. Neu Gefundenes tritt mit Funken aus dem Schatten. */
+.equip-body { --eslot: clamp(40px, 13.2vh, 58px); --rslot: calc(var(--eslot) * 1.12);
+  display: grid; grid-template-columns: minmax(0, 1fr) clamp(140px, 27%, 236px) minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; gap: 8px 12px; min-height: 0; padding-top: 6px; }
+@supports (height: 1dvh) { .equip-body { --eslot: clamp(40px, 13.2dvh, 58px); } }
+.equip-group { position: relative; align-self: center; justify-self: center; display: grid; justify-items: center; min-height: 0;
+  padding: clamp(13px, 4vh, 18px) clamp(10px, 1.6vw, 16px) clamp(9px, 2.8vh, 13px); border-radius: 12px; }
+.equip-group .plakette { position: absolute; z-index: 2; top: 0; left: 50%; transform: translate(-50%, -52%); margin: 0; padding: 4px 10px 3px; border-radius: 3px; white-space: nowrap;
+  color: #fff1a8; background: linear-gradient(#3a3020, #17120a); border: 1px solid #0b0905; box-shadow: inset 0 0 0 1.5px rgba(242,201,76,.62), 0 2px 5px rgba(0,0,0,.6); text-shadow: 0 1px 0 #000; }
+/* Beutel: Leder mit Naht */
+.equip-group.bag {
+  background:
+    radial-gradient(130% 90% at 28% 8%, rgba(255,214,150,.2), transparent 55%),
+    repeating-linear-gradient(118deg, rgba(0,0,0,.06) 0 2px, transparent 2px 5px),
+    linear-gradient(162deg, #6e4829, #432a15 60%, #2c1b0c);
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,.65), inset 0 2px 0 rgba(255,224,176,.22), inset 0 -3px 0 rgba(0,0,0,.35), inset 0 0 26px rgba(0,0,0,.5), 0 5px 12px rgba(0,0,0,.55); }
+.equip-group.bag::before { content: ""; position: absolute; inset: 5px; border: 1.5px dashed rgba(240,204,140,.5); border-radius: 8px; pointer-events: none; }
+/* Fähigkeiten: Nachthimmel mit Sternen, Runenkreise */
+.equip-group.magic {
+  background:
+    radial-gradient(circle at 50% 58%, rgba(160,130,255,.28), transparent 62%),
+    radial-gradient(rgba(255,255,255,.55) 0 .8px, transparent 1.3px) 3px 5px / 23px 19px,
+    radial-gradient(rgba(200,220,255,.4) 0 .7px, transparent 1.1px) 12px 9px / 31px 27px,
+    linear-gradient(165deg, #2e2556, #16112c 65%, #0d0a1c);
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,.65), inset 0 2px 0 rgba(220,200,255,.2), inset 0 0 26px rgba(0,0,0,.55), 0 5px 12px rgba(0,0,0,.55); }
+.equip-group.magic::before { content: ""; position: absolute; inset: 5px; border: 1px solid rgba(201,164,255,.38); border-radius: 9px; pointer-events: none; }
+
+.slots { display: grid; grid-template-columns: repeat(2, var(--rslot)); gap: 10px 18px; justify-content: center; padding: 5px 2px 2px; }
+#slotsGear { display: flex; flex-wrap: wrap; justify-content: center; gap: 7px 8px; width: calc(3 * var(--eslot) + 16px); padding: 3px 0 0; }
+.slot { --kl: 11px; --kb: 3px; position: relative; display: grid; place-items: center; width: var(--eslot); height: var(--eslot); padding: 0; border: 0; background: none; cursor: pointer; }
+.slot:focus-visible { outline: 2px solid #fff; outline-offset: 5px; border-radius: 8px; }
 .well { position: relative; display: grid; place-items: center; width: var(--slot); height: var(--slot); border-radius: 2px; color: var(--c, var(--gold)); background: rgba(4,7,5,.52);
   box-shadow: inset 3px 3px 5px rgba(255,255,255,.06), inset -3px -3px 6px rgba(0,0,0,.7), 1px 2px 1px #080a07; }
 .well svg { width: 66%; height: 66%; filter: drop-shadow(1.5px 2px 0 #000); }
-.slot.st-nicht .well { color: #11140f; }
-.slot.st-nicht .well svg { filter: drop-shadow(1px 1px 0 rgba(255,255,255,.1)); }
-.slot.st-verloren .well { color: #5d5d55; }
-.slot.is-selected .well { outline: 2px solid #f8f8ee; outline-offset: 2px; filter: brightness(1.25); animation: cursorPulse 420ms steps(2, end) infinite; }
-@keyframes cursorPulse { 50% { outline-color: var(--cursor); } }
-.character-window { position: relative; grid-column: 2; grid-row: 1; min-height: 0; overflow: hidden; background: radial-gradient(ellipse at 50% 45%, rgba(129,151,95,.25), #020403 68%);
-  border-left: 3px solid #1c251c; border-right: 3px solid #1c251c; box-shadow: inset 0 0 28px #000; }
+/* Tasche im Beutel: deins = Goldrand, Farbe des Items leuchtet von innen */
+.slot .well { position: absolute; inset: 0; width: auto; height: auto; border-radius: 9px; overflow: hidden;
+  background: radial-gradient(circle at 50% 46%, color-mix(in srgb, var(--c), transparent 68%), transparent 66%), linear-gradient(#1b1109, #2d1d0f);
+  box-shadow: inset 0 3px 7px rgba(0,0,0,.8), inset 0 -1px 0 rgba(255,222,170,.14), 0 0 0 1.5px var(--gold), 0 0 0 3px rgba(20,12,4,.8), 0 2px 3px rgba(0,0,0,.6); }
+.slot .well .ic { position: relative; z-index: 1; }
+/* Ab und zu läuft ein Glanz über alles, was Dennis gehört */
+.slot.st-besitz:not(.rune) .well::before { content: ""; position: absolute; z-index: 2; inset: -30% -60%; pointer-events: none;
+  background: linear-gradient(105deg, transparent 42%, rgba(255,250,225,.42) 50%, transparent 58%); transform: translateX(-70%);
+  animation: glanz 8s ease-in-out calc(var(--i) * 1.3s + 1s) infinite; }
+@keyframes glanz { 0%, 78% { transform: translateX(-70%); } 92%, 100% { transform: translateX(70%); } }
+/* Schatten: noch nicht erspielt. Nur die Form, eine offene Naht drumherum */
+.slot.schatten .well { background: radial-gradient(circle at 50% 46%, rgba(255,232,190,.16), transparent 70%), linear-gradient(#2e2012, #20160b);
+  box-shadow: inset 0 3px 7px rgba(0,0,0,.75), 0 0 0 1px rgba(236,196,130,.32), 0 1px 0 rgba(255,230,180,.1); }
+.slot.schatten .well::after { content: ""; position: absolute; inset: 4px; border: 1px dashed rgba(236,196,130,.34); border-radius: 6px; pointer-events: none; }
+.slot.schatten .ic { filter: brightness(0) drop-shadow(0 0 1px rgba(255,236,190,.6)); opacity: .9; }
+.slot.schatten.entgangen .ic { opacity: .35; }
+/* Jetzt einsetzbar: leuchtet in seiner Farbe, ein Ring pulsiert */
+.slot.usable .well { box-shadow: inset 0 3px 7px rgba(0,0,0,.55), 0 0 0 2px var(--c), 0 0 16px 2px color-mix(in srgb, var(--c), transparent 30%); }
+.slot.usable::after { content: ""; position: absolute; inset: -6px; border-radius: 13px; border: 2px solid color-mix(in srgb, var(--c), #fff 35%); pointer-events: none; animation: usablePulse 1.6s ease-in-out infinite; }
+/* Verbraucht oder verloren: grau */
+.slot.st-verbraucht .well, .slot.st-verloren .well { background: linear-gradient(#1d1a15, #27231c); box-shadow: inset 0 3px 7px rgba(0,0,0,.75), 0 0 0 1px rgba(160,150,130,.35); }
+.slot.st-verbraucht .ic, .slot.st-verloren .ic { filter: grayscale(1) brightness(.62) drop-shadow(1px 1px 0 #000); opacity: .6; }
+/* Fähigkeiten: runde Mulde, der Runenkreis dreht sich, das Zeichen schwebt */
+.slot.rune { width: var(--rslot); height: var(--rslot); }
+.slot.rune .well { border-radius: 50%; overflow: visible;
+  background: radial-gradient(circle, color-mix(in srgb, var(--c), transparent 55%), rgba(14,10,30,.94) 64%);
+  box-shadow: inset 0 0 12px rgba(0,0,0,.85), 0 0 0 1.5px color-mix(in srgb, var(--c), #000 25%), 0 0 18px color-mix(in srgb, var(--c), transparent 55%); }
+.slot.rune .rune-ring { position: absolute; left: -13%; top: -13%; width: 126%; height: 126%; color: var(--c); pointer-events: none; filter: none; animation: runeDreh 26s linear infinite; }
+@keyframes runeDreh { to { transform: rotate(360deg); } }
+.slot.rune .ic { width: 58%; height: 58%; animation: schweben 3.2s ease-in-out calc(var(--i) * -1.1s) infinite; }
+@keyframes schweben { 50% { transform: translateY(-3px); } }
+.slot.rune.usable .well { box-shadow: inset 0 0 10px rgba(0,0,0,.7), 0 0 0 2px var(--c), 0 0 22px 4px color-mix(in srgb, var(--c), transparent 35%); }
+.slot.rune.usable .rune-ring { animation-duration: 7s; }
+.slot.rune.usable::after { inset: -10px; border-radius: 50%; }
+.slot.rune.schatten .well { background: radial-gradient(circle, rgba(200,190,255,.12), rgba(10,8,22,.92) 64%); box-shadow: inset 0 0 12px rgba(0,0,0,.85), 0 0 0 1px rgba(170,160,220,.32); }
+.slot.rune.schatten .well::after { display: none; }
+.slot.rune.schatten .rune-ring, .slot.rune.st-verbraucht .rune-ring, .slot.rune.st-verloren .rune-ring { color: #6a6590; opacity: .45; animation: none; }
+.slot.rune.schatten .ic, .slot.rune.st-verbraucht .ic, .slot.rune.st-verloren .ic { animation: none; }
+.slot.rune.st-verbraucht .well, .slot.rune.st-verloren .well { background: radial-gradient(circle, #2a2722, #15130f 70%); }
+/* Auswahl: goldene Eckklammern wie in Ocarina of Time, die sanft atmen */
+.slot.is-selected::before { content: ""; position: absolute; z-index: 4; inset: -7px; pointer-events: none; filter: drop-shadow(0 1px 1px rgba(0,0,0,.85)); animation: klammerAtmen 1.5s ease-in-out infinite;
+  background:
+    linear-gradient(var(--cursor), var(--cursor)) left top / var(--kl) var(--kb) no-repeat, linear-gradient(var(--cursor), var(--cursor)) left top / var(--kb) var(--kl) no-repeat,
+    linear-gradient(var(--cursor), var(--cursor)) right top / var(--kl) var(--kb) no-repeat, linear-gradient(var(--cursor), var(--cursor)) right top / var(--kb) var(--kl) no-repeat,
+    linear-gradient(var(--cursor), var(--cursor)) left bottom / var(--kl) var(--kb) no-repeat, linear-gradient(var(--cursor), var(--cursor)) left bottom / var(--kb) var(--kl) no-repeat,
+    linear-gradient(var(--cursor), var(--cursor)) right bottom / var(--kl) var(--kb) no-repeat, linear-gradient(var(--cursor), var(--cursor)) right bottom / var(--kb) var(--kl) no-repeat; }
+.slot.rune.is-selected::before { inset: -11px; }
+@keyframes klammerAtmen { 50% { transform: scale(1.07); opacity: .72; } }
+/* NEU: bis Dennis das Feld antippt */
+.slot .neu-tag { display: none; position: absolute; z-index: 5; top: -8px; right: -10px; padding: 3px 5px 2px; border-radius: 3px; background: var(--cursor); color: #1c1604;
+  font: 900 10px/1 "Courier New", monospace; letter-spacing: .06em; box-shadow: 0 1px 0 #000, 0 0 8px rgba(250,242,110,.6); animation: neuWippen 1.4s ease-in-out infinite; }
+.slot.neu .neu-tag { display: block; }
+@keyframes neuWippen { 50% { transform: translateY(-2px) rotate(5deg); } }
+/* Fund: der Schatten füllt sich mit Licht und Farbe, Funken stieben */
+.slot .funken { display: none; }
+.slot.fund .ic { animation: fundIcon 1.2s cubic-bezier(.2, .8, .3, 1.2) var(--fd, 0s) both; }
+@keyframes fundIcon {
+  0% { filter: brightness(0) drop-shadow(0 0 1px rgba(255,236,190,.6)); transform: scale(1); }
+  40% { filter: brightness(2.4) drop-shadow(0 0 8px rgba(255,255,255,.95)); transform: scale(1.32); }
+  100% { filter: brightness(1) drop-shadow(1.5px 2px 0 #000); transform: scale(1); } }
+.slot.fund .well { animation: fundWell 1.3s ease-out var(--fd, 0s) both; }
+@keyframes fundWell { 0% { box-shadow: inset 0 3px 7px rgba(0,0,0,.75), 0 0 0 1px rgba(236,196,130,.32); } 35% { box-shadow: inset 0 0 14px rgba(255,255,255,.6), 0 0 0 2px #fff6c8, 0 0 24px 7px rgba(255,236,160,.85); } }
+.slot.fund .funken { display: block; position: absolute; z-index: 5; left: 50%; top: 50%; width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; border-radius: 50%; pointer-events: none; background: #fff;
+  box-shadow: 0 -20px 0 0 #fff6c8, 17px -10px 0 0 #ffe27a, 19px 9px 0 0 #fff6c8, 0 21px 0 0 #ffe27a, -18px 10px 0 0 #fff6c8, -17px -11px 0 0 #ffe27a, 0 0 12px 6px rgba(255,248,210,.9);
+  animation: funken .9s ease-out calc(var(--fd, 0s) + .3s) both; }
+@keyframes funken { 0% { transform: scale(.2); opacity: 0; } 25% { opacity: 1; } 100% { transform: scale(1.8); opacity: 0; } }
+
+/* Dennis im Bogenfenster: Steinrahmen, Licht fällt von oben, Staub schwebt im Licht */
+.character-window { position: relative; grid-column: 2; grid-row: 1; min-height: 0; overflow: hidden; border-radius: 50% 50% 6px 6px / 24% 24% 6px 6px;
+  background: radial-gradient(ellipse 70% 45% at 50% 6%, rgba(255,238,190,.3), transparent 70%), radial-gradient(ellipse at 50% 58%, rgba(129,151,95,.28), #020403 72%);
+  border: 4px solid #3b4033; box-shadow: 0 0 0 1.5px #0b0d08, inset 0 0 0 1.5px rgba(242,201,76,.42), inset 0 0 28px #000, 0 5px 12px rgba(0,0,0,.6); }
+.cw-licht { position: absolute; left: 14%; right: 14%; top: -4%; height: 88%; pointer-events: none; clip-path: polygon(32% 0, 68% 0, 100% 100%, 0 100%);
+  background: linear-gradient(rgba(255,244,205,.36), rgba(255,244,205,.08) 62%, transparent); animation: lichtAtmen 5s ease-in-out infinite alternate; }
+@keyframes lichtAtmen { from { opacity: .5; } to { opacity: 1; } }
+.motes { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+.motes i { position: absolute; bottom: 12%; width: 3px; height: 3px; border-radius: 50%; background: #fff6d0; box-shadow: 0 0 5px 2px rgba(255,236,160,.6); opacity: 0; animation: staub 7s linear infinite; }
+.motes i:nth-child(1) { left: 24%; animation-delay: -1s; }
+.motes i:nth-child(2) { left: 70%; animation-delay: -2.6s; animation-duration: 8.5s; }
+.motes i:nth-child(3) { left: 40%; animation-delay: -4.2s; }
+.motes i:nth-child(4) { left: 82%; animation-delay: -5.5s; animation-duration: 9s; }
+.motes i:nth-child(5) { left: 13%; animation-delay: -6.4s; animation-duration: 7.8s; }
+@keyframes staub { 0% { opacity: 0; transform: translate(0, 0); } 15% { opacity: .9; } 70% { opacity: .55; } 100% { opacity: 0; transform: translate(12px, -150px); } }
 /* Avatar: Dennis spielt Okarina (freigestellt, leicht abgedunkelt). Unten angeschnitten wie ein Brustbild im Fenster. */
 .character-window img { position: absolute; left: 50%; top: 5%; height: 138%; width: auto; max-width: none; transform: translateX(-50%); transform-origin: 50% 30%;
   filter: drop-shadow(0 6px 10px rgba(0,0,0,.7)); animation: idleBreath 3.2s ease-in-out infinite; }
@@ -402,9 +500,17 @@ html.schwach .map-fog, html.schwach .map-gps::after { animation: none; }
 .notes i:nth-child(3) { animation-delay: 2.4s; }
 @keyframes note { 0% { opacity: 0; transform: translate(0, 0) scale(.6); } 15% { opacity: 1; } 100% { opacity: 0; transform: translate(28px, -46px) rotate(14deg) scale(1.1); } }
 .item-box { grid-column: 1 / -1; grid-row: 2; display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 2px 12px; min-height: calc(var(--fs-h) + var(--fs-body) * 2.8 + 16px); }
-.item-box .ib-icon { grid-row: span 2; width: clamp(28px, 9vh, 38px); height: clamp(28px, 9vh, 38px); color: var(--c, var(--gold)); filter: drop-shadow(1px 2px 0 #000); }
+/* Das gewählte Ding auf einem kleinen Lichtkreis in seiner Farbe, als Schatten, solange es nicht erspielt ist */
+.item-box .ib-stage { grid-row: span 2; display: grid; place-items: center; width: clamp(36px, 11vh, 50px); aspect-ratio: 1; border-radius: 50%;
+  background: radial-gradient(circle, color-mix(in srgb, var(--c, var(--gold)), transparent 50%), color-mix(in srgb, var(--c, var(--gold)), transparent 88%) 55%, transparent 71%); }
+.item-box .ib-icon { width: 76%; height: 76%; color: var(--c, var(--gold)); filter: drop-shadow(1px 2px 0 #000); }
+.item-box.schatten .ib-stage { background: radial-gradient(circle, rgba(190,204,240,.22), rgba(190,204,240,.05) 55%, transparent 71%); }
+.item-box.schatten .ib-icon { filter: brightness(0) drop-shadow(0 0 1px rgba(225,232,255,.85)); }
+.item-box.schatten .tb-title { color: #d8cf9e; font-style: italic; }
 .item-box .tb-title { margin: 0; }
 .item-box .tb-title .tag { margin-left: 6px; }
+/* Belohnung einer Quest, die Dennis noch nicht hat: auch dort nur der Schatten */
+.chip .schatten svg { filter: brightness(0) drop-shadow(0 0 1px rgba(230,236,255,.9)); }
 
 /* ---------- Fuß: Demo, Hinweis, Stand ---------- */
 .foot { grid-column: 1 / -1; grid-row: 3; z-index: 12; display: flex; align-items: center; gap: 12px; min-width: 0; padding: 0 4px 2px; color: #bdb99c; font: 700 var(--fs-tiny)/1 "Courier New", monospace; letter-spacing: .03em; text-shadow: 1px 1px 0 #000; }
@@ -439,6 +545,12 @@ html.probe body::after { content: ""; position: fixed; inset: 0; z-index: 9999; 
 .result-lines .tarn { display: block; font: italic 400 calc(var(--fs-body) * .8)/1.2 Georgia, serif; color: #c9c3a2; margin-bottom: 2px; }
 .result-lines .reveal > span:last-child { animation: revealName 900ms ease-out calc(var(--d, 0) * 220ms + 500ms) both; }
 @keyframes revealName { from { opacity: .35; filter: blur(3px); } to { opacity: 1; filter: none; } }
+/* Das Symbol tritt dabei aus dem Schatten, wie später in der Ausrüstung */
+.result-lines .reveal .ri svg { animation: schattenWeg 1s ease-out calc(var(--d, 0) * 220ms + 450ms) both; }
+@keyframes schattenWeg {
+  0% { filter: brightness(0) drop-shadow(0 0 1px rgba(255,236,190,.8)); }
+  45% { filter: brightness(2.2) drop-shadow(0 0 7px rgba(255,255,255,.9)); }
+  100% { filter: brightness(1) drop-shadow(0 0 0 transparent); } }
 .result-lines .plus { color: #ffe27a; } .result-lines .minus { color: #ff9b90; }
 .result-next { margin: 10px 0 0; color: #aab3cf; font: 700 var(--fs-tiny)/1.2 "Courier New", monospace; letter-spacing: .04em; }
 .result-more { position: absolute; right: 12px; bottom: 8px; color: var(--gold); font-size: 12px; animation: nextPulse 700ms steps(2, end) infinite; }
@@ -530,7 +642,8 @@ html.probe body::after { content: ""; position: fixed; inset: 0; z-index: 9999; 
 @media (prefers-reduced-motion: reduce) {
   .menu-cube { transition: none; }
   .medal-stage > *, .medal-stage::before, .medal-stage::after, .result.big-moment *, .q-row.revealing, .q-row.revealing::after, .quest-card.revealing > *,
-  .is-next::before, .slot.is-selected .well, .character-window img, .notes i, .slot.usable .well::before, .lb-wave i, .intro-cam, .install-btn, .intro-sun, .intro-rays, .intro-rays i, .intro-path-light, .start-quest, .mark .you, .result-more, .pack-row .gain, .tumbler.gain, .rotate-hint .phone { animation: none !important; }
+  .is-next::before, .slot.is-selected::before, .slot.usable::after, .slot .well::before, .slot.rune .rune-ring, .slot.rune .ic, .slot .neu-tag, .cw-licht, .motes i,
+  .result-lines .reveal .ri svg, .character-window img, .notes i, .lb-wave i, .intro-cam, .install-btn, .intro-sun, .intro-rays, .intro-rays i, .intro-path-light, .start-quest, .mark .you, .result-more, .pack-row .gain, .tumbler.gain, .rotate-hint .phone { animation: none !important; }
   .intro-screen { transition: none; }
 }
 
@@ -586,23 +699,13 @@ html.probe body::after { content: ""; position: fixed; inset: 0; z-index: 9999; 
   .prolog, .prolog-fee, .prolog-bild, .coach-fee { animation: none !important; }
 }
 
-/* ---------- v1: leere Plätze, Einsetzbar, laufende Quests (07-spiele-und-items.md) ---------- */
-/* Noch nicht erspielt: einfach ein leerer Platz */
-.slot.empty { cursor: default; }
-.slot.empty .well { color: transparent; background: rgba(4,7,5,.34); box-shadow: inset 2px 2px 6px rgba(0,0,0,.75), inset -1px -1px 0 rgba(255,255,255,.05); }
-.slot.empty .well svg, .slot.empty .count { display: none; }
-/* Einsetzbar bei der aktuellen Quest: leuchtet. Besitz, der hier nicht hilft: ausgegraut */
-.slot.usable .well { box-shadow: inset 3px 3px 5px rgba(255,255,255,.08), inset -3px -3px 6px rgba(0,0,0,.6), 0 0 0 2px var(--c), 0 0 14px color-mix(in srgb, var(--c), transparent 35%); }
-.slot.usable .well::before { content: ""; position: absolute; inset: -5px; border-radius: 4px; border: 1.5px solid color-mix(in srgb, var(--c), #fff 30%); opacity: .7; animation: usablePulse 1.6s ease-in-out infinite; }
+/* ---------- v1: Einsetzbar, laufende Quests (07-spiele-und-items.md) ---------- */
 @keyframes usablePulse { 50% { opacity: 0; transform: scale(1.08); } }
-.slot.idle .well { color: #767868; filter: saturate(.2); }
-.slot.idle .well svg { opacity: .55; }
-.slot.st-verbraucht .well { color: #4c4d45; }
-.slot.st-verbraucht .well svg { opacity: .4; }
-.well .count { position: absolute; right: 2px; bottom: 1px; font: 900 clamp(10px, 3.4vh, 13px)/1 Georgia, serif; color: #fff4c4; text-shadow: 1px 1px 0 #000, -1px 0 #000; }
+.well .count { position: absolute; z-index: 3; right: 2px; bottom: 1px; font: 900 clamp(10px, 3.4vh, 13px)/1 Georgia, serif; color: #fff4c4; text-shadow: 1px 1px 0 #000, -1px 0 #000; }
+.slot .well .count { right: 5px; bottom: 4px; }
+.slot.rune .well .count { right: -2px; bottom: -2px; padding: 2px 3px 1px; border-radius: 3px; background: rgba(10,8,22,.9); box-shadow: 0 0 0 1px color-mix(in srgb, var(--c), transparent 40%); }
 .well .count:empty { display: none; }
 .item-box .ib-use { display: inline; color: #fff1a8; }
-.item-box .ib-use.dim { color: #9aa2bd; }
 
 .well.mini.usable { color: var(--c); box-shadow: 0 0 0 1.5px var(--c), 0 0 10px color-mix(in srgb, var(--c), transparent 45%); }
 .well.mini .count { font-size: 10px; right: 1px; bottom: 0; }
@@ -670,4 +773,6 @@ html.schwach .intro-rays { -webkit-mask-image: none; mask-image: none; }
 html.schwach .intro-rays i:nth-child(n+2) { display: none; }
 html.schwach .intro-cam { animation: none; }
 html.schwach .medal-stage.won::before { animation: raysIn 900ms ease-out both; }
+html.schwach .motes, html.schwach .slot .well::before { display: none; }
+html.schwach .cw-licht, html.schwach .slot.rune .rune-ring { animation: none; }
 html.schwach .face { box-shadow: inset 0 0 0 4px rgba(220,222,171,.1), 4px 5px 0 #000; }

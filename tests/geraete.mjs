@@ -69,7 +69,7 @@ async function pruefen(page, g, name) {
       if (hatText && s.overflow !== 'visible' && s.textOverflow !== 'ellipsis' && el.scrollWidth > el.clientWidth + 2 && !['TEXTAREA'].includes(el.tagName)) out.ueberlauf.push(`${el.className || el.tagName} "${el.textContent.trim().slice(0, 24)}"`);
     }
     for (const el of document.querySelectorAll('.face.active button:not([disabled]), .hud button, .shoulder, .lb-panel button:not([disabled]), .prolog button')) {
-      if (!bereich(el) || !sichtbar(el) || el.closest('.slot.empty')) continue;
+      if (!bereich(el) || !sichtbar(el)) continue;
       const b = el.getBoundingClientRect();
       if (Math.min(b.width, b.height) < 28) out.tipp.push(`${el.className} ${Math.round(b.width)}x${Math.round(b.height)}`);
     }
@@ -96,8 +96,8 @@ const browser = await chromium.launch();
 let alleProbleme = 0;
 for (const g of GERAETE) {
   log(`\n== ${g.id} (${g.w}×${g.h}, Insets l${g.sa.l} r${g.sa.r} b${g.sa.b}${g.cpu ? ', CPU ÷' + g.cpu : ''})`);
-  // Startbildschirm
-  let { ctx, page } = await neueSeite(browser, g, '?demo');
+  // Startbildschirm. Mitte des Tages mit ?onboarding: Prolog und Hinweise kommen sonst nur am Anfang des Spiels
+  let { ctx, page } = await neueSeite(browser, g, '?demo&onboarding');
   await page.waitForTimeout(900);
   await shot(page, g, '0-intro');
   // Bildrate auf dem Startbildschirm messen
@@ -107,7 +107,7 @@ for (const g of GERAETE) {
   if (pressStart.r > g.w - g.sa.r || pressStart.b > g.h - g.sa.b) { log('  PROBLEM: PRESS START in Safe Area', JSON.stringify(pressStart)); alleProbleme++; }
   await page.click('#introScreen');
   await page.waitForTimeout(700);
-  // Prolog der Fee (in der Demo jedes Mal): vier Tafeln, dann ein kurzer Rundgang
+  // Prolog der Fee (mit ?onboarding jedes Mal): vier Tafeln, dann ein kurzer Rundgang
   await page.waitForTimeout(1700); await shot(page, g, '0b-prolog');
   alleProbleme += (await pruefen(page, g, 'PROLOG')).length;
   for (let i = 0; i < 12 && await page.isVisible('#prolog'); i++) { await page.click('#prolog'); await page.waitForTimeout(300); }
@@ -130,7 +130,8 @@ for (const g of GERAETE) {
   await page.click('.sc-close'); await page.waitForTimeout(200);
   await seite(page, 2); await page.waitForTimeout(300);
   // Onboarding durchklicken
-  if (!(await page.$('#overlay[hidden]'))) { await shot(page, g, '3a-onboarding'); await page.click('#overlay'); await page.waitForTimeout(400); }
+  // Der Beutel tritt erst aus dem Schatten, danach beginnen die Hinweise der Fee
+  if (!(await page.$('#overlay[hidden]'))) { await shot(page, g, '3a-onboarding'); await page.click('#overlay'); await page.waitForTimeout(1600); }
   for (let i = 0; i < 4; i++) { if (await page.$('#coach:not([hidden])')) { if (i === 2) await shot(page, g, '3b-coach'); await page.click('#coach'); await page.waitForTimeout(300); } }
   await shot(page, g, '3-ausruestung');
   alleProbleme += (await pruefen(page, g, 'AUSRÜSTUNG')).length;
@@ -278,7 +279,7 @@ for (const g of GERAETE) {
   await dennis.waitForTimeout(700);
   while (await dennis.$('#overlay:not([hidden])')) { await dennis.click('#overlay'); await dennis.waitForTimeout(300); }
   while (await dennis.$('#coach:not([hidden])')) { await dennis.click('#coach'); await dennis.waitForTimeout(250); }
-  const slots = await dennis.$$eval('.slot', els => els.map(e => `${e.dataset.id}:${e.classList.contains('empty') ? 'leer' : e.classList.contains('usable') ? 'LEUCHTET' : e.classList.contains('idle') ? 'grau' : [...e.classList].filter(c => c.startsWith('st-')).join('')}`));
+  const slots = await dennis.$$eval('.slot', els => els.map(e => `${e.dataset.id}:${e.classList.contains('schatten') ? 'Schatten' : e.classList.contains('usable') ? 'LEUCHTET' : [...e.classList].filter(c => c.startsWith('st-')).join('')}`));
   log(`  Ausrüstung am Gipfel: ${slots.join(', ')}`);
   const hud = await dennis.$eval('#hudNextName', e => e.textContent);
   log(`  HUD nächste Quest: ${hud}`); if (hud === '?') { log('  PROBLEM: HUD bleibt verdeckt'); alleProbleme++; }

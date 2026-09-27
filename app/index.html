@@ -29,6 +29,7 @@
   <!-- Dennis' Menü (06-design-plan.md, 07-spiele-und-items.md)
        /             liest den echten Stand (Firebase), schreibt nur Log-Buch-Antworten
        /?demo        Beispielstand mit Demo-Knöpfen, ohne Firebase (auch ?demo=start, ?demo=bund, ?demo=ende)
+       /?onboarding  Prolog und Hinweise der Fee auch später am Tag (sonst nur, solange noch keine Quest entschieden ist)
        /?direkt      ohne Startbildschirm
        /?probe       Probelauf des Quest Masters (admin.html?probe), roter Rahmen, echtes Spiel unberührt -->
   <div class="game" id="game">
@@ -133,22 +134,25 @@
             </div>
           </section>
 
-          <!-- Seite 2: AUSRÜSTUNG · Was habe ich dabei? -->
+          <!-- Seite 2: AUSRÜSTUNG · Was habe ich dabei? Links der Beutel (Items), Mitte Dennis im Bogenfenster,
+               rechts Runenkreise (Fähigkeiten). Noch nicht Erspieltes ist ein Schatten. -->
           <section class="face face-equip" data-page="2" aria-label="Ausrüstung">
             <header class="face-head">
               <h2>AUSRÜSTUNG</h2>
             </header>
             <div class="equip-body">
-              <div class="equip-group">
-                <p class="lbl">ITEMS</p>
+              <div class="equip-group bag">
+                <p class="lbl plakette">ITEMS</p>
                 <div class="slots" id="slotsGear"></div>
               </div>
               <div class="character-window" id="charWindow">
+                <span class="cw-licht" aria-hidden="true"></span>
                 <img src="assets/avatar-okarina.webp" alt="Dennis spielt Okarina" width="560" height="1218" decoding="async">
+                <span class="motes" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
                 <span class="notes" aria-hidden="true"><i>♪</i><i>♫</i><i>♪</i></span>
               </div>
-              <div class="equip-group">
-                <p class="lbl">FÄHIGKEITEN</p>
+              <div class="equip-group magic">
+                <p class="lbl plakette">FÄHIGKEITEN</p>
                 <div class="slots" id="slotsSkill"></div>
               </div>
               <div class="item-box textbox" id="itemBox" aria-live="polite"></div>
@@ -251,7 +255,24 @@
       <circle cx="12" cy="17.6" r="2.3" fill="#1c1a12"/><rect x="10.9" y="18.6" width="2.2" height="4.6" rx="1" fill="#1c1a12"/>
     </symbol>
     <!-- Items -->
-    <symbol id="i-backpack" viewBox="0 0 512 512"><path fill="currentColor" d="M186 21 173 47c7 0 14-1 21-1l4-7h116l4 7 21 1-13-26H186Zm70 42c-46 0-91 2-135 5-4 50-9 101-1 146 89 12 180 13 273 0 7-31 5-85-1-146-44-3-90-5-136-5Zm0 29c33 0 65 3 98 9l7 1v8c0 15 2 35-13 50-10 10-26 17-51 20v19h-82v-19c-24-4-39-10-49-20-15-15-15-34-15-50v-8l7-1c33-6 65-9 98-9Zm-71 179v219c48 2 95 2 142 0V271c-48 2-95 2-142 0Z"/></symbol>
+    <!-- Beutel: Lederbeutel mit Kordel (Startitem) -->
+    <symbol id="i-beutel" viewBox="0 0 32 32">
+      <path fill="currentColor" d="M9.2 3.6c2.1 1.5 4.4 2.1 6.8 2.1s4.7-.6 6.8-2.1l-2.2 7.2h-9.2Z"/>
+      <path fill="currentColor" d="M11.1 11.4h9.8c4.7 2.6 7.8 6.9 7.8 10.9 0 4.5-5.3 6.9-12.7 6.9S3.3 26.8 3.3 22.3c0-4 3.1-8.3 7.8-10.9Z"/>
+      <rect x="9.8" y="9.5" width="12.4" height="3.3" rx="1.65" fill="rgba(0,0,0,.45)"/>
+      <path d="M19.6 12.4c.5 2.3 2.1 3.6 4 4.5M18.7 12.6c-.3 2.5.5 4.2 1.7 5.7" fill="none" stroke="rgba(0,0,0,.42)" stroke-width="1.3" stroke-linecap="round"/>
+      <circle cx="19.2" cy="11.15" r="1.75" fill="rgba(255,255,255,.45)"/>
+      <path d="M13.1 6.6l.7 2.9M16 6.9v2.7M18.9 6.6l-.7 2.9" stroke="rgba(0,0,0,.3)" stroke-width="1.1" stroke-linecap="round"/>
+      <path d="M8.4 18.8c.8-2.1 2.3-3.8 4.1-5" fill="none" stroke="rgba(255,255,255,.42)" stroke-width="1.9" stroke-linecap="round"/>
+      <path d="M8 25.2c2.4 1.3 5.1 1.8 8 1.8" fill="none" stroke="rgba(0,0,0,.25)" stroke-width="1.4" stroke-linecap="round"/>
+    </symbol>
+    <!-- Runenkreis um jede Fähigkeit: dreht sich, solange sie Dennis gehört -->
+    <symbol id="i-rune" viewBox="0 0 100 100">
+      <circle cx="50" cy="50" r="46.5" fill="none" stroke="currentColor" stroke-width="1.6" opacity=".8"/>
+      <circle cx="50" cy="50" r="41" fill="none" stroke="currentColor" stroke-width="5.5" stroke-dasharray="1.4 5.04 3.6 5.04 1.4 5.04" opacity=".75"/>
+      <circle cx="50" cy="50" r="35.5" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="14 3 2 3" opacity=".55"/>
+      <path fill="currentColor" d="M50 0l3.4 5.6h-6.8ZM50 100l-3.4-5.6h6.8ZM0 50l5.6-3.4v6.8ZM100 50l-5.6 3.4v-6.8Z"/>
+    </symbol>
     <symbol id="i-pistol" viewBox="0 0 32 32"><g fill="currentColor"><rect x="9" y="4.5" width="12" height="7.5" rx="3"/><path d="M2.5 13H25l2-1h3v5h-3l-2-1H14.4l-1.6 2.4v1.4h-2.3L9.2 28.5H4.2l2.1-10.2L2.5 16.6Z"/></g><path d="M12.4 19.6c1.5.2 2.4 1.3 2.3 2.9" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="10.5" y="6" width="3" height="4.5" rx="1.2" fill="rgba(255,255,255,.35)"/></symbol>
     <symbol id="i-ropering" viewBox="0 0 32 32"><circle cx="16" cy="16" r="10.4" fill="none" stroke="currentColor" stroke-width="5.4"/><circle cx="16" cy="16" r="10.4" fill="none" stroke="rgba(0,0,0,.32)" stroke-width="5.4" stroke-dasharray="2.2 2.6"/></symbol>
     <symbol id="i-cards" viewBox="0 0 32 32"><g fill="currentColor"><rect x="4" y="8" width="14.5" height="20" rx="2" transform="rotate(-14 11.25 18)" opacity=".6"/><rect x="12.5" y="3.5" width="14.5" height="20" rx="2" transform="rotate(9 19.75 13.5)"/></g><path d="M15.6 7.4 23.8 8.7" transform="rotate(9 19.75 13.5)" stroke="rgba(255,255,255,.75)" stroke-width="1.7" stroke-linecap="round"/><path d="M15 11.3 18.8 11.9" transform="rotate(9 19.75 13.5)" stroke="rgba(255,255,255,.5)" stroke-width="1.4" stroke-linecap="round"/></symbol>

@@ -151,7 +151,7 @@ Seit 26.09. umgedreht (Branch `elegant-ramanujan`, auf `main`): Rike beantwortet
 | Aus Versehen weggetippt | Das Fenster schließt beim ersten Tippen, auch nach 0,1 Sekunden. | wie eine N64-Textbox: Der erste Tipp zeigt sofort alles, der zweite schließt. Später „▶ Moment ansehen". |
 | Drei Dinge auf einmal gebucht | ein Fenster „… und 2 weitere" | jede Quest ihr eigener Moment |
 | Verloren, und jetzt? | rot, „−1 Pack" | eine Zeile Trost: „Das ist noch nicht vorbei." bei Spielen, die als Revanche wiederkommen können, sonst „Kopf hoch. Weiter geht's." (Entscheidung 7) |
-| Spruchrolle eingesetzt | rote Zeile „Spruchrolle eingesetzt", als wäre es ein Verlust | violett, Titel ZAUBER GEWIRKT, die Rolle entrollt sich, Runen glühen auf |
+| Spruchrolle eingesetzt | rote Zeile „Spruchrolle eingesetzt", als wäre es ein Verlust | violett, Titel FLUCH GESPROCHEN, die Rolle entrollt sich, Runen glühen auf |
 | Was kommt jetzt? | Der Nebel lichtet sich über der Zeile. | Dazu eine Titelkarte wie beim Betreten eines Ortes: groß „ERSTES WALDSTÜCK", darunter „Auge des Jägers". 1,5 Sekunden, verschwindet von selbst. |
 
 - **Reise:** Das ist der Herzschlag des Tages: neun Quests, zwei laufende, drei Duelle, das Kästchen.
@@ -179,7 +179,7 @@ Seit 26.09. umgedreht (Branch `elegant-ramanujan`, auf `main`): Rike beantwortet
 
 ### 3.8 AUSRÜSTUNG
 
-**Heute:** links fünf Item-Felder, rechts zwei Fähigkeiten, in der Mitte Dennis mit Okarina. Noch nicht Erspieltes ist ein leerer Platz. Was bei der aktuellen Quest geht, leuchtet, der restliche Besitz ist grau.
+**Heute (seit 27.09., Abschnitt 13):** links der Lederbeutel mit fünf Items, rechts zwei Fähigkeiten in Runenkreisen, in der Mitte Dennis mit Okarina im Bogenfenster. Noch nicht Erspieltes ist ein Schatten, dessen Form man erkennt. Deins = Farbe mit Goldrand, jetzt einsetzbar = leuchtet mit JETZT, verbraucht oder verloren = grau.
 
 | Dennis fragt sich | Heute da | Plan |
 |---|---|---|
@@ -321,7 +321,7 @@ Alles Neue aus Stufe 1 bis 3 entsteht gleich im neuen Look.
 | 1.7 | Log-Buch: Kopfhörer-Tafel, zurückblättern, nach dem Urteil lesen und hören | 3.5 | mittel |
 | 1.8 | Ton-Knopf, Audio-Sitzung auf dem iPhone | 3.1, 3.11 | klein |
 | 1.9 | Kästchen-Ansicht ohne Öffnen-Moment: Code groß, Packs, fehlende Ziffern mit Preis | 3.10 | mittel |
-| 1.10 | Zauber statt roter Zeile | 3.6 | klein |
+| 1.10 | Fluch statt roter Zeile | 3.6 | klein |
 
 ### Stufe 2: Erlebnis
 
@@ -537,7 +537,7 @@ Wunsch vom 26.09.: KARTE und QUESTS überschneiden sich inhaltlich. Dazu überal
 
 Auf Wunsch des Nutzers: „am Anfang noch einen Ticken mehr Onboarding“ und mehr Interaktion und Funktion auf der Karte. Gewählt: Karte lebt, Stationen antippen, echte Position per GPS, Höhe und Strecke.
 
-- **Prolog (3.2):** nach dem ersten PRESS START, einmal pro Handy (Demo und `?onboarding` jedes Mal). Rikes Fee fliegt ein, vier Tafeln wie in 3.2 (Text erscheint Buchstabe für Buchstabe, erster Tipp zeigt alles), Punkte zeigen den Fortschritt, ÜBERSPRINGEN oben rechts. Danach ein Rundgang in vier Schritten: Packs, Code, Z und R, Quest-Karte. Die Fee hat keinen Namen („Rike schickt mich“), Entscheidung 6 bleibt offen.
+- **Prolog (3.2):** nach dem ersten PRESS START, einmal pro Handy und nur am Anfang des Spiels (seit 27.09., Abschnitt 13; `?onboarding` jedes Mal). Rikes Fee fliegt ein, vier Tafeln wie in 3.2 (Text erscheint Buchstabe für Buchstabe, erster Tipp zeigt alles), Punkte zeigen den Fortschritt, ÜBERSPRINGEN oben rechts. Danach ein Rundgang in vier Schritten: Packs, Code, Z und R, Quest-Karte. Die Fee hat keinen Namen („Rike schickt mich“), Entscheidung 6 bleibt offen.
 - **Die Fee spricht alle Hinweise** (3.12): Sie sitzt in jeder Hinweisblase, auch im Onboarding der Ausrüstung. Freigestellt als `assets/fee.png`.
 - **Karte (3.7, Richtung B):** gegangener Weg golden, Dennis läuft zur neuen Station, sobald er die Karte ansieht (Rückgängig springt ohne Laufen), der Nebel treibt.
 - **Stationstafel:** Tippen auf eine Station zeigt Ort, Höhe, Kilometer ab Bahnhof, die Quests mit Status und im Nebel nur „1 Prüfung im Nebel“. Zeile oder zweites Tippen öffnet die Quest. An der Hütte das Kästchen mit Code, Packs und fehlenden Ziffern. Die Tafel liegt immer auf der anderen Seite als die Station.
@@ -545,3 +545,17 @@ Auf Wunsch des Nutzers: „am Anfang noch einen Ticken mehr Onboarding“ und me
 - **GPS:** freiwillig per Knopf, nur solange die Karte offen ist. Feenlicht auf dem Weg, weit weg die Luftlinie, ohne Erlaubnis ein Hinweis.
 - **Getestet:** `tests/karte.mjs`, `tests/nebel.mjs` prüft auch alle Stationstafeln, `tests/geraete.mjs` mit Prolog, Rundgang und Tafeln auf allen sechs Geräten.
 
+---
+
+## 13. Ausrüstung mit Schatten, Fluch statt Zauber, Onboarding nur am Anfang (umgesetzt am 27.09.)
+
+Wünsche vom 27.09.: Items und Fähigkeiten am Anfang leer, aber so, dass man erkennt, was es ist. Aufbewahrung spannender, das animierte Bild in der Mitte bleibt. Spruchrolle mystischer und Fluch statt Zauber. Onboarding lief später am Tag noch einmal.
+
+- **Schatten statt leerer Plätze** (ersetzt die Entscheidung „leere Plätze“ vom 25.09.): Was Dennis noch nicht hat, steht als dunkler Schatten mit offener Naht im Feld. Antippen zeigt den Tarnnamen und den Tarntext, dazu „Zu erbeuten bei …“ (nur wenn die Quest schon aus dem Nebel ist), sonst „Wartet noch im Nebel.“, nach einer Niederlage „Entgangen bei …“ (blasser Schatten). Die Belohnung auf der Quest-Karte zeigt denselben Schatten statt der Truhe, das Ergebnis-Fenster lässt ihn beim Entpuppen hell werden.
+- **Vier Zustände** (3.8 und 3.12): Schatten, Farbe mit Goldrand (deins, dazu ab und zu ein Glanz), leuchtet mit pulsierendem Ring und JETZT in der Textbox (einsetzbar), grau (verbraucht oder verloren). Besitz, der gerade nicht hilft, ist nicht mehr ausgegraut.
+- **Aufbewahrung:** Items in einem Lederbeutel mit Naht und Plakette, Fähigkeiten in Runenkreisen auf Nachthimmel (der Kreis dreht sich, das Zeichen schwebt). Dennis im Bogenfenster mit Steinrahmen, Licht von oben und schwebendem Staub (10.3). Auswahl mit goldenen Eckklammern (G.5). Neues Beutel-Symbol (2.5).
+- **Fund:** Was seit dem letzten Besuch dazugekommen ist, tritt beim nächsten Besuch der Ausrüstung aus dem Schatten (Lichtblitz, Funken, kurze Melodie) und trägt NEU, bis Dennis es antippt. Gemerkt pro Handy, beim ersten Besuch gilt alles als gesehen. Die Textbox nennt die Herkunft: „Erbeutet bei …“, „Eingesetzt bei …“.
+- **Spruchrolle:** „In dieser Rolle schläft ein alter Fluch. Entrolle sie in einem Spiel, und er erwacht. Welche Gestalt er annimmt, weiß niemand, bis er gesprochen ist.“ Beim Einsetzen: „Der Fluch ist gesprochen. Welche Gestalt er annimmt, enthüllt dir der Quest Master.“
+- **Onboarding nur am Anfang:** Prolog, Beutel-Fund und Hinweise der Fee kommen nur, solange noch keine Quest entschieden ist. Ein neues Handy, ein anderer Browser oder der Home-Bildschirm statt Safari (eigener Speicher) zeigen es später am Tag nicht mehr. Kommt der echte Stand erst nach PRESS START, verschwindet der Prolog still. Demo: nur mit `?demo=start`, `?onboarding` erzwingt es.
+- **Stilprobe repariert:** Seit dem Onboarding vom 26.09. fehlten ihr Prolog, Kartusche und Stationstafel, sie brach beim Laden ab. Jetzt wieder auf dem Stand von `index.html`.
+- **Geprüft:** `node app/engine.test.js`, `tests/karte.mjs` (neu: später am Tag kein Onboarding, auch auf einem neuen Handy mit echtem Stand), `tests/nebel.mjs` (neu: jedes Feld der Ausrüstung angetippt, nichts verraten), `tests/geraete.mjs` (0 Probleme auf allen sechs Geräten), `tests/probe.mjs`.

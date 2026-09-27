@@ -28,11 +28,11 @@
        stapel:   kann mehrfach besessen werden (Anzahl wird gezählt)
        einmalig: ist nach dem Einsetzen verbraucht
        symbol:   Sprite aus index.html
-       tarn:     So heißt das Item, solange Dennis es nicht erspielt hat (in der Vorschau einer Belohnung).
-                 Beim Gewinnen „entpuppt" es sich. In der Ausrüstung ist bis dahin nur ein leerer Platz.
+       tarn:     So heißt das Item, solange Dennis es nicht erspielt hat (Ausrüstung und Vorschau einer Belohnung).
+                 Beim Gewinnen „entpuppt" es sich. Bis dahin zeigt die Ausrüstung seinen Schatten: Die Form ist zu erkennen.
        Texte nennen keine Quest beim Namen, sonst verraten sie, was im Nebel liegt. */
     items: [
-      { id: "beutel", nr: "I1", gruppe: "item", name: "Dennis' Eier", kurz: "Eier", farbe: "#d9a441", symbol: "i-backpack",
+      { id: "beutel", nr: "I1", gruppe: "item", name: "Dennis' Eier", kurz: "Eier", farbe: "#d9a441", symbol: "i-beutel",
         text: "Klein, aber oho. Hier landet alles, was du dir erspielst.",
         tarn: { name: "Heiliger Beutel des Helden", kurz: "Beutel", text: "Seit jeher an deiner Seite. Was steckt wohl darin?" } },
       { id: "pistole_gross", nr: "I2", gruppe: "item", name: "Große Wasserpistole", kurz: "Pistole", farbe: "#4fb8e8", symbol: "i-pistol",
@@ -48,7 +48,7 @@
         text: "Eine Elbenklinge. Ein Schwert mehr heißt ein Versuch mehr.",
         tarn: { name: "Verrostete Klinge", kurz: "Klinge", text: "Alt und stumpf. Doch sie wartet auf ihren Moment." } },
       { id: "spruchrolle", nr: "F1", gruppe: "faehigkeit", stapel: true, einmalig: true, name: "Spruchrolle", kurz: "Rolle", farbe: "#c9a4ff", symbol: "i-scroll",
-        text: "Ein Zauber für ein Spiel. Was er bewirkt, zeigt sich erst beim Einsetzen.",
+        text: "In dieser Rolle schläft ein alter Fluch. Entrolle sie in einem Spiel, und er erwacht. Welche Gestalt er annimmt, weiß niemand, bis er gesprochen ist.",
         tarn: { name: "Versiegeltes Pergament", kurz: "Pergament", text: "Niemand weiß, was darauf steht." } },
       { id: "schild", nr: "F3", gruppe: "faehigkeit", einmalig: true, name: "Schild des Bundes", kurz: "Schild", farbe: "#7aa7ff", symbol: "i-shield",
         text: "Wiederhole ein verlorenes Duell. Einmal.",
