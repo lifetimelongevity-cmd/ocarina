@@ -1,7 +1,7 @@
 // Test der Logik v1: node app/engine.test.js
 const assert = require("assert");
 const config = require("./config.js");
-const { derive, emptyDoc, normalize, showdownDuelle, einsetzbar, jetztEinsetzbar } = require("./engine.js");
+const { derive, emptyDoc, normalize, mitEintraegen, showdownDuelle, einsetzbar, jetztEinsetzbar } = require("./engine.js");
 
 const reihe = config.quests.filter(q => q.typ !== "lauf");
 const itemIds = config.items.map(i => i.id);
@@ -182,5 +182,41 @@ assert.strictEqual(W.ziel.id, "gipfel");
 assert.ok(W.laenge > 3000 && W.laenge < 4500, "Weg etwa 3,5 km");
 assert.ok(W.hoeheBei(0) < 800 && W.ziel.hoehe > 1200, "Höhen vom See zum Gipfel");
 assert.ok(W.projizieren(48.1402, 11.5586).abstand > 40000, "München ist weit weg vom Weg");
+
+// 17. Dennis trägt selbst ein (Kanal „dennis"): Ergebnis, Einsatz, Duell, Amulett, Ziffer. Was der Admin entschieden hat, gilt vor.
+const mit = (doc, ein) => derive(config, mitEintraegen(config, doc, ein));
+s = mit({}, { q_logbuch: { status: "bestanden", zeit: 10 }, q_klingen: { status: "verloren", zeit: 20 } });
+assert.strictEqual(s.quests.logbuch, "bestanden");
+assert.strictEqual(s.quests.klingen, "verloren");
+assert.strictEqual(s.next, "wirbel");
+assert.strictEqual(s.packs, stufen([P("logbuch", "win"), P("klingen", "lose")]));
+// Der Admin hat schon anders entschieden: seine Buchung zählt
+assert.strictEqual(mit({ quests: { logbuch: "verloren" } }, { q_logbuch: { status: "bestanden", zeit: 10 } }).quests.logbuch, "verloren");
+// Unsinn wird ignoriert
+s = mit({}, { q_gibtsnicht: { status: "bestanden" }, q_logbuch: { status: "vielleicht" }, e_1: { item: "zauberstab", quest: "auge" }, d_1: { ergebnis: "remis" }, z_9: { zeit: 1 }, x_1: {} });
+assert.strictEqual(s.quests.logbuch, "offen");
+assert.deepStrictEqual(s.duelle, {});
+assert.deepStrictEqual(s.ziffern, [null, null, null, null]);
+// Einsatz: Spruchrolle aus der Prophezeiung wird verbraucht, der Einsatz steht bei der Quest
+s = mit({ quests: { prophezeiung: "laeuft" }, zaehler: { prophezeiung: 1 } }, { e_a: { item: "spruchrolle", quest: "logbuch", zeit: 5 } });
+assert.strictEqual(s.anzahl.spruchrolle, 0);
+assert.deepStrictEqual(s.eingesetzt.logbuch, ["spruchrolle"]);
+// Laufende Quest: Amulett gefunden und zusammengesetzt, obwohl der Admin nur „läuft" gesetzt hat
+s = mit({ quests: { amulett: "laeuft" } }, { s_amulett_gefunden: { zeit: 5 }, q_amulett: { status: "bestanden", zeit: 9 } });
+assert.strictEqual(s.schritte.amulett.gefunden, true);
+assert.strictEqual(s.quests.amulett, "bestanden");
+assert.strictEqual(s.packs, P("amulett", "win"));
+// Duelle: Dennis füllt Lücken, der Admin hat Vorrang
+s = mit({ duelle: { "1": "niederlage" } }, { d_1: { ergebnis: "sieg", zeit: 1 }, d_2: { ergebnis: "sieg", zeit: 2 } });
+assert.deepStrictEqual(s.duelle, { "1": "niederlage", "2": "sieg" });
+// Ziffer am Kästchen gekauft: kostet Packs in zeitlicher Reihenfolge, zweimal dieselbe Ziffer zählt einmal
+s = mit({ quests: { logbuch: "bestanden", klingen: "bestanden" }, zeiten: { logbuch: 1, klingen: 2 }, buchungen: [{ id: "b", packs: 0, grund: "x", ziffer: 1 }] }, { z_3: { zeit: 5 }, z_1: { zeit: 6 } });
+assert.deepStrictEqual(s.ziffern, [7, 4, 2, null]);
+assert.deepStrictEqual(s.gekauft, [true, false, true, false]);
+assert.strictEqual(s.packs, P("logbuch", "win") + P("klingen", "win") - config.ziffer_preis);
+// Das Dokument des Admins bleibt unverändert
+const adminDoc = { quests: { logbuch: "bestanden" } };
+mitEintraegen(config, adminDoc, { q_klingen: { status: "bestanden", zeit: 1 } });
+assert.deepStrictEqual(adminDoc, { quests: { logbuch: "bestanden" } });
 
 console.log("Alle Tests bestanden.");

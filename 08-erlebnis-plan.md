@@ -559,3 +559,21 @@ Wünsche vom 27.09.: Items und Fähigkeiten am Anfang leer, aber so, dass man er
 - **Onboarding nur am Anfang:** Prolog, Beutel-Fund und Hinweise der Fee kommen nur, solange noch keine Quest entschieden ist. Ein neues Handy, ein anderer Browser oder der Home-Bildschirm statt Safari (eigener Speicher) zeigen es später am Tag nicht mehr. Kommt der echte Stand erst nach PRESS START, verschwindet der Prolog still. Demo: nur mit `?demo=start`, `?onboarding` erzwingt es.
 - **Stilprobe repariert:** Seit dem Onboarding vom 26.09. fehlten ihr Prolog, Kartusche und Stationstafel, sie brach beim Laden ab. Jetzt wieder auf dem Stand von `index.html`.
 - **Geprüft:** `node app/engine.test.js`, `tests/karte.mjs` (neu: später am Tag kein Onboarding, auch auf einem neuen Handy mit echtem Stand), `tests/nebel.mjs` (neu: jedes Feld der Ausrüstung angetippt, nichts verraten), `tests/geraete.mjs` (0 Probleme auf allen sechs Geräten), `tests/probe.mjs`.
+
+---
+
+## 14. Dennis trägt selbst ein, du bist Schiedsrichter (umgesetzt am 27.09., zweiter Teil)
+
+Wunsch vom 27.09.: Die Momente hängen davon ab, dass der Quest Master bucht, und Dennis sieht sie nur, wenn er gerade das Menü offen hat. Er soll selbst sagen, ob er bestanden hat, mit Bestätigung, und Items und Fähigkeiten selbst einlösen. Der Quest Master kann zurücknehmen.
+
+Entschieden am 27.09.: Siegel gedrückt halten, Dennis trägt auch Duelle, Rikes Amulett und Ziffern am Kästchen ein, beim Zurücknehmen sagt es ihm die Fee, direkt bauen.
+
+- **Siegel:** Jede Eingabe öffnet ein Fenster mit dem, was passiert (Sieg- oder Niederlage-Zeile, beim Einsetzen die Wirkung). Das Siegel wird gedrückt gehalten, bis sich der Ring schließt (knapp eine Sekunde). Ein kurzer Tipp löst nichts aus. Danach läuft sofort der Moment, auch ohne Netz.
+- **Quest-Karte:** BESTANDEN in der Zeile SIEG, VERLOREN in der Zeile NIEDERLAGE, nur bei der Quest, die dran ist. Das Log-Buch erst, wenn alle sieben Antworten besiegelt sind. Rikes Amulett: GEFUNDEN in der Zeile STAND, danach ZUSAMMENGESETZT (`ergebnisWort` in `config.js`).
+- **Einsetzen:** Die leuchtenden Symbole unter EINSETZBAR sind Knöpfe, in der Ausrüstung steht EINSETZEN in der Textbox. Passt ein Item bei mehreren laufenden Quests, fragt das Fenster wo. Der Text im Fenster kommt aus `einsatz` in `config.js` (Spruchrolle: „Der Fluch erwacht …“).
+- **Gipfel (3.9):** Duell-Tafel mit den drei Duellen, das nächste offene hat SIEG und NIEDERLAGE. Nach der Mehrheit erscheint nur noch der passende Knopf für die Prüfung. Der Quest-Text weicht der Tafel.
+- **Kästchen:** Nach der letzten Quest führt „Zum Kästchen“ im HUD zum Code. Fehlende Ziffern tauscht Dennis dort gegen Packs, solange sie reichen.
+- **Zurücknehmen:** Der Admin zeigt Dennis' Einträge live mit Uhrzeit und Zurücknehmen, dazu eine kurze Meldung bei jedem neuen Eintrag. Bei Dennis erscheint die Fee mit ZURÜCKGENOMMEN und dem Satz „Der Quest Master hat das Ergebnis von … zurückgenommen. Trag es neu ein.“ Das gilt auch für Rückgängig im Admin (vorher still).
+- **Verpasste Momente (3.6, Stufe 1.1):** Jedes Handy merkt sich den zuletzt gesehenen Stand. Nach PRESS START laufen verpasste Momente nacheinander, jede Quest einzeln in der Reihenfolge, in der sie entschieden wurde. Die nächste Quest bleibt so lange im Nebel.
+- **Technik:** eigener Kanal `/spiele/<spiel>-dennis` (wie das Log-Buch, Einträge einzeln, offline gepuffert). `engine.js` `mitEintraegen()` rechnet sie ein, was der Admin entschieden hat, gilt vor. Rückgängig im Admin stellt zurückgenommene Einträge wieder her. Firebase-Regeln in `app/README.md`.
+- **Geprüft:** `node app/engine.test.js` (neue Fälle für Einträge), `tests/selbst.mjs` (Admin und Dennis zusammen: Siegel, kurzer Tipp, Moment, Zurücknehmen, Rückgängig, Einsatz, verpasster Moment nach PRESS START, Duelle, Amulett, Ziffer), `tests/geraete.mjs` mit dem Siegel-Fenster auf allen sechs Geräten, `tests/probe.mjs`, `tests/nebel.mjs`, `tests/karte.mjs`.

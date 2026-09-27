@@ -209,6 +209,45 @@
     return set;
   }
 
+  /* Dennis' Einträge (store.js, Kanal „dennis") in das Dokument des Admins einrechnen. Ergibt ein Dokument wie vom Admin,
+     derive() rechnet damit wie immer. Was der Admin selbst entschieden hat, gilt vor Dennis' Eintrag.
+       q_<quest>             { status: "bestanden" | "verloren", zeit }   Ergebnis einer Quest (bei laufenden auch nach „läuft")
+       e_<id>                { item, quest, zeit }                          Einsatz eines Items oder einer Fähigkeit
+       d_<nr>                { ergebnis: "sieg" | "niederlage", zeit }      Duell im Showdown
+       s_<quest>_<schritt>   { zeit }                                      Schritt einer laufenden Quest (Amulett gefunden)
+       z_<nr>                { zeit }                                      Ziffer am Kästchen gegen Packs getauscht
+     Eingerechnete Einsätze und Käufe tragen von: "dennis" und ihren Schlüssel als id. */
+  const ENTSCHIEDEN = ["bestanden", "verloren", "beendet"];
+  function mitEintraegen(config, rawDoc, eintraege) {
+    const out = JSON.parse(JSON.stringify(normalize(rawDoc)));
+    const ein = obj(eintraege);
+    const quest = id => config.quests.find(q => q.id === id);
+    Object.keys(ein).sort((a, b) => (Number(obj(ein[a]).zeit) || 0) - (Number(obj(ein[b]).zeit) || 0)).forEach(k => {
+      const e = obj(ein[k]), zeit = Number(e.zeit) || 0, i = k.indexOf("_");
+      const art = k.slice(0, i), rest = k.slice(i + 1);
+      if (art === "q") {
+        if (!quest(rest) || !["bestanden", "verloren"].includes(e.status) || ENTSCHIEDEN.includes(out.quests[rest])) return;
+        out.quests[rest] = e.status;
+        out.zeiten[rest] = zeit;
+      } else if (art === "e") {
+        if (!itemCfg(config, e.item) || !quest(e.quest)) return;
+        out.einsaetze.push({ id: k, item: e.item, quest: e.quest, zeit, von: "dennis" });
+      } else if (art === "d") {
+        if (!["sieg", "niederlage"].includes(e.ergebnis) || out.duelle[rest]) return;
+        out.duelle[rest] = e.ergebnis;
+      } else if (art === "s") {
+        const j = rest.indexOf("_"), qid = rest.slice(0, j), schritt = rest.slice(j + 1), q = quest(qid);
+        if (!q || !(q.schritte || []).some(x => x.id === schritt)) return;
+        out.schritte[qid] = { ...obj(out.schritte[qid]), [schritt]: true };
+      } else if (art === "z") {
+        const nr = Math.trunc(Number(rest));
+        if (!(nr >= 1 && nr <= config.code.length) || out.buchungen.some(b => Number(b.ziffer) === nr)) return;
+        out.buchungen.push({ id: k, packs: -(config.ziffer_preis || 0), grund: `Ziffer ${nr} gekauft`, ziffer: nr, zeit, von: "dennis" });
+      }
+    });
+    return out;
+  }
+
   // Kurztext der Effekte einer Quest, für den Admin
   function effektText(config, effekt, gewonnen) {
     const teile = [];
@@ -222,7 +261,7 @@
     return teile.length ? teile.join(", ") : "nichts";
   }
 
-  const api = { derive, emptyDoc, normalize, effektText, showdownDuelle, einsetzbar, aktuelleQuests, jetztEinsetzbar, STATUS, STATUS_LAUF };
+  const api = { derive, emptyDoc, normalize, mitEintraegen, effektText, showdownDuelle, einsetzbar, aktuelleQuests, jetztEinsetzbar, STATUS, STATUS_LAUF };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.QuestEngine = api;
 })(typeof window !== "undefined" ? window : globalThis);

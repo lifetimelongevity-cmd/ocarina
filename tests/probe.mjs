@@ -50,13 +50,14 @@ pruefe((await dennis.textContent('#hudNextName')).includes('Bundes'), 'Dennis ze
 pruefe((await echt.textContent('#nextTitle')).includes('Log-Buch') && (await echt.textContent('#packs')) === '0', 'Echtes Spiel bleibt unberührt');
 await admin.screenshot({ path: `${OUT}/probe-admin.png`, fullPage: true });
 
-// Vertippt: Verloren gebucht, Dennis sieht das Fenster, Rückgängig schließt es still
+// Vertippt: Verloren gebucht, Dennis sieht das Fenster. Rückgängig schließt es, und die Fee sagt Dennis, dass es zurückgenommen ist
 await admin.click('#nextLose'); await warte(700);
 pruefe(!(await dennis.$eval('#overlay', e => e.hidden)) && (await dennis.textContent('#overlay')).includes('VERLOREN'), 'Dennis sieht „VERLOREN"');
 await dennis.screenshot({ path: `${OUT}/probe-dennis-verloren.png` });
 pruefe((await admin.textContent('#undoWas')).includes('Prüfung des Bundes: verloren'), 'Rückgängig zeigt, was es zurücknimmt');
 await admin.click('#undo'); await warte(700);
-pruefe(await dennis.$eval('#overlay', e => e.hidden), 'Rückgängig: Fenster bei Dennis geht still zu');
+const zurueck = await dennis.textContent('#overlay');
+pruefe(!zurueck.includes('VERLOREN') && zurueck.includes('ZURÜCKGENOMMEN') && zurueck.includes('Prüfung des Bundes'), 'Rückgängig: Ergebnis-Fenster zu, die Fee meldet es');
 pruefe((await admin.textContent('#nextTitle')).includes('Bundes'), 'Rückgängig: Bund ist wieder offen');
 pruefe((await admin.textContent('#undoWas')).includes('Vor dem Bund'), 'Rückgängig: davor liegt der Sprung');
 

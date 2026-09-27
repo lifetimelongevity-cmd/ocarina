@@ -27,6 +27,7 @@
        gruppe:   "item" (Gegenstand, links in der Ausrüstung) oder "faehigkeit" (Magie, rechts)
        stapel:   kann mehrfach besessen werden (Anzahl wird gezählt)
        einmalig: ist nach dem Einsetzen verbraucht
+       einsatz:  was im Siegel-Fenster steht, wenn Dennis es einsetzt (sonst text)
        symbol:   Sprite aus index.html
        tarn:     So heißt das Item, solange Dennis es nicht erspielt hat (Ausrüstung und Vorschau einer Belohnung).
                  Beim Gewinnen „entpuppt" es sich. Bis dahin zeigt die Ausrüstung seinen Schatten: Die Form ist zu erkennen.
@@ -49,9 +50,11 @@
         tarn: { name: "Verrostete Klinge", kurz: "Klinge", text: "Alt und stumpf. Doch sie wartet auf ihren Moment." } },
       { id: "spruchrolle", nr: "F1", gruppe: "faehigkeit", stapel: true, einmalig: true, name: "Spruchrolle", kurz: "Rolle", farbe: "#c9a4ff", symbol: "i-scroll",
         text: "In dieser Rolle schläft ein alter Fluch. Entrolle sie in einem Spiel, und er erwacht. Welche Gestalt er annimmt, weiß niemand, bis er gesprochen ist.",
+        einsatz: "Der Fluch erwacht. Welche Gestalt er annimmt, enthüllt dir der Quest Master.",
         tarn: { name: "Versiegeltes Pergament", kurz: "Pergament", text: "Niemand weiß, was darauf steht." } },
       { id: "schild", nr: "F3", gruppe: "faehigkeit", einmalig: true, name: "Schild des Bundes", kurz: "Schild", farbe: "#7aa7ff", symbol: "i-shield",
         text: "Wiederhole ein verlorenes Duell. Einmal.",
+        einsatz: "Du spielst ein verlorenes Duell noch einmal. Besiegle danach das neue Ergebnis.",
         tarn: { name: "Zerbrochenes Wappen", kurz: "Wappen", text: "Ein Bruchstück eines alten Bundes. Es schützt, wer es heilt." } }
     ],
 
@@ -94,7 +97,8 @@
        qm:         Notiz nur für den Quest Master
        farbe, emblem: Medaillon einer Prüfung (Sprite aus index.html)
        win / lose: packs (Zahl), items (Liste), ziffer (1 bis 4, nur bei win)
-       einsetzbar: Items und Fähigkeiten, die Dennis hier einsetzen kann (bucht der Quest Master)
+       einsetzbar: Items und Fähigkeiten, die Dennis hier einsetzen kann (er besiegelt selbst, der Quest Master kann zurücknehmen)
+       ergebnisWort: Wort auf dem Knopf, mit dem Dennis den Sieg besiegelt (sonst „Bestanden")
        duell:      ein Spiel gegen einen aus dem Bund
        revanche:   kann im Showdown als Revanche wiederkommen, wenn Dennis es verloren hat
        Belohnungskette (Vorschlag 25.09.): jeder Sieg bringt das Item für ein späteres Spiel.
@@ -105,7 +109,7 @@
       { id: "logbuch", nr: 1, typ: "kern", name: "Log-Buch", ort: "Zug nach München", station: "zug",
         farbe: "#4a8fe8", emblem: "z-water",
         text: "Rike hat sieben Fragen über dich beantwortet. Schreib, was sie gesagt hat, dann hörst du ihre Antwort.",
-        qm: "Dennis tippt seine Antworten im Menü, danach spielt Rikes Sprachnachricht. Seine Antworten stehen unten im Admin.",
+        qm: "Dennis tippt seine Antworten im Menü, danach spielt Rikes Sprachnachricht. Seine Antworten stehen unten im Admin. Das Ergebnis trägt er danach selbst ein.",
         win:  { packs: 1, ziffer: 1 },
         lose: { packs: 0 },
         einsetzbar: [], logbuch: true },
@@ -183,8 +187,8 @@
       { id: "amulett", nr: 15, typ: "lauf", name: "Rikes Amulett", ort: "Den ganzen Tag",
         farbe: "#e56aa0", emblem: "i-amulet",
         text: "Rikes Brosche ist versteckt. Finde sie rechtzeitig und setz sie zusammen, bevor der Tag endet.",
-        qm: "Erst finden (Frist), dann den ganzen Tag knobeln. Gelöst = bestanden. Versteck, Frist und Packs offen.",
-        schritte: [{ id: "gefunden", name: "Gefunden" }],
+        qm: "Erst finden (Frist), dann den ganzen Tag knobeln. Gelöst = bestanden. Dennis meldet Gefunden und Zusammengesetzt selbst, Verloren buchst du. Versteck, Frist und Packs offen.",
+        schritte: [{ id: "gefunden", name: "Gefunden" }], ergebnisWort: "Zusammengesetzt",
         win:  { packs: 3 },
         lose: { packs: 0 },
         einsetzbar: ["spruchrolle"] }

@@ -11,7 +11,8 @@
         store.subscribe(fn)   fn(doc, info) bei jedem neuen Stand, sofort mit dem letzten bekannten Stand
         store.save(doc)       nur Admin
         store.onStatus(fn)    fn({ online, pending, stand })
-   Probelauf (?probe): siehe unten, QuestStore.probe(config). */
+   Probelauf (?probe): siehe unten, QuestStore.probe(config).
+   Dazu die Kanäle, in die Dennis schreibt: QuestStore.logbuch(config) und QuestStore.eintraege(config). */
 (function (root) {
   const E = root.QuestEngine;
 
@@ -163,17 +164,18 @@
     return localStore(cfg);
   }
 
-  /* Log-Buch: die einzige Stelle, an der Dennis schreibt. Eigener Pfad neben dem Spiel
-     (/spiele/<spielId>-logbuch), damit das Speichern im Admin seine Antworten nie überschreibt.
-     Jede Antwort wird einzeln geschrieben: { "1": { antwort, zeit }, … }. Ohne Netz bleibt sie im
-     Gerät und wird nachgereicht.
-     API: const lb = QuestStore.logbuch(config)
-          lb.subscribe(fn)     fn(antworten) bei jedem neuen Stand
-          lb.besiegeln(nr, text) */
-  function logbuch(cfg) {
+  /* Kanäle, in die Dennis schreibt: eigene Pfade neben dem Spiel (/spiele/<spielId>-<name>), damit das Speichern
+     im Admin sie nie überschreibt. Jeder Eintrag wird einzeln unter seinem Schlüssel geschrieben ({ schluessel: eintrag }).
+     Ohne Netz bleibt er im Gerät und wird nachgereicht. Der Admin liest mit und kann einzelne Einträge löschen.
+     API: const k = kanal(config, name, speicherName)
+          k.subscribe(fn)          fn(eintraege) bei jedem neuen Stand
+          k.setzen(schluessel, e)  schreiben (Dennis, oder der Admin beim Wiederherstellen)
+          k.loeschen(schluessel)   nur Admin: einen Eintrag löschen (Promise, scheitert ohne Netz)
+          k.zuruecksetzen()        nur Admin: alle Einträge löschen */
+  function kanal(cfg, name, speicherName) {
     const s = cfg.speicher || {};
-    const id = (s.spielId || "standard") + "-logbuch";
-    const key = "dennis-quest-logbuch:" + id, pendingKey = key + ":pending";
+    const id = (s.spielId || "standard") + "-" + name;
+    const key = "dennis-quest-" + speicherName + ":" + id, pendingKey = key + ":pending";
     const subs = [];
     const lesen = k => { try { return JSON.parse(localStorage.getItem(k) || "null") || {}; } catch (_) { return {}; } };
     const schreiben = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (_) {} };
@@ -182,20 +184,24 @@
     const melden = () => subs.forEach(fn => fn(alle()));
     const firebase = s.typ === "firebase" && s.databaseURL;
     const base = firebase ? s.databaseURL.replace(/\/+$/, "") + "/spiele/" + encodeURIComponent(id) : "";
-
-    function uebernehmen(data) {
-      const next = obj(data);
-      if (JSON.stringify(next) === JSON.stringify(remote)) return;
-      remote = next;
-      schreiben(key, remote);
-      Object.keys(pending).forEach(n => { if (remote[n]) delete pending[n]; });
-      schreiben(pendingKey, pending);
-      melden();
-    }
     const obj = x => {
       if (Array.isArray(x)) { const o = {}; x.forEach((v, i) => { if (v) o[String(i)] = v; }); return o; }
       return x && typeof x === "object" ? x : {};
     };
+    // Vergleich ohne Rücksicht auf die Reihenfolge der Schlüssel (Firebase liefert sie sortiert zurück)
+    const kanon = x => JSON.stringify(x, (k, v) => v && typeof v === "object" && !Array.isArray(v) ? Object.fromEntries(Object.keys(v).sort().map(y => [y, v[y]])) : v);
+    const gleich = (a, b) => kanon(a) === kanon(b);
+
+    function uebernehmen(data) {
+      const next = obj(data);
+      if (gleich(next, remote)) return;
+      remote = next;
+      schreiben(key, remote);
+      // Angekommen ist ein Eintrag, wenn der Server genau ihn hat (gleiche Zeit)
+      Object.keys(pending).forEach(n => { if (remote[n] && gleich(remote[n], pending[n])) delete pending[n]; });
+      schreiben(pendingKey, pending);
+      melden();
+    }
 
     let flushing = false;
     async function flush() {
@@ -205,10 +211,11 @@
       flushing = true;
       try {
         for (const n of offen) {
-          const res = await fetch(base + "/" + encodeURIComponent(n) + ".json", { method: "PUT", body: JSON.stringify(pending[n]) });
+          const e = pending[n];
+          const res = await fetch(base + "/" + encodeURIComponent(n) + ".json", { method: "PUT", body: JSON.stringify(e) });
           if (!res.ok) throw new Error("HTTP " + res.status);
-          remote = { ...remote, [n]: pending[n] };
-          delete pending[n];
+          remote = { ...remote, [n]: e };
+          if (gleich(pending[n], e)) delete pending[n];
         }
         schreiben(key, remote); schreiben(pendingKey, pending);
       } catch (_) { /* später noch einmal */ }
@@ -245,14 +252,23 @@
 
     return {
       subscribe(fn) { subs.push(fn); fn(alle()); },
-      besiegeln(nr, text) {
-        const eintrag = { antwort: String(text).slice(0, 500), zeit: Date.now() };
-        if (firebase) { pending[String(nr)] = eintrag; schreiben(pendingKey, pending); }
-        else { remote = { ...remote, [String(nr)]: eintrag }; schreiben(key, remote); }
+      setzen(n, eintrag) {
+        n = String(n);
+        if (firebase) { pending[n] = eintrag; schreiben(pendingKey, pending); }
+        else { remote = { ...remote, [n]: eintrag }; schreiben(key, remote); }
         melden();
         return flush();
       },
-      zuruecksetzen() {                              // nur Admin: alle Antworten löschen
+      loeschen(n) {
+        n = String(n);
+        if (!firebase) { const r = { ...remote }; delete r[n]; delete pending[n]; remote = r; schreiben(key, remote); schreiben(pendingKey, pending); melden(); return Promise.resolve(); }
+        return fetch(base + "/" + encodeURIComponent(n) + ".json", { method: "DELETE" }).then(res => {
+          if (!res.ok) throw new Error("HTTP " + res.status);
+          const r = { ...remote }; delete r[n]; delete pending[n]; remote = r;
+          schreiben(key, remote); schreiben(pendingKey, pending); melden();
+        });
+      },
+      zuruecksetzen() {
         pending = {}; schreiben(pendingKey, pending);
         remote = {}; schreiben(key, remote); melden();
         if (firebase) return fetch(base + ".json", { method: "DELETE" }).catch(() => {});
@@ -260,6 +276,21 @@
       }
     };
   }
+
+  /* Log-Buch: Dennis' Antworten, { "1": { antwort, zeit }, … }
+     API: const lb = QuestStore.logbuch(config), lb.subscribe(fn), lb.besiegeln(nr, text), lb.zuruecksetzen() */
+  function logbuch(cfg) {
+    const k = kanal(cfg, "logbuch", "logbuch");
+    return {
+      subscribe: k.subscribe, zuruecksetzen: k.zuruecksetzen,
+      besiegeln(nr, text) { return k.setzen(String(nr), { antwort: String(text).slice(0, 500), zeit: Date.now() }); }
+    };
+  }
+
+  /* Dennis' Einträge: was er selbst besiegelt (Ergebnis, Einsatz, Duell, Amulett, Ziffer). engine.js führt sie mit dem
+     Dokument des Admins zusammen (mitEintraegen). Schlüssel: q_<quest>, e_<id>, d_<nr>, s_<quest>_<schritt>, z_<nr>.
+     API: const ein = QuestStore.eintraege(config), ein.subscribe(fn), ein.setzen(schluessel, e), ein.loeschen(schluessel) */
+  function eintraege(cfg) { return kanal(cfg, "dennis", "eintraege"); }
 
   /* Probelauf: ?probe in der Adresse (Admin und Dennis). Ein eigenes Spiel neben dem echten
      (<spielId>-probe, Log-Buch <spielId>-probe-logbuch), gleiche Regeln, das echte Spiel bleibt unberührt.
@@ -269,5 +300,5 @@
     return PROBE ? { ...cfg, speicher: { ...cfg.speicher, spielId: (cfg.speicher.spielId || "standard") + "-probe" } } : cfg;
   }
 
-  root.QuestStore = { create, logbuch, probe, PROBE };
+  root.QuestStore = { create, logbuch, eintraege, probe, PROBE };
 })(window);
