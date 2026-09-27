@@ -3,6 +3,7 @@
      Drei Seiten im Ring: KARTE · QUESTS · AUSRÜSTUNG. HUD: Packs, nächste Quest, Code.
      Liest den Stand. Schreibt nur eins: Dennis' Antworten im Log-Buch (eigener Pfad).
      ?demo zeigt einen Beispielstand ohne Firebase (auch ?demo=start, ?demo=bund, ?demo=ende), ?direkt ohne Startbildschirm,
+     ?onboarding zeigt Prolog und Hinweise der Fee auch später am Tag,
      ?probe liest den Probelauf des Quest Masters statt des echten Spiels (roter Rahmen). */
   const C = window.QuestStore.probe(window.GAME_CONFIG);
   const PROBE = window.QuestStore.PROBE;
@@ -22,10 +23,17 @@
   /* ---------- Speicher: echt, Probelauf oder Demo ---------- */
   const DEMO = params.has("demo");
   document.documentElement.classList.toggle("probe", PROBE && !DEMO);
-  // Onboarding einmal pro Handy. In der Demo und mit ?onboarding jedes Mal neu. Der Probelauf merkt es sich getrennt.
+  // Onboarding (Prolog, Beutel, Hinweise der Fee) nur am Anfang des Spiels und einmal pro Handy. Ist schon eine Quest
+  // entschieden, kennt Dennis das Menü: Ein neues Handy, ein anderer Browser oder der Home-Bildschirm statt Safari
+  // (eigener Speicher) zeigen es dann nicht noch einmal. Die Demo merkt sich nichts, zeigt es also nur mit ?demo=start.
+  // ?onboarding zeigt es immer. Der Probelauf merkt es sich getrennt.
+  const OB_ERZWINGEN = params.has("onboarding");
+  const spaeter = () => !OB_ERZWINGEN && !!state && state.zaehler.erledigt > 0;
+  const obGemerkt = key => { try { return !DEMO && !OB_ERZWINGEN && localStorage.getItem(key) === "1"; } catch (e) { return false; } };
+  const obMerken = key => { try { if (!DEMO) localStorage.setItem(key, "1"); } catch (e) {} };
   const OB_KEY = "dq-onboarding-v1" + (PROBE ? "-probe" : "");
-  let onboarded = false;
-  try { onboarded = !DEMO && !params.has("onboarding") && localStorage.getItem(OB_KEY) === "1"; } catch (e) {}
+  let beutelGezeigt = obGemerkt(OB_KEY);
+  const onboarded = () => beutelGezeigt || spaeter();
   const DEMO_DOCS = {
     start: { quests: {} },
     mitte: {
@@ -66,13 +74,19 @@
   const $ = s => document.querySelector(s);
   const questById = id => C.quests.find(q => q.id === id);
   const itemById = id => C.items.find(i => i.id === id);
-  // Was Dennis von einem Item sieht: vor dem ersten Erspielen die Tarnung (nur in der Vorschau einer Belohnung),
-  // danach das echte Ding. Der Beutel ist Startitem: seine Tarnung fällt beim ersten Besuch der Ausrüstung.
-  const getarnt = id => !!itemById(id).tarn && (id === "beutel" ? !onboarded : state.items[id] === "nicht");
+  // Was Dennis von einem Item sieht: Solange er es nicht erspielt hat, nur den Schatten (die Form ist zu erkennen)
+  // und die Tarnung als Name. Beim Gewinnen „entpuppt" es sich. Der Beutel ist Startitem: seine Tarnung fällt beim
+  // ersten Besuch der Ausrüstung.
+  const verborgen = id => id === "beutel" ? !onboarded() : state.items[id] === "nicht";
+  const getarnt = id => !!itemById(id).tarn && verborgen(id);
   const itemSicht = id => {
     const x = itemById(id);
-    return getarnt(id) ? { ...x, ...x.tarn, symbol: "i-chest" } : x;
+    return getarnt(id) ? { ...x, ...x.tarn } : x;
   };
+  // Welche Quest ein Item bringt (Sieg oder Treffer), für „Erbeutet bei" und „Zu erbeuten bei"
+  const quelle = id => C.quests.find(q => (q.win && q.win.items || []).includes(id) || (q.zaehler && q.zaehler.proTreffer.items || []).includes(id));
+  // Nicht erspielt, und die Quest, die es bringt, ist schon vorbei (verloren, oder ohne Treffer beendet)
+  const entgangen = id => { const q = verborgen(id) && quelle(id); return !!q && !["offen", "laeuft"].includes(state.quests[q.id]); };
   const useSvg = (id, cls = "") => `<svg class="${cls}" aria-hidden="true"><use href="#${id}"></use></svg>`;
   const cardSvg = (cls = "") => `<svg class="ic-card ${cls}" aria-hidden="true"><use href="#${cls.includes("empty") ? "i-card-empty" : "i-card"}"></use></svg>`;
   const packsWort = n => Math.abs(n) === 1 ? "Pack" : "Packs";
@@ -110,6 +124,7 @@
     nebel:    [[1047, .05], [1319, .05], [1568, .05], [2093, .2]],
     zauber:   [[784, .07], [988, .07], [1175, .07], [1568, .07], [1175, .07], [1568, .3]],
     siegel:   [[262, .08], [392, .3]],
+    fund:     [[659, .07], [880, .07], [1175, .07], [1760, .32]],
     // Platzhalter, solange Rikes Sprachnachricht fehlt: die ersten Töne eines Liebesthemas (eigene Tonfolge)
     stimme:   [[659, .3], [784, .3], [880, .45], [784, .3], [659, .6]]
   };
@@ -174,8 +189,8 @@
       out.push(`<span class="chip plus"><span class="mini-tumbler">${v == null ? "?" : v}</span>Ziffer ${effekt.ziffer}</span>`);
     }
     (effekt.items || []).forEach(id => {
-      const x = itemSicht(id);
-      out.push(`<span class="chip${gewonnen ? "" : " minus"}"><span class="${gewonnen ? "" : "x-over"}" style="color:${x.farbe}">${useSvg(x.symbol)}</span>${esc(x.kurz)}${gewonnen ? "" : " weg"}</span>`);
+      const x = itemSicht(id), cls = [gewonnen ? "" : "x-over", verborgen(id) ? "schatten" : ""].join(" ").trim();
+      out.push(`<span class="chip${gewonnen ? "" : " minus"}"><span class="${cls}" style="color:${x.farbe}">${useSvg(x.symbol)}</span>${esc(x.kurz)}${gewonnen ? "" : " weg"}</span>`);
     });
     return out.length ? out.join("") : `<span class="chip none">nichts</span>`;
   }
@@ -213,12 +228,17 @@
     });
     buildLegende();
 
-    // Ausrüstung: links Items, rechts Fähigkeiten. Noch nicht Erspieltes ist ein leerer Platz.
-    const slot = it => `<button type="button" class="slot" data-id="${it.id}"><span class="well" style="--c:${it.farbe}">${useSvg(it.symbol)}<b class="count"></b></span></button>`;
+    // Ausrüstung: links der Beutel mit den Items, rechts Runenkreise mit den Fähigkeiten.
+    // Noch nicht Erspieltes ist ein Schatten: Man erkennt die Form, der Name bleibt getarnt.
+    const slot = (it, i) => {
+      const rune = it.gruppe === "faehigkeit";
+      return `<button type="button" class="slot${rune ? " rune" : ""}" data-id="${it.id}" style="--i:${i};--c:${it.farbe}"><span class="well">`
+        + `${rune ? useSvg("i-rune", "rune-ring") : ""}${useSvg(it.symbol, "ic")}<b class="count"></b></span>`
+        + `<span class="funken" aria-hidden="true"></span><span class="neu-tag" aria-hidden="true">NEU</span></button>`;
+    };
     $("#slotsGear").innerHTML = C.items.filter(it => it.gruppe !== "faehigkeit").map(slot).join("");
     $("#slotsSkill").innerHTML = C.items.filter(it => it.gruppe === "faehigkeit").map(slot).join("");
-    [$("#slotsGear"), $("#slotsSkill")].forEach(g => { if (g.children.length % 2) g.lastElementChild.classList.add("solo"); });
-    document.querySelectorAll(".slot").forEach(b => b.addEventListener("click", () => { if (!b.classList.contains("empty")) selectItem(b.dataset.id); }));
+    document.querySelectorAll(".slot").forEach(b => b.addEventListener("click", () => selectItem(b.dataset.id)));
   }
 
   /* ---------- Weg auf der Karte ---------- */
@@ -608,44 +628,81 @@
   }
   document.addEventListener("visibilitychange", () => { if (document.hidden) gpsStopp(); else if (page === 0) gpsStart(); });
 
-  // Ausrüstung: leerer Platz, bis ein Item erspielt ist. Bei der aktuellen Quest leuchtet, was dort einsetzbar ist,
-  // alles andere, was Dennis besitzt, ist ausgegraut.
+  // Ausrüstung: vier Zustände, überall gleich (08-erlebnis-plan.md, 3.8 und 3.12):
+  // Schatten = noch nicht erspielt, Farbe mit Goldrand = deins, leuchtet = jetzt einsetzbar, grau = verbraucht oder verloren.
   function renderEquip() {
     const jetzt = E.jetztEinsetzbar(C, state);
-    const sichtbar = id => state.items[id] !== "nicht" || (id === "beutel" && !onboarded);
-    if (!sel[2] || !sichtbar(sel[2])) sel[2] = [...jetzt][0] || state.erhalten[state.erhalten.length - 1] || "beutel";
+    if (!sel[2]) sel[2] = [...jetzt][0] || state.erhalten[state.erhalten.length - 1] || "beutel";
     document.querySelectorAll(".slot").forEach(b => {
-      const id = b.dataset.id, st = state.items[id], x = itemSicht(id), leer = !sichtbar(id);
-      b.className = `slot st-${st}${leer ? " empty" : ""}${jetzt.has(id) ? " usable" : ""}${!leer && st === "besitz" && !jetzt.has(id) ? " idle" : ""}${sel[2] === id && !leer ? " is-selected" : ""}${b.classList.contains("solo") ? " solo" : ""}`;
-      b.disabled = leer;
-      b.querySelector(".well").classList.toggle("lost", st === "verloren");
-      b.querySelector("use").setAttribute("href", "#" + x.symbol);
-      b.querySelector(".count").textContent = x.stapel && !leer ? "×" + state.anzahl[id] : "";
-      b.setAttribute("aria-label", leer ? "Leerer Platz" : `${x.name}, ${{ besitz: jetzt.has(id) ? "jetzt einsetzbar" : "im Beutel", verloren: "verloren", verbraucht: "verbraucht", nicht: "getarnt" }[st]}`);
+      const id = b.dataset.id, st = state.items[id], x = itemSicht(id), schatten = verborgen(id);
+      b.className = `slot${b.classList.contains("rune") ? " rune" : ""} st-${schatten ? "nicht" : st}${schatten ? " schatten" : ""}${entgangen(id) ? " entgangen" : ""}`
+        + `${!schatten && jetzt.has(id) ? " usable" : ""}${neuMarke.has(id) ? " neu" : ""}${fundLaeuft.has(id) ? " fund" : ""}${sel[2] === id ? " is-selected" : ""}`;
+      b.querySelector(".ic use").setAttribute("href", "#" + x.symbol);
+      b.querySelector(".count").textContent = x.stapel && !schatten && st === "besitz" ? "×" + state.anzahl[id] : "";
+      b.setAttribute("aria-label", `${x.name}, ${schatten ? "noch nicht erspielt" : { besitz: jetzt.has(id) ? "jetzt einsetzbar" : "im Beutel", verloren: "verloren", verbraucht: "verbraucht" }[st]}`);
     });
     renderItemBox(sel[2]);
   }
 
+  // Textbox zum gewählten Feld: Name, Beschreibung und ein Satz dazu, woher es kommt oder wo es jetzt hilft.
+  // Eine Quest steht nur da, wenn sie schon aus dem Nebel getreten ist.
   function renderItemBox(id) {
     const box = $("#itemBox");
-    const x = itemSicht(id), st = state.items[id], jetzt = E.jetztEinsetzbar(C, state);
-    const tag = st === "verloren" ? `<span class="tag lost">VERLOREN</span>` : st === "verbraucht" ? `<span class="tag open">VERBRAUCHT</span>` : "";
-    let extra = "";
-    if (st === "besitz") {
-      const wo = E.aktuelleQuests(C, state).filter(qid => E.einsetzbar(C, state, qid).includes(id)).map(qid => questById(qid).name);
-      if (jetzt.has(id)) extra = `<span class="ib-use">Einsetzbar bei <em>${wo.map(esc).join("</em> und <em>")}</em>. Sag es dem Quest Master.</span>`;
-    }
-    const nahm = C.quests.find(q => (q.lose && q.lose.items || []).includes(id) && state.quests[q.id] === "verloren");
-    if (st === "verloren" && nahm) extra = `<span class="ib-use">Verloren bei <em>${esc(nahm.name)}</em>.</span>`;
+    const x = itemSicht(id), st = state.items[id], jetzt = E.jetztEinsetzbar(C, state), schatten = verborgen(id), q = quelle(id);
+    const em = qid => `<em>${esc(questById(qid).name)}</em>`;
+    let tag = "", extra = "";
+    if (schatten) {
+      if (q) extra = entgangen(id) ? `Entgangen bei ${em(q.id)}.` : aufgedeckt(q.id) ? `Zu erbeuten bei ${em(q.id)}.` : "Wartet noch im Nebel.";
+    } else if (st === "verloren") {
+      tag = `<span class="tag lost">VERLOREN</span>`;
+      const nahm = C.quests.find(k => (k.lose && k.lose.items || []).includes(id) && state.quests[k.id] === "verloren");
+      if (nahm) extra = `Verloren bei ${em(nahm.id)}.`;
+    } else if (st === "verbraucht") {
+      tag = `<span class="tag open">VERBRAUCHT</span>`;
+      const bei = Object.keys(state.eingesetzt).filter(k => state.eingesetzt[k].includes(id)).pop();
+      if (bei) extra = `Eingesetzt bei ${em(bei)}.`;
+    } else if (jetzt.has(id)) {
+      tag = `<span class="tag now">JETZT</span>`;
+      const wo = E.aktuelleQuests(C, state).filter(qid => E.einsetzbar(C, state, qid).includes(id));
+      extra = `Einsetzbar bei ${wo.map(em).join(" und ")}. Sag es dem Quest Master.`;
+    } else if (q && state.quests[q.id] !== "offen") extra = `Erbeutet bei ${em(q.id)}.`;
+    if (!schatten && neuMarke.has(id)) tag = `<span class="tag won">NEU</span>` + tag;
     box.style.setProperty("--c", x.farbe);
-    box.innerHTML = `${useSvg(x.symbol, "ib-icon")}<p class="tb-title">${esc(x.name)}${tag}</p><p class="tb-text">${esc(x.text)} ${extra}</p>`;
+    box.classList.toggle("schatten", schatten);
+    box.innerHTML = `<span class="ib-stage">${useSvg(x.symbol, "ib-icon")}</span><p class="tb-title">${esc(x.name)}${tag}</p>`
+      + `<p class="tb-text">${esc(x.text)}${extra ? ` <span class="ib-use">${extra}</span>` : ""}</p>`;
   }
 
   function selectItem(id, play = true) {
     sel[2] = id;
+    if (play && neuMarke.delete(id)) { renderEquip(); tone("move"); return; }   // Antippen nimmt die Marke NEU
     document.querySelectorAll(".slot").forEach(b => b.classList.toggle("is-selected", b.dataset.id === id));
     renderItemBox(id);
     if (play) tone("move");
+  }
+
+  /* Funde: Was seit dem letzten Besuch dazugekommen ist, tritt beim nächsten Besuch der Ausrüstung aus dem Schatten.
+     Gemerkt wird pro Handy, wie viel Dennis von jedem Item hier schon gesehen hat. Beim ersten Besuch gilt alles als gesehen. */
+  const FUND_KEY = "dq-funde-v1" + (PROBE ? "-probe" : "");
+  const neuMarke = new Set(), fundLaeuft = new Set();
+  let gesehen = null;
+  try { if (!DEMO) gesehen = JSON.parse(localStorage.getItem(FUND_KEY) || "null"); } catch (e) {}
+  const besitzZahl = id => state.items[id] !== "besitz" || verborgen(id) ? 0 : itemById(id).stapel ? state.anzahl[id] : 1;
+  function funde() {
+    const jetzt = Object.fromEntries(C.items.map(it => [it.id, besitzZahl(it.id)]));
+    const neu = gesehen ? C.items.map(it => it.id).filter(id => jetzt[id] > (gesehen[id] || 0)) : [];
+    gesehen = jetzt;
+    try { if (!DEMO) localStorage.setItem(FUND_KEY, JSON.stringify(gesehen)); } catch (e) {}
+    if (neu.length) aufleuchten(neu);
+  }
+  function aufleuchten(ids) {
+    const still = STILL.matches;
+    ids.forEach(id => { neuMarke.add(id); if (!still) fundLaeuft.add(id); });
+    sel[2] = ids[ids.length - 1];
+    document.querySelectorAll(".slot").forEach(b => { const i = ids.indexOf(b.dataset.id); if (i >= 0) b.style.setProperty("--fd", i * .38 + "s"); });
+    renderEquip();
+    melody("fund");
+    setTimeout(() => { ids.forEach(id => fundLaeuft.delete(id)); renderEquip(); }, 1500 + ids.length * 380);
   }
 
   /* ---------- Ergebnis-Fenster ---------- */
@@ -671,6 +728,8 @@
     const f = overlayAfter; overlayAfter = null;
     if (f) f();
     else if (revealPending) showNextQuest();
+    // Kam etwas dazu, während Dennis in der Ausrüstung steht (Treffer, Geschenk): gleich hier aus dem Schatten holen
+    if (page === 2 && onboarded() && $("#overlay").hidden) funde();
   }
 
   // Der Quest Master hat das Ergebnis zurückgenommen, solange das Fenster noch offen ist: Fenster still zu, Nebel bleibt
@@ -762,7 +821,7 @@
       const e = neueE[neueE.length - 1], it = itemById(e.item);
       klang = "zauber";
       head = `<span class="ri-big" style="color:${it.farbe}">${useSvg(it.symbol)}</span><p class="big">${esc(it.name.toUpperCase())}</p><p class="sub">eingesetzt bei ${esc(questById(e.quest).name)}</p>`;
-      if (it.id === "spruchrolle") lines.push(`<li><span class="ri"></span>Der Zauber wirkt. Der Quest Master verrät dir, wie.</li>`);
+      if (it.id === "spruchrolle") lines.push(`<li><span class="ri"></span>Der Fluch ist gesprochen. Welche Gestalt er annimmt, enthüllt dir der Quest Master.</li>`);
     } else if (neueD.length) {
       const k = neueD[0], sieg = next.duelle[k] === "sieg";
       klang = sieg ? "plus" : "minus";
@@ -773,7 +832,7 @@
       head = `<span class="ri-big">${cardSvg()}</span><p class="big${dPacks < 0 && !b.ziffer ? " lost" : ""}">${titel}</p><p class="sub">${esc(b.grund || "Buchung vom Quest Master")}</p>`;
       if (!lines.length) lines.push(`<li><span class="ri"></span>Du hattest keine Packs mehr, es bleibt bei 0.</li>`);
     } else {
-      head = `<span class="ri-big">${useSvg("i-backpack")}</span><p class="big">DEIN BEUTEL</p><p class="sub">Der Quest Master hat etwas geändert.</p>`;
+      head = `<span class="ri-big">${useSvg("i-beutel")}</span><p class="big">DEIN BEUTEL</p><p class="sub">Der Quest Master hat etwas geändert.</p>`;
       if (!lines.length) return;
     }
     // Die nächste Quest wird erst nach dem Fenster aufgedeckt, darum steht ihr Name hier nicht
@@ -846,13 +905,13 @@
     flatTimer = setTimeout(() => {
       cube.classList.add("flat");
       if (page === 1) { const row = document.querySelector(".q-row.is-selected"); if (row) scrollIntoList(row); }
-      if (page === 2 && !onboarded && $("#overlay").hidden) onboarding();
+      if (page === 2 && $("#overlay").hidden) { if (!onboarded()) onboarding(); else funde(); }
       if (page === 0) { gpsStart(); spieleLauf(); if (!laufFrame) kartenHinweis(); }
     }, 470);
   }
 
   /* ---------- Onboarding: erster Besuch der Ausrüstung ---------- */
-  // Erst das Fundfenster mit Enthüllung des Beutels, dann kurze Hinweise nacheinander.
+  // Erst das Fundfenster mit Enthüllung des Beutels, dann tritt er in seinem Feld aus dem Schatten, dann kurze Hinweise.
   function onboarding() {
     const x = itemById("beutel");
     melody("pruefung");
@@ -861,26 +920,26 @@
       lines: `<li class="plus reveal"><span class="ri" style="color:${x.farbe}">${useSvg(x.symbol)}</span><span><small class="tarn">${esc(x.tarn.name)} entpuppt sich als</small>${esc(x.name)}</span></li>`,
       next: "", gross: true
     }, () => {
-      onboarded = true;
-      try { if (!DEMO) localStorage.setItem(OB_KEY, "1"); } catch (e) {}
-      renderEquip();
-      coach([
-        [$("#slotsGear").parentElement, "Hier landet, was du dir erspielst. Leere Plätze füllen sich unterwegs."],
-        [$("#slotsSkill").parentElement, "Hier landen deine Zauber."],
+      beutelGezeigt = true;
+      obMerken(OB_KEY);
+      funde();                                   // erster Besuch: alles, was da ist, gilt als gesehen
+      aufleuchten(["beutel"]);
+      setTimeout(() => coach([
+        [$("#slotsGear").parentElement, "Hier landet, was du dir erspielst. Die Schatten zeigen, was noch zu holen ist."],
+        [$("#slotsSkill").parentElement, "Hier ruhen Flüche und Segen, sobald du sie dir verdient hast."],
         [$(".equip-body"), "Was leuchtet, kannst du bei der aktuellen Quest einsetzen. Sag es dem Quest Master."],
         [$(".hud"), "Packs und Ziffern für dein Kästchen."]
-      ]);
+      ]), STILL.matches ? 0 : 1100);
     });
   }
   /* ---------- Onboarding: erster Besuch der Karte ---------- */
-  // Zwei Hinweise der Fee, einmal pro Handy (Demo und ?onboarding: jedes Mal)
+  // Zwei Hinweise der Fee, einmal pro Handy und nur am Anfang des Spiels (wie das Onboarding oben)
   const KARTE_KEY = "dq-karte-v1" + (PROBE ? "-probe" : "");
-  let karteGesehen = false;
-  try { karteGesehen = !DEMO && !params.has("onboarding") && localStorage.getItem(KARTE_KEY) === "1"; } catch (e) {}
+  let karteGesehen = obGemerkt(KARTE_KEY);
   function kartenHinweis() {
-    if (karteGesehen || page !== 0 || !$("#overlay").hidden || !$("#prolog").hidden || !$("#coach").hidden) return;
+    if (karteGesehen || spaeter() || page !== 0 || !$("#overlay").hidden || !$("#prolog").hidden || !$("#coach").hidden) return;
     karteGesehen = true;
-    try { if (!DEMO) localStorage.setItem(KARTE_KEY, "1"); } catch (e) {}
+    obMerken(KARTE_KEY);
     const hier = document.querySelector(`.mark[data-station="${STATIONEN[kartenHier ?? hierIndex()].id}"]`);
     coach([
       [hier, "Hier stehst du. Tippe eine Station an: Du siehst, was dort war und was dort wartet."],
@@ -890,11 +949,11 @@
 
   /* ---------- Prolog: einmal pro Handy nach dem ersten PRESS START (08-erlebnis-plan.md, 3.2) ---------- */
   // Rikes Fee erklärt in vier Tafeln, worum es geht, danach zeigt sie kurz das Menü. Tippen blättert, ÜBERSPRINGEN beendet.
+  // Nur am Anfang des Spiels (siehe Onboarding oben).
   const PROLOG_KEY = "dq-prolog-v1" + (PROBE ? "-probe" : "");
   const prolog = (() => {
     const el = $("#prolog"), text = $("#prologText"), bild = $("#prologBild"), dots = $("#prologDots");
-    let gesehen = false, i = -1, tippen = null;
-    try { gesehen = !DEMO && !params.has("onboarding") && localStorage.getItem(PROLOG_KEY) === "1"; } catch (e) {}
+    let gesehen = obGemerkt(PROLOG_KEY), i = -1, tippen = null;
     const karten = (n, cls = "") => Array.from({ length: n }, () => cardSvg(cls)).join("");
     const TAFELN = () => {
       const max = C.waehrung.max, halb = Math.round(max / 2);
@@ -936,7 +995,8 @@
       clearInterval(tippen); tippen = null;
       el.hidden = true;
       gesehen = true;
-      try { if (!DEMO) localStorage.setItem(PROLOG_KEY, "1"); } catch (e) {}
+      obMerken(PROLOG_KEY);
+      if (uebersprungen === "still") return;
       if (uebersprungen) return tone("move");
       tone("confirm");
       // Kurzer Rundgang durch das Menü, gesprochen von der Fee
@@ -948,15 +1008,18 @@
       ]), 250);
     }
     function start() {
-      if (gesehen) return false;
+      if (gesehen || spaeter()) return false;
       tafeln = TAFELN(); i = -1;
       el.hidden = false;
       weiter();
       return true;
     }
+    // Neues Handy ohne gespeicherten Stand: Kommt der echte Stand erst nach PRESS START und ist der Tag schon weiter,
+    // verschwindet der Prolog still
+    function pruefen() { if (!el.hidden && spaeter()) ende("still"); }
     el.addEventListener("click", e => { if (!e.target.closest(".prolog-skip")) weiter(); });
     $("#prologSkip").addEventListener("click", e => { e.stopPropagation(); ende(true); });
-    return { start, weiter, ende };
+    return { start, weiter, ende, pruefen };
   })();
 
   function coach(schritte) {
@@ -1043,7 +1106,7 @@
     e.preventDefault();
     if (page === 1) { const ids = [...document.querySelectorAll(".quest-list li:not([hidden]) .q-row")].map(b => b.dataset.id); followNext = false; selectQuest(ids[(ids.indexOf(sel[1]) + step + ids.length) % ids.length]); }
     if (page === 0) { const ids = STATIONEN.map(s => s.id); selectStation(ids[(ids.indexOf(sel[0]) + step + ids.length) % ids.length]); }
-    if (page === 2) { const ids = [...document.querySelectorAll(".slot:not(.empty)")].map(b => b.dataset.id); selectItem(ids[(ids.indexOf(sel[2]) + step + ids.length) % ids.length]); }
+    if (page === 2) { const ids = [...document.querySelectorAll(".slot")].map(b => b.dataset.id); selectItem(ids[(ids.indexOf(sel[2]) + step + ids.length) % ids.length]); }
   });
 
   /* ---------- Log-Buch: Dennis tippt, besiegelt, dann spricht Rike ---------- */
@@ -1369,6 +1432,7 @@
     render();
     renderSync();
     fensterZuruecknehmen();
+    prolog.pruefen();
     // Log-Buch-Sprachnachrichten vorladen, solange das Log-Buch noch nicht entschieden ist
     if (state.quests.logbuch === "offen") logbuch.vorladen();
     if (meta.initial && intro.hidden) requestAnimationFrame(() => { const row = document.querySelector(".q-row.is-selected"); if (row) scrollIntoList(row); });

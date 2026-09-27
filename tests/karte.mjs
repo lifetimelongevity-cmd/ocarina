@@ -24,8 +24,8 @@ const zurKarte = async p => { await weg(p); await p.click('.shoulder-left'); awa
 const aktiv = p => p.evaluate(() => document.querySelector('.face.active').dataset.page);
 const legende = p => p.evaluate(() => ['#mlWert', '#mlWo', '#mlRest'].map(s => document.querySelector(s).textContent).join(' | '));
 
-// Prolog: erscheint nach PRESS START, vier Tafeln, danach Rundgang mit der Fee
-let { ctx, p } = await seite('?demo');
+// Prolog: erscheint nach PRESS START am Anfang des Spiels, vier Tafeln, danach Rundgang mit der Fee
+let { ctx, p } = await seite('?demo=start');
 await p.click('#introScreen'); await warte(900);
 pruefe(await p.isVisible('#prolog'), 'Prolog erscheint nach PRESS START');
 pruefe((await p.$$('#prologDots i')).length === 4, 'Prolog hat vier Tafeln');
@@ -39,6 +39,34 @@ await weg(p);
 // Karte: erster Besuch mit Hinweis der Fee
 await p.click('.shoulder-left'); await warte(900);
 pruefe(await p.isVisible('#coach') && (await p.textContent('.coach-text')).includes('Station'), 'Karte: Hinweis zum Antippen');
+await ctx.close();
+
+// Später am Tag kein Onboarding mehr: weder in der Demo noch auf einem neuen Handy mit dem echten Stand
+for (const url of ['?demo', '?demo=bund']) {
+  ({ ctx, p } = await seite(url));
+  await p.click('#introScreen'); await warte(900);
+  pruefe(!(await p.isVisible('#prolog')), `${url}: später am Tag kein Prolog`);
+  await p.click('.shoulder-right'); await warte(900);
+  pruefe(await p.$('#overlay[hidden]') && await p.$('#coach[hidden]'), `${url}: Ausrüstung ohne Beutel-Fund und ohne Hinweise`);
+  pruefe(await p.$eval('.slot[data-id="beutel"]', e => !e.classList.contains('schatten')), `${url}: Beutel ist ausgepackt`);
+  await p.click('.shoulder-left'); await warte(500); await p.click('.shoulder-left'); await warte(900);
+  pruefe(!(await p.isVisible('#coach')), `${url}: Karte ohne Hinweis`);
+  await ctx.close();
+}
+{
+  // Echter Stand auf einem neuen Handy: im Speicher liegt schon ein Tag mit zwei entschiedenen Quests
+  const ctx2 = await b.newContext({ viewport: { width: 852, height: 393 }, isMobile: true, hasTouch: true });
+  await ctx2.route('**firebasedatabase.app**', r => r.abort());
+  await ctx2.addInitScript(() => localStorage.setItem('dennis-quest-doc:dennis-jga-2026', JSON.stringify({ quests: { logbuch: 'bestanden', klingen: 'verloren' }, stand: 1 })));
+  const p2 = await ctx2.newPage(); p2.on('pageerror', e => fehler.push('neues Handy: ' + e.message));
+  await p2.goto(BASE); await warte(500);
+  await p2.click('#introScreen'); await warte(900);
+  pruefe(!(await p2.isVisible('#prolog')), 'Neues Handy mitten am Tag: kein Prolog');
+  await ctx2.close();
+}
+({ ctx, p } = await seite('?demo=bund&onboarding'));
+await p.click('#introScreen'); await warte(900);
+pruefe(await p.isVisible('#prolog'), '?onboarding zeigt den Prolog auch später am Tag');
 await ctx.close();
 
 // Überspringen: kein Rundgang, auf einem echten Handy nur einmal

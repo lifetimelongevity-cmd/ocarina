@@ -8,7 +8,7 @@ Zwei Seiten, ein gespeicherter Stand.
 | `admin.html` | Quest Master | Nächste Quest mit Bestanden/Verloren, Einsetzen, Showdown-Duellen und Log-Buch-Antworten. Laufende Quests (Prophezeiung mit Zähler, Rikes Amulett), Packs buchen, Ziffern kaufen, Items korrigieren, Zurücksetzen. Oben rechts **Rückgängig** für jede Änderung. `admin.html?probe` ist der **Probelauf**. |
 
 Adressen: Dennis `https://dd-ocarina.netlify.app/`, Quest Master `https://dd-ocarina.netlify.app/admin.html`.
-Zusätze für Dennis' Seite: `?probe` (liest den Probelauf des Quest Masters, roter Rahmen), `?demo` (Beispielstand mit Demo-Knöpfen, ohne Datenbank, auch `?demo=start`, `?demo=bund` kurz vor dem Showdown, `?demo=ende`), `?direkt` (ohne Startbildschirm), `?onboarding` (Prolog, Hinweise auf der Karte und Beutel-Onboarding noch einmal), `?schwach` (Sparmodus erzwingen). Die alte Adresse `entwurf.html` leitet auf die Hauptseite um.
+Zusätze für Dennis' Seite: `?probe` (liest den Probelauf des Quest Masters, roter Rahmen), `?demo` (Beispielstand mit Demo-Knöpfen, ohne Datenbank, auch `?demo=start`, `?demo=bund` kurz vor dem Showdown, `?demo=ende`), `?direkt` (ohne Startbildschirm), `?onboarding` (Prolog, Hinweise auf der Karte und Beutel-Onboarding noch einmal, auch später am Tag. Ohne diesen Zusatz kommt das Onboarding nur am Anfang des Spiels, solange noch keine Quest entschieden ist, in der Demo also nur mit `?demo=start`), `?schwach` (Sparmodus erzwingen). Die alte Adresse `entwurf.html` leitet auf die Hauptseite um.
 
 ## Dateien
 
