@@ -24,14 +24,18 @@ const zurKarte = async p => { await weg(p); await p.click('.shoulder-left'); awa
 const aktiv = p => p.evaluate(() => document.querySelector('.face.active').dataset.page);
 const legende = p => p.evaluate(() => ['#mlWert', '#mlWo', '#mlRest'].map(s => document.querySelector(s).textContent).join(' | '));
 
-// Prolog: erscheint nach PRESS START am Anfang des Spiels, vier Tafeln, danach Rundgang mit der Fee
+// Prolog: erscheint nach PRESS START am Anfang des Spiels, sechs Tafeln, danach Rundgang mit der Fee
 let { ctx, p } = await seite('?demo=start');
 await p.click('#introScreen'); await warte(900);
 pruefe(await p.isVisible('#prolog'), 'Prolog erscheint nach PRESS START');
-pruefe((await p.$$('#prologDots i')).length === 4, 'Prolog hat vier Tafeln');
+pruefe((await p.$$('#prologDots i')).length === 6, 'Prolog hat sechs Tafeln');
 await warte(1500);
-pruefe((await p.textContent('#prologText')).includes('Rike schickt mich'), 'Tafel 1: Rikes Fee');
-for (let i = 0; i < 12 && await p.isVisible('#prolog'); i++) { await p.click('#prolog'); await warte(250); }
+pruefe((await p.textContent('#prologText')).includes('Ich bin die Fee. Rike hat mich'), 'Tafel 1: Die Fee stellt sich vor, Rike hat sie geschickt');
+await p.click('#prolog'); await warte(1800);
+pruefe((await p.textContent('#prologBild')).includes('Mini-JGA') && (await p.textContent('#prologText')).startsWith('Willkommen auf deinem Mini-JGA'), 'Tafel 2: Willkommen auf deinem Mini-JGA');
+await p.click('#prolog'); await warte(1800);
+pruefe((await p.$$('#prologBild .medal.covered')).length === 6 && (await p.textContent('#prologText')).includes('geprüft werden'), 'Tafel 3: die Reise, sechs Prüfungen im Nebel');
+for (let i = 0; i < 20 && await p.isVisible('#prolog'); i++) { await p.click('#prolog'); await warte(250); }
 await warte(500);
 pruefe(!(await p.isVisible('#prolog')), 'Prolog lässt sich durchblättern');
 pruefe(await p.isVisible('#coach') && (await p.textContent('.coach-text')).includes('Packs'), 'Rundgang beginnt bei den Packs');

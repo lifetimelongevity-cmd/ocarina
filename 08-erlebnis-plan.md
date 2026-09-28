@@ -577,3 +577,19 @@ Entschieden am 27.09.: Siegel gedrückt halten, Dennis trägt auch Duelle, Rikes
 - **Verpasste Momente (3.6, Stufe 1.1):** Jedes Handy merkt sich den zuletzt gesehenen Stand. Nach PRESS START laufen verpasste Momente nacheinander, jede Quest einzeln in der Reihenfolge, in der sie entschieden wurde. Die nächste Quest bleibt so lange im Nebel.
 - **Technik:** eigener Kanal `/spiele/<spiel>-dennis` (wie das Log-Buch, Einträge einzeln, offline gepuffert). `engine.js` `mitEintraegen()` rechnet sie ein, was der Admin entschieden hat, gilt vor. Rückgängig im Admin stellt zurückgenommene Einträge wieder her. Firebase-Regeln in `app/README.md`.
 - **Geprüft:** `node app/engine.test.js` (neue Fälle für Einträge), `tests/selbst.mjs` (Admin und Dennis zusammen: Siegel, kurzer Tipp, Moment, Zurücknehmen, Rückgängig, Einsatz, verpasster Moment nach PRESS START, Duelle, Amulett, Ziffer), `tests/geraete.mjs` mit dem Siegel-Fenster auf allen sechs Geräten, `tests/probe.mjs`, `tests/nebel.mjs`, `tests/karte.mjs`.
+
+---
+
+## 15. Etwas kleiner, die Fee stellt sich vor (umgesetzt am 28.09.)
+
+Wünsche vom 28.09.: In der App alles etwas kleiner, weil es an manchen Stellen gequetscht wirkt. Ganz am Anfang des Onboardings ein oder zwei Elemente mehr: Rike hat die Fee geschickt, „Willkommen auf deinem Mini-JGA“, das wird eine Reise, du wirst geprüft werden.
+
+- **Kleiner:** Schriften, HUD, Quest-Zeilen, Quest-Karte, Kartusche und Stationstafel auf der Karte, Felder der Ausrüstung, Ergebnis-, Siegel- und Log-Buch-Fenster, Prolog und Hinweise der Fee, jeweils gut 10 %. Die Seiten haben mehr Luft: Am Gipfel passen Duell-Tafel, SIEG und NIEDERLAGE jetzt auch im kleinsten Safari-Fenster ohne Scrollen, die Kartusche kürzt die Station nicht mehr ab. Untergrenzen bleiben: Schrift mindestens 10 px, Tippflächen mindestens 28 px, das Eingabefeld im Log-Buch 16 px (sonst zoomt das iPhone).
+- **Gemessen (iPhone 15):** Text der Quest-Karte in Safari 12,3 px (vorher 14 px), vom Home-Bildschirm 14,1 px (vorher 16,1 px). Quest-Zeile 32 px und 35 px hoch (vorher 34 px und 39 px), Item-Feld 40 px und 46 px (vorher 45 px und 52 px).
+- **Prolog mit sechs Tafeln** (vorher vier, 3.2 und 12):
+  1. Die Fee allein: „Hey, wach auf, Dennis! Ich bin die Fee. Rike hat mich zu dir geschickt.“
+  2. Titel wie ein Gebietsname im Spiel, „Willkommen auf deinem“ und groß „Mini-JGA“ in Hylia Serif mit Goldlicht (die Schrift hat keine Umlaute, der Titel braucht keine), dazu die Fanfare der Prüfungen: „Willkommen auf deinem Mini-JGA! Ab jetzt weiche ich dir nicht mehr von der Seite.“
+  3. Die Reise: Zug, sechs Medaillons mit Fragezeichen, die ansteigen, oben der Gipfel. „Das wird eine Reise, vom Zug bis auf den Gipfel. Und unterwegs wirst du geprüft werden.“ Die Zahl der Medaillons kommt aus `config.js` (Prüfungen), der Nebel bleibt gewahrt.
+  4. bis 6. wie bisher: Kästchen mit den Packs, Packs und Ziffern gewinnen und verlieren, was am Ende dir gehört.
+- **Wieder neu:** Der Prolog merkt sich unter einem neuen Namen, dass er gesehen wurde. Wer die alten vier Tafeln schon auf seinem Handy gesehen hat, bekommt am Anfang des Spiels die neuen sechs.
+- **Geprüft:** `node app/engine.test.js`, `tests/karte.mjs` (neu: sechs Tafeln, Fee, Willkommen, Reise), `tests/geraete.mjs` (0 Probleme auf allen sechs Geräten), `tests/nebel.mjs`, `tests/selbst.mjs`, `tests/probe.mjs`. Die Stilprobe zeigt die neuen Tafeln ebenfalls.

@@ -1085,17 +1085,24 @@
   }
 
   /* ---------- Prolog: einmal pro Handy nach dem ersten PRESS START (08-erlebnis-plan.md, 3.2) ---------- */
-  // Rikes Fee erklärt in vier Tafeln, worum es geht, danach zeigt sie kurz das Menü. Tippen blättert, ÜBERSPRINGEN beendet.
-  // Nur am Anfang des Spiels (siehe Onboarding oben).
-  const PROLOG_KEY = "dq-prolog-v1" + (PROBE ? "-probe" : "");
+  // Rikes Fee stellt sich vor, heißt Dennis willkommen und erklärt in sechs Tafeln, worum es geht, danach zeigt sie
+  // kurz das Menü. Tippen blättert, ÜBERSPRINGEN beendet. Nur am Anfang des Spiels (siehe Onboarding oben).
+  const PROLOG_KEY = "dq-prolog-v2" + (PROBE ? "-probe" : "");   // v2 (28.09.): sechs Tafeln, wer die alten vier kennt, sieht sie neu
   const prolog = (() => {
     const el = $("#prolog"), text = $("#prologText"), bild = $("#prologBild"), dots = $("#prologDots");
     let gesehen = obGemerkt(PROLOG_KEY), i = -1, tippen = null;
     const karten = (n, cls = "") => Array.from({ length: n }, () => cardSvg(cls)).join("");
     const TAFELN = () => {
       const max = C.waehrung.max, halb = Math.round(max / 2);
+      const pruefungen = C.quests.filter(q => q.typ === "kern").length;
       return [
-        { bild: "fee", text: "Hey, wach auf, Dennis! Rike schickt mich, ich begleite dich bis zum Kästchen." },
+        { bild: "fee", text: "Hey, wach auf, Dennis! Ich bin die Fee. Rike hat mich zu dir geschickt." },
+        { bild: `<span class="pb-titel"><small>Willkommen auf deinem</small><b>Mini-JGA</b></span>`, ton: "pruefung",
+          text: "Willkommen auf deinem Mini-JGA! Ab jetzt weiche ich dir nicht mehr von der Seite." },
+        // Die Reise: vom Zug bis zum Gipfel, jede Prüfung noch im Nebel
+        { bild: `<span class="pb-reise"><span class="pb-ort">${useSvg("i-train")}</span>${Array.from({ length: pruefungen }, (_, k) =>
+            `<span class="medal covered" style="--k:${k + 1}"><b>?</b></span>`).join("")}<span class="pb-ort gipfel" style="--k:${pruefungen + 1}">${useSvg("i-mountain")}</span></span>`,
+          text: "Das wird eine Reise, vom Zug bis auf den Gipfel. Und unterwegs wirst du geprüft werden." },
         { bild: `<span class="pb-chest">${useSvg("i-chest")}${useSvg("i-lock", "pb-lock")}</span><span class="pb-cards${max > 10 ? " two" : ""}" style="--n:${max > 10 ? Math.ceil(max / 2) : max}">${karten(max)}</span>`,
           text: `Der Bund hat ein Kästchen verschlossen. Darin liegen ${max} Packs.` },
         { bild: `<span class="pb-gain">${cardSvg()}<b>+</b></span><span class="pb-tumblers">${C.code.map(() => `<span class="tumbler">?</span>`).join("")}</span>`,
@@ -1121,7 +1128,7 @@
       bild.style.animation = "none"; void bild.offsetWidth; bild.style.animation = "";
       dots.innerHTML = tafeln.map((_, k) => `<i class="${k === i ? "on" : k < i ? "done" : ""}"></i>`).join("");
       schreibe(t.text);
-      if (i === 0) melody("zauber"); else tone("move");
+      if (i === 0) melody("zauber"); else if (t.ton) melody(t.ton); else tone("move");
     }
     function weiter() {
       if (tippen) { clearInterval(tippen); tippen = null; text.textContent = tafeln[i].text; return; }
