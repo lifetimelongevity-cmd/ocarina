@@ -106,7 +106,7 @@
        Alle Siege zusammen 24: Ein perfekter Tag füllt das Kästchen, ein halb gewonnener bringt etwa ein Viertel.
        Werte ändern, dann node tests/balance.js (rechnet 50 000 Tage durch). */
     quests: [
-      { id: "logbuch", nr: 1, typ: "kern", name: "Log-Buch", ort: "Zug nach München", station: "zug",
+      { id: "logbuch", nr: 1, typ: "kern", name: "Rikes Tagebuch", ort: "Zug nach München", station: "zug",
         farbe: "#4a8fe8", emblem: "z-water",
         text: "Rike hat sieben Fragen über dich beantwortet. Schreib, was sie gesagt hat, dann hörst du ihre Antwort.",
         qm: "Dennis tippt seine Antworten im Menü, danach spielt Rikes Sprachnachricht. Seine Antworten stehen unten im Admin. Das Ergebnis trägt er danach selbst ein.",
@@ -114,10 +114,11 @@
         lose: { packs: 0 },
         einsetzbar: [], logbuch: true },
 
-      { id: "klingen", nr: 4, typ: "kern", name: "Kreuzung der Klingen", ort: "Wiese am Anstieg", station: "wiese",
+      // Hieß bis 28.09. „Kreuzung der Klingen“ (id bleibt, damit gespeicherte Stände passen)
+      { id: "klingen", nr: 4, typ: "kern", name: "Die drei Zeichen", ort: "Wiese am Anstieg", station: "wiese",
         farbe: "#ec8f2e", emblem: "z-spirit",
-        text: "Wähle deinen Gegner aus dem Bund. Erst dann erfährst du die Disziplin.",
-        qm: "Disziplin nach der Wahl verraten: Schnick Schnack Schnuck, Best of 3.",
+        text: "Wähle deinen Gegner aus dem Bund. Schnick, Schnack, Schnuck: Wer zuerst zwei Runden gewinnt, siegt.",
+        qm: "Schnick Schnack Schnuck, Best of 3. Dennis wählt seinen Gegner aus dem Bund.",
         win:  { packs: 2, ziffer: 2, items: ["kreisel"] },
         lose: { packs: -1 },
         einsetzbar: ["spruchrolle", "schild"], duell: true, revanche: true },
@@ -159,10 +160,11 @@
         lose: { packs: -1 },
         einsetzbar: ["stich", "spruchrolle"], revanche: true },
 
-      { id: "feuerprobe", nr: 3, typ: "kern", name: "Feuerprobe", ort: "Aussichtspunkt", station: "aussicht",
+      // Ersetzt am 28.09. die Feuerprobe („Der Ruf“), id bleibt
+      { id: "feuerprobe", nr: 3, typ: "kern", name: "Hüter der Flamme", ort: "Aussichtspunkt", station: "aussicht",
         farbe: "#e2472f", emblem: "e-flame",
-        text: "Der Ruf. Bring eine fremde Wandergruppe dazu, mit dir eine Botschaft für Rike aufzunehmen.",
-        qm: "Mutprobe „Der Ruf“: Video mit einer fremden Wandergruppe für Rike.",
+        text: "Trag ein brennendes Teelicht 50 Schritte bergauf, ohne dass es erlischt. Der Bund darf dich ablenken, aber nicht anpusten.",
+        qm: "Offenes Teelicht ohne Glas, 50 Schritte bergauf. Erlischt es, verloren. Der Bund lenkt ab, pustet nicht, berührt nicht. Feuerzeug und Ersatzlicht mitnehmen.",
         win:  { packs: 3, ziffer: 3, items: ["schild"] },
         lose: { packs: -2 },
         einsetzbar: ["spruchrolle"] },
@@ -194,7 +196,7 @@
         einsetzbar: ["spruchrolle"] }
     ],
 
-    /* Log-Buch (Quest 1): Rike beantwortet sieben Fragen über Dennis per Sprachnachricht.
+    /* Log-Buch (Quest 1, für Dennis „Rikes Tagebuch“): Rike beantwortet sieben Fragen über Dennis per Sprachnachricht.
        Dennis tippt in ein bis drei Worten, was sie gesagt hat, besiegelt es, dann spielt ihre Antwort.
        Fragen festgelegt am 26.09. Wie Rike sie gestellt bekommt: app/assets/logbuch/LIESMICH.md.
        Dateien: app/assets/logbuch/frage1.m4a bis frage7.m4a. Fehlt eine, spielt die App einen Platzhalter-Klang. */

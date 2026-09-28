@@ -37,7 +37,7 @@ pruefe(await dennis.isVisible('[data-ergebnis="bestanden"]') && await dennis.isV
 
 // Kurzer Tipp auf das Siegel löst nichts aus, Halten besiegelt
 await dennis.tap('[data-ergebnis="bestanden"]'); await warte(400);
-pruefe(await dennis.isVisible('#schwur') && (await dennis.textContent('#swKopf')).includes('Log-Buch'), 'Siegel-Fenster zeigt die Quest');
+pruefe(await dennis.isVisible('#schwur') && (await dennis.textContent('#swKopf')).includes('Rikes Tagebuch'), 'Siegel-Fenster zeigt die Quest');
 await dennis.tap('#swSiegel'); await warte(400);
 pruefe(await dennis.isVisible('#schwur') && !(await fenster(dennis)), 'Kurzer Tipp besiegelt nicht');
 await dennis.screenshot({ path: `${OUT}/selbst-1-siegel.png` });
@@ -45,8 +45,8 @@ await halten(dennis);
 pruefe((await fenster(dennis)).includes('PRÜFUNG BESTANDEN'), 'Halten: Moment „Prüfung bestanden“ sofort bei Dennis');
 await dennis.screenshot({ path: `${OUT}/selbst-2-moment.png` });
 await warte(400);
-pruefe((await admin.textContent('#dennisListe')).includes('Log-Buch: bestanden'), 'Admin sieht Dennis’ Eintrag live');
-pruefe((await admin.textContent('#nextTitle')).includes('Kreuzung der Klingen'), 'Admin: nächste Quest rückt weiter');
+pruefe((await admin.textContent('#dennisListe')).includes('Rikes Tagebuch: bestanden'), 'Admin sieht Dennis’ Eintrag live');
+pruefe((await admin.textContent('#nextTitle')).includes('Die drei Zeichen'), 'Admin: nächste Quest rückt weiter');
 pruefe((await admin.textContent('#packs')) === '1', 'Admin: Packs zählen mit');
 await admin.screenshot({ path: `${OUT}/selbst-3-admin.png`, fullPage: true });
 await zu(dennis); await warte(1200);
@@ -54,7 +54,7 @@ await zu(dennis); await warte(1200);
 // Zurücknehmen: Die Fee sagt es Dennis, die Quest ist wieder offen
 await admin.click('#dennisListe .zurueck'); await warte(700);
 const zurueck = await fenster(dennis);
-pruefe(zurueck.includes('ZURÜCKGENOMMEN') && zurueck.includes('Log-Buch') && zurueck.includes('Trag es neu ein'), 'Zurücknehmen: Fee meldet es Dennis');
+pruefe(zurueck.includes('ZURÜCKGENOMMEN') && zurueck.includes('Rikes Tagebuch') && zurueck.includes('Trag es neu ein'), 'Zurücknehmen: Fee meldet es Dennis');
 await dennis.screenshot({ path: `${OUT}/selbst-4-zurueck.png` });
 await zu(dennis);
 pruefe(await dennis.isVisible('[data-ergebnis="bestanden"]'), 'Nach dem Zurücknehmen: Dennis kann neu eintragen');
@@ -63,7 +63,7 @@ await admin.click('#undo'); await warte(700);
 pruefe((await fenster(dennis)).includes('PRÜFUNG BESTANDEN'), 'Rückgängig: Eintrag ist wieder da, Dennis sieht den Moment');
 await zu(dennis); await warte(1200);
 
-// Einsetzen: Spruchrolle aus der Prophezeiung, bei Kreuzung der Klingen
+// Einsetzen: Spruchrolle aus der Prophezeiung, bei Die drei Zeichen
 await admin.click('#lauf .lauf-q[data-id="prophezeiung"] [data-a="start"]'); await warte(400);
 await admin.click('#lauf .lauf-q[data-id="prophezeiung"] [data-a="plus"]'); await warte(600);
 await zu(dennis); await warte(800);
@@ -84,7 +84,7 @@ pruefe(!(await fenster(dennis)), 'Startbildschirm: noch kein Fenster');
 await dennis.click('#introScreen'); await warte(1200);
 pruefe(!(await dennis.isVisible('#prolog')), 'Später am Tag kein Prolog');
 const nachgeholt = await fenster(dennis);
-pruefe(nachgeholt.includes('BESTANDEN') && nachgeholt.includes('Kreuzung der Klingen'), 'Nach PRESS START: verpasster Moment läuft nach');
+pruefe(nachgeholt.includes('BESTANDEN') && nachgeholt.includes('Die drei Zeichen'), 'Nach PRESS START: verpasster Moment läuft nach');
 pruefe((await dennis.textContent('#hudNextName')) === '?', 'Die nächste Quest bleibt im Nebel, bis der Moment vorbei ist');
 await dennis.screenshot({ path: `${OUT}/selbst-5-nachgeholt.png` });
 await zu(dennis); await warte(1500);
@@ -115,7 +115,7 @@ pruefe((await p.textContent('#swKopf')).includes('ZUSAMMENGESETZT'), 'Amulett: K
 await halten(p);
 pruefe((await fenster(p)).includes('BESTANDEN') || (await fenster(p)).includes('BEENDET'), 'Amulett: Moment');
 await zu(p); await warte(800);
-// Am Kästchen fehlt Ziffer 2 (Kreuzung der Klingen verloren): selbst kaufen
+// Am Kästchen fehlt Ziffer 2 (Die drei Zeichen verloren): selbst kaufen
 await p.click('#hudNext'); await warte(400);
 pruefe(await p.isVisible('#overlay [data-kauf="2"]'), 'Kästchen: Ziffer 2 kaufen');
 await p.screenshot({ path: `${OUT}/selbst-8-kaestchen.png` });

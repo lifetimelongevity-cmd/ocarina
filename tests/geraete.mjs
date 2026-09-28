@@ -273,7 +273,7 @@ for (const g of GERAETE) {
   log(`  Treffer: ${await dennis.$eval('#resultHead .big', e => e.textContent)} · ${zeilen.join(' | ')}`);
   await dennis.screenshot({ path: `${OUT}/dennis-treffer.png` });
   await dennis.click('#overlay'); await dennis.waitForTimeout(300);
-  // Einsetzen: Spruchrolle bei Kreuzung der Klingen
+  // Einsetzen: Spruchrolle bei Die drei Zeichen
   await admin.screenshot({ path: `${OUT}/admin-2-naechste.png`, fullPage: true });
   await admin.click('#nextUse .use-btn[data-item="spruchrolle"]'); await dennis.waitForTimeout(700);
   log(`  Einsatz: ${await dennis.$eval('#resultHead .big', e => e.textContent).catch(() => '–')} ${await dennis.$eval('#resultHead .sub', e => e.textContent).catch(() => '')}`);

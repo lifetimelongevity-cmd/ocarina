@@ -47,7 +47,7 @@ pruefe((await admin.textContent('#nextTitle')).includes('Bundes'), 'Sprung „Vo
 pruefe((await admin.$$('.duel-list li')).length === 3, 'Sprung „Vor dem Bund": drei Duelle stehen');
 while (await dennis.$('#overlay:not([hidden])')) { await dennis.click('#overlay'); await warte(300); }
 pruefe((await dennis.textContent('#hudNextName')).includes('Bundes'), 'Dennis zeigt den Bund als nächste Quest');
-pruefe((await echt.textContent('#nextTitle')).includes('Log-Buch') && (await echt.textContent('#packs')) === '0', 'Echtes Spiel bleibt unberührt');
+pruefe((await echt.textContent('#nextTitle')).includes('Rikes Tagebuch') && (await echt.textContent('#packs')) === '0', 'Echtes Spiel bleibt unberührt');
 await admin.screenshot({ path: `${OUT}/probe-admin.png`, fullPage: true });
 
 // Vertippt: Verloren gebucht, Dennis sieht das Fenster. Rückgängig schließt es, und die Fee sagt Dennis, dass es zurückgenommen ist
@@ -63,7 +63,7 @@ pruefe((await admin.textContent('#undoWas')).includes('Vor dem Bund'), 'Rückgä
 
 // Noch einmal zurück: Stand vor dem Sprung (leer), Verlauf leer
 await admin.click('#undo'); await warte(500);
-pruefe((await admin.textContent('#nextTitle')).includes('Log-Buch'), 'Zweites Rückgängig: wieder am Start');
+pruefe((await admin.textContent('#nextTitle')).includes('Rikes Tagebuch'), 'Zweites Rückgängig: wieder am Start');
 pruefe(await admin.$eval('#undo', e => e.disabled), 'Verlauf leer: Knopf aus');
 
 // Verlauf überlebt ein Neuladen (iPhone lädt oft neu)

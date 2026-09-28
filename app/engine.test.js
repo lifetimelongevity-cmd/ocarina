@@ -132,7 +132,7 @@ assert.deepStrictEqual([...jetztEinsetzbar(config, s)], ["pistole_gross"]);   //
 s = derive(config, { quests: { amulett: "laeuft", prophezeiung: "laeuft", logbuch: "bestanden" }, zaehler: { prophezeiung: 1 } });
 assert.deepStrictEqual([...jetztEinsetzbar(config, s)], ["spruchrolle"]);       // Amulett läuft, dort hilft die Rolle
 
-// 11. Showdown: erst Revanchen in Spielreihenfolge, dann Wirbel der Götter; Log-Buch und Feuerprobe kommen nicht wieder
+// 11. Showdown: erst Revanchen in Spielreihenfolge, dann Wirbel der Götter; Rikes Tagebuch und Hüter der Flamme kommen nicht wieder
 s = derive(config, { quests: { logbuch: "verloren", klingen: "bestanden", wirbel: "bestanden", podrennen: "verloren",
                               kartenwurf: "bestanden", auge: "verloren", feuerprobe: "verloren" }, duelle: { "1": "sieg" } });
 assert.deepStrictEqual(showdownDuelle(config, s).map(d => [d.quest, d.art, d.ergebnis]),

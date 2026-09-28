@@ -199,15 +199,15 @@
     $("#nextWin").addEventListener("click", () => state.next && setQuest(state.next, "bestanden"));
     $("#nextLose").addEventListener("click", () => state.next && setQuest(state.next, "verloren"));
     $("#reset").addEventListener("click", () => {
-      if (!confirm("Wirklich alles zurücksetzen? Alle Quests werden offen, Buchungen, Einsätze und Zähler gelöscht. Die Log-Buch-Antworten bleiben. Rückgängig holt den Stand zurück.")) return;
+      if (!confirm("Wirklich alles zurücksetzen? Alle Quests werden offen, Buchungen, Einsätze und Zähler gelöscht. Die Tagebuch-Antworten bleiben. Rückgängig holt den Stand zurück.")) return;
       commit(d => Object.assign(d, E.emptyDoc()), "Zurückgesetzt", { dennis: Object.keys(eintraege) });
     });
     $("#undo").addEventListener("click", rueckgaengig);
     renderUndo();
     buildProbe();
     $("#resetLb").addEventListener("click", () => {
-      if (!confirm("Alle Log-Buch-Antworten von Dennis löschen? Er kann dann neu antworten.")) return;
-      lbStore.zuruecksetzen().then(() => toast("Log-Buch geleert"));
+      if (!confirm("Alle Tagebuch-Antworten von Dennis löschen? Er kann dann neu antworten.")) return;
+      lbStore.zuruecksetzen().then(() => toast("Tagebuch geleert"));
     });
 
     const s = C.speicher;

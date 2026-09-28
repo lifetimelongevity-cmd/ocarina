@@ -65,7 +65,8 @@ Dennis' Antworten und Einträge liegen bewusst neben dem Spiel, damit das Speich
 - **Prophezeiung:** morgens „Starten", jede erfüllte Vorhersage „+1 Treffer" (gibt eine Spruchrolle), abends „Beenden". Das bleibt bei dir.
 - **Rikes Amulett:** „Starten", wenn die Brosche versteckt ist. Dennis meldet „Gefunden“ und „Zusammengesetzt“. Verpasst er die Frist, buchst du Verloren.
 - **Showdown:** Dennis sieht am Gipfel die Duell-Tafel (verlorene Spiele vom Tag zuerst, aufgefüllt mit Wirbel der Götter) und trägt jedes Duell ein. Nach der Mehrheit trägt er die Prüfung ein. Den Schild setzt er vor dem Besiegeln einer Niederlage ein und spielt das Duell noch einmal.
-- **Log-Buch:** Dennis' Antworten erscheinen live unter der Quest und unten im Bereich Log-Buch. Sind alle sieben besiegelt, trägt er das Ergebnis selbst ein.
+- **Rikes Tagebuch** (intern Log-Buch, hieß bis 28.09. so): Dennis' Antworten erscheinen live unter der Quest und unten im Bereich „Rikes Tagebuch“. Sind alle sieben besiegelt, trägt er das Ergebnis selbst ein.
+- **Die drei Zeichen** (Schnick Schnack Schnuck, Best of 3, Dennis wählt seinen Gegner) und **Hüter der Flamme** (offenes Teelicht 50 Schritte bergauf, der Bund lenkt ab, pustet nicht) ersetzen seit 28.09. Kreuzung der Klingen und Feuerprobe. Für Hüter der Flamme Feuerzeug und Ersatz-Teelicht einpacken.
 - **Verpasste Momente:** War Dennis' App zu oder ohne Netz, laufen die Momente nach PRESS START nacheinander ab. Die nächste Quest tritt erst danach aus dem Nebel.
 
 ## Auf den Startbildschirm (App installieren)

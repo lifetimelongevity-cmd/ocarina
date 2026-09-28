@@ -430,7 +430,7 @@
 
   function logbuchKnopf() {
     const n = C.logbuch.fragen.length, fertig = Object.keys(antworten).filter(k => +k >= 1 && +k <= n).length;
-    const text = fertig >= n ? `ALLE ${n} BESIEGELT` : fertig ? `WEITER SCHREIBEN · ${fertig}/${n}` : "LOG-BUCH ÖFFNEN";
+    const text = fertig >= n ? `ALLE ${n} BESIEGELT` : fertig ? `WEITER SCHREIBEN · ${fertig}/${n}` : "TAGEBUCH ÖFFNEN";
     return `<button type="button" class="qc-action" data-logbuch>${useSvg("i-scroll")}${text}</button>`;
   }
 

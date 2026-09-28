@@ -88,7 +88,7 @@ await ctx.close();
 await zurKarte(p); await weg(p);
 await p.click('.mark[data-station="wiese"]'); await warte(300);
 const tafel = await p.textContent('#stationCard');
-pruefe(tafel.includes('Kreuzung der Klingen') && tafel.includes('815 m'), 'Tafel Wiese: Quests und Höhe');
+pruefe(tafel.includes('Die drei Zeichen') && tafel.includes('815 m'), 'Tafel Wiese: Quests und Höhe');
 pruefe(await p.$eval('#stationCard', e => e.classList.contains('rechts')), 'Tafel liegt gegenüber der Station');
 await p.click('.sc-row[data-quest="podrennen"]'); await warte(800);
 pruefe(await aktiv(p) === '1' && (await p.textContent('#questCard .tb-title')).includes('Podrennen'), 'Zeile öffnet die Quest');

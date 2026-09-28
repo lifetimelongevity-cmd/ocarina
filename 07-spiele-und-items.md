@@ -1,6 +1,6 @@
 # Spiele und Items · Arbeitsstand
 
-Stand 25.09.2026. Sammelt, was der Nutzer pro Spiel und Item festgelegt hat. Die Nummern sind fest und dienen zum Referenzieren. **Seit 25.09. in `app/config.js` umgesetzt** (Abschnitt „Umsetzung“ unten).
+Stand 25.09.2026, Namen und Aussichtspunkt geändert am 28.09. Sammelt, was der Nutzer pro Spiel und Item festgelegt hat. Die Nummern sind fest und dienen zum Referenzieren. **Seit 25.09. in `app/config.js` umgesetzt** (Abschnitt „Umsetzung“ unten).
 
 **Grundregel (25.09.):** Der Quest Master bucht nur „bestanden" oder „nicht bestanden". Ab wann ein Spiel bestanden ist, wird später festgelegt, gern erst am Spieltag.
 
@@ -8,10 +8,10 @@ Stand 25.09.2026. Sammelt, was der Nutzer pro Spiel und Item festgelegt hat. Die
 
 | Nr. | Spiel | Stand | Offen |
 |---|---|---|---|
-| 1 | Log-Buch | **Entschieden (25.09.):** Rike beantwortet vorab 7 Fragen (26.09.) per Sprachnachricht. Dennis sitzt allein im Zug, rät ihre Antwort in der App, danach spielt die App Rikes Sprachnachricht ab (Plan unten). | Sprachdateien |
+| 1 | Log-Buch, für Dennis **„Rikes Tagebuch“** (Name seit 28.09.) | **Entschieden (25.09.):** Rike beantwortet vorab 7 Fragen (26.09.) per Sprachnachricht. Dennis sitzt allein im Zug, rät ihre Antwort in der App, danach spielt die App Rikes Sprachnachricht ab (Plan unten). | Sprachdateien |
 | 2 | Auge des Jägers | Bleibt: 5 Teelichter, Wasserpistole, ein Tank. | Grenze später |
-| 3 | Feuerprobe | **Entschieden (25.09.):** eine Mutprobe, „Der Ruf": Eine fremde Wandergruppe nimmt mit Dennis ein Video für Rike auf. Keine Umschläge. | |
-| 4 | Kreuzung der Klingen | **Entschieden (25.09.):** Dennis wählt einen Gegner aus dem Bund, erst danach erfährt er die Disziplin: Schnick Schnack Schnuck, Best of 3. | |
+| 3 | **Hüter der Flamme** (ersetzt am 28.09. die Feuerprobe mit „Der Ruf“) | **Entschieden (28.09.):** Dennis trägt ein offenes, brennendes Teelicht 50 Schritte bergauf. Der Bund darf ablenken, aber nicht pusten und nicht berühren. Kommt die Flamme an, bestanden. Material: Teelicht, Feuerzeug, Ersatzlicht. | Stelle am Aussichtspunkt |
+| 4 | **Die drei Zeichen** (hieß Kreuzung der Klingen, Name seit 28.09.) | **Entschieden (25.09., Name 28.09.):** Schnick Schnack Schnuck, Best of 3. Dennis wählt seinen Gegner aus dem Bund. Der Name verrät das Spiel, die Disziplin ist kein Geheimnis mehr. | |
 | 5 | Prüfung des Bundes (Showdown auf dem Gipfel) | **Entschieden (25.09.):** 3 Duelle. Zuerst die Spiele, die Dennis am Tag verloren hat (Revanche), aufgefüllt mit Wirbel der Götter. Die App zeigt dem Quest Master die drei. | |
 | 6 | Prophezeiung | **Bleibt** (25.09.). Morgens sagt Dennis 2 bis 3 Dinge voraus, die der Bund heute tun wird („Bene wird sich dehnen"). Jede, die in Erfüllung geht, bringt ihm eine **Spruchrolle** (F1). Läuft den ganzen Tag, der Quest Master bucht, sobald sich eine erfüllt. | Anzahl Vorhersagen, Rolle oder Pack pro Treffer |
 | 7 | **Das Podrennen** (RC-Auto, ersetzt Waffenschmied) | Name steht (25.09.). Kleines ferngesteuertes Auto, Parcours auf Zeit. Wird eine Prüfung. | Parcours |
@@ -78,14 +78,14 @@ Stand 25.09.2026. Sammelt, was der Nutzer pro Spiel und Item festgelegt hat. Die
 
 | # | Nr. | Quest | Art | Ort | Sieg | Niederlage | Einsetzbar |
 |---|---|---|---|---|---|---|---|
-| 1 | 1 | Log-Buch | Prüfung | Zug | +1, Ziffer 1 | 0 | nichts |
-| 2 | 4 | Kreuzung der Klingen | Prüfung | Wiese | +2, Ziffer 2, Kreisel (I5) | −1 | Spruchrolle, Schild |
+| 1 | 1 | Rikes Tagebuch | Prüfung | Zug | +1, Ziffer 1 | 0 | nichts |
+| 2 | 4 | Die drei Zeichen | Prüfung | Wiese | +2, Ziffer 2, Kreisel (I5) | −1 | Spruchrolle, Schild |
 | 3 | 14 | Wirbel der Götter | Sidequest | Wiese | +1, Gepanzerte Karten (I4) | −1 | Kreisel, Spruchrolle, Schild |
 | 4 | 7 | Das Podrennen | Prüfung | Wiese | +2, Große Wasserpistole (I2) | −1 | Spruchrolle |
 | 5 | 9 | Kartenwurf | Sidequest | Wald | +2 | −1 | Karten, Spruchrolle, Schild |
 | 6 | 2 | Auge des Jägers | Prüfung | Wald | +3, Stich (I6) | −2 | Wasserpistole, Spruchrolle |
 | 7 | 12 | Klingen des Deku-Baums | Sidequest | Wald | +2 | −1 | Stich, Spruchrolle |
-| 8 | 3 | Feuerprobe | Prüfung | Aussicht | +3, Ziffer 3, Schild (F3) | −2 | Spruchrolle |
+| 8 | 3 | Hüter der Flamme | Prüfung | Aussicht | +3, Ziffer 3, Schild (F3) | −2 | Spruchrolle |
 | 9 | 5 | Prüfung des Bundes | Prüfung | Gipfel | +5, Ziffer 4 | −4 | Spruchrolle, Schild, dazu alles, was bei den Spielen der Duelle hilft |
 | läuft | 6 | Prophezeiung | Zähler (max. 3) | den ganzen Tag | je Treffer 1 Spruchrolle | | |
 | läuft | 15 | Rikes Amulett | Schritt „Gefunden“ | den ganzen Tag | +3 | 0 | Spruchrolle |
@@ -106,7 +106,7 @@ Sechs Prüfungen = sechs Medaillons. Das Podrennen trägt das Schatten-Medaillon
 | F1 | Spruchrolle (mehrfach, einmalig) | Versiegeltes Pergament |
 | F3 | Schild des Bundes (einmalig) | Zerbrochenes Wappen |
 
-**Showdown:** Revanche möglich bei 2, 4, 7, 9, 12, 14 (Log-Buch und Feuerprobe kommen nicht wieder). Verlorene Spiele in Tagesreihenfolge, höchstens drei, dann mit Wirbel der Götter aufgefüllt. Der Quest Master tippt je Duell Sieg oder Niederlage, die App sagt, wann es reicht (2 von 3).
+**Showdown:** Revanche möglich bei 2, 4, 7, 9, 12, 14 (Rikes Tagebuch und Hüter der Flamme kommen nicht wieder). Verlorene Spiele in Tagesreihenfolge, höchstens drei, dann mit Wirbel der Götter aufgefüllt. Der Quest Master tippt je Duell Sieg oder Niederlage, die App sagt, wann es reicht (2 von 3).
 
 **Log-Buch:** Umgedreht am 26.09.: Rike beantwortet 7 Fragen über Dennis, Dennis tippt in ein bis drei Worten, was sie gesagt hat. Fragen stehen fest (in `config.js` an Dennis gerichtet, so wie Rike sie bekommt in `app/assets/logbuch/LIESMICH.md`). Dateien `app/assets/logbuch/frage1.m4a` bis `frage7.m4a` fehlen noch, bis dahin spielt ein Platzhalter-Klang. Hinweise zum Format in `app/assets/logbuch/LIESMICH.md`.
 
