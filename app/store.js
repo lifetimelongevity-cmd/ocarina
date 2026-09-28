@@ -171,7 +171,7 @@
           k.subscribe(fn)          fn(eintraege) bei jedem neuen Stand
           k.setzen(schluessel, e)  schreiben (Dennis, oder der Admin beim Wiederherstellen)
           k.loeschen(schluessel)   nur Admin: einen Eintrag löschen (Promise, scheitert ohne Netz)
-          k.zuruecksetzen()        nur Admin: alle Einträge löschen */
+          k.zuruecksetzen()        nur Admin: alle Einträge löschen (Promise, scheitert ohne Netz) */
   function kanal(cfg, name, speicherName) {
     const s = cfg.speicher || {};
     const id = (s.spielId || "standard") + "-" + name;
@@ -209,6 +209,7 @@
       const offen = Object.keys(pending);
       if (!offen.length) return;
       flushing = true;
+      let weiter = false;
       try {
         for (const n of offen) {
           const e = pending[n];
@@ -218,8 +219,10 @@
           if (gleich(pending[n], e)) delete pending[n];
         }
         schreiben(key, remote); schreiben(pendingKey, pending);
+        weiter = Object.keys(pending).length > 0;      // während des Sendens kam mehr dazu (Rückgängig schreibt viele auf einmal)
       } catch (_) { /* später noch einmal */ }
       finally { flushing = false; }
+      if (weiter) flush();
     }
 
     if (firebase) {
@@ -271,18 +274,18 @@
       zuruecksetzen() {
         pending = {}; schreiben(pendingKey, pending);
         remote = {}; schreiben(key, remote); melden();
-        if (firebase) return fetch(base + ".json", { method: "DELETE" }).catch(() => {});
+        if (firebase) return fetch(base + ".json", { method: "DELETE" }).then(res => { if (!res.ok) throw new Error("HTTP " + res.status); });
         return Promise.resolve();
       }
     };
   }
 
   /* Log-Buch: Dennis' Antworten, { "1": { antwort, zeit }, … }
-     API: const lb = QuestStore.logbuch(config), lb.subscribe(fn), lb.besiegeln(nr, text), lb.zuruecksetzen() */
+     API: const lb = QuestStore.logbuch(config), lb.subscribe(fn), lb.besiegeln(nr, text), lb.zuruecksetzen(), lb.setzen(nr, e) (Rückgängig im Admin) */
   function logbuch(cfg) {
     const k = kanal(cfg, "logbuch", "logbuch");
     return {
-      subscribe: k.subscribe, zuruecksetzen: k.zuruecksetzen,
+      subscribe: k.subscribe, zuruecksetzen: k.zuruecksetzen, setzen: k.setzen,
       besiegeln(nr, text) { return k.setzen(String(nr), { antwort: String(text).slice(0, 500), zeit: Date.now() }); }
     };
   }

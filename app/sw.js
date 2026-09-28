@@ -2,9 +2,9 @@
    Eigene Dateien: erst Netz (damit Änderungen sofort ankommen, auch hinter dem Zwischenspeicher des Hosts), ohne Netz aus dem Speicher.
    Bilder, Schriften, Töne: aus dem Speicher, im Hintergrund aufgefrischt.
    Firebase und alles von anderen Adressen läuft am Speicher vorbei. */
-const CACHE = "dennis-quest-v2";
+const CACHE = "dennis-quest-v3";
 const KERN = ["./", "index.html", "styles.css", "app.js", "config.js", "engine.js", "store.js", "weg.js",
-  "assets/intro-titel.webp", "assets/intro-fee.png", "assets/fee.png", "assets/hylia-serif.woff2", "assets/alpine-trail.webp", "assets/avatar-okarina.webp"];
+  "assets/intro-titel.webp", "assets/intro-fee.png", "assets/fee.png", "assets/hylia-serif.woff2", "assets/alpine-trail.webp", "assets/avatar-okarina.webp", "assets/avatar-klein.webp"];
 
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(KERN)).then(() => self.skipWaiting()));

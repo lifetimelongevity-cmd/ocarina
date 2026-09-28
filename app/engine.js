@@ -13,6 +13,7 @@
      items:     { [itemId]: "besitz" | "verloren" | "nicht" }      // manuelle Korrektur, schlägt die Regel
      zeiten:    { [questId]: Zeitstempel }             // wann die Quest entschieden wurde (für die Reihenfolge der Packs)
      stand:     Zeitstempel der letzten Änderung
+     neustart:  Zeitstempel, wann der Quest Master zuletzt alles zurückgesetzt hat (Dennis' Handy fängt dann von vorn an)
    }
 
    Packs zählen Schritt für Schritt in der Reihenfolge, in der sie passiert sind (zeiten, buchung.zeit),
@@ -26,7 +27,7 @@
   const list = x => (Array.isArray(x) ? x.filter(Boolean) : x && typeof x === "object" ? Object.values(x).filter(Boolean) : []);
 
   function emptyDoc() {
-    return { quests: {}, glanz: {}, zaehler: {}, schritte: {}, einsaetze: [], duelle: {}, buchungen: [], items: {}, zeiten: {}, stand: 0 };
+    return { quests: {}, glanz: {}, zaehler: {}, schritte: {}, einsaetze: [], duelle: {}, buchungen: [], items: {}, zeiten: {}, stand: 0, neustart: 0 };
   }
 
   function normalize(doc) {
@@ -45,7 +46,8 @@
       buchungen: list(d.buchungen),
       items: obj(d.items),
       zeiten: obj(d.zeiten),
-      stand: Number(d.stand) || 0
+      stand: Number(d.stand) || 0,
+      neustart: Number(d.neustart) || 0
     };
   }
 

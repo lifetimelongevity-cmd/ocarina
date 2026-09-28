@@ -132,6 +132,9 @@ svg { display: block; }
 .menu-cube { position: absolute; inset: 0; transform-style: preserve-3d; transition: transform 430ms steps(9, end); }
 .face { --i: 0; position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; transform: rotateY(calc(var(--i) * 120deg)) translateZ(var(--apo, 28.8675cqw)); }
 .face-quests { --i: 1; } .face-equip { --i: 2; }
+/* Während der Drehung (app.js setzt .dreht) ohne Überblendungen und weiche Schatten: weniger Arbeit pro Bild, vor allem auf dem iPhone */
+.game.dreht .dither, .game.dreht .face::after { display: none; }
+.game.dreht .face { box-shadow: inset 0 0 0 4px rgba(220,222,171,.1), 4px 5px 0 #000; }
 /* Im Ruhezustand ist nichts gedreht: sauberes Tippen und Scrollen auf dem iPhone */
 .menu-cube.flat { transform: none !important; transition: none; }
 .menu-cube.flat .face { transform: none; visibility: hidden; }
@@ -294,7 +297,7 @@ svg { display: block; }
 .mark.label-top .m-label { top: auto; bottom: 100%; margin: 0 0 -2px; }
 .mark.is-selected .medal, .mark.is-selected .m-chest { outline: 2px solid #fff; outline-offset: 3px; border-radius: 50%; }
 .mark .you { position: absolute; left: 50%; bottom: calc(100% - 4px); width: 26px; height: 26px; margin-left: -13px; border-radius: 50%; border: 2px solid var(--cursor); box-shadow: 0 0 0 1.5px #1b1e16, 0 2px 4px #000;
-  background: #2b3522 url("assets/avatar-okarina.webp") no-repeat; background-size: 70px auto; background-position: -25px -15px; animation: youBob 900ms steps(3, end) infinite; }
+  background: #2b3522 url("assets/avatar-klein.webp") center / cover no-repeat; animation: youBob 900ms steps(3, end) infinite; }
 .mark .you::after { content: ""; position: absolute; left: 50%; top: 100%; margin-left: -4px; border: 4px solid transparent; border-top-color: var(--cursor); }
 @keyframes youBob { 50% { transform: translateY(-3px); } }
 .map-icon { position: absolute; width: 18px; height: 18px; transform: translate(-50%, -50%); color: #4a3622; pointer-events: none; }
@@ -303,14 +306,18 @@ svg { display: block; }
 .map-lake-label { position: absolute; left: 13%; bottom: 5%; color: #e7f1f3; font: italic 900 var(--fs-tiny)/1 Georgia, serif; letter-spacing: .14em; opacity: .85; text-shadow: 1px 1px 0 #2d5a66; pointer-events: none; }
 
 /* Die Karte lebt: gegangener Weg in Gold über dem gestrichelten, Nebel treibt, Dennis läuft (app.js, spieleLauf) */
-.t-done { fill: none; stroke: #f2c94c; stroke-width: 4; stroke-linecap: round; vector-effect: non-scaling-stroke; filter: drop-shadow(0 0 2px rgba(143,106,18,.9)); }
+/* Eigene Ebene, ohne SVG-Filter (der Schein ist eine breitere Linie darunter): Beim Laufen bleibt das Gelände unberührt */
+.map-weg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; will-change: transform; }
+.t-done-rand { fill: none; stroke: rgba(143,106,18,.55); stroke-width: 7; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+.t-done { fill: none; stroke: #f2c94c; stroke-width: 4; stroke-linecap: round; vector-effect: non-scaling-stroke; }
 .map-fog { animation: fogDrift 17s ease-in-out infinite alternate; }
 @keyframes fogDrift { from { transform: translateX(-10px); } to { transform: translate(14px, -4px); } }
-.map-walker { position: absolute; z-index: 3; width: 26px; height: 26px; transform: translate(-50%, calc(-100% - 12px)); border-radius: 50%; border: 2px solid var(--cursor); box-shadow: 0 0 0 1.5px #1b1e16, 0 2px 4px #000; pointer-events: none;
-  background: #2b3522 url("assets/avatar-okarina.webp") no-repeat; background-size: 70px auto; background-position: -25px -15px; animation: walkBob 260ms steps(2, end) infinite; }
+/* Läuft per transform (app.js), damit der Browser beim Laufen nichts neu anordnen muss */
+.map-walker { position: absolute; z-index: 3; left: 0; top: 0; width: 26px; height: 26px; margin: -38px 0 0 -13px; border-radius: 50%; border: 2px solid var(--cursor); box-shadow: 0 0 0 1.5px #1b1e16, 0 2px 4px #000; pointer-events: none; will-change: transform;
+  background: #2b3522 url("assets/avatar-klein.webp") center / cover no-repeat; animation: walkBob 260ms steps(2, end) infinite; }
 .map-walker::after { content: ""; position: absolute; left: 50%; top: 100%; margin-left: -4px; border: 4px solid transparent; border-top-color: var(--cursor); }
 .map-walker[hidden] { display: none; }
-@keyframes walkBob { 50% { margin-top: -3px; } }
+@keyframes walkBob { 50% { translate: 0 -3px; } }
 .map-sheet.walking .mark .you { display: none; }
 
 /* GPS: ein Feenlicht dort, wo Dennis wirklich am Weg steht */

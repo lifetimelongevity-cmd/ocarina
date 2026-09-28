@@ -29,7 +29,7 @@ const questOeffnen = async (p, id) => { await p.evaluate(i => document.querySele
 async function siegel(p, sel, erwartet, text) {
   await p.tap(sel); await warte(350); await halten(p);
   const f = await fenster(p);
-  pruefe(f.includes(erwartet), `${text}: „${erwartet}“`);
+  pruefe(f.includes(erwartet), `${text}: „${erwartet}“` + (f.includes(erwartet) ? "" : " (Fenster: " + f.slice(0, 120) + ")"));
   await zu(p); await warte(900);
   return f;
 }

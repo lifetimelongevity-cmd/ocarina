@@ -55,17 +55,25 @@
   const kanon = d => JSON.stringify({ ...E.normalize(d), stand: 0 }, (k, v) =>
     v && typeof v === "object" && !Array.isArray(v) ? Object.fromEntries(Object.keys(v).sort().map(x => [x, v[x]])) : v);
 
-  // o.dennis: Schlüssel von Dennis' Einträgen, die mit weg sollen (Zurücknehmen). Rückgängig schreibt sie wieder.
+  // o.dennis: Schlüssel von Dennis' Einträgen, die mit weg sollen (Zurücknehmen), o.alle: alle auf einmal (ein einziges
+  // Löschen, bei Dennis kommt es in einem Stück an), o.tagebuch: seine Tagebuch-Antworten auch. Rückgängig schreibt alles wieder.
   function commit(mutate, msg, o = {}) {
     const vorher = JSON.parse(JSON.stringify(doc));
     const next = JSON.parse(JSON.stringify(doc));
     mutate(next);
     const weg = {};
-    (o.dennis || []).forEach(k => { if (eintraege[k]) weg[k] = eintraege[k]; });
-    verlauf = [...verlauf, { doc: vorher, was: msg || "Änderung", nach: kanon(next), dennis: weg }].slice(-40);
+    (o.alle ? Object.keys(eintraege) : o.dennis || []).forEach(k => { if (eintraege[k]) weg[k] = eintraege[k]; });
+    const tagebuch = o.tagebuch ? JSON.parse(JSON.stringify(antworten)) : null;
+    verlauf = [...verlauf, { doc: vorher, was: msg || "Änderung", nach: kanon(next), dennis: weg, ...(tagebuch ? { tagebuch } : {}) }].slice(-40);
     verlaufMerken();
-    if (kanon(vorher) !== kanon(next)) store.save(next);
-    Object.keys(weg).forEach(k => einStore.loeschen(k).catch(() => toast("Kein Netz: Dennis' Eintrag ist noch nicht gelöscht. Bitte nochmal.")));
+    // Erst das Spiel, dann das Löschen: So kommt bei Dennis der neue Stand (etwa der Neustart) vor den Einzelteilen an
+    const gespeichert = Promise.resolve(kanon(vorher) !== kanon(next) ? store.save(next) : null);
+    const keinNetz = was => () => setTimeout(() => toast(`Kein Netz: ${was} noch nicht gelöscht. Bitte nochmal.`), 1700);
+    gespeichert.then(() => {
+      if (o.alle) einStore.zuruecksetzen().catch(keinNetz("Dennis' Einträge sind"));
+      else Object.keys(weg).forEach(k => einStore.loeschen(k).catch(keinNetz("Dennis' Eintrag ist")));
+      if (tagebuch) lbStore.zuruecksetzen().catch(keinNetz("Die Tagebuch-Antworten sind"));
+    });
     if (msg) toast(msg);
     renderUndo();
   }
@@ -79,6 +87,7 @@
     verlaufMerken();
     store.save(letzter.doc);
     Object.entries(letzter.dennis || {}).forEach(([k, e]) => einStore.setzen(k, e));
+    Object.entries(letzter.tagebuch || {}).forEach(([k, e]) => lbStore.setzen(k, e));
     toast("Zurückgenommen: " + letzter.was);
     renderUndo();
   }
@@ -205,16 +214,18 @@
     $("#nextWin").addEventListener("click", () => state.next && setQuest(state.next, "bestanden"));
     $("#nextGlanz").addEventListener("click", () => state.next && questById(state.next).glanz && setQuest(state.next, "glanz"));
     $("#nextLose").addEventListener("click", () => state.next && setQuest(state.next, "verloren"));
+    // Alles zurücksetzen: neuer Zeitstempel in neustart, daran erkennt Dennis' Handy den neuen Anfang (ein Fenster, dann von vorn)
     $("#reset").addEventListener("click", () => {
-      if (!confirm("Wirklich alles zurücksetzen? Alle Quests werden offen, Buchungen, Einsätze und Zähler gelöscht. Die Tagebuch-Antworten bleiben. Rückgängig holt den Stand zurück.")) return;
-      commit(d => Object.assign(d, E.emptyDoc()), "Zurückgesetzt", { dennis: Object.keys(eintraege) });
+      if (!confirm("Wirklich alles zurücksetzen? Alle Quests werden offen, Packs, Einsätze, Zähler und Dennis' Tagebuch-Antworten werden gelöscht. Sein Handy fängt von vorn an, mit der Fee. Rückgängig holt den Stand zurück.")) return;
+      commit(d => { Object.assign(d, E.emptyDoc()); d.neustart = Date.now(); }, "Alles zurückgesetzt", { alle: true, tagebuch: true });
     });
     $("#undo").addEventListener("click", rueckgaengig);
     renderUndo();
     buildProbe();
     $("#resetLb").addEventListener("click", () => {
-      if (!confirm("Alle Tagebuch-Antworten von Dennis löschen? Er kann dann neu antworten.")) return;
-      lbStore.zuruecksetzen().then(() => toast("Tagebuch geleert"));
+      if (!Object.keys(antworten).length) return toast("Das Tagebuch ist schon leer");
+      if (!confirm("Alle Tagebuch-Antworten von Dennis löschen? Er kann dann neu antworten. Rückgängig holt sie zurück.")) return;
+      commit(() => {}, "Tagebuch geleert", { tagebuch: true });
     });
 
     const s = C.speicher;
@@ -269,7 +280,10 @@
       b.type = "button";
       b.className = "btn";
       b.textContent = sz.name;
-      b.addEventListener("click", () => commit(d => Object.assign(d, E.emptyDoc(), sz.doc()), "Probe: " + sz.name, { dennis: Object.keys(eintraege) }));
+      // Start ist ein neuer Anfang wie „Alles zurücksetzen“ (auch das Tagebuch), die anderen Sprünge behalten den Zeitstempel
+      const start = sz.name === "Start";
+      b.addEventListener("click", () => commit(d => { const ns = d.neustart; Object.assign(d, E.emptyDoc(), sz.doc()); d.neustart = start ? Date.now() : ns || 0; },
+        "Probe: " + sz.name, { alle: true, tagebuch: start }));
       $("#szenarien").appendChild(b);
     });
   }
