@@ -55,9 +55,22 @@ async function pruefen(page, g, name) {
     const sichtbar = el => { const s = getComputedStyle(el); if (s.visibility === 'hidden' || s.display === 'none' || +s.opacity === 0) return false; const b = el.getBoundingClientRect(); return b.width > 0 && b.height > 0; };
     const inAktiv = el => !el.closest('.face') || el.closest('.face.active');
     const bereich = el => !el.closest('[hidden]') && inAktiv(el) && !el.closest('.intro-screen') ;
+    // Sichtbarer Teil: was in einer scrollbaren Liste weggescrollt ist, ist erreichbar und kein Überlauf
+    const sichtbarerTeil = el => {
+      const e = el.getBoundingClientRect();
+      let b = { left: e.left, right: e.right, top: e.top, bottom: e.bottom };
+      for (let a = el.parentElement; a; a = a.parentElement) {
+        const s = getComputedStyle(a);
+        if (!/auto|scroll/.test(s.overflowY + s.overflowX)) continue;
+        const q = a.getBoundingClientRect();
+        b = { left: Math.max(b.left, q.left), right: Math.min(b.right, q.right), top: Math.max(b.top, q.top), bottom: Math.min(b.bottom, q.bottom) };
+      }
+      return b.right > b.left && b.bottom > b.top ? b : null;
+    };
     for (const el of document.querySelectorAll('.hud button, .shoulder, .foot .sync, .face.active button, .face.active p, .result, .lb-panel, .qc-action, .prolog-skip, .prolog-box, .coach-bubble, .sw-panel')) {
       if (!bereich(el) || !sichtbar(el)) continue;
-      const b = el.getBoundingClientRect();
+      const b = sichtbarerTeil(el);
+      if (!b) continue;
       if (b.left < sa.l - 1 || b.right > W - sa.r + 1 || (b.bottom > H - sa.b + 1 && !el.classList.contains('sync'))) out.inset.push(`${el.className || el.tagName} [${Math.round(b.left)},${Math.round(b.right)},${Math.round(b.bottom)}]`);
       if (b.right > W + 1 || b.bottom > H + 1) out.ausserhalb.push(el.className);
     }

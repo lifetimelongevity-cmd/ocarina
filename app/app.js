@@ -51,7 +51,7 @@
       einsaetze: [{ id: "e1", item: "spruchrolle", quest: "auge" }]
     },
     ende: {
-      quests: Object.fromEntries(C.quests.map(q => [q.id, q.zaehler ? "beendet" : ["wirbel", "auge"].includes(q.id) ? "verloren" : "bestanden"])),
+      quests: Object.fromEntries(C.quests.map(q => [q.id, q.zaehler ? "beendet" : ["wirbel", "kartenwurf"].includes(q.id) ? "verloren" : "bestanden"])),
       zaehler: { prophezeiung: 2 }, schritte: { amulett: { gefunden: true } },
       einsaetze: [{ id: "e1", item: "spruchrolle", quest: "auge" }]
     }
@@ -209,11 +209,13 @@
     row.innerHTML = Array.from({ length: max }, () => cardSvg("empty")).join("");
     $("#tumblers").innerHTML = C.code.map((_, i) => `<span class="tumbler" data-i="${i}">?</span>`).join("");
 
-    // Quests: oben was gerade läuft, dann die feste Reihe, am Ende der Nebel
+    // Quests in zwei Kammern (28.09.): oben die Hauptquests mit Medaillon, am Ende der Nebel,
+    // unten die Sidequests, zuerst was den ganzen Tag läuft
     const zeile = q => `<li><button type="button" class="q-row ${q.typ}" data-id="${q.id}"><span class="ic"></span><span class="q-name">${esc(q.name)}</span><span class="q-mark"></span></button></li>`;
-    $("#questList").innerHTML = `<li class="q-sep" data-sep="lauf">LÄUFT</li>` + LAUF.map(zeile).join("")
-      + `<li class="q-sep q-div" data-sep="reihe" aria-hidden="true"></li>` + REIHE.map(zeile).join("")
-      + `<li><button type="button" class="q-row nebel" data-id="${NEBEL}"><span class="ic">${coveredMedal()}</span><span class="q-name"></span><span class="q-mark"></span></button></li>`;
+    const kammer = (id, titel, zeilen) => `<li class="kammer kammer-${id}" data-kammer="${id}"><p class="kammer-kopf">${titel}</p><ol class="kammer-liste">${zeilen}</ol></li>`;
+    $("#questList").innerHTML = kammer("haupt", "HAUPTQUESTS", REIHE.filter(q => q.typ === "kern").map(zeile).join("")
+        + `<li><button type="button" class="q-row nebel" data-id="${NEBEL}"><span class="ic">${coveredMedal()}</span><span class="q-name"></span><span class="q-mark"></span></button></li>`)
+      + kammer("neben", "SIDEQUESTS", LAUF.map(zeile).join("") + REIHE.filter(q => q.typ !== "kern").map(zeile).join(""));
     document.querySelectorAll(".q-row").forEach(b => b.addEventListener("click", () => { followNext = b.dataset.id === state.next; selectQuest(b.dataset.id); }));
     $("#questCard").addEventListener("click", e => {
       if (e.target.closest("[data-logbuch]")) return logbuch.oeffnen();
@@ -325,14 +327,13 @@
         : st === "bestanden" || st === "beendet" ? useSvg("i-check") : st === "verloren" ? useSvg("i-x") : "";
       b.setAttribute("aria-label", `${q.name}, ${artWort(q)}, ${statusWort(q.id)}`);
     });
-    const laufSichtbar = LAUF.some(q => aufgedeckt(q.id));
-    document.querySelector('.q-sep[data-sep="lauf"]').hidden = !laufSichtbar;
-    document.querySelector('.q-sep[data-sep="reihe"]').hidden = !laufSichtbar;
     const nebel = $(".q-row.nebel"), nk = verdeckteKern();
     nebel.parentElement.hidden = !verdeckt.length;
     nebel.querySelector(".q-name").textContent = nk ? `Noch ${pruefungen(nk)}` : "Im Nebel";
     nebel.classList.toggle("is-selected", sel[1] === NEBEL);
     nebel.setAttribute("aria-label", nebel.querySelector(".q-name").textContent);
+    // Eine Kammer ohne sichtbare Quest bleibt zu (am Anfang des Tages meist die Sidequests)
+    document.querySelectorAll(".kammer").forEach(k => { k.hidden = !k.querySelector(".kammer-liste > li:not([hidden])"); });
     renderQuestCard(sel[1]);
   }
 
@@ -366,7 +367,7 @@
       card.classList.toggle("showdown", !!ein.duelle);
     }
     card.innerHTML = `
-      <div class="qc-head">${questIcon(q, st, false)}<div><p class="tb-title">${esc(q.name)}</p><p class="tb-meta">${esc(q.ort)}</p></div></div>
+      <div class="qc-head">${questIcon(q, st, false)}<div><p class="tb-title">${esc(q.name)}</p></div></div>
       <p class="tb-text">${esc(q.text)}</p>
       ${q.logbuch && isNext ? logbuchKnopf() : ""}
       ${einsatzHtml(id)}
@@ -1253,7 +1254,7 @@
     const step = { arrowdown: 1, arrowright: 1, arrowup: -1, arrowleft: -1 }[k];
     if (!step) return;
     e.preventDefault();
-    if (page === 1) { const ids = [...document.querySelectorAll(".quest-list li:not([hidden]) .q-row")].map(b => b.dataset.id); followNext = false; selectQuest(ids[(ids.indexOf(sel[1]) + step + ids.length) % ids.length]); }
+    if (page === 1) { const ids = [...document.querySelectorAll(".kammer-liste > li:not([hidden]) > .q-row")].map(b => b.dataset.id); followNext = false; selectQuest(ids[(ids.indexOf(sel[1]) + step + ids.length) % ids.length]); }
     if (page === 0) { const ids = STATIONEN.map(s => s.id); selectStation(ids[(ids.indexOf(sel[0]) + step + ids.length) % ids.length]); }
     if (page === 2) { const ids = [...document.querySelectorAll(".slot")].map(b => b.dataset.id); selectItem(ids[(ids.indexOf(sel[2]) + step + ids.length) % ids.length]); }
   });

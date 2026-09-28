@@ -209,11 +209,18 @@ svg { display: block; }
 
 /* ---------- Seite QUESTS ---------- */
 .quests-body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.08fr); gap: 10px; min-height: 0; }
-.quest-list { list-style: none; margin: 0; padding: 4px; min-height: 0; overflow-y: auto; overscroll-behavior: contain; touch-action: pan-y; scrollbar-width: thin; scrollbar-color: #6d7552 transparent;
-  background: rgba(4,7,5,.4); box-shadow: inset 2px 2px 5px rgba(0,0,0,.7), inset -1px -1px 0 rgba(255,255,255,.07); }
+.quest-list { list-style: none; margin: 0; padding: 8px 0; min-height: 0; overflow-y: auto; overscroll-behavior: contain; touch-action: pan-y; scrollbar-width: thin; scrollbar-color: #6d7552 transparent; }
+/* Zwei Kammern (28.09.): oben die Hauptquests, unten die Sidequests samt dem, was den ganzen Tag läuft */
+.kammer { padding: 0 4px 4px; border-radius: 3px; background: rgba(4,7,5,.4); box-shadow: inset 2px 2px 5px rgba(0,0,0,.7), inset -1px -1px 0 rgba(255,255,255,.07); }
+.kammer + .kammer { margin-top: 8px; }
+.kammer[hidden] { display: none; }
+.kammer-neben { background: rgba(10,12,26,.42); }
+.kammer-kopf { margin: 0; padding: 6px 6px 3px; color: #c9c29a; font: 800 var(--fs-tiny)/1 "Courier New", monospace; letter-spacing: .1em; opacity: .85; }
+.kammer-neben .kammer-kopf { color: #aeb6d2; }
+.kammer-liste { list-style: none; margin: 0; padding: 0; }
 .q-row { display: grid; grid-template-columns: 26px minmax(0, 1fr) auto; align-items: center; gap: 8px; width: 100%; min-height: var(--row); padding: 2px 8px 2px 4px; border: 0; background: transparent; cursor: pointer; text-align: left;
   color: var(--cream); font: 600 var(--fs-body)/1.15 "Trebuchet MS", sans-serif; }
-.quest-list li + li { border-top: 1px solid rgba(255,255,255,.06); }
+.kammer-liste > li + li { border-top: 1px solid rgba(255,255,255,.06); }
 .q-row .ic { display: grid; place-items: center; }
 .q-row.kern .q-name { font-weight: 800; letter-spacing: .01em; }
 .q-row.kern .medal { --sz: 23px; }
@@ -226,7 +233,6 @@ svg { display: block; }
 .q-row:focus-visible { outline: 2px solid #fff; outline-offset: -2px; }
 .q-row.nebel .q-name { color: #b3ad90; font-style: italic; font-weight: 600; }
 .q-row.nebel .medal { --sz: 23px; }
-.q-sep { list-style: none; padding: 7px 6px 3px; color: #c9c29a; font: 800 var(--fs-tiny)/1 "Courier New", monospace; letter-spacing: .08em; opacity: .8; }
 
 .quest-card { display: flex; flex-direction: column; min-height: 0; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none; padding: 8px 11px; }
 .qc-head { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 3px 9px; align-items: center; margin-bottom: 6px; }
@@ -744,8 +750,6 @@ html.probe body::after { content: ""; position: fixed; inset: 0; z-index: 9999; 
 .medal.running { color: color-mix(in srgb, var(--m), #fff 20%); background: radial-gradient(circle at 35% 28%, #4d4868, #1e1b2e 62%, #0a0910); border-color: color-mix(in srgb, var(--m), #000 50%); }
 .medal.running svg { opacity: .95; }
 .medal.lauf { border-radius: 30%; }
-.q-sep[hidden] { display: none; }
-.quest-list li.q-div { height: 0; padding: 0; margin: 5px 8px; border-top: 2px solid rgba(233, 213, 150, .28); }
 .fx.treffer { gap: 4px; }
 .fx.treffer .pip { display: grid; place-items: center; width: 22px; height: 22px; color: #3d3a52; }
 .fx.treffer .pip svg { width: 100%; height: 100%; filter: drop-shadow(1px 1px 0 #000); }

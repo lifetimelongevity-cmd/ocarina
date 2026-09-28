@@ -78,21 +78,21 @@ Stand 25.09.2026, Namen und Aussichtspunkt geändert am 28.09. Sammelt, was der 
 
 | # | Nr. | Quest | Art | Ort | Sieg | Niederlage | Einsetzbar |
 |---|---|---|---|---|---|---|---|
-| 1 | 1 | Rikes Tagebuch | Prüfung | Zug | +1, Ziffer 1 | 0 | nichts |
-| 2 | 4 | Die drei Zeichen | Prüfung | Wiese | +2, Ziffer 2, Kreisel (I5) | −1 | Spruchrolle, Schild |
-| 3 | 14 | Wirbel der Götter | Sidequest | Wiese | +1, Gepanzerte Karten (I4) | −1 | Kreisel, Spruchrolle, Schild |
-| 4 | 7 | Das Podrennen | Prüfung | Wiese | +2, Große Wasserpistole (I2) | −1 | Spruchrolle |
+| 1 | 1 | Rikes Tagebuch | Hauptquest | Zug | +1, Ziffer 1 | 0 | nichts |
+| 2 | 4 | Die drei Zeichen | Sidequest | Wiese | +2, Kreisel (I5) | −1 | Spruchrolle, Schild |
+| 3 | 14 | Wirbel der Götter | Hauptquest | Wiese | +1, Gepanzerte Karten (I4) | −1 | Kreisel, Spruchrolle, Schild |
+| 4 | 7 | Das Podrennen | Hauptquest | Wiese | +2, Ziffer 2, Große Wasserpistole (I2) | −1 | Spruchrolle |
 | 5 | 9 | Kartenwurf | Sidequest | Wald | +2 | −1 | Karten, Spruchrolle, Schild |
-| 6 | 2 | Auge des Jägers | Prüfung | Wald | +3, Stich (I6) | −2 | Wasserpistole, Spruchrolle |
-| 7 | 12 | Klingen des Deku-Baums | Sidequest | Wald | +2 | −1 | Stich, Spruchrolle |
-| 8 | 3 | Hüter der Flamme | Prüfung | Aussicht | +3, Ziffer 3, Schild (F3) | −2 | Spruchrolle |
-| 9 | 5 | Prüfung des Bundes | Prüfung | Gipfel | +5, Ziffer 4 | −4 | Spruchrolle, Schild, dazu alles, was bei den Spielen der Duelle hilft |
+| 6 | 2 | Auge des Jägers | Hauptquest | Wald | +3, Ziffer 3, Stich (I6) | −2 | Wasserpistole, Spruchrolle |
+| 7 | 12 | Klingen des Deku-Baums | Hauptquest | Wald | +2 | −1 | Stich, Spruchrolle |
+| 8 | 3 | Hüter der Flamme | Sidequest | Aussicht | +3, Schild (F3) | −2 | Spruchrolle |
+| 9 | 5 | Prüfung des Bundes | Hauptquest | Gipfel | +5, Ziffer 4 | −4 | Spruchrolle, Schild, dazu alles, was bei den Spielen der Duelle hilft |
 | läuft | 6 | Prophezeiung | Zähler (max. 3) | den ganzen Tag | je Treffer 1 Spruchrolle | | |
 | läuft | 15 | Rikes Amulett | Schritt „Gefunden“ | den ganzen Tag | +3 | 0 | Spruchrolle |
 
 **Packs (26.09.):** Das Kästchen hat eher 20+ Packs (`waehrung.max` 20). Je weiter der Weg, desto mehr steht auf dem Spiel: vorne 1 bis 2, hinten 3, der Bund +5 / −4. Alle Siege zusammen 24. Packs zählen in der Reihenfolge, in der gebucht wurde, und bleiben immer zwischen 0 und 20: Wer bei 0 verliert, verliert nichts, was über 20 geht, verfällt. Eine fehlende Ziffer kostet 1 Pack. Nachrechnen mit `node tests/balance.js`.
 
-Sechs Prüfungen = sechs Medaillons. Das Podrennen trägt das Schatten-Medaillon (violett), die Prophezeiung ist keine Prüfung mehr, sondern läuft mit Zähler. Items gehen bei Niederlagen nicht mehr verloren, Niederlagen kosten nur Packs.
+Sechs Prüfungen = sechs Medaillons. **Neu aufgeteilt am 28.09.:** Hauptquests (Prüfungen mit Medaillon) sind Rikes Tagebuch (Wasser, blau), Wirbel der Götter (Geister, orange), Das Podrennen (Schatten, violett), Auge des Jägers (Feuer, rot, fünf Flammen), Klingen des Deku-Baums (Wald, grün) und Prüfung des Bundes (Triforce, gold). Sidequests sind Die drei Zeichen, Kartenwurf und Hüter der Flamme. Die Ziffern liegen bei Rikes Tagebuch (1, Zug), Podrennen (2, Wiese), Auge des Jägers (3, Wald) und Prüfung des Bundes (4, Gipfel). Dennis sieht die Quests in zwei Kammern: oben HAUPTQUESTS, unten SIDEQUESTS samt Prophezeiung und Rikes Amulett. Den Ort unter dem Quest-Titel gibt es nicht mehr, der steht auf der Karte. Die Prophezeiung ist keine Prüfung mehr, sondern läuft mit Zähler. Items gehen bei Niederlagen nicht mehr verloren, Niederlagen kosten nur Packs.
 
 **Tarnnamen** (so heißt ein Item in der Vorschau einer Belohnung, bis Dennis es erspielt):
 

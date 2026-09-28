@@ -115,13 +115,13 @@ pruefe((await p.textContent('#swKopf')).includes('ZUSAMMENGESETZT'), 'Amulett: K
 await halten(p);
 pruefe((await fenster(p)).includes('BESTANDEN') || (await fenster(p)).includes('BEENDET'), 'Amulett: Moment');
 await zu(p); await warte(800);
-// Am Kästchen fehlt Ziffer 2 (Die drei Zeichen verloren): selbst kaufen
+// Am Kästchen fehlt Ziffer 3 (Auge des Jägers verloren): selbst kaufen
 await p.click('#hudNext'); await warte(400);
-pruefe(await p.isVisible('#overlay [data-kauf="2"]'), 'Kästchen: Ziffer 2 kaufen');
+pruefe(await p.isVisible('#overlay [data-kauf="3"]'), 'Kästchen: Ziffer 3 kaufen');
 await p.screenshot({ path: `${OUT}/selbst-8-kaestchen.png` });
-await p.click('#overlay [data-kauf="2"]'); await warte(400); await halten(p);
+await p.click('#overlay [data-kauf="3"]'); await warte(400); await halten(p);
 const kauf = await fenster(p);
-pruefe(kauf.includes('ZIFFER GEKAUFT') && kauf.includes('Ziffer 2: 4'), 'Ziffer gekauft, sie rastet ein');
+pruefe(kauf.includes('ZIFFER GEKAUFT') && kauf.includes('Ziffer 3: 2'), 'Ziffer gekauft, sie rastet ein');
 await ctx2.close();
 
 await b.close();

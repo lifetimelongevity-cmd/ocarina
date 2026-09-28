@@ -1,7 +1,7 @@
 /* Dennis Quest · Konfiguration v1 (Stand 25.09.2026, siehe 07-spiele-und-items.md)
    Alles, was das Spiel kennt. Ändert sich am Spieltag nicht.
 
-   Quests mit typ "kern" (Prüfung, Medaillon) und "side" (Sidequest, Stein) laufen in fester Reihenfolge:
+   Quests mit typ "kern" (Hauptquest, Prüfung mit Medaillon) und "side" (Sidequest, Stein) laufen in fester Reihenfolge:
    dran ist immer die erste offene. Quests mit typ "lauf" laufen den ganzen Tag daneben (Bereich „Läuft"),
    der Quest Master startet sie.
 
@@ -114,16 +114,16 @@
         lose: { packs: 0 },
         einsetzbar: [], logbuch: true },
 
-      // Hieß bis 28.09. „Kreuzung der Klingen“ (id bleibt, damit gespeicherte Stände passen)
-      { id: "klingen", nr: 4, typ: "kern", name: "Die drei Zeichen", ort: "Wiese am Anstieg", station: "wiese",
-        farbe: "#ec8f2e", emblem: "z-spirit",
+      // Hieß bis 28.09. „Kreuzung der Klingen“ und war eine Prüfung (id bleibt, damit gespeicherte Stände passen)
+      { id: "klingen", nr: 4, typ: "side", name: "Die drei Zeichen", ort: "Wiese am Anstieg", station: "wiese",
         text: "Wähle deinen Gegner aus dem Bund. Schnick, Schnack, Schnuck: Wer zuerst zwei Runden gewinnt, siegt.",
         qm: "Schnick Schnack Schnuck, Best of 3. Dennis wählt seinen Gegner aus dem Bund.",
-        win:  { packs: 2, ziffer: 2, items: ["kreisel"] },
+        win:  { packs: 2, items: ["kreisel"] },
         lose: { packs: -1 },
         einsetzbar: ["spruchrolle", "schild"], duell: true, revanche: true },
 
-      { id: "wirbel", nr: 14, typ: "side", name: "Wirbel der Götter", ort: "Wiese am Anstieg", station: "wiese",
+      { id: "wirbel", nr: 14, typ: "kern", name: "Wirbel der Götter", ort: "Wiese am Anstieg", station: "wiese",
+        farbe: "#ec8f2e", emblem: "z-spirit",
         text: "Zwei Kreisel, eine Arena. Wer sich länger dreht, gewinnt.",
         qm: "Beyblade, nur zwei Kreisel. Gegner und Best of 3 offen. Füllt auch den Showdown auf.",
         win:  { packs: 1, items: ["karten_gepanzert"] },
@@ -134,7 +134,7 @@
         farbe: "#a468e6", emblem: "z-shadow",
         text: "Ein kleiner Gleiter, ein Parcours, eine Uhr. Fahr schneller als die Zeit.",
         qm: "RC-Auto auf Zeit. Parcours und Zeitgrenze legst du fest.",
-        win:  { packs: 2, items: ["pistole_gross"] },
+        win:  { packs: 2, ziffer: 2, items: ["pistole_gross"] },
         lose: { packs: -1 },
         einsetzbar: ["spruchrolle"], revanche: true },
 
@@ -146,26 +146,26 @@
         einsetzbar: ["karten_gepanzert", "spruchrolle", "schild"], duell: true, revanche: true },
 
       { id: "auge", nr: 2, typ: "kern", name: "Auge des Jägers", ort: "Erstes Waldstück", station: "wald",
-        farbe: "#48b454", emblem: "z-forest",
+        farbe: "#e2472f", emblem: "e-flame",
         text: "Fünf Flammen, ein Tank. Lösch sie, bevor dir das Wasser ausgeht.",
         qm: "5 Teelichter, Wasserpistole, ein Tank. Grenze für bestanden legst du fest.",
-        win:  { packs: 3, items: ["stich"] },
+        win:  { packs: 3, ziffer: 3, items: ["stich"] },
         lose: { packs: -2 },
         einsetzbar: ["pistole_gross", "spruchrolle"], revanche: true },
 
-      { id: "deku", nr: 12, typ: "side", name: "Klingen des Deku-Baums", ort: "Erstes Waldstück", station: "wald",
+      { id: "deku", nr: 12, typ: "kern", name: "Klingen des Deku-Baums", ort: "Erstes Waldstück", station: "wald",
+        farbe: "#48b454", emblem: "z-forest",
         text: "Wirf deine Klingen in den alten Baum. Nur was stecken bleibt, zählt.",
         qm: "Mini-Schwerter auf einen Baum. 1 bis 4 Schwerter je nachdem, wie gut ein anderes Spiel lief (offen). Stich gibt eins mehr.",
         win:  { packs: 2 },
         lose: { packs: -1 },
         einsetzbar: ["stich", "spruchrolle"], revanche: true },
 
-      // Ersetzt am 28.09. die Feuerprobe („Der Ruf“), id bleibt
-      { id: "feuerprobe", nr: 3, typ: "kern", name: "Hüter der Flamme", ort: "Aussichtspunkt", station: "aussicht",
-        farbe: "#e2472f", emblem: "e-flame",
+      // Ersetzt am 28.09. die Feuerprobe („Der Ruf“) und ist eine Sidequest, id bleibt
+      { id: "feuerprobe", nr: 3, typ: "side", name: "Hüter der Flamme", ort: "Aussichtspunkt", station: "aussicht",
         text: "Trag ein brennendes Teelicht 50 Schritte bergauf, ohne dass es erlischt. Der Bund darf dich ablenken, aber nicht anpusten.",
         qm: "Offenes Teelicht ohne Glas, 50 Schritte bergauf. Erlischt es, verloren. Der Bund lenkt ab, pustet nicht, berührt nicht. Feuerzeug und Ersatzlicht mitnehmen.",
-        win:  { packs: 3, ziffer: 3, items: ["schild"] },
+        win:  { packs: 3, items: ["schild"] },
         lose: { packs: -2 },
         einsetzbar: ["spruchrolle"] },
 

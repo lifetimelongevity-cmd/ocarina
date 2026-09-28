@@ -211,7 +211,7 @@ s = mit({ duelle: { "1": "niederlage" } }, { d_1: { ergebnis: "sieg", zeit: 1 },
 assert.deepStrictEqual(s.duelle, { "1": "niederlage", "2": "sieg" });
 // Ziffer am Kästchen gekauft: kostet Packs in zeitlicher Reihenfolge, zweimal dieselbe Ziffer zählt einmal
 s = mit({ quests: { logbuch: "bestanden", klingen: "bestanden" }, zeiten: { logbuch: 1, klingen: 2 }, buchungen: [{ id: "b", packs: 0, grund: "x", ziffer: 1 }] }, { z_3: { zeit: 5 }, z_1: { zeit: 6 } });
-assert.deepStrictEqual(s.ziffern, [7, 4, 2, null]);
+assert.deepStrictEqual(s.ziffern, [7, null, 2, null]);   // Die drei Zeichen geben seit 28.09. keine Ziffer
 assert.deepStrictEqual(s.gekauft, [true, false, true, false]);
 assert.strictEqual(s.packs, P("logbuch", "win") + P("klingen", "win") - config.ziffer_preis);
 // Das Dokument des Admins bleibt unverändert
