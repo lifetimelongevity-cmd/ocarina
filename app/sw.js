@@ -1,5 +1,5 @@
 /* Dennis Quest · Offline-Speicher für Funklöcher
-   Eigene Dateien: erst Netz (damit Änderungen sofort ankommen), ohne Netz aus dem Speicher.
+   Eigene Dateien: erst Netz (damit Änderungen sofort ankommen, auch hinter dem Zwischenspeicher des Hosts), ohne Netz aus dem Speicher.
    Bilder, Schriften, Töne: aus dem Speicher, im Hintergrund aufgefrischt.
    Firebase und alles von anderen Adressen läuft am Speicher vorbei. */
 const CACHE = "dennis-quest-v2";
@@ -24,7 +24,10 @@ self.addEventListener("fetch", e => {
     }));
     return;
   }
-  e.respondWith(fetch(req).then(res => {
+  // no-cache: beim Server nachfragen, ob sich etwas geändert hat (GitHub Pages hält Dateien sonst bis zu 10 Minuten)
+  // (Seitenaufrufe über die Adresse, weil manche Browser eine Navigation nicht mit Optionen kopieren)
+  const frisch = req.mode === "navigate" ? fetch(req.url, { cache: "no-cache", credentials: "same-origin" }) : fetch(req, { cache: "no-cache" });
+  e.respondWith(frisch.then(res => {
     if (res.ok) caches.open(CACHE).then(c => c.put(req, res.clone()));
     return res;
   }).catch(() => caches.match(req, { ignoreSearch: true })));
