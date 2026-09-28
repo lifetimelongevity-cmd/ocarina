@@ -35,7 +35,7 @@
   const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   const typWort = q => q.typ === "kern" ? "Prüfung" : q.typ === "side" ? "Sidequest" : "Läuft";
-  const STATUS_WORT = { offen: "offen", laeuft: "läuft", bestanden: "bestanden", verloren: "verloren", beendet: "beendet" };
+  const STATUS_WORT = { offen: "offen", laeuft: "läuft", bestanden: "bestanden", verloren: "verloren", beendet: "beendet", glanz: "Glanzsieg" };
 
   function toast(msg) {
     clearTimeout(toastTimer);
@@ -92,14 +92,17 @@
 
   // Wann eine Quest entschieden wurde: bestimmt die Reihenfolge der Packs (engine.js). Umbuchen behält die Zeit.
   const ENTSCHIEDEN = ["bestanden", "verloren", "beendet"];
-  // Offen oder „läuft“ nimmt auch Dennis' Ergebnis zurück (bei „offen“ auch seine Schritte). Bestanden oder Verloren
-  // von dir gilt vor seinem Eintrag.
+  // Offen oder „läuft“ nimmt auch Dennis' Ergebnis zurück (bei „offen“ auch seine Schritte). Bestanden, Glanzsieg oder
+  // Verloren von dir gilt vor seinem Eintrag. Glanzsieg = bestanden plus glanz (nur Quests mit glanz in config.js).
   function setQuest(id, v) {
-    const dennis = ENTSCHIEDEN.includes(v) ? [] : ["q_" + id, ...(v === "offen" ? Object.keys(eintraege).filter(k => k.startsWith(`s_${id}_`)) : [])];
+    const dennis = ENTSCHIEDEN.includes(v) || v === "glanz" ? [] : ["q_" + id, ...(v === "offen" ? Object.keys(eintraege).filter(k => k.startsWith(`s_${id}_`)) : [])];
+    const status = v === "glanz" ? "bestanden" : v;
     commit(d => {
       const vorher = d.quests[id];
-      if (v === "offen") delete d.quests[id]; else d.quests[id] = v;
-      if (!ENTSCHIEDEN.includes(v)) delete d.zeiten[id];
+      d.glanz = { ...d.glanz };
+      if (v === "glanz") d.glanz[id] = true; else delete d.glanz[id];
+      if (status === "offen") delete d.quests[id]; else d.quests[id] = status;
+      if (!ENTSCHIEDEN.includes(status)) delete d.zeiten[id];
       else if (!ENTSCHIEDEN.includes(vorher) || !d.zeiten[id]) d.zeiten[id] = Date.now();
     }, questById(id).name + ": " + STATUS_WORT[v], { dennis });
   }
@@ -112,7 +115,9 @@
 
   function fxHtml(q) {
     if (q.zaehler) return `<span class="w">Pro ${esc(q.zaehler.name)}: ${esc(E.effektText(C, q.zaehler.proTreffer, true))}</span>`;
-    return `<span class="w">Sieg: ${esc(E.effektText(C, q.win, true))}</span> · <span class="l">Niederlage: ${esc(E.effektText(C, q.lose, false))}</span>`;
+    return `<span class="w">Sieg: ${esc(E.effektText(C, q.win, true))}</span>`
+      + (q.glanz ? ` · <span class="w">Glanzsieg (${esc(q.glanz.bedingung)}): dazu ${esc(E.effektText(C, q.glanz, true))}</span>` : "")
+      + ` · <span class="l">Niederlage: ${esc(E.effektText(C, q.lose, false))}</span>`;
   }
 
   const besitzText = id => {
@@ -150,9 +155,10 @@
       li.innerHTML = `
         <div class="q-head"><span class="q-nr">${q.nr}</span><span class="q-name">${esc(q.name)}</span><span class="badge ${q.typ}">${typWort(q)}</span><span class="badge jetzt" hidden>Jetzt</span></div>
         <div class="q-fx">${esc(q.ort)} · ${fxHtml(q)}</div>
-        <div class="seg" role="group" aria-label="Status ${esc(q.name)}">
+        <div class="seg${q.glanz ? " vier" : ""}" role="group" aria-label="Status ${esc(q.name)}">
           <button type="button" data-v="offen">Offen</button>
           <button type="button" data-v="bestanden">Bestanden</button>
+          ${q.glanz ? `<button type="button" data-v="glanz">Glanzsieg</button>` : ""}
           <button type="button" data-v="verloren">Verloren</button>
         </div>`;
       li.querySelectorAll(".seg button").forEach(b => b.addEventListener("click", () => setQuest(q.id, b.dataset.v)));
@@ -197,6 +203,7 @@
     });
 
     $("#nextWin").addEventListener("click", () => state.next && setQuest(state.next, "bestanden"));
+    $("#nextGlanz").addEventListener("click", () => state.next && questById(state.next).glanz && setQuest(state.next, "glanz"));
     $("#nextLose").addEventListener("click", () => state.next && setQuest(state.next, "verloren"));
     $("#reset").addEventListener("click", () => {
       if (!confirm("Wirklich alles zurücksetzen? Alle Quests werden offen, Buchungen, Einsätze und Zähler gelöscht. Die Log-Buch-Antworten bleiben. Rückgängig holt den Stand zurück.")) return;
@@ -231,7 +238,10 @@
     let t = Date.now() - 3600e3;
     const zeit = id => { d.zeiten[id] = t; t += 60e3; };
     const wurf = () => Math.random() < .5 ? "bestanden" : "verloren";
-    reihe.slice(0, n).forEach((q, i) => { d.quests[q.id] = o.zufall ? wurf() : i % 3 === 2 ? "verloren" : "bestanden"; zeit(q.id); });
+    reihe.slice(0, n).forEach((q, i) => {
+      d.quests[q.id] = o.zufall ? wurf() : i % 3 === 2 ? "verloren" : "bestanden"; zeit(q.id);
+      if (o.zufall && q.glanz && d.quests[q.id] === "bestanden" && Math.random() < .5) d.glanz[q.id] = true;
+    });
     lauf.forEach(q => {
       const ende = o.ende || (o.zufall && Math.random() < .3);
       d.quests[q.id] = !ende ? "laeuft" : q.zaehler ? "beendet" : o.zufall ? wurf() : "bestanden";
@@ -277,7 +287,7 @@
     renderLauf();
 
     document.querySelectorAll("#quests li").forEach(li => {
-      const v = state.quests[li.dataset.id];
+      const g = !!state.glanz[li.dataset.id], v = g ? "glanz" : state.quests[li.dataset.id];
       li.querySelectorAll(".seg button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.v === v)));
       li.querySelector(".badge.jetzt").hidden = li.dataset.id !== state.next;
     });
@@ -341,6 +351,7 @@
     $("#nextMeta").textContent = n ? `${n.ort} · ${n.text}` : "Jetzt fehlende Ziffern kaufen und das Kästchen öffnen.";
     $("#nextQm").textContent = n && n.qm ? n.qm : "";
     $("#nextFx").innerHTML = n ? fxHtml(n) : "";
+    $("#nextGlanz").hidden = !(n && n.glanz);
     $("#nextUse").innerHTML = n ? useHtml(n.id) : "";
     bindUse($("#nextUse"));
 
@@ -437,7 +448,7 @@
   /* Was Dennis selbst besiegelt hat: live mit Uhrzeit, jeder Eintrag lässt sich zurücknehmen */
   function eintragText(k, e) {
     const i = k.indexOf("_"), art = k.slice(0, i), rest = k.slice(i + 1);
-    if (art === "q") return `${questById(rest)?.name || rest}: ${STATUS_WORT[e.status] || e.status}`;
+    if (art === "q") return `${questById(rest)?.name || rest}: ${e.glanz && e.status === "bestanden" ? "Glanzsieg" : STATUS_WORT[e.status] || e.status}`;
     if (art === "e") return `${itemById(e.item)?.name || e.item} eingesetzt bei ${questById(e.quest)?.name || e.quest}`;
     if (art === "d") return `Duell ${rest}: ${e.ergebnis === "sieg" ? "Sieg" : "Niederlage"}`;
     if (art === "s") { const j = rest.indexOf("_"), q = questById(rest.slice(0, j)), sx = q && (q.schritte || []).find(x => x.id === rest.slice(j + 1)); return `${q ? q.name : rest}: ${sx ? sx.name : rest}`; }
@@ -447,7 +458,7 @@
   // Gilt der Eintrag, oder hast du selbst schon anders gebucht?
   function eintragGilt(k, e) {
     const i = k.indexOf("_"), art = k.slice(0, i), rest = k.slice(i + 1);
-    if (art === "q") return !ENTSCHIEDEN.includes(doc.quests[rest]) || doc.quests[rest] === e.status;
+    if (art === "q") return !ENTSCHIEDEN.includes(doc.quests[rest]) || (doc.quests[rest] === e.status && !doc.glanz[rest] === !(e.glanz && e.status === "bestanden"));
     if (art === "d") return !doc.duelle[rest] || doc.duelle[rest] === e.ergebnis;
     return true;
   }

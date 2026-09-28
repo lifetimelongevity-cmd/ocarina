@@ -4,6 +4,7 @@
    Das Dokument enthält nur, was der Quest Master einstellt:
    {
      quests:    { [questId]: "bestanden" | "verloren" | "laeuft" | "beendet" }   // fehlt = offen
+     glanz:     { [questId]: true }                   // Glanzsieg: bestanden und besonders deutlich (nur Quests mit glanz)
      zaehler:   { [questId]: Zahl }                   // Treffer einer Zähler-Quest (Prophezeiung)
      schritte:  { [questId]: { [schrittId]: true } }  // Zwischenschritte einer laufenden Quest (Amulett gefunden)
      einsaetze: [ { id, item, quest } ]               // Dennis hat ein Item oder eine Fähigkeit eingesetzt
@@ -25,7 +26,7 @@
   const list = x => (Array.isArray(x) ? x.filter(Boolean) : x && typeof x === "object" ? Object.values(x).filter(Boolean) : []);
 
   function emptyDoc() {
-    return { quests: {}, zaehler: {}, schritte: {}, einsaetze: [], duelle: {}, buchungen: [], items: {}, zeiten: {}, stand: 0 };
+    return { quests: {}, glanz: {}, zaehler: {}, schritte: {}, einsaetze: [], duelle: {}, buchungen: [], items: {}, zeiten: {}, stand: 0 };
   }
 
   function normalize(doc) {
@@ -36,6 +37,7 @@
     else Object.assign(duelle, obj(d.duelle));
     return {
       quests: obj(d.quests),
+      glanz: obj(d.glanz),
       zaehler: obj(d.zaehler),
       schritte: obj(d.schritte),
       einsaetze: list(d.einsaetze),
@@ -58,7 +60,7 @@
     const erhalten = [];                        // Reihenfolge, in der Items ins Inventar kamen
     const ziffern = config.code.map(() => null);
     const gekauft = config.code.map(() => false);
-    const quests = {}, treffer = {}, schritte = {}, eingesetzt = {};
+    const quests = {}, glanz = {}, treffer = {}, schritte = {}, eingesetzt = {};
     let bestanden = 0, verloren = 0;
 
     config.items.forEach(it => { items[it.id] = "nicht"; if (it.stapel) anzahl[it.id] = 0; });
@@ -92,6 +94,11 @@
         dp += q.win.packs || 0;
         (q.win.items || []).forEach(id => geben(id));
         if (q.win.ziffer) ziffern[q.win.ziffer - 1] = config.code[q.win.ziffer - 1];
+        if (q.glanz && doc.glanz[q.id]) {         // Glanzsieg: zusätzlich zum Sieg
+          glanz[q.id] = true;
+          dp += q.glanz.packs || 0;
+          (q.glanz.items || []).forEach(id => geben(id));
+        }
       } else if (status === "verloren" && q.lose) {
         dp += q.lose.packs || 0;
         (q.lose.items || []).forEach(nehmen);
@@ -164,7 +171,7 @@
 
     return {
       packs, max, kappung, items, anzahl, erhalten: erhalten.filter(id => items[id] !== "nicht"),
-      ziffern, gekauft, quests, treffer, schritte, eingesetzt, duelle,
+      ziffern, gekauft, quests, glanz, treffer, schritte, eingesetzt, duelle,
       next: nextQuest ? nextQuest.id : null,
       laufend: config.quests.filter(q => q.typ === "lauf" && quests[q.id] !== "offen").map(q => q.id),
       zaehler: { bestanden, verloren, erledigt: bestanden + verloren, gesamt: r.length },
@@ -192,7 +199,13 @@
       const dq = config.quests.find(x => x.id === d.quest);
       (dq && dq.einsetzbar || []).forEach(id => { if (!ids.includes(id)) ids.push(id); });
     });
-    return config.items.map(i => i.id).filter(id => ids.includes(id));
+    return config.items.map(i => i.id).filter(id => ids.includes(id) && !abgeloest(config, state, id));
+  }
+
+  // Hat Dennis ein stärkeres Item, das dieses ablöst (ersetzt)? Dann das stärkste davon, sonst null.
+  function abgeloest(config, state, id) {
+    const neu = config.items.filter(i => (i.ersetzt || []).includes(id) && state.items[i.id] === "besitz");
+    return neu.length ? neu[neu.length - 1].id : null;
   }
 
   // Wo Dennis gerade steht: die nächste Quest und alle, die gerade laufen
@@ -211,7 +224,8 @@
 
   /* Dennis' Einträge (store.js, Kanal „dennis") in das Dokument des Admins einrechnen. Ergibt ein Dokument wie vom Admin,
      derive() rechnet damit wie immer. Was der Admin selbst entschieden hat, gilt vor Dennis' Eintrag.
-       q_<quest>             { status: "bestanden" | "verloren", zeit }   Ergebnis einer Quest (bei laufenden auch nach „läuft")
+       q_<quest>             { status: "bestanden" | "verloren", glanz?, zeit }   Ergebnis einer Quest (bei laufenden auch nach „läuft"),
+                                                                          glanz: true = Glanzsieg (nur Quests mit glanz)
        e_<id>                { item, quest, zeit }                          Einsatz eines Items oder einer Fähigkeit
        d_<nr>                { ergebnis: "sieg" | "niederlage", zeit }      Duell im Showdown
        s_<quest>_<schritt>   { zeit }                                      Schritt einer laufenden Quest (Amulett gefunden)
@@ -229,6 +243,8 @@
         if (!quest(rest) || !["bestanden", "verloren"].includes(e.status) || ENTSCHIEDEN.includes(out.quests[rest])) return;
         out.quests[rest] = e.status;
         out.zeiten[rest] = zeit;
+        if (e.status === "bestanden" && e.glanz === true && quest(rest).glanz) out.glanz[rest] = true;
+        else delete out.glanz[rest];
       } else if (art === "e") {
         if (!itemCfg(config, e.item) || !quest(e.quest)) return;
         out.einsaetze.push({ id: k, item: e.item, quest: e.quest, zeit, von: "dennis" });
@@ -261,7 +277,7 @@
     return teile.length ? teile.join(", ") : "nichts";
   }
 
-  const api = { derive, emptyDoc, normalize, mitEintraegen, effektText, showdownDuelle, einsetzbar, aktuelleQuests, jetztEinsetzbar, STATUS, STATUS_LAUF };
+  const api = { derive, emptyDoc, normalize, mitEintraegen, effektText, showdownDuelle, einsetzbar, abgeloest, aktuelleQuests, jetztEinsetzbar, STATUS, STATUS_LAUF };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.QuestEngine = api;
 })(typeof window !== "undefined" ? window : globalThis);
