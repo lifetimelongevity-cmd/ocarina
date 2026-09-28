@@ -1,3 +1,4 @@
+# Früheres Hosting. Der Free-Plan ist aufgebraucht (15 Credits pro Deploy), die App zieht zu Vercel um (vercel.json).
 # Netlify: nur der Ordner app/ wird veröffentlicht, kein Build-Schritt
 [build]
   publish = "app"
