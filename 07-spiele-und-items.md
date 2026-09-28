@@ -111,3 +111,40 @@ Sechs Prüfungen = sechs Medaillons. Das Podrennen trägt das Schatten-Medaillon
 **Log-Buch:** Umgedreht am 26.09.: Rike beantwortet 7 Fragen über Dennis, Dennis tippt in ein bis drei Worten, was sie gesagt hat. Fragen stehen fest (in `config.js` an Dennis gerichtet, so wie Rike sie bekommt in `app/assets/logbuch/LIESMICH.md`). Dateien `app/assets/logbuch/frage1.m4a` bis `frage7.m4a` fehlen noch, bis dahin spielt ein Platzhalter-Klang. Hinweise zum Format in `app/assets/logbuch/LIESMICH.md`.
 
 **Offen:** Reihenfolge und Belohnungen bestätigen, Sprachdateien, genaue Anzahl Packs (20 gesetzt), was passiert, wenn die Packs für die fehlenden Ziffern nicht reichen, welches Spiel die Schwerter für 12 vergibt, Frist und Versteck für 15.
+
+## Material und Kosten (28.09.)
+
+Gekauft auf Amazon vom 22. bis 25.09., alles zugestellt. Die Reinigungslotion aus derselben Bestellung wie die Wasserpistole gehört nicht zum JGA und ist rausgerechnet.
+
+| Für | Material | Kosten |
+|---|---|---|
+| 12 Klingen des Deku-Baums | 4 Brieföffner-Schwerter aus Metall, 20 cm (gold, bronze, silber, schwarz) | 7,99 € |
+| 14 Wirbel der Götter | Beyblade X Star Wars: Obi-Wan Kenobi 4-60P gegen General Grievous 3-80HN, zwei Kreisel, zwei Starter | 15,46 € |
+| 15 Rikes Amulett, dazu ein bis zwei Sidequests | 9 Knobelspiele aus Metall | 17,99 € |
+| 2 Auge des Jägers | Elektrische Wasserpistole mit LED | ca. 10,50 € (Bestellung 24,24 € zusammen mit der Lotion, die bei Amazon etwa 13 bis 14 € kostet; genauer Preis in den Bestelldetails) |
+| 7 Das Podrennen | Revell Control Ultra Racers Series 1 Itasha: ein Auto (zufälliges Design aus sechs) mit Fernbedienung | 12,49 € |
+| **Summe** | | **ca. 64 €** (53,93 € fest plus Pistole) |
+
+Schon vorhanden: eine ganz kleine Wasserpistole und eine kleine Spritze.
+
+**Vor dem Spieltag testen:**
+
+- **Schwerter:** Brieföffner haben meist eine stumpfe Spitze. An einem Baum ausprobieren, ob sie stecken bleiben. Wenn nicht: ein morscher Stumpf als Ziel, oder es zählt, was mit der Spitze trifft. Nur werfen, wenn niemand hinter dem Baum ist.
+- **Nur 4 Schwerter:** „1 bis 4, mit Stich eins mehr“ bräuchte 5. Vorschlag: Das silberne ist Stich, Dennis bekommt 1 bis 3, mit Stich eins mehr. Dann `qm` bei `deku` in `config.js` anpassen.
+- **Beyblade:** Auf dem Bild sind nur Kreisel und Starter, keine Arena. Draußen reicht eine große Salatschüssel oder ein Wok.
+- **RC-Auto:** Klein und für glatten Boden. Auf Gras bleibt es vermutlich hängen, also Parcours auf festem Weg (Teer oder feiner Schotter), Tore aus Wanderstöcken oder Trinkflaschen. Akku oder Batterien prüfen. Zeitgrenze: Einer aus dem Bund fährt vor, seine Zeit muss Dennis schlagen.
+- **Knobelspiele:** Vorher selbst lösen und Zeit stoppen. Für Sidequests welche nehmen, die 10 bis 20 Minuten dauern. Unterwegs ohne Frist ist riskant, gut passt der Zug am Freitag nach dem Log-Buch (Frist bis München).
+
+### Vorschlag: drei Wasserwaffen als Stufen (offen, noch nicht gebaut)
+
+Wie Zoras Schuppe in Ocarina of Time (erst Silber, dann Gold): Im Auge des Jägers zählt die stärkste Waffe, die Dennis hat.
+
+| Stufe | Waffe | Woher |
+|---|---|---|
+| 0 | Spritze (oder die ganz kleine Pistole, je nachdem, welche im Test schwächer ist) | hat Dennis immer, kein Item in der App (einziges Startitem bleibt der Beutel) |
+| 1 | Kleine Wasserpistole | neu: Sieg im Kartenwurf (Sidequest direkt vor dem Auge des Jägers, gibt bisher kein Item). Wer das Podrennen verliert, hat so eine zweite Chance |
+| 2 | Große elektrische Wasserpistole | Sieg im Podrennen, wie bisher (I2) |
+
+Regel für alle Stufen gleich: ein Tank, gleicher Abstand. Vorher testen, wie viele der 5 Flammen jede Stufe schafft, dann die Grenze für bestanden setzen. Stufe 0 sollte knapp scheitern, sonst ist das Upgrade wertlos.
+
+Für die App, wenn der Nutzer es sagt: neues Item `pistole_klein` in `config.js` (Tarnname etwa „Zoras Schuppe“), `kartenwurf` gibt es bei Sieg, `auge` macht es einsetzbar. Text der großen Pistole („Dreifacher Tank“) an die echte anpassen.
