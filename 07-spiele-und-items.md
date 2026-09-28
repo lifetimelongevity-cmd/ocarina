@@ -1,6 +1,6 @@
 # Spiele und Items · Arbeitsstand
 
-Stand 25.09.2026. Sammelt, was der Nutzer pro Spiel und Item festgelegt hat. Die Nummern sind fest und dienen zum Referenzieren. **Seit 25.09. in `app/config.js` umgesetzt** (Abschnitt „Umsetzung“ unten).
+Stand 25.09.2026, Namen und Aussichtspunkt geändert am 28.09. Sammelt, was der Nutzer pro Spiel und Item festgelegt hat. Die Nummern sind fest und dienen zum Referenzieren. **Seit 25.09. in `app/config.js` umgesetzt** (Abschnitt „Umsetzung“ unten).
 
 **Grundregel (25.09.):** Der Quest Master bucht nur „bestanden" oder „nicht bestanden". Ab wann ein Spiel bestanden ist, wird später festgelegt, gern erst am Spieltag.
 
@@ -8,12 +8,12 @@ Stand 25.09.2026. Sammelt, was der Nutzer pro Spiel und Item festgelegt hat. Die
 
 | Nr. | Spiel | Stand | Offen |
 |---|---|---|---|
-| 1 | Log-Buch | **Entschieden (25.09.):** Rike beantwortet vorab 7 Fragen (26.09.) per Sprachnachricht. Dennis sitzt allein im Zug, rät ihre Antwort in der App, danach spielt die App Rikes Sprachnachricht ab (Plan unten). | Sprachdateien |
+| 1 | Log-Buch, für Dennis **„Rikes Tagebuch“** (Name seit 28.09.) | **Entschieden (25.09.):** Rike beantwortet vorab 7 Fragen (26.09.) per Sprachnachricht. Dennis sitzt allein im Zug, rät ihre Antwort in der App, danach spielt die App Rikes Sprachnachricht ab (Plan unten). | Sprachdateien |
 | 2 | Auge des Jägers | Bleibt: 5 Teelichter, Wasserpistole, ein Tank. | Grenze später |
-| 3 | Feuerprobe | **Entschieden (25.09.):** eine Mutprobe, „Der Ruf": Eine fremde Wandergruppe nimmt mit Dennis ein Video für Rike auf. Keine Umschläge. | |
-| 4 | Kreuzung der Klingen | **Entschieden (25.09.):** Dennis wählt einen Gegner aus dem Bund, erst danach erfährt er die Disziplin: Schnick Schnack Schnuck, Best of 3. | |
+| 3 | **Hüter der Flamme** (ersetzt am 28.09. die Feuerprobe mit „Der Ruf“) | **Entschieden (28.09.):** Dennis trägt ein offenes, brennendes Teelicht 50 Schritte bergauf. Der Bund darf ablenken, aber nicht pusten und nicht berühren. Kommt die Flamme an, bestanden. Material: Teelicht, Feuerzeug, Ersatzlicht. | Stelle am Aussichtspunkt |
+| 4 | **Die drei Zeichen** (hieß Kreuzung der Klingen, Name seit 28.09.) | **Entschieden (25.09., Name 28.09.):** Schnick Schnack Schnuck, Best of 3. Dennis wählt seinen Gegner aus dem Bund. Der Name verrät das Spiel, die Disziplin ist kein Geheimnis mehr. | |
 | 5 | Prüfung des Bundes (Showdown auf dem Gipfel) | **Entschieden (25.09.):** 3 Duelle. Zuerst die Spiele, die Dennis am Tag verloren hat (Revanche), aufgefüllt mit Wirbel der Götter. Die App zeigt dem Quest Master die drei. | |
-| 6 | Prophezeiung | **Bleibt** (25.09.). Morgens sagt Dennis 2 bis 3 Dinge voraus, die der Bund heute tun wird („Bene wird sich dehnen"). Jede, die in Erfüllung geht, bringt ihm eine **Spruchrolle** (F1). Läuft den ganzen Tag, der Quest Master bucht, sobald sich eine erfüllt. | Anzahl Vorhersagen, Rolle oder Pack pro Treffer |
+| 6 | Prophezeiung | **Bleibt** (25.09.). Morgens sagt Dennis 2 bis 3 Dinge voraus, die der Bund heute tun wird („Bene wird sich dehnen"). Jede, die in Erfüllung geht, bringt ihm einen **Fluch** (F1, früher Spruchrolle). Läuft den ganzen Tag, der Quest Master bucht, sobald sich eine erfüllt. | Anzahl Vorhersagen, Rolle oder Pack pro Treffer |
 | 7 | **Das Podrennen** (RC-Auto, ersetzt Waffenschmied) | Name steht (25.09.). Kleines ferngesteuertes Auto, Parcours auf Zeit. Wird eine Prüfung. | Parcours |
 | 8 | ~~Ringschmied~~ | **Gestrichen** (25.09.), mit dem Großen Ring. | |
 | 9 | Kartenwurf | Bleibt, **als Duell**, mit Karten aus schon geöffneten Packs, fester Abstand. Start mit 3 Karten, Item gibt +2. Fähigkeiten können helfen (näher ran, nur einer wirft). | Abstand, Ziel |
@@ -36,28 +36,30 @@ Stand 25.09.2026. Sammelt, was der Nutzer pro Spiel und Item festgelegt hat. Die
 
 | Nr. | Item | Hilft bei | Stand |
 |---|---|---|---|
-| I1 | Beutel (Dennis' Eier) | nirgends, Onboarding | fertig im Entwurf |
+| I1 | ~~Beutel (Dennis' Eier)~~ | | **Kein eigenes Feld mehr** (28.09.): Der Beutel ist die Tarnung der Spritze (I7) |
 | I2 | Große Wasserpistole (Monsterpistole, elektrisch) | 2 | Stärkste Stufe. **Glanzsieg im Kartenwurf** (28.09.), löst Spritze und kleine Pistole ab |
 | I3 | ~~Großer Ring~~ | | **Gestrichen** (25.09.) |
 | I4 | Gepanzerte Karten bzw. +2 Karten | 9 | Idee steht |
 | I5 | Beyblade-Vorteil (eigener Kreisel zum Üben oder erste Wahl) | 14 | Name offen |
 | I6 | **Stich** (Schwert aus Herr der Ringe, war F2, 25.09.) | 12 | Ein Schwert mehr, also ein Versuch mehr |
-| I7 | **Wasserspritze** (28.09.) | 2 | Zweites Startitem: kommt beim ersten Öffnen des Beutels heraus und erklärt die Stufen |
+| I7 | **Wasserspritze** (28.09.) | 2 | Einziges Startitem: Der Heilige Beutel des Helden entpuppt sich beim ersten Besuch der Ausrüstung als Spritze, im selben Feld, und die Fee erklärt die Stufen |
 | I8 | **Kleine Wasserpistole** (28.09.) | 2 | Sieg im Podrennen, löst die Spritze ab |
 
 ## Fähigkeiten (Magie, kein physischer Gegenstand nötig)
 
 | Nr. | Fähigkeit | Stand |
 |---|---|---|
-| F1 | **Spruchrolle** (ersetzt Token und die einzelnen Flüche, 25.09.) | Siehe Regel unten. Gewinnt Dennis über erfüllte Prophezeiungen (6), kann mehrere haben |
+| F1 | **Fluch** (hieß bis 28.09. Spruchrolle, ersetzt Token und die einzelnen Flüche) | Trifft immer den Bund, nie Dennis. Gewinnt Dennis über erfüllte Prophezeiungen (6) und den Kartenwurf (9), kann mehrere haben |
 | F2 | ~~Schwert~~ | Jetzt Item I6 |
 | F3 | Schild: verlorenes Duell wiederholen | Gut so, als Magie |
-| F4 | ~~Brosche~~ | **Gestrichen** (25.09.). Rikes Amulett (15) gibt Packs |
+| F4 | ~~Brosche~~ | **Gestrichen** (25.09.) |
+| F5 | **Nakama-Ruf** (neu 28.09., Strohhut) | Einer aus dem Bund kämpft ein Duell für Dennis, sein Ergebnis zählt. Einmalig. Aus Die drei Zeichen (4) |
+| F6 | **Rikes Segen** (neu 28.09., Herz) | Schenkt am Tor zum Gipfel eine fehlende Ziffer. Einmalig. Aus Rikes Amulett (15) |
 
 ## Regel: Einsetzen pro Quest (25.09.)
 
 - Jede Quest hat eine Liste, was dort einsetzbar ist. Im Menü sieht Dennis bei der nächsten Quest, welche Items und Fähigkeiten er dort nutzen kann. Alles andere ist ausgegraut.
-- **Spruchrolle:** Beim Einsetzen steht nicht da, was sie bewirkt. Es passiert eine Sache, die zum jeweiligen Spiel passt (zum Beispiel näher ran, nur einer vom Bund spielt, ein Versuch mehr). Die konkrete Wirkung bestimmt der Quest Master je Spiel. Für die App ist es nur „Spruchrolle eingesetzt".
+- **Fluch (früher Spruchrolle):** Beim Einsetzen steht nicht da, was er bewirkt. Es passiert eine Sache, die zum jeweiligen Spiel passt (zum Beispiel näher ran, nur einer vom Bund spielt, ein Versuch mehr). Die konkrete Wirkung bestimmt der Quest Master je Spiel. Für die App ist es nur „Fluch eingesetzt".
 - **Entschieden (25.09.):** Dennis sagt an, der Quest Master bucht das Einsetzen im Admin. Dennis hat keinen Knopf.
 
 ## Laufende Quests (25.09.)
@@ -74,43 +76,53 @@ Stand 25.09.2026. Sammelt, was der Nutzer pro Spiel und Item festgelegt hat. Die
 - Zug-Funklöcher: Die App lädt alle Dateien beim Start vorab, die Antworten werden bei Netz nachgereicht.
 - Hinweis: Dateien auf Netlify sind für jeden mit dem Link abrufbar.
 
-## Umsetzung in der App (25.09.)
+## Umsetzung in der App (25.09., Regel neu am 28.09.)
 
-**Reihenfolge und Belohnungen (Vorschlag, in `config.js` leicht änderbar).** Jeder Sieg bringt das Item für ein späteres Spiel:
+**Die Regel (28.09.):**
+- **Hauptquests** bringen Packs und eine Ziffer oder ein Item.
+- **Sidequests** und die laufenden Quests bringen eine Fähigkeit.
+- **Jede Niederlage kostet nur Packs.** Es gibt keine Flüche gegen Dennis. Ein Fluch ist eine Fähigkeit, die den Bund trifft.
+- **Ohne alle vier Ziffern kein Finale.** Die Ziffern liegen vor dem Gipfel. Fehlt eine, holt Dennis sie sich am **Tor zum Gipfel**: für 2 Packs, mit Rikes Segen oder per Bußprüfung, die der Quest Master bestimmt. Er besiegelt selbst, der Quest Master kann zurücknehmen oder im Admin selbst buchen.
+- **Items** helfen jeweils bei genau einem späteren Spiel und bleiben. **Fähigkeiten** sind einmalig und wirken bei Duellen und im Showdown.
+- Die Spiele sind bewusst schwer (Grenzen in der Tabelle, jeweils in `config.js` als Notiz für den Quest Master).
 
-| # | Nr. | Quest | Art | Ort | Sieg | Niederlage | Einsetzbar |
+| # | Nr. | Quest | Art | Ort | Sieg | Niederlage | Bestanden, wenn … |
 |---|---|---|---|---|---|---|---|
-| 1 | 1 | Log-Buch | Prüfung | Zug | +1, Ziffer 1 | 0 | nichts |
-| 2 | 4 | Kreuzung der Klingen | Prüfung | Wiese | +2, Ziffer 2, Kreisel (I5) | −1 | Spruchrolle, Schild |
-| 3 | 14 | Wirbel der Götter | Sidequest | Wiese | +1, Gepanzerte Karten (I4) | −1 | Kreisel, Spruchrolle, Schild |
-| 4 | 7 | Das Podrennen | Prüfung | Wiese | +2, Kleine Wasserpistole (I8) | −1 | Spruchrolle |
-| 5 | 9 | Kartenwurf | Sidequest | Wald | +2, **Glanzsieg** (2 Karten Vorsprung): dazu Große Wasserpistole (I2) | −1 | Karten, Spruchrolle, Schild |
-| 6 | 2 | Auge des Jägers | Prüfung | Wald | +3, Stich (I6) | −2 | stärkste Wasserwaffe (Spritze, kleine oder große Pistole), Spruchrolle |
-| 7 | 12 | Klingen des Deku-Baums | Sidequest | Wald | +2 | −1 | Stich, Spruchrolle |
-| 8 | 3 | Feuerprobe | Prüfung | Aussicht | +3, Ziffer 3, Schild (F3) | −2 | Spruchrolle |
-| 9 | 5 | Prüfung des Bundes | Prüfung | Gipfel | +5, Ziffer 4 | −4 | Spruchrolle, Schild, dazu alles, was bei den Spielen der Duelle hilft |
-| läuft | 6 | Prophezeiung | Zähler (max. 3) | den ganzen Tag | je Treffer 1 Spruchrolle | | |
-| läuft | 15 | Rikes Amulett | Schritt „Gefunden“ | den ganzen Tag | +3 | 0 | Spruchrolle |
+| 1 | 1 | Rikes Tagebuch | Hauptquest | Zug | +2, Ziffer 1, Kreisel (I5) | 0 | 5 von 7 Antworten treffen |
+| 2 | 4 | Die drei Zeichen | Sidequest | Wiese | Nakama-Ruf (F5) | −1 | er zwei Gegner nacheinander schlägt, jeweils Best of 3 |
+| 3 | 14 | Wirbel der Götter | Hauptquest | Wiese | +3, Gepanzerte Karten (I4) | −2 | 2 von 3 gegen den besten Blader |
+| 4 | 7 | Das Podrennen | Hauptquest | Wiese | +3, Ziffer 2, Kleine Wasserpistole (I8) | −2 | ein Versuch unter einer Zeit, die der Quest Master nur jedes zweite Mal schafft |
+| 5 | 9 | Kartenwurf | Sidequest | Wald | Fluch (F1), **Glanzsieg** (2 Karten Vorsprung): dazu Große Wasserpistole (I2) | −2 | mehr Karten im Ziel, Gleichstand zählt als verloren |
+| 6 | 2 | Auge des Jägers | Hauptquest | Wald | +4, Ziffer 3, Stich (I6) | −2 | alle 5 Flammen aus 4 m mit einem Tank |
+| 7 | 12 | Klingen des Deku-Baums | Hauptquest | Wald | +4, Ziffer 4 | −2 | 2 von 4 Schwertern aus 4 m stecken (Stich: ein Schwert mehr) |
+| 8 | 3 | Hüter der Flamme | Sidequest | Aussicht | Schild (F3) | −2 | das Teelicht 100 Schritte bergauf brennt |
+| Tor | | fehlende Ziffern | | Gipfel | je Ziffer 2 Packs, Rikes Segen oder Bußprüfung | | |
+| 9 | 5 | Prüfung des Bundes | Hauptquest | Gipfel | +6 | −4 | 2 von 3 Duellen |
+| läuft | 6 | Prophezeiung | Zähler (max. 3) | den ganzen Tag | je Treffer 1 Fluch | | |
+| läuft | 15 | Rikes Amulett | Schritt „Gefunden“ | bis zum Gipfel | Rikes Segen (F6) | 0 | gefunden und zusammengesetzt |
 
-**Packs (26.09.):** Das Kästchen hat eher 20+ Packs (`waehrung.max` 20). Je weiter der Weg, desto mehr steht auf dem Spiel: vorne 1 bis 2, hinten 3, der Bund +5 / −4. Alle Siege zusammen 24. Packs zählen in der Reihenfolge, in der gebucht wurde, und bleiben immer zwischen 0 und 20: Wer bei 0 verliert, verliert nichts, was über 20 geht, verfällt. Eine fehlende Ziffer kostet 1 Pack. Nachrechnen mit `node tests/balance.js`.
+Einsetzbar: Kreisel bei Wirbel, Karten beim Kartenwurf, die stärkste Wasserwaffe beim Auge (Spritze, kleine oder große Pistole), Stich beim Deku-Baum. Fluch fast überall, Schild und Nakama-Ruf bei den Duellen (Wirbel, Kartenwurf, Die drei Zeichen nur Schild) und im Showdown, Rikes Segen nur am Tor.
 
-Sechs Prüfungen = sechs Medaillons. Das Podrennen trägt das Schatten-Medaillon (violett), die Prophezeiung ist keine Prüfung mehr, sondern läuft mit Zähler. Items gehen bei Niederlagen nicht mehr verloren, Niederlagen kosten nur Packs.
+**Packs (28.09.):** Das Kästchen hat 20 Packs (`waehrung.max`). Alle Siege zusammen 22, alle Niederlagen −17. Packs zählen in der Reihenfolge, in der gebucht wurde, und bleiben immer zwischen 0 und 20: Wer bei 0 verliert, verliert nichts, was über 20 geht, verfällt. Nachrechnen mit `node tests/balance.js`: Gewinnt Dennis jedes Spiel mit 50 %, bleiben ihm im Schnitt 5 Packs, am Tor fehlen ihm im Schnitt 2 Ziffern, in 43 % der Tage braucht er eine Bußprüfung, und etwa jeder dritte Tag endet ohne Packs. Mit 70 % sind es im Schnitt 10 Packs.
+
+Sechs Hauptquests = sechs Medaillons (28.09.): Rikes Tagebuch (Wasser, blau), Wirbel der Götter (Geister, orange), Das Podrennen (Schatten, violett), Auge des Jägers (Feuer, rot, fünf Flammen), Klingen des Deku-Baums (Wald, grün) und Prüfung des Bundes (Triforce, gold). Dennis sieht die Quests in zwei Kammern: oben HAUPTQUESTS, unten SIDEQUESTS samt Prophezeiung und Rikes Amulett. Den Ort unter dem Quest-Titel gibt es nicht mehr, der steht auf der Karte. Items gehen bei Niederlagen nicht verloren. Einziges Startitem ist die Spritze: Beim ersten Besuch der Ausrüstung entpuppt sich der Heilige Beutel des Helden als Wasserspritze, im selben Feld (28.09., vorher Beutel und Spritze als zwei Felder). Einzige Ausnahme von der Regel ist der Glanzsieg im Kartenwurf, der zusätzlich ein Item bringt.
 
 **Tarnnamen** (so heißt ein Item in der Vorschau einer Belohnung, bis Dennis es erspielt):
 
 | Nr. | Item | Tarnname |
 |---|---|---|
-| I1 | Dennis' Eier (Beutel) | Heiliger Beutel des Helden |
-| I7 | Wasserspritze | Zoras Träne |
+| I7 | Wasserspritze (Startitem, als Beutel getarnt) | Heiliger Beutel des Helden |
 | I8 | Kleine Wasserpistole | Silberne Schuppe |
 | I2 | Große Wasserpistole | Zoras Quellstab |
 | I4 | Gepanzerte Karten (+2 Karten) | Federn der Eule |
 | I5 | Götterkreisel (üben, erste Wahl) | Kern der Goronen |
 | I6 | Stich | Verrostete Klinge |
-| F1 | Spruchrolle (mehrfach, einmalig) | Versiegeltes Pergament |
+| F1 | Fluch (mehrfach, einmalig) | Versiegeltes Pergament |
 | F3 | Schild des Bundes (einmalig) | Zerbrochenes Wappen |
+| F5 | Nakama-Ruf (einmalig) | Zerschlissener Hut |
+| F6 | Rikes Segen (einmalig, am Tor) | Versiegelter Brief |
 
-**Showdown:** Revanche möglich bei 2, 4, 7, 9, 12, 14 (Log-Buch und Feuerprobe kommen nicht wieder). Verlorene Spiele in Tagesreihenfolge, höchstens drei, dann mit Wirbel der Götter aufgefüllt. Der Quest Master tippt je Duell Sieg oder Niederlage, die App sagt, wann es reicht (2 von 3).
+**Showdown:** Revanche möglich bei 2, 4, 7, 9, 12, 14 (Rikes Tagebuch und Hüter der Flamme kommen nicht wieder). Verlorene Spiele in Tagesreihenfolge, höchstens drei, dann mit Wirbel der Götter aufgefüllt. Der Quest Master tippt je Duell Sieg oder Niederlage, die App sagt, wann es reicht (2 von 3).
 
 **Log-Buch:** Umgedreht am 26.09.: Rike beantwortet 7 Fragen über Dennis, Dennis tippt in ein bis drei Worten, was sie gesagt hat. Fragen stehen fest (in `config.js` an Dennis gerichtet, so wie Rike sie bekommt in `app/assets/logbuch/LIESMICH.md`). Dateien `app/assets/logbuch/frage1.m4a` bis `frage7.m4a` fehlen noch, bis dahin spielt ein Platzhalter-Klang. Hinweise zum Format in `app/assets/logbuch/LIESMICH.md`.
 
@@ -147,7 +159,7 @@ Wie Zoras Schuppe in Ocarina of Time (erst Silber, dann Gold): Im Auge des Jäge
 
 | Stufe | Waffe | Tarnname | Woher |
 |---|---|---|---|
-| 0 | Wasserspritze (I7) | Zoras Träne | **Startitem.** Beim ersten Besuch der Ausrüstung entpuppt sich erst der Beutel, dann öffnet Dennis ihn, und die Spritze kommt heraus. Dabei erklärt die App die Stufen |
+| 0 | Wasserspritze (I7) | Heiliger Beutel des Helden | **Startitem.** Beim ersten Besuch der Ausrüstung entpuppt sich der Beutel als Spritze, im selben Feld (28.09., kein zusätzlicher Platz). Dabei erklärt die App die Stufen |
 | 1 | Kleine Wasserpistole (I8) | Silberne Schuppe | Sieg im Podrennen (die erste Chance) |
 | 2 | Große Wasserpistole, die Monsterpistole (I2) | Zoras Quellstab | **Glanzsieg im Kartenwurf**: mindestens 2 Karten mehr im Ziel als der Gegner. Der Kartenwurf ist das einzige Spiel zwischen Podrennen und Auge des Jägers. Die Gepanzerten Karten (+2) machen den Glanzsieg leichter. Auch ohne kleine Pistole bringt der Glanzsieg die große |
 

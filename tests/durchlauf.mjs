@@ -43,7 +43,7 @@ const dennis = await seite('?direkt');
 await dennis.click('[data-logbuch]'); await warte(300);
 for (let i = 0; i < 7; i++) { await dennis.fill('#lbInput', 'Antwort ' + (i + 1)); await dennis.click('#lbSeal'); await warte(250); await dennis.click('#lbNext'); await warte(150); }
 await dennis.click('#lbClose'); await warte(300);
-await siegel(dennis, '#questCard [data-ergebnis="bestanden"]', 'PRÜFUNG BESTANDEN', 'Log-Buch');
+await siegel(dennis, '#questCard [data-ergebnis="bestanden"]', 'PRÜFUNG BESTANDEN', 'Rikes Tagebuch');
 
 // Samstagmorgen: Prophezeiung und Amulett starten
 await admin.click('#lauf .lauf-q[data-id="prophezeiung"] [data-a="start"]'); await warte(300);
@@ -51,8 +51,8 @@ await admin.click('#lauf .lauf-q[data-id="amulett"] [data-a="start"]'); await wa
 await zu(dennis);
 
 // Wiese
-await siegel(dennis, '#questCard [data-ergebnis="bestanden"]', 'PRÜFUNG BESTANDEN', 'Kreuzung der Klingen');
-await siegel(dennis, '#questCard [data-ergebnis="verloren"]', 'SIDEQUEST VERLOREN', 'Wirbel der Götter');
+await siegel(dennis, '#questCard [data-ergebnis="bestanden"]', 'SIDEQUEST BESTANDEN', 'Die drei Zeichen');
+await siegel(dennis, '#questCard [data-ergebnis="verloren"]', 'PRÜFUNG VERLOREN', 'Wirbel der Götter');
 const pod = await siegel(dennis, '#questCard [data-ergebnis="bestanden"]', 'PRÜFUNG BESTANDEN', 'Podrennen');
 pruefe(pod.includes('Kleine Wasserpistole'), 'Podrennen bringt die Kleine Wasserpistole');
 // Prophezeiung: ein Treffer unterwegs
@@ -65,19 +65,21 @@ pruefe(glanz.includes('Große Wasserpistole'), 'Glanzsieg bringt die Große Wass
 pruefe(await dennis.isVisible('#questCard [data-einsetzen="pistole_gross"]') && !(await dennis.$('#questCard [data-einsetzen="pistole_klein"]')) && !(await dennis.$('#questCard [data-einsetzen="spritze"]')), 'Auge: nur die große Pistole leuchtet');
 await siegel(dennis, '#questCard [data-einsetzen="pistole_gross"]', 'GROSSE WASSERPISTOLE', 'Große Wasserpistole eingesetzt');
 await siegel(dennis, '#questCard [data-ergebnis="bestanden"]', 'PRÜFUNG BESTANDEN', 'Auge des Jägers');
-await siegel(dennis, '#questCard [data-ergebnis="bestanden"]', 'SIDEQUEST BESTANDEN', 'Klingen des Deku-Baums');
+await siegel(dennis, '#questCard [data-ergebnis="bestanden"]', 'PRÜFUNG BESTANDEN', 'Klingen des Deku-Baums');
 
 // Amulett gefunden, Aussicht, zweiter Treffer, Amulett zusammengesetzt
 await questOeffnen(dennis, 'amulett');
 await siegel(dennis, '#questCard [data-schritt="gefunden"]', 'GEFUNDEN', 'Amulett gefunden');
 await questOeffnen(dennis, 'feuerprobe');
-await siegel(dennis, '#questCard [data-ergebnis="bestanden"]', 'PRÜFUNG BESTANDEN', 'Feuerprobe');
+await siegel(dennis, '#questCard [data-ergebnis="bestanden"]', 'SIDEQUEST BESTANDEN', 'Hüter der Flamme');
 await admin.click('#lauf .lauf-q[data-id="prophezeiung"] [data-a="plus"]'); await warte(500);
 await zu(dennis);
 await questOeffnen(dennis, 'amulett');
 await siegel(dennis, '#questCard [data-ergebnis="bestanden"]', 'BESTANDEN', 'Amulett zusammengesetzt');
 
-// Gipfel: Revanche Wirbel der Götter, dann zweimal aufgefüllt. Sieg, Niederlage, Sieg.
+// Gipfel: alle vier Ziffern da, also kein Tor. Revanche Wirbel der Götter, dann zweimal aufgefüllt. Sieg, Niederlage, Sieg.
+await questOeffnen(dennis, 'bund');
+pruefe(!(await dennis.$('#questCard [data-tor]')), 'Gipfel: mit allen vier Ziffern kein Tor');
 await questOeffnen(dennis, 'bund');
 const duelle = await dennis.$$eval('.duell .d-name', els => els.map(e => e.textContent.replace(/\s+/g, ' ').trim()));
 pruefe(duelle.length === 3 && duelle[0].includes('Wirbel der Götter REVANCHE'), 'Showdown: zuerst die Revanche im Wirbel der Götter');
@@ -104,7 +106,7 @@ pruefe(Number(await admin.textContent('#packs')) === erwartet.packs, `Admin: ${e
 const code = await dennis.$$eval('#tumblers .tumbler', els => els.map(e => e.textContent).join(''));
 pruefe(code === C.code.join(''), 'Code vollständig: ' + code);
 const inv = await admin.textContent('#inv');
-pruefe(['Spritze', 'Kleine Pistole', 'Große Pistole', 'Kreisel', 'Stich', 'Schild'].every(x => inv.includes(x)), 'Admin-Inventar: alle drei Wasserwaffen, Kreisel, Stich, Schild');
+pruefe(['Spritze', 'Kleine Pistole', 'Große Pistole', 'Kreisel', 'Stich', 'Schild', 'Nakama', 'Segen'].every(x => inv.includes(x)), 'Admin-Inventar: alle drei Wasserwaffen, Kreisel, Stich, Schild, Nakama-Ruf, Rikes Segen');
 const liste = await admin.textContent('#dennisListe');
 pruefe(liste.includes('Kartenwurf: Glanzsieg') && !liste.includes('gilt nicht'), 'Admin: alle Einträge von Dennis gelten, Kartenwurf als Glanzsieg');
 await dennis.click('#hudNext'); await warte(400);

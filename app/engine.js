@@ -9,7 +9,7 @@
      schritte:  { [questId]: { [schrittId]: true } }  // Zwischenschritte einer laufenden Quest (Amulett gefunden)
      einsaetze: [ { id, item, quest } ]               // Dennis hat ein Item oder eine Fähigkeit eingesetzt
      duelle:    { "1": "sieg" | "niederlage", ... }    // Ergebnisse der Showdown-Duelle
-     buchungen: [ { id, packs, grund, zeit?, ziffer?, item?, menge? } ]   // ziffer = gekauft, item/menge = Spruchrolle o. Ä.
+     buchungen: [ { id, packs, grund, zeit?, ziffer?, weg?, item?, menge? } ]   // ziffer am Tor geholt (weg: packs, busse, segen), item/menge = Fluch o. Ä.
      items:     { [itemId]: "besitz" | "verloren" | "nicht" }      // manuelle Korrektur, schlägt die Regel
      zeiten:    { [questId]: Zeitstempel }             // wann die Quest entschieden wurde (für die Reihenfolge der Packs)
      stand:     Zeitstempel der letzten Änderung
@@ -60,6 +60,7 @@
     const erhalten = [];                        // Reihenfolge, in der Items ins Inventar kamen
     const ziffern = config.code.map(() => null);
     const gekauft = config.code.map(() => false);
+    const zifferWeg = config.code.map(() => null);   // wie eine fehlende Ziffer geholt wurde: "packs", "busse" oder "segen"
     const quests = {}, glanz = {}, treffer = {}, schritte = {}, eingesetzt = {};
     let bestanden = 0, verloren = 0;
 
@@ -124,13 +125,14 @@
       if (z >= 1 && z <= config.code.length) {
         ziffern[z - 1] = config.code[z - 1];
         gekauft[z - 1] = true;
+        zifferWeg[z - 1] = ["busse", "segen"].includes(b.weg) ? b.weg : "packs";
       }
       const m = Math.trunc(Number(b.menge) || 0);
       if (b.item && m > 0) geben(b.item, m);
       if (b.item && m < 0) for (let i = 0; i < -m; i++) nehmen(b.item);
     });
 
-    // Einsätze: Spruchrolle zählt runter, einmalige Fähigkeiten sind danach verbraucht
+    // Einsätze: Flüche zählen runter, einmalige Fähigkeiten sind danach verbraucht
     doc.einsaetze.forEach(e => {
       const it = itemCfg(config, e.item);
       if (!it) return;
@@ -168,10 +170,13 @@
     const nextQuest = r.find(q => quests[q.id] === "offen") || null;
     const duelle = {};
     Object.keys(doc.duelle).forEach(k => { if (doc.duelle[k] === "sieg" || doc.duelle[k] === "niederlage") duelle[k] = doc.duelle[k]; });
+    // Das Tor zum Gipfel: Ist die Quest mit „tor" dran und fehlt noch eine Ziffer, darf Dennis nicht antreten
+    const fehlend = ziffern.map((z, i) => (z == null ? i + 1 : 0)).filter(Boolean);
+    const tor = nextQuest && nextQuest.tor && fehlend.length ? { quest: nextQuest.id, fehlend } : null;
 
     return {
       packs, max, kappung, items, anzahl, erhalten: erhalten.filter(id => items[id] !== "nicht"),
-      ziffern, gekauft, quests, glanz, treffer, schritte, eingesetzt, duelle,
+      ziffern, gekauft, zifferWeg, quests, glanz, treffer, schritte, eingesetzt, duelle, tor,
       next: nextQuest ? nextQuest.id : null,
       laufend: config.quests.filter(q => q.typ === "lauf" && quests[q.id] !== "offen").map(q => q.id),
       zaehler: { bestanden, verloren, erledigt: bestanden + verloren, gesamt: r.length },
@@ -215,10 +220,13 @@
     return ids;
   }
 
-  // Items, die Dennis jetzt besitzt und bei einer aktuellen Quest einsetzen kann
+  // Items, die Dennis jetzt besitzt und bei einer aktuellen Quest einsetzen kann. Am Tor zählt nur, was dort hilft (Rikes Segen).
   function jetztEinsetzbar(config, state) {
     const set = new Set();
-    aktuelleQuests(config, state).forEach(qid => einsetzbar(config, state, qid).forEach(id => { if (state.items[id] === "besitz") set.add(id); }));
+    aktuelleQuests(config, state).forEach(qid => {
+      if (state.tor && state.tor.quest === qid) config.items.forEach(it => { if (it.tor && state.items[it.id] === "besitz") set.add(it.id); });
+      else einsetzbar(config, state, qid).forEach(id => { if (state.items[id] === "besitz") set.add(id); });
+    });
     return set;
   }
 
@@ -229,7 +237,8 @@
        e_<id>                { item, quest, zeit }                          Einsatz eines Items oder einer Fähigkeit
        d_<nr>                { ergebnis: "sieg" | "niederlage", zeit }      Duell im Showdown
        s_<quest>_<schritt>   { zeit }                                      Schritt einer laufenden Quest (Amulett gefunden)
-       z_<nr>                { zeit }                                      Ziffer am Kästchen gegen Packs getauscht
+       z_<nr>                { weg?, zeit }                                fehlende Ziffer am Tor geholt: weg "packs" (Standard, kostet
+                                                                             ziffer_preis), "busse" (Bußprüfung bestanden) oder "segen" (Rikes Segen)
      Eingerechnete Einsätze und Käufe tragen von: "dennis" und ihren Schlüssel als id. */
   const ENTSCHIEDEN = ["bestanden", "verloren", "beendet"];
   function mitEintraegen(config, rawDoc, eintraege) {
@@ -258,11 +267,17 @@
       } else if (art === "z") {
         const nr = Math.trunc(Number(rest));
         if (!(nr >= 1 && nr <= config.code.length) || out.buchungen.some(b => Number(b.ziffer) === nr)) return;
-        out.buchungen.push({ id: k, packs: -(config.ziffer_preis || 0), grund: `Ziffer ${nr} gekauft`, ziffer: nr, zeit, von: "dennis" });
+        const weg = ["busse", "segen"].includes(e.weg) ? e.weg : "packs";
+        out.buchungen.push({ id: k, packs: weg === "packs" ? -(config.ziffer_preis || 0) : 0, grund: zifferGrund(nr, weg), ziffer: nr, weg, zeit, von: "dennis" });
+        // Rikes Segen ist danach verbraucht (als Einsatz bei der Quest mit dem Tor)
+        const segen = weg === "segen" && config.items.find(it => it.tor), torQ = config.quests.find(q => q.tor);
+        if (segen && torQ) out.einsaetze.push({ id: k, item: segen.id, quest: torQ.id, zeit, von: "dennis" });
       }
     });
     return out;
   }
+
+  const zifferGrund = (nr, weg) => weg === "busse" ? `Ziffer ${nr} durch Bußprüfung` : weg === "segen" ? `Ziffer ${nr} durch Rikes Segen` : `Ziffer ${nr} gekauft`;
 
   // Kurztext der Effekte einer Quest, für den Admin
   function effektText(config, effekt, gewonnen) {
@@ -277,7 +292,7 @@
     return teile.length ? teile.join(", ") : "nichts";
   }
 
-  const api = { derive, emptyDoc, normalize, mitEintraegen, effektText, showdownDuelle, einsetzbar, abgeloest, aktuelleQuests, jetztEinsetzbar, STATUS, STATUS_LAUF };
+  const api = { derive, emptyDoc, normalize, mitEintraegen, effektText, zifferGrund, showdownDuelle, einsetzbar, abgeloest, aktuelleQuests, jetztEinsetzbar, STATUS, STATUS_LAUF };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.QuestEngine = api;
 })(typeof window !== "undefined" ? window : globalThis);

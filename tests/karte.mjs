@@ -24,14 +24,18 @@ const zurKarte = async p => { await weg(p); await p.click('.shoulder-left'); awa
 const aktiv = p => p.evaluate(() => document.querySelector('.face.active').dataset.page);
 const legende = p => p.evaluate(() => ['#mlWert', '#mlWo', '#mlRest'].map(s => document.querySelector(s).textContent).join(' | '));
 
-// Prolog: erscheint nach PRESS START am Anfang des Spiels, vier Tafeln, danach Rundgang mit der Fee
+// Prolog: erscheint nach PRESS START am Anfang des Spiels, sechs Tafeln, danach Rundgang mit der Fee
 let { ctx, p } = await seite('?demo=start');
 await p.click('#introScreen'); await warte(900);
 pruefe(await p.isVisible('#prolog'), 'Prolog erscheint nach PRESS START');
-pruefe((await p.$$('#prologDots i')).length === 4, 'Prolog hat vier Tafeln');
+pruefe((await p.$$('#prologDots i')).length === 6, 'Prolog hat sechs Tafeln');
 await warte(1500);
-pruefe((await p.textContent('#prologText')).includes('Rike schickt mich'), 'Tafel 1: Rikes Fee');
-for (let i = 0; i < 12 && await p.isVisible('#prolog'); i++) { await p.click('#prolog'); await warte(250); }
+pruefe((await p.textContent('#prologText')).includes('Ich bin die Fee. Rike hat mich'), 'Tafel 1: Die Fee stellt sich vor, Rike hat sie geschickt');
+await p.click('#prolog'); await warte(1800);
+pruefe((await p.textContent('#prologBild')).includes('Mini-JGA') && (await p.textContent('#prologText')).startsWith('Willkommen auf deinem Mini-JGA'), 'Tafel 2: Willkommen auf deinem Mini-JGA');
+await p.click('#prolog'); await warte(1800);
+pruefe((await p.$$('#prologBild .medal.covered')).length === 6 && (await p.textContent('#prologText')).includes('geprüft werden'), 'Tafel 3: die Reise, sechs Prüfungen im Nebel');
+for (let i = 0; i < 20 && await p.isVisible('#prolog'); i++) { await p.click('#prolog'); await warte(250); }
 await warte(500);
 pruefe(!(await p.isVisible('#prolog')), 'Prolog lässt sich durchblättern');
 pruefe(await p.isVisible('#coach') && (await p.textContent('.coach-text')).includes('Packs'), 'Rundgang beginnt bei den Packs');
@@ -48,7 +52,7 @@ for (const url of ['?demo', '?demo=bund']) {
   pruefe(!(await p.isVisible('#prolog')), `${url}: später am Tag kein Prolog`);
   await p.click('.shoulder-right'); await warte(900);
   pruefe(await p.$('#overlay[hidden]') && await p.$('#coach[hidden]'), `${url}: Ausrüstung ohne Beutel-Fund und ohne Hinweise`);
-  pruefe(await p.$eval('.slot[data-id="beutel"]', e => !e.classList.contains('schatten')), `${url}: Beutel ist ausgepackt`);
+  pruefe(await p.$eval('.slot[data-id="spritze"]', e => !e.classList.contains('schatten')), `${url}: Der Beutel ist schon zur Spritze geworden`);
   await p.click('.shoulder-left'); await warte(500); await p.click('.shoulder-left'); await warte(900);
   pruefe(!(await p.isVisible('#coach')), `${url}: Karte ohne Hinweis`);
   await ctx.close();
@@ -84,7 +88,7 @@ await ctx.close();
 await zurKarte(p); await weg(p);
 await p.click('.mark[data-station="wiese"]'); await warte(300);
 const tafel = await p.textContent('#stationCard');
-pruefe(tafel.includes('Kreuzung der Klingen') && tafel.includes('815 m'), 'Tafel Wiese: Quests und Höhe');
+pruefe(tafel.includes('Die drei Zeichen') && tafel.includes('815 m'), 'Tafel Wiese: Quests und Höhe');
 pruefe(await p.$eval('#stationCard', e => e.classList.contains('rechts')), 'Tafel liegt gegenüber der Station');
 await p.click('.sc-row[data-quest="podrennen"]'); await warte(800);
 pruefe(await aktiv(p) === '1' && (await p.textContent('#questCard .tb-title')).includes('Podrennen'), 'Zeile öffnet die Quest');

@@ -206,15 +206,15 @@
     $("#nextGlanz").addEventListener("click", () => state.next && questById(state.next).glanz && setQuest(state.next, "glanz"));
     $("#nextLose").addEventListener("click", () => state.next && setQuest(state.next, "verloren"));
     $("#reset").addEventListener("click", () => {
-      if (!confirm("Wirklich alles zurücksetzen? Alle Quests werden offen, Buchungen, Einsätze und Zähler gelöscht. Die Log-Buch-Antworten bleiben. Rückgängig holt den Stand zurück.")) return;
+      if (!confirm("Wirklich alles zurücksetzen? Alle Quests werden offen, Buchungen, Einsätze und Zähler gelöscht. Die Tagebuch-Antworten bleiben. Rückgängig holt den Stand zurück.")) return;
       commit(d => Object.assign(d, E.emptyDoc()), "Zurückgesetzt", { dennis: Object.keys(eintraege) });
     });
     $("#undo").addEventListener("click", rueckgaengig);
     renderUndo();
     buildProbe();
     $("#resetLb").addEventListener("click", () => {
-      if (!confirm("Alle Log-Buch-Antworten von Dennis löschen? Er kann dann neu antworten.")) return;
-      lbStore.zuruecksetzen().then(() => toast("Log-Buch geleert"));
+      if (!confirm("Alle Tagebuch-Antworten von Dennis löschen? Er kann dann neu antworten.")) return;
+      lbStore.zuruecksetzen().then(() => toast("Tagebuch geleert"));
     });
 
     const s = C.speicher;
@@ -249,6 +249,8 @@
       if (q.zaehler) d.zaehler[q.id] = o.zufall ? Math.floor(Math.random() * ((q.zaehler.max || 3) + 1)) : Math.min(o.treffer, q.zaehler.max || 99);
       if (q.schritte && (o.schritte || ende || (o.zufall && Math.random() < .5))) d.schritte[q.id] = Object.fromEntries(q.schritte.map(x => [x.id, true]));
     });
+    // Am Ende war Dennis durch das Tor: fehlende Ziffern per Buße geholt
+    if (o.ende) E.derive(C, d).ziffern.forEach((z, i) => { if (z == null) d.buchungen.push({ id: "busse" + (i + 1), packs: 0, grund: E.zifferGrund(i + 1, "busse"), ziffer: i + 1, weg: "busse", zeit: t }); });
     return d;
   }
 
@@ -301,8 +303,15 @@
       b.className = "btn";
       b.textContent = `Ziffer ${i + 1} kaufen (−${C.ziffer_preis})`;
       b.disabled = state.packs < C.ziffer_preis;
-      b.addEventListener("click", () => commit(d => d.buchungen.push(buchung({ packs: -C.ziffer_preis, grund: `Ziffer ${i + 1} gekauft`, ziffer: i + 1 })), `Ziffer ${i + 1} gekauft`));
+      b.addEventListener("click", () => commit(d => d.buchungen.push(buchung({ packs: -C.ziffer_preis, grund: E.zifferGrund(i + 1, "packs"), ziffer: i + 1, weg: "packs" })), `Ziffer ${i + 1} gekauft`));
       buy.appendChild(b);
+      // Tor zum Gipfel: Bußprüfung bestanden, die Ziffer kostet keine Packs
+      const bu = document.createElement("button");
+      bu.type = "button";
+      bu.className = "btn";
+      bu.textContent = `Ziffer ${i + 1} per Buße`;
+      bu.addEventListener("click", () => commit(d => d.buchungen.push(buchung({ packs: 0, grund: E.zifferGrund(i + 1, "busse"), ziffer: i + 1, weg: "busse" })), `Ziffer ${i + 1} per Buße`));
+      buy.appendChild(bu);
     });
 
     const ledger = $("#ledger");
@@ -348,7 +357,7 @@
     $("#nextCard").classList.toggle("all-done", !n);
     $("#nextEyebrow").textContent = n ? `Nächste Quest · Nr. ${n.nr} · ${typWort(n)}` : "Geschafft";
     $("#nextTitle").textContent = n ? n.name : "Alle Quests erledigt";
-    $("#nextMeta").textContent = n ? `${n.ort} · ${n.text}` : "Jetzt fehlende Ziffern kaufen und das Kästchen öffnen.";
+    $("#nextMeta").textContent = n ? `${n.ort} · ${n.text}` : "Jetzt das Kästchen öffnen.";
     $("#nextQm").textContent = n && n.qm ? n.qm : "";
     $("#nextFx").innerHTML = n ? fxHtml(n) : "";
     $("#nextGlanz").hidden = !(n && n.glanz);
@@ -363,7 +372,8 @@
       const siege = liste.filter(d => d.ergebnis === "sieg").length, nied = liste.filter(d => d.ergebnis === "niederlage").length;
       const noetig = Math.floor(liste.length / 2) + 1;
       const rat = siege >= noetig ? "Genug Siege: Bestanden buchen." : nied >= noetig ? "Zu viele Niederlagen: Verloren buchen." : `Stand ${siege} : ${nied}. Nötig: ${noetig} Siege.`;
-      duels.innerHTML = `<p class="sub-h">Die ${liste.length} Duelle</p><ol class="duel-list">${liste.map(d => `
+      const tor = state.tor ? `<p class="hint tor">Tor zum Gipfel: Es fehlt noch ${state.tor.fehlend.map(z => "Ziffer " + z).join(" und ")}. Dennis holt sie für ${C.ziffer_preis} Packs, mit Rikes Segen oder per Bußprüfung (du bestimmst sie). Du kannst sie unter „Packs buchen“ auch selbst buchen.</p>` : "";
+      duels.innerHTML = tor + `<p class="sub-h">Die ${liste.length} Duelle</p><ol class="duel-list">${liste.map(d => `
         <li><span class="d-name">${esc(questById(d.quest).name)} <small>${d.art === "revanche" ? "Revanche" : "aufgefüllt"}</small></span>
           <span class="seg two" role="group" aria-label="Duell ${d.nr}">
             <button type="button" data-nr="${d.nr}" data-v="sieg" aria-pressed="${d.ergebnis === "sieg"}">Sieg</button>
@@ -452,7 +462,7 @@
     if (art === "e") return `${itemById(e.item)?.name || e.item} eingesetzt bei ${questById(e.quest)?.name || e.quest}`;
     if (art === "d") return `Duell ${rest}: ${e.ergebnis === "sieg" ? "Sieg" : "Niederlage"}`;
     if (art === "s") { const j = rest.indexOf("_"), q = questById(rest.slice(0, j)), sx = q && (q.schritte || []).find(x => x.id === rest.slice(j + 1)); return `${q ? q.name : rest}: ${sx ? sx.name : rest}`; }
-    if (art === "z") return `Ziffer ${rest} gekauft (−${C.ziffer_preis})`;
+    if (art === "z") return E.zifferGrund(rest, e.weg) + (e.weg === "busse" || e.weg === "segen" ? "" : ` (−${C.ziffer_preis})`);
     return k;
   }
   // Gilt der Eintrag, oder hast du selbst schon anders gebucht?

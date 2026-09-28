@@ -55,9 +55,22 @@ async function pruefen(page, g, name) {
     const sichtbar = el => { const s = getComputedStyle(el); if (s.visibility === 'hidden' || s.display === 'none' || +s.opacity === 0) return false; const b = el.getBoundingClientRect(); return b.width > 0 && b.height > 0; };
     const inAktiv = el => !el.closest('.face') || el.closest('.face.active');
     const bereich = el => !el.closest('[hidden]') && inAktiv(el) && !el.closest('.intro-screen') ;
+    // Sichtbarer Teil: was in einer scrollbaren Liste weggescrollt ist, ist erreichbar und kein Überlauf
+    const sichtbarerTeil = el => {
+      const e = el.getBoundingClientRect();
+      let b = { left: e.left, right: e.right, top: e.top, bottom: e.bottom };
+      for (let a = el.parentElement; a; a = a.parentElement) {
+        const s = getComputedStyle(a);
+        if (!/auto|scroll/.test(s.overflowY + s.overflowX)) continue;
+        const q = a.getBoundingClientRect();
+        b = { left: Math.max(b.left, q.left), right: Math.min(b.right, q.right), top: Math.max(b.top, q.top), bottom: Math.min(b.bottom, q.bottom) };
+      }
+      return b.right > b.left && b.bottom > b.top ? b : null;
+    };
     for (const el of document.querySelectorAll('.hud button, .shoulder, .foot .sync, .face.active button, .face.active p, .result, .lb-panel, .qc-action, .prolog-skip, .prolog-box, .coach-bubble, .sw-panel')) {
       if (!bereich(el) || !sichtbar(el)) continue;
-      const b = el.getBoundingClientRect();
+      const b = sichtbarerTeil(el);
+      if (!b) continue;
       if (b.left < sa.l - 1 || b.right > W - sa.r + 1 || (b.bottom > H - sa.b + 1 && !el.classList.contains('sync'))) out.inset.push(`${el.className || el.tagName} [${Math.round(b.left)},${Math.round(b.right)},${Math.round(b.bottom)}]`);
       if (b.right > W + 1 || b.bottom > H + 1) out.ausserhalb.push(el.className);
     }
@@ -114,10 +127,10 @@ for (const g of GERAETE) {
   if (pressStart.r > g.w - g.sa.r || pressStart.b > g.h - g.sa.b) { log('  PROBLEM: PRESS START in Safe Area', JSON.stringify(pressStart)); alleProbleme++; }
   await page.click('#introScreen');
   await page.waitForTimeout(700);
-  // Prolog der Fee (mit ?onboarding jedes Mal): vier Tafeln, dann ein kurzer Rundgang
+  // Prolog der Fee (mit ?onboarding jedes Mal): sechs Tafeln, dann ein kurzer Rundgang
   await page.waitForTimeout(1700); await shot(page, g, '0b-prolog');
   alleProbleme += (await pruefen(page, g, 'PROLOG')).length;
-  for (let i = 0; i < 12 && await page.isVisible('#prolog'); i++) { await page.click('#prolog'); await page.waitForTimeout(300); }
+  for (let i = 0; i < 20 && await page.isVisible('#prolog'); i++) { await page.click('#prolog'); await page.waitForTimeout(300); }
   await page.waitForTimeout(500);
   if (await page.$('#coach:not([hidden])')) { await shot(page, g, '0c-rundgang'); alleProbleme += (await pruefen(page, g, 'RUNDGANG')).length; }
   await weiterTippen(page);
@@ -137,11 +150,9 @@ for (const g of GERAETE) {
   await page.click('.sc-close'); await page.waitForTimeout(200);
   await seite(page, 2); await page.waitForTimeout(300);
   // Onboarding durchklicken
-  // Der Beutel tritt erst aus dem Schatten, danach beginnen die Hinweise der Fee
-  if (!(await page.$('#overlay[hidden]'))) { await shot(page, g, '3a-onboarding'); await page.click('#overlay'); await page.waitForTimeout(2000); }
-  // Dann öffnet Dennis den Beutel: Die Spritze kommt heraus
-  if (!(await page.$('#overlay[hidden]'))) { await shot(page, g, '3a2-beutel-offen'); alleProbleme += (await pruefen(page, g, 'BEUTEL OFFEN')).length; await page.click('#overlay'); await page.waitForTimeout(1600); }
-  else { log('  PROBLEM: Der Beutel öffnet sich nicht'); alleProbleme++; }
+  // Der Beutel entpuppt sich als Spritze (ein Feld), danach beginnen die Hinweise der Fee
+  if (!(await page.$('#overlay[hidden]'))) { await shot(page, g, '3a-onboarding'); alleProbleme += (await pruefen(page, g, 'BEUTEL WIRD SPRITZE')).length; await page.click('#overlay'); await page.waitForTimeout(1600); }
+  else { log('  PROBLEM: Der Beutel entpuppt sich nicht'); alleProbleme++; }
   for (let i = 0; i < 4; i++) { if (await page.$('#coach:not([hidden])')) { if (i === 2) await shot(page, g, '3b-coach'); await page.click('#coach'); await page.waitForTimeout(300); } }
   await shot(page, g, '3-ausruestung');
   alleProbleme += (await pruefen(page, g, 'AUSRÜSTUNG')).length;
@@ -276,7 +287,7 @@ for (const g of GERAETE) {
   log(`  Treffer: ${await dennis.$eval('#resultHead .big', e => e.textContent)} · ${zeilen.join(' | ')}`);
   await dennis.screenshot({ path: `${OUT}/dennis-treffer.png` });
   await dennis.click('#overlay'); await dennis.waitForTimeout(300);
-  // Einsetzen: Spruchrolle bei Kreuzung der Klingen
+  // Einsetzen: Spruchrolle bei Die drei Zeichen
   await admin.screenshot({ path: `${OUT}/admin-2-naechste.png`, fullPage: true });
   await admin.click('#nextUse .use-btn[data-item="spruchrolle"]'); await dennis.waitForTimeout(700);
   log(`  Einsatz: ${await dennis.$eval('#resultHead .big', e => e.textContent).catch(() => '–')} ${await dennis.$eval('#resultHead .sub', e => e.textContent).catch(() => '')}`);
