@@ -55,7 +55,8 @@ await admin.click('#nextLose'); await warte(700);
 pruefe(!(await dennis.$eval('#overlay', e => e.hidden)) && (await dennis.textContent('#overlay')).includes('VERLOREN'), 'Dennis sieht „VERLOREN"');
 await dennis.screenshot({ path: `${OUT}/probe-dennis-verloren.png` });
 pruefe((await admin.textContent('#undoWas')).includes('Prüfung des Bundes: verloren'), 'Rückgängig zeigt, was es zurücknimmt');
-await admin.click('#undo'); await warte(700);
+// Rücknahmen sammelt Dennis' Seite kurz (0,7 s), damit Einzelteile in einem Fenster ankommen
+await admin.click('#undo'); await warte(1400);
 const zurueck = await dennis.textContent('#overlay');
 pruefe(!zurueck.includes('VERLOREN') && zurueck.includes('ZURÜCKGENOMMEN') && zurueck.includes('Prüfung des Bundes'), 'Rückgängig: Ergebnis-Fenster zu, die Fee meldet es');
 pruefe((await admin.textContent('#nextTitle')).includes('Bundes'), 'Rückgängig: Bund ist wieder offen');
@@ -70,7 +71,7 @@ pruefe(await admin.$eval('#undo', e => e.disabled), 'Verlauf leer: Knopf aus');
 await admin.click('#szenarien button:has-text("Mitte")'); await warte(300);
 await admin.reload(); await warte(500);
 pruefe((await admin.textContent('#undoWas')).includes('Probe: Mitte'), 'Verlauf überlebt Neuladen');
-await admin.click('#undo'); await warte(300);
+await admin.click('#undo'); await warte(1200);
 
 // Keine Schulden: Strafe bei 0 Packs, Dennis erfährt warum sich nichts tut
 while (await dennis.$('#overlay:not([hidden])')) { await dennis.click('#overlay'); await warte(300); }
@@ -88,7 +89,7 @@ pruefe(dialoge.filter(m => m.includes('anderen Gerät')).length === 1, 'Rückgä
 // Echtes Spiel hat davon nichts
 await echt.reload(); await warte(400);
 pruefe((await echt.textContent('#packs')) === '0' && (await echt.$$('#ledger li:not(.empty)')).length === 0, 'Echtes Spiel: keine Buchung aus dem Probelauf');
-pruefe((await echt.textContent('#undoWas')) === 'Zurückgesetzt', 'Echtes Spiel: eigener Verlauf (nur das eigene Zurücksetzen)');
+pruefe((await echt.textContent('#undoWas')) === 'Alles zurückgesetzt', 'Echtes Spiel: eigener Verlauf (nur das eigene Zurücksetzen)');
 
 await b.close();
 console.log(ok.map(t => 'ok   ' + t).join('\n'));

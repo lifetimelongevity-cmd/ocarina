@@ -99,8 +99,9 @@
                   <path class="t-lake" d="M0 336 C110 318 210 342 300 328 C380 316 440 352 480 420 H0Z"/>
                   <path class="t-rail" d="M0 392 C40 376 70 352 100 332"/>
                   <path class="t-route" id="mapRoute" d=""/>
-                  <path class="t-done" id="mapDone" d=""/>
                 </svg>
+                <!-- Der gegangene Weg in eigener Ebene: Beim Laufen wird nur sie neu gezeichnet, nicht das ganze Gelände -->
+                <svg class="map-weg" viewBox="0 0 1000 420" preserveAspectRatio="none" aria-hidden="true"><path class="t-done-rand" id="mapDoneRand" d=""/><path class="t-done" id="mapDone" d=""/></svg>
                 <div class="map-fog" id="mapFog" hidden></div>
                 <div class="map-marks" id="mapMarks"></div>
                 <span class="map-walker" id="mapWalker" hidden aria-hidden="true"></span>

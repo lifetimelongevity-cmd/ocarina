@@ -495,7 +495,7 @@
       if (id === hier) m.insertAdjacentHTML("afterbegin", `<span class="you" title="Du bist hier"></span>`);
     });
     // Gegangener Weg golden, Nebel über dem Weg ab der Mitte zur nächsten Station
-    if (!laufFrame) $("#mapDone").setAttribute("d", pfad(kartenHier));
+    if (!laufFrame) setzeWeg(pfad(kartenHier));
     const weiter = STATIONEN[kartenHier + 1];
     $("#mapFog").hidden = !(s.next && weiter);
     if (s.next && weiter) $("#mapFog").style.left = ((STATIONEN[kartenHier].x + weiter.x) / 2) + "%";
@@ -506,12 +506,14 @@
   }
 
   // Dennis läuft von der zuletzt gezeigten Station zur neuen, der Weg hinter ihm wird golden
+  // Der gegangene Weg: goldene Linie mit breiterem Rand darunter (eigene Ebene, siehe styles.css)
+  const setzeWeg = d => { $("#mapDone").setAttribute("d", d); $("#mapDoneRand").setAttribute("d", d); };
   function spieleLauf() {
     const hi = hierIndex(), von = kartenHier;
     if (laufFrame || von === null || hi <= von) return;
     if (page !== 0 || !$("#introScreen").hidden || !$("#overlay").hidden || !$("#prolog").hidden) return;
     if (STILL.matches || hi - von > 3) { kartenHier = hi; renderMap(); return; }
-    const walker = $("#mapWalker"), sheet = $("#mapSheet");
+    const walker = $("#mapWalker"), sheet = $("#mapSheet"), W = sheet.clientWidth, H = sheet.clientHeight;
     const abschnitte = hi - von, dauer = Math.min(2600, 1300 * abschnitte), t0 = performance.now();
     const ease = x => x < .5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2;
     sheet.classList.add("walking");
@@ -520,8 +522,8 @@
       const g = Math.min(1, (jetzt - t0) / dauer), x = ease(g) * abschnitte;
       const i = Math.min(von + Math.floor(x), hi - 1), f = Math.min(1, von + x - i);
       const [px, py] = alsProzent(bez(ABSCHNITTE[i], f));
-      walker.style.left = px + "%"; walker.style.top = py + "%";
-      $("#mapDone").setAttribute("d", pfad(i, f));
+      walker.style.transform = `translate(${(px * W / 100).toFixed(1)}px, ${(py * H / 100).toFixed(1)}px)`;
+      setzeWeg(pfad(i, f));
       if (g < 1) { laufFrame = requestAnimationFrame(schritt); return; }
       laufFrame = null; kartenHier = hi;
       walker.hidden = true; sheet.classList.remove("walking");
@@ -824,16 +826,23 @@
   const GESEHEN_KEY = "dq-gesehen-v1" + (PROBE ? "-probe" : "");
   let gesehenDoc = null, schlange = [];
   try { if (!DEMO) gesehenDoc = JSON.parse(localStorage.getItem(GESEHEN_KEY) || "null"); } catch (e) {}
-  function merkeGesehen() {
-    gesehenDoc = lastDoc;
-    try { if (!DEMO && lastDoc) localStorage.setItem(GESEHEN_KEY, JSON.stringify(lastDoc)); } catch (e) {}
+  function merkeGesehen(d = lastDoc) {
+    gesehenDoc = d;
+    try { if (!DEMO && d) localStorage.setItem(GESEHEN_KEY, JSON.stringify(d)); } catch (e) {}
   }
+  // Neustart des Quest Masters (neustart im Spiel, engine.js), den dieses Handy zuletzt kannte. Fehlt er, aber das Handy
+  // hat schon etwas gesehen, stammt es von vor dem Zeitstempel (0).
+  const NEUSTART_KEY = "dq-neustart-v1" + (PROBE ? "-probe" : "");
+  let neustartBekannt = null;
+  try { if (!DEMO) { const v = localStorage.getItem(NEUSTART_KEY); neustartBekannt = v !== null ? Number(v) || 0 : gesehenDoc ? 0 : null; } } catch (e) {}
   function nachholen() {
     const alt = gesehenDoc && E.normalize(gesehenDoc), neu = lastDoc && E.normalize(lastDoc);
     merkeGesehen();
     if (!alt || !neu || JSON.stringify({ ...alt, stand: 0 }) === JSON.stringify({ ...neu, stand: 0 })) return;
     const reihe = C.quests.map(q => q.id), zeit = id => Number(neu.zeiten[id]) || 9e15;
-    const ids = reihe.filter(id => (alt.quests[id] || "offen") !== (neu.quests[id] || "offen") || !alt.glanz[id] !== !neu.glanz[id])
+    // Einzeln nachgeholt wird nur, was neu entschieden oder gestartet ist. Was zurückgenommen wurde, kommt gesammelt
+    // im letzten Schritt (ein Fenster statt einem je Quest)
+    const ids = reihe.filter(id => neu.quests[id] && ((alt.quests[id] || "offen") !== neu.quests[id] || !alt.glanz[id] !== !neu.glanz[id]))
       .sort((x, y) => zeit(x) - zeit(y) || reihe.indexOf(x) - reihe.indexOf(y));
     const docs = [alt];
     ids.forEach(id => {
@@ -1061,6 +1070,7 @@
     if (target === page) return;
     if (!dir) dir = (target - page + 3) % 3 === 1 ? 1 : -1;
     const cube = $("#menuCube");
+    $("#game").classList.add("dreht");
     cube.style.transition = "none";
     cube.classList.remove("flat");
     cube.style.transform = `translateZ(calc(-1 * var(--apo))) rotateY(${-angle}deg)`;
@@ -1075,6 +1085,7 @@
     clearTimeout(flatTimer);
     flatTimer = setTimeout(() => {
       cube.classList.add("flat");
+      $("#game").classList.remove("dreht");
       if (page === 1) { const row = document.querySelector(".q-row.is-selected"); if (row) scrollIntoList(row); }
       if (page === 2 && $("#overlay").hidden) { if (!onboarded()) onboarding(); else funde(); }
       if (page === 0) { gpsStart(); spieleLauf(); if (!laufFrame) kartenHinweis(); }
@@ -1204,7 +1215,8 @@
     function pruefen() { if (!el.hidden && spaeter()) ende("still"); }
     el.addEventListener("click", e => { if (!e.target.closest(".prolog-skip")) weiter(); });
     $("#prologSkip").addEventListener("click", e => { e.stopPropagation(); ende(true); });
-    return { start, weiter, ende, pruefen };
+    function vergessen() { gesehen = false; try { localStorage.removeItem(PROLOG_KEY); } catch (e) {} }
+    return { start, weiter, ende, pruefen, vergessen };
   })();
 
   function coach(schritte) {
@@ -1654,6 +1666,20 @@
   })();
   introFx.start();
 
+  // Vorwärmen (28.09.): Solange der Startbildschirm alles verdeckt, die Karte einmal kurz im Raum aufbauen. Dann liegen
+  // Bilder, Symbole und Ebenen schon bereit, und das erste Drehen zur Karte hängt nicht. Unsichtbar, dauert zwei Bilder.
+  setTimeout(() => {
+    if (intro.hidden) return;
+    const cube = $("#menuCube");
+    cube.style.transition = "none";
+    cube.style.transform = `translateZ(calc(-1 * var(--apo))) rotateY(${-(angle - 120)}deg)`;
+    cube.classList.remove("flat");
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      if (!cube.classList.contains("flat") && !$("#game").classList.contains("dreht")) cube.classList.add("flat");
+      cube.style.transition = "";
+    }));
+  }, 1200);
+
   const fsBtn = $("#fullscreenToggle");
   const isStandalone = () => navigator.standalone === true || matchMedia("(display-mode: standalone)").matches || matchMedia("(display-mode: fullscreen)").matches;
   const fsElement = () => document.fullscreenElement || document.webkitFullscreenElement;
@@ -1776,8 +1802,69 @@
     if (!$("#schwur").hidden) schwur.pruefen();
     // Log-Buch-Sprachnachrichten vorladen, solange das Log-Buch noch nicht entschieden ist
     if (state.quests.logbuch === "offen") logbuch.vorladen();
+    // Alles zurückgesetzt (der Quest Master hat im Admin neu angefangen, neuer Zeitstempel in neustart): ein Fenster,
+    // das Handy vergisst, was es sich gemerkt hat. Die Einzelteile (Dennis' Einträge, Tagebuch) kommen danach still an.
+    // Ein neues Handy übernimmt den Zeitstempel erst vom Netz, nicht vom leeren Startstand (sonst hielte es ihn für neu)
+    const ns = adminDoc.neustart || 0;
+    if (ns !== neustartBekannt && !(neustartBekannt === null && meta.initial)) {
+      const alt = neustartBekannt;
+      neustartBekannt = ns;
+      try { if (!DEMO) localStorage.setItem(NEUSTART_KEY, String(ns)); } catch (e) {}
+      if (alt !== null) {
+        stilleBis = Date.now() + 10000;
+        if (ns > alt) return neuerAnfang(!!prev && !meta.initial && intro.hidden);
+      }
+    }
+    if (Date.now() < stilleBis) { merkeGesehen(); return; }
     if (meta.initial && intro.hidden) { requestAnimationFrame(() => { const row = document.querySelector(".q-row.is-selected"); if (row) scrollIntoList(row); }); nachholen(); }
-    if (prev && !meta.initial && intro.hidden) { announce(prev, state, prevDoc, doc); merkeGesehen(); }
+    if (prev && !meta.initial && intro.hidden) melden(prev, prevDoc);
+  }
+
+  // Nimmt der Quest Master mehreres auf einmal zurück, kommen die Einzelteile nacheinander an (Spiel und Dennis' Einträge
+  // getrennt). Rücknahmen werden darum kurz gesammelt und in einem Fenster gezeigt, Neuigkeiten sofort.
+  // Nach einem Neustart (auch wenn er zurückgenommen wird) bleibt es kurz still, bis alles angekommen ist.
+  let sammel = null, stilleBis = 0;
+  // Nur weggenommen: Alles im neuen Stand stand schon genauso im alten (nichts entschieden, gestartet, gezählt, eingesetzt, gebucht)
+  function nurWeniger(alt, neu) {
+    alt = E.normalize(alt); neu = E.normalize(neu);
+    const gleich = (x, y) => JSON.stringify(x) === JSON.stringify(y);
+    const teil = (a, b) => Object.keys(b || {}).every(k => a && k in a && gleich(a[k], b[k]));
+    const ids = l => new Set(l.map(x => x.id));
+    return teil(alt.quests, neu.quests) && teil(alt.glanz, neu.glanz) && teil(alt.duelle, neu.duelle) && teil(alt.items, neu.items)
+      && Object.keys(neu.zaehler).every(k => (Number(neu.zaehler[k]) || 0) <= (Number(alt.zaehler[k]) || 0))
+      && Object.keys(neu.schritte).every(k => teil(alt.schritte[k], neu.schritte[k]))
+      && neu.einsaetze.every(e => ids(alt.einsaetze).has(e.id)) && neu.buchungen.every(x => ids(alt.buchungen).has(x.id));
+  }
+  function melden(prev, prevDoc) {
+    if (sammel) { clearTimeout(sammel.t); prev = sammel.prev; prevDoc = sammel.prevDoc; sammel = null; }
+    if (nurWeniger(prevDoc, lastDoc)) {
+      sammel = { prev, prevDoc, t: setTimeout(() => { const x = sammel; sammel = null; if (x && intro.hidden) { announce(x.prev, state, x.prevDoc, lastDoc); merkeGesehen(); } }, 700) };
+      return;
+    }
+    announce(prev, state, prevDoc, lastDoc); merkeGesehen();
+  }
+
+  // Neuer Anfang: Das Handy vergisst Prolog, Beutel, Hinweise, Funde und den zuletzt gesehenen Stand. Beim nächsten
+  // PRESS START läuft alles wie beim ersten Mal. Ist das Menü offen, sagt es die Fee in einem einzigen Fenster.
+  function neuerAnfang(zeigen) {
+    if (sammel) { clearTimeout(sammel.t); sammel = null; }
+    try { [OB_KEY, KARTE_KEY, FUND_KEY].forEach(k => localStorage.removeItem(k)); } catch (e) {}
+    beutelGezeigt = false; karteGesehen = false; gesehen = null; neuMarke.clear();
+    prolog.vergessen();
+    schlange = []; revealPending = null; fensterQuest = null;
+    // Gesehen ist der leere Anfang: Was von Dennis' Einträgen noch nachkommt oder schon weg ist, meldet niemand mehr
+    merkeGesehen(E.normalize(adminDoc));
+    if (!zeigen) return;
+    schwur.schliessen();
+    if (!$("#logbuch").hidden) logbuch.schliessen();
+    $("#coach").hidden = true;
+    melody("zauber");
+    showOverlay({
+      head: `<span class="ri-big fee"><img src="assets/fee.png" alt=""></span><p class="big">NEUER ANFANG</p><p class="sub">vom Quest Master</p>`,
+      lines: `<li><span class="ri"></span><span>Der Quest Master hat alles zurückgesetzt. Die Reise beginnt von vorn.</span></li>`,
+      next: ""
+    }, () => { if (!DEMO) location.reload(); });
+    renderHud(); renderQuests();
   }
   einStore.subscribe(e => { eintraege = e; neuBerechnen({}); });
   store.subscribe((doc, meta) => { adminDoc = doc; neuBerechnen(meta); });
