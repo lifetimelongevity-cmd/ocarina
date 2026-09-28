@@ -4,8 +4,8 @@ Zwei Seiten, ein gespeicherter Stand.
 
 | Seite | Wer | Was |
 |---|---|---|
-| `index.html` | Dennis | Menü im N64-Stil: Startbildschirm, beim ersten Start der Prolog mit Rikes Fee, drei Seiten KARTE, QUESTS, AUSRÜSTUNG, HUD mit Packs, nächster Quest und Code. **Trägt selbst ein** (seit 27.09.): Ergebnis, Einsatz, Duelle, Rikes Amulett, Ziffern am Kästchen, jeweils mit gedrückt gehaltenem Siegel. Ergebnis-Fenster sofort, auch ohne Netz, verpasste Momente nach PRESS START. Schreibt dazu seine Log-Buch-Antworten. |
-| `admin.html` | Quest Master | Schiedsrichter: sieht live, was Dennis einträgt, und kann jeden Eintrag **zurücknehmen** (die Fee sagt es Dennis). Nächste Quest mit Bestanden/Verloren als Notlösung, Einsetzen, Showdown-Duelle und Log-Buch-Antworten. Laufende Quests (Prophezeiung mit Zähler, Rikes Amulett), Packs buchen, Ziffern kaufen, Items korrigieren, Zurücksetzen. Oben rechts **Rückgängig** für jede Änderung. `admin.html?probe` ist der **Probelauf**. |
+| `index.html` | Dennis | Menü im N64-Stil: Startbildschirm, beim ersten Start der Prolog mit Rikes Fee, drei Seiten KARTE, QUESTS, AUSRÜSTUNG, HUD mit Packs, nächster Quest und Code. **Trägt selbst ein** (seit 27.09.): Ergebnis, Einsatz, Duelle, Rikes Amulett, fehlende Ziffern am Tor zum Gipfel, jeweils mit gedrückt gehaltenem Siegel. Ergebnis-Fenster sofort, auch ohne Netz, verpasste Momente nach PRESS START. Schreibt dazu seine Log-Buch-Antworten. |
+| `admin.html` | Quest Master | Schiedsrichter: sieht live, was Dennis einträgt, und kann jeden Eintrag **zurücknehmen** (die Fee sagt es Dennis). Nächste Quest mit Bestanden/Verloren als Notlösung, Einsetzen, Showdown-Duelle und Log-Buch-Antworten. Laufende Quests (Prophezeiung mit Zähler, Rikes Amulett), Packs buchen, Ziffern kaufen oder per Buße buchen, Items korrigieren, Zurücksetzen. Oben rechts **Rückgängig** für jede Änderung. `admin.html?probe` ist der **Probelauf**. |
 
 Adressen: Dennis `https://docarina.vercel.app/`, Quest Master `https://docarina.vercel.app/admin.html`.
 Zusätze für Dennis' Seite: `?probe` (liest den Probelauf des Quest Masters, roter Rahmen), `?demo` (Beispielstand mit Demo-Knöpfen, ohne Datenbank, auch `?demo=start`, `?demo=bund` kurz vor dem Showdown, `?demo=ende`), `?direkt` (ohne Startbildschirm), `?onboarding` (Prolog, Hinweise auf der Karte und Beutel-Onboarding noch einmal, auch später am Tag. Ohne diesen Zusatz kommt das Onboarding nur am Anfang des Spiels, solange noch keine Quest entschieden ist, in der Demo also nur mit `?demo=start`), `?schwach` (Sparmodus erzwingen). Die alte Adresse `entwurf.html` leitet auf die Hauptseite um.
@@ -16,7 +16,7 @@ Zusätze für Dennis' Seite: `?probe` (liest den Probelauf des Quest Masters, ro
 |---|---|
 | `config.js` | Alles, was das Spiel kennt: Quests (Reihenfolge, Texte, Belohnungen, einsetzbar), Items und Fähigkeiten mit Tarnnamen, Kartenstationen, Log-Buch-Fragen, Code, Packs, Speicher. **Hier wird ergänzt.** |
 | `weg.js` | Der echte Weg (Bahnhof Tegernsee, Wanderweg 681a, Neureuth): Stelle am Weg aus GPS, Höhe an jeder Stelle, Strecke bis zum Gipfel. Reine Funktionen, getestet in `engine.test.js`. |
-| `engine.js` | Die Logik. Rechnet aus Konfiguration und gespeichertem Stand alles aus: Packs, Ziffern, Items, Anzahl Spruchrollen, nächste Quest, laufende Quests, Showdown-Duelle, was wo einsetzbar ist. |
+| `engine.js` | Die Logik. Rechnet aus Konfiguration und gespeichertem Stand alles aus: Packs, Ziffern, Items, Anzahl Flüche, Tor zum Gipfel, nächste Quest, laufende Quests, Showdown-Duelle, was wo einsetzbar ist. |
 | `store.js` | Speicher. `lokal` (ein Browser, zum Testen) oder `firebase` (zwei Handys). Dazu die Kanäle, in die Dennis schreibt: Log-Buch-Antworten und seine Einträge. |
 | `app.js`, `styles.css`, `index.html` | Dennis' Menü. |
 | `admin.js`, `admin.css`, `admin.html` | Quest-Master-Menü. |
@@ -59,10 +59,12 @@ Dennis' Antworten und Einträge liegen bewusst neben dem Spiel, damit das Speich
 
 - **Vertippt:** Oben rechts **Rückgängig**. Darunter steht, was zurückgenommen wird. Nimmt jede Änderung zurück, auch Sprünge und „Alles zurücksetzen“, bis zu 40 Schritte, und merkt sich das auch nach dem Neuladen. Ist bei Dennis das Ergebnis-Fenster noch offen, geht es still zu.
 
-- **Dennis trägt selbst ein** (seit 27.09.): Auf seiner Quest-Karte stehen BESTANDEN und VERLOREN, er hält das Siegel gedrückt, bis sich der Ring schließt, dann läuft sofort der Moment. Genauso setzt er Items und Fähigkeiten ein (antippen, Siegel halten), trägt am Gipfel jedes Duell ein, meldet bei Rikes Amulett „Gefunden“ und „Zusammengesetzt“ und kauft am Ende fehlende Ziffern am Kästchen. Du siehst alles im Admin unter „Dennis trägt selbst ein“ mit Uhrzeit, dazu eine kurze Meldung unten.
+- **Dennis trägt selbst ein** (seit 27.09.): Auf seiner Quest-Karte stehen BESTANDEN und VERLOREN, er hält das Siegel gedrückt, bis sich der Ring schließt, dann läuft sofort der Moment. Genauso setzt er Items und Fähigkeiten ein (antippen, Siegel halten), trägt am Gipfel jedes Duell ein, meldet bei Rikes Amulett „Gefunden“ und „Zusammengesetzt“ und holt am Tor zum Gipfel fehlende Ziffern. Du siehst alles im Admin unter „Dennis trägt selbst ein“ mit Uhrzeit, dazu eine kurze Meldung unten.
 - **Zurücknehmen:** Stimmt etwas nicht, tippst du bei seinem Eintrag auf **Zurücknehmen**. Die Quest ist wieder offen, Packs und Items springen zurück, und die Fee sagt es Dennis („Der Quest Master hat das Ergebnis von Kartenwurf zurückgenommen. Trag es neu ein.“). Rückgängig oben holt den Eintrag zurück. Auch „Offen“ bei einer Quest, ein zweiter Tipp auf ein gesetztes Duell und das Ausschalten von „Gefunden“ nehmen seinen Eintrag mit zurück.
 - **Notlösung:** Alle Knöpfe von früher gibt es weiter (Bestanden, Verloren, Einsetzen, Duelle), zum Beispiel wenn sein Akku leer ist. Was du buchst, gilt vor seinem Eintrag.
-- **Prophezeiung:** morgens „Starten", jede erfüllte Vorhersage „+1 Treffer" (gibt eine Spruchrolle), abends „Beenden". Das bleibt bei dir.
+- **Prophezeiung:** morgens „Starten", jede erfüllte Vorhersage „+1 Treffer" (gibt einen Fluch), abends „Beenden". Das bleibt bei dir.
+- **Belohnungen (seit 28.09.):** Hauptquests geben Packs und eine Ziffer oder ein Item, Sidequests und die laufenden Quests eine Fähigkeit (Fluch, Schild, Nakama-Ruf, Rikes Segen). Jede Niederlage kostet nur Packs. Ein Fluch trifft immer den Bund, welche Gestalt er annimmt, bestimmst du.
+- **Tor zum Gipfel:** Ohne alle vier Ziffern kein Finale. Fehlt eine, zeigt Dennis' Quest-Karte am Gipfel das Tor: Er holt die Ziffer für 2 Packs, mit Rikes Segen (aus dem Amulett) oder per Bußprüfung. Die Buße bestimmst du, er besiegelt sie erst, wenn er sie bestanden hat. Du kannst die Ziffer auch selbst buchen (unter „Packs buchen“: kaufen oder per Buße). Erst dann erscheinen bei ihm die Duelle.
 - **Rikes Amulett:** „Starten", wenn die Brosche versteckt ist. Dennis meldet „Gefunden“ und „Zusammengesetzt“. Verpasst er die Frist, buchst du Verloren.
 - **Showdown:** Dennis sieht am Gipfel die Duell-Tafel (verlorene Spiele vom Tag zuerst, aufgefüllt mit Wirbel der Götter) und trägt jedes Duell ein. Nach der Mehrheit trägt er die Prüfung ein. Den Schild setzt er vor dem Besiegeln einer Niederlage ein und spielt das Duell noch einmal.
 - **Rikes Tagebuch** (intern Log-Buch, hieß bis 28.09. so): Dennis' Antworten erscheinen live unter der Quest und unten im Bereich „Rikes Tagebuch“. Sind alle sieben besiegelt, trägt er das Ergebnis selbst ein.
@@ -86,7 +88,7 @@ python3 -m http.server 8000
 
 `http://localhost:8000/?demo` zeigt Dennis' Menü mit Demo-Knöpfen ohne Datenbank. Für Admin und Dennis zusammen in `config.js` `typ: "lokal"` setzen und beide Seiten in zwei Tabs desselben Browsers öffnen.
 
-Geräte-Test (iPhone 13 und 15 in Safari und vom Home-Bildschirm, Samsung mit gedrosselter CPU): `tests/geraete.mjs`, siehe Kopf der Datei. Dazu `tests/nebel.mjs` (verrät nichts, auch nicht in den Stationstafeln und der Ausrüstung), `tests/probe.mjs` (Probelauf, Rückgängig), `tests/karte.mjs` (Karte, GPS, Prolog) und `tests/selbst.mjs` (Dennis trägt selbst ein, Zurücknehmen, verpasste Momente, Duelle, Kästchen).
+Geräte-Test (iPhone 13 und 15 in Safari und vom Home-Bildschirm, Samsung mit gedrosselter CPU): `tests/geraete.mjs`, siehe Kopf der Datei. Dazu `tests/nebel.mjs` (verrät nichts, auch nicht in den Stationstafeln und der Ausrüstung), `tests/probe.mjs` (Probelauf, Rückgängig), `tests/karte.mjs` (Karte, GPS, Prolog) und `tests/selbst.mjs` (Dennis trägt selbst ein, Zurücknehmen, verpasste Momente, Tor, Duelle).
 
 ## Firebase
 

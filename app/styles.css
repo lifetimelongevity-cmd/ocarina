@@ -781,6 +781,15 @@ html.probe body::after { content: ""; position: fixed; inset: 0; z-index: 9999; 
 .duell .d-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .duell .d-name small { color: #aab3cf; font: 800 10px/1 "Courier New", monospace; letter-spacing: .08em; }
 .duell.spaeter, .duell.sieg, .duell.niederlage { min-height: 24px; }
+/* Das Tor zum Gipfel (28.09.): fehlende Ziffern holen, bevor das Finale beginnt */
+.tor { margin-top: 6px; }
+.tor ol { list-style: none; margin: 3px 0 0; padding: 0; display: grid; gap: 3px; }
+.tor-z { display: flex; align-items: center; gap: 6px; min-height: 30px; padding: 2px 6px; border-radius: 3px; background: rgba(250,242,110,.07); box-shadow: inset 0 0 0 1.5px rgba(250,242,110,.5);
+  font: 700 var(--fs-small)/1.15 "Trebuchet MS", sans-serif; }
+.tor-z .mini-tumbler { display: inline-grid; place-items: center; flex: none; width: 1.2em; height: 1.5em; border-radius: 2px; background: #0c0d09; border: 1px solid #a58a33; color: var(--gold); font: 900 max(10px, .85em)/1 Georgia, serif; }
+.tor-z .d-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tor-z .qc-eintrag { flex: none; padding: 0 7px; }
+.qc-eintrag.segen { color: #fff; background: linear-gradient(#f5a3cb, #d0467f 60%, #8f2455); box-shadow: inset 1px 1px 0 rgba(255,255,255,.35), 1px 2px 0 #000; }
 /* Am Gipfel erklärt die Duell-Tafel, was passiert: kein Quest-Text */
 .quest-card.showdown > .tb-text { display: none; }
 .quest-card.showdown .duelle { margin-top: 2px; }

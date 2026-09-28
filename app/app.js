@@ -43,7 +43,7 @@
       einsaetze: [{ id: "e1", item: "kreisel", quest: "wirbel" }],
       buchungen: [{ id: "b1", packs: -1, grund: "Strafe vom Quest Master" }]
     },
-    // Kurz vor dem Ende: alles gespielt bis auf den Bund, zwei Revanchen stehen an, Amulett gefunden
+    // Kurz vor dem Ende: alles gespielt bis auf den Bund, am Tor fehlt Ziffer 3, danach zwei Revanchen, Amulett gefunden
     bund: {
       quests: { logbuch: "bestanden", klingen: "verloren", wirbel: "bestanden", podrennen: "bestanden", kartenwurf: "bestanden",
                 auge: "verloren", deku: "bestanden", feuerprobe: "bestanden", prophezeiung: "laeuft", amulett: "laeuft" },
@@ -219,9 +219,10 @@
     document.querySelectorAll(".q-row").forEach(b => b.addEventListener("click", () => { followNext = b.dataset.id === state.next; selectQuest(b.dataset.id); }));
     $("#questCard").addEventListener("click", e => {
       if (e.target.closest("[data-logbuch]")) return logbuch.oeffnen();
-      const t = e.target.closest("[data-ergebnis], [data-schritt], [data-duell], [data-einsetzen]");
+      const t = e.target.closest("[data-ergebnis], [data-schritt], [data-duell], [data-einsetzen], [data-tor]");
       if (!t) return;
-      if (t.dataset.ergebnis) schwurErgebnis(sel[1], t.dataset.ergebnis);
+      if (t.dataset.tor) schwurTor(+t.dataset.tor, t.dataset.weg);
+      else if (t.dataset.ergebnis) schwurErgebnis(sel[1], t.dataset.ergebnis);
       else if (t.dataset.schritt) schwurSchritt(sel[1], t.dataset.schritt);
       else if (t.dataset.duell) schwurDuell(t.dataset.duell, t.dataset.v);
       else schwurEinsatz(t.dataset.einsetzen, t.dataset.quest);
@@ -364,6 +365,7 @@
         <div class="fx-row${st === "bestanden" ? " dim" : ""}"><span class="fx-lbl lose">NIEDERLAGE</span><span class="fx">${fxChips(q.lose, false)}</span>${kann("verloren") ? knopf("lose", `data-ergebnis="verloren"`, "VERLOREN") : ""}</div>
       </div>`;
       if (ein.duelle) unten = duellTafel(ein.duelle) + unten;
+      if (ein.tor) unten = torTafel(ein.tor) + unten;
       card.classList.toggle("showdown", !!ein.duelle);
     }
     card.innerHTML = `
@@ -398,6 +400,7 @@
       return offen ? { schritt: offen } : { ergebnis: ["bestanden"] };
     }
     if (id !== state.next || (q.logbuch && !logbuchFertig())) return {};
+    if (state.tor && state.tor.quest === id) return { tor: state.tor };   // erst alle vier Ziffern, dann das Finale
     if (q.showdown) { const sd = showdownStand(); return { duelle: sd, ergebnis: sd.entschieden ? [sd.entschieden] : [] }; }
     return { ergebnis: ["bestanden", "verloren"] };
   }
@@ -413,12 +416,25 @@
     }).join("")}</ol></div>`;
   }
 
+  // Das Tor zum Gipfel (28.09.): Ohne alle vier Ziffern kein Finale. Jede fehlende holt Dennis für Packs,
+  // mit Rikes Segen oder per Bußprüfung, die der Quest Master bestimmt. Er besiegelt selbst, der Quest Master kann zurücknehmen.
+  const torSegen = () => C.items.find(it => it.tor);
+  function torTafel(tor) {
+    const preis = C.ziffer_preis, segen = torSegen(), hatSegen = segen && state.items[segen.id] === "besitz";
+    const knopf = (nr, weg, text, cls) => `<button type="button" class="qc-eintrag ${cls}" data-tor="${nr}" data-weg="${weg}">${text}</button>`;
+    return `<div class="tor"><p class="fx-head">DAS TOR · ${C.code.length - tor.fehlend.length} VON ${C.code.length} ZIFFERN</p><ol>${tor.fehlend.map(nr =>
+      `<li class="tor-z"><span class="mini-tumbler">?</span><span class="d-name">Ziffer ${nr}</span>`
+      + (state.packs >= preis ? knopf(nr, "packs", `${preis} PACKS`, "win") : "")
+      + (hatSegen ? knopf(nr, "segen", "SEGEN", "segen") : "")
+      + knopf(nr, "busse", "BUSSE", "lose") + `</li>`).join("")}</ol></div>`;
+  }
+
   // Einsetzbar: nur bei der Quest, die gerade dran ist oder läuft. Leuchtet, was Dennis dabeihat.
   // Schon Eingesetztes steht darunter, auch bei erledigten Quests.
   function einsatzHtml(id) {
     const schon = state.eingesetzt[id] || [];
     const teile = [];
-    if (aktiv(id)) {
+    if (aktiv(id) && !(state.tor && state.tor.quest === id)) {
       const hier = E.einsetzbar(C, state, id).filter(i => state.items[i] === "besitz");
       if (hier.length) teile.push(`<div class="helps"><span class="fx-head">EINSETZBAR</span><span class="helps-row">${hier.map(i => {
         const x = itemById(i);
@@ -723,7 +739,7 @@
     } else if (jetzt.has(id)) {
       tag = `<span class="tag now">JETZT</span>`;
       const wo = E.aktuelleQuests(C, state).filter(qid => E.einsetzbar(C, state, qid).includes(id));
-      extra = `Einsetzbar bei ${wo.map(em).join(" und ")}.`;
+      extra = x.tor ? "Einsetzbar am Tor zum Gipfel." : `Einsetzbar bei ${wo.map(em).join(" und ")}.`;
     } else if (q && state.quests[q.id] !== "offen") extra = `Erbeutet bei ${em(q.id)}.`;
     if (!schatten && neuMarke.has(id)) tag = `<span class="tag won">NEU</span>` + tag;
     box.style.setProperty("--c", x.farbe);
@@ -931,7 +947,13 @@
       const q = schritte[0], sx = q.schritte.find(x => next.schritte[q.id][x.id] && !prev.schritte[q.id][x.id]);
       klang = "side"; gross = true;
       head = `<span class="medal-stage won" style="--m:${q.farbe}">${medalHtml(q, "laeuft", false)}</span><p class="big">${esc(sx.name.toUpperCase())}</p><p class="sub">${esc(q.name)}</p>`;
-      if (!lines.length) lines.push(`<li><span class="ri"></span>Jetzt zusammensetzen, bevor der Tag endet.</li>`);
+      if (!lines.length) lines.push(`<li><span class="ri"></span>Jetzt zusammensetzen, bevor du am Gipfel stehst.</li>`);
+    } else if (neueB.some(b => b.ziffer)) {
+      const b = neueB.filter(x => x.ziffer).pop(), weg = b.weg || "packs";
+      klang = weg === "packs" ? "plus" : "zauber";
+      const ic = weg === "segen" ? `<span class="ri-big" style="color:${torSegen().farbe}">${useSvg(torSegen().symbol)}</span>` : `<span class="ri-big lock">${useSvg("i-lock")}</span>`;
+      head = `${ic}<p class="big">${weg === "busse" ? "BUSSE BESTANDEN" : weg === "segen" ? "RIKES SEGEN" : "ZIFFER GEKAUFT"}</p><p class="sub">${esc(b.grund || "")}</p>`;
+      if (prev.tor && !next.tor && next.next) lines.push(`<li class="plus"><span class="ri">${useSvg("z-triforce")}</span>Das Tor ist offen. Der Bund erwartet dich.</li>`);
     } else if (neueE.length) {
       const e = neueE[neueE.length - 1], it = itemById(e.item);
       klang = "zauber";
@@ -997,11 +1019,11 @@
       const q = REIHE.find(x => x.win && x.win.ziffer === i + 1);
       const wo = q ? esc(q.name) : "?";
       const offen = !q || !aufgedeckt(q.id) ? "im Nebel"
-        : s.quests[q.id] === "verloren" ? `verloren, am Kästchen ${C.ziffer_preis} ${packsWort(C.ziffer_preis)}` : `jetzt: ${wo}`;
+        : s.quests[q.id] === "verloren" ? "verloren, hol sie dir am Tor zum Gipfel" : `jetzt: ${wo}`;
       // Nach der letzten Quest tauscht Dennis fehlende Ziffern selbst gegen Packs
       const kauf = v == null && !s.next ? (s.packs >= C.ziffer_preis
         ? `<button type="button" class="qc-eintrag win kauf" data-kauf="${i + 1}">KAUFEN · ${C.ziffer_preis} ${packsWort(C.ziffer_preis).toUpperCase()}</button>` : `<small class="kauf-fehlt">zu wenig Packs</small>`) : "";
-      return `<li class="${v == null ? "" : "plus"}"><span class="ri"><span class="tumbler${v == null ? "" : " known"}" style="--hud-h:30px">${v == null ? "?" : v}</span></span><span>${v == null ? (s.next ? offen : "fehlt") : s.gekauft[i] ? "gekauft" : wo}</span>${kauf}</li>`;
+      return `<li class="${v == null ? "" : "plus"}"><span class="ri"><span class="tumbler${v == null ? "" : " known"}" style="--hud-h:30px">${v == null ? "?" : v}</span></span><span>${v == null ? (s.next ? offen : "fehlt") : s.gekauft[i] ? { busse: "durch Bußprüfung", segen: "durch Rikes Segen" }[s.zifferWeg[i]] || "gekauft" : wo}</span>${kauf}</li>`;
     }).join("");
     showOverlay({
       head: `<span class="ri-big lock">${useSvg("i-lock")}</span><p class="big">CODE</p>`,
@@ -1107,9 +1129,9 @@
         { bild: `<span class="pb-chest">${useSvg("i-chest")}${useSvg("i-lock", "pb-lock")}</span><span class="pb-cards${max > 10 ? " two" : ""}" style="--n:${max > 10 ? Math.ceil(max / 2) : max}">${karten(max)}</span>`,
           text: `Der Bund hat ein Kästchen verschlossen. Darin liegen ${max} Packs.` },
         { bild: `<span class="pb-gain">${cardSvg()}<b>+</b></span><span class="pb-tumblers">${C.code.map(() => `<span class="tumbler">?</span>`).join("")}</span>`,
-          text: "Jede Prüfung bringt dir Packs, manche eine Ziffer des Codes. Verlierst du, holt sich der Bund Packs zurück." },
+          text: "Hauptquests bringen dir Packs und die vier Ziffern, Sidequests Fähigkeiten. Ohne alle vier Ziffern lässt dich der Bund nicht auf den Gipfel." },
         { bild: `<span class="pb-split"><span class="pb-cards mine" style="--n:${Math.min(halb, 10)}">${karten(halb)}</span><small>deins</small></span><span class="pb-split"><span class="pb-cards" style="--n:${Math.min(max - halb, 10)}">${karten(max - halb, "empty")}</span><small>beim Bund</small></span>`,
-          text: `Was am Ende dir gehört, nimmst du mit. Deine ${state && state.zaehler.erledigt ? "nächste" : "erste"} Prüfung wartet schon.` }
+          text: `Verlierst du, holt sich der Bund Packs zurück. Was am Ende dir gehört, nimmst du mit.` }
       ];
     };
     let tafeln = [];
@@ -1450,6 +1472,7 @@
   }
   function schwurEinsatz(item, quest) {
     const x = itemById(item);
+    if (x && x.tor) { if (state.tor) schwurTor(state.tor.fehlend[0], "segen"); return; }
     const orte = E.aktuelleQuests(C, state).filter(qid => (!quest || qid === quest) && E.einsetzbar(C, state, qid).includes(item));
     if (!x || !orte.length || state.items[item] !== "besitz") return;
     const n = state.anzahl[item];
@@ -1462,6 +1485,27 @@
       wahlen: orte.map(id => ({ id, name: questById(id).name })), folgen,
       gueltig: () => state.items[item] === "besitz",
       ausfuehren: w => eintrag("e_" + uid(), { item, quest: w || orte[0] })
+    });
+  }
+  function schwurTor(nr, weg) {
+    const preis = C.ziffer_preis, segen = torSegen();
+    const gueltig = () => !!state.tor && state.tor.fehlend.includes(nr) && state.ziffern[nr - 1] == null
+      && (weg !== "packs" || state.packs >= preis) && (weg !== "segen" || (segen && state.items[segen.id] === "besitz"));
+    if (!gueltig()) return;
+    const ziffer = `<span class="chip plus"><span class="mini-tumbler">?</span>Ziffer ${nr}</span>`;
+    const o = {
+      packs: { sub: `FÜR ${preis} ${packsWort(preis).toUpperCase()}`, ton: "win",
+        folgen: [`<span class="fx"><span class="chip minus">${cardSvg()}−${preis} ${packsWort(preis)}</span>${ziffer}</span>`] },
+      segen: { sub: "RIKES SEGEN", ton: "magie",
+        folgen: [`<span class="fx">${ziffer}</span>`, `<span class="fx">${esc(segen ? segen.einsatz : "")} Danach ist er verbraucht.</span>`] },
+      busse: { sub: "BUSSPRÜFUNG", ton: "lose",
+        folgen: [`<span class="fx">${ziffer}</span>`, `<span class="fx">Der Bund stellt dir eine Bußprüfung. Besiegle erst, wenn du sie bestanden hast.</span>`] }
+    }[weg];
+    if (!o) return;
+    schwur.oeffnen({
+      art: "AM TOR ZUM GIPFEL", icon: weg === "segen" ? `<span class="sw-item" style="color:${segen.farbe}">${useSvg(segen.symbol)}</span>` : `<span class="sw-item lock">${useSvg("i-lock")}</span>`,
+      titel: `Ziffer ${nr}`, ...o, gueltig,
+      ausfuehren: () => eintrag("z_" + nr, { weg })
     });
   }
   function schwurZiffer(nr) {
