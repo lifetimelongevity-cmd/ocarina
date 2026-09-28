@@ -1844,13 +1844,18 @@
     announce(prev, state, prevDoc, lastDoc); merkeGesehen();
   }
 
-  // Neuer Anfang: Das Handy vergisst Prolog, Beutel, Hinweise, Funde und den zuletzt gesehenen Stand. Beim nächsten
-  // PRESS START läuft alles wie beim ersten Mal. Ist das Menü offen, sagt es die Fee in einem einzigen Fenster.
+  // Neuer Anfang: Das Handy vergisst alles vom alten Spiel: Prolog, Beutel, Hinweise, Funde, GPS, den zuletzt gesehenen
+  // Stand und seine Kopien von Dennis' Einträgen und Tagebuch-Antworten (auch was ohne Netz noch nicht gesendet war).
+  // Beim nächsten PRESS START läuft alles wie beim ersten Mal. Ist das Menü offen, sagt es die Fee in einem einzigen Fenster.
+  // Bleibt: ob die App auf dem Home-Bildschirm liegt.
   function neuerAnfang(zeigen) {
     if (sammel) { clearTimeout(sammel.t); sammel = null; }
-    try { [OB_KEY, KARTE_KEY, FUND_KEY].forEach(k => localStorage.removeItem(k)); } catch (e) {}
+    try { [OB_KEY, KARTE_KEY, FUND_KEY, GPS_KEY].forEach(k => localStorage.removeItem(k)); } catch (e) {}
     beutelGezeigt = false; karteGesehen = false; gesehen = null; neuMarke.clear();
     prolog.vergessen();
+    gpsStopp(); gps.an = false; gps.lage = null; gps.hinweis = "";
+    if (WEG) renderLegende();
+    einStore.vergessen(); lbStore.vergessen();
     schlange = []; revealPending = null; fensterQuest = null;
     // Gesehen ist der leere Anfang: Was von Dennis' Einträgen noch nachkommt oder schon weg ist, meldet niemand mehr
     merkeGesehen(E.normalize(adminDoc));

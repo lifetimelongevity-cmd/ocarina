@@ -107,6 +107,49 @@ await dennis.click('#lbClose'); await warte(300);
 await admin.click('#undo'); await warte(800);
 pruefe((await admin.textContent('#lbList')).includes('Neu 7'), 'Tagebuch-Knopf: Rückgängig holt die Antworten zurück');
 
+// Echtes Handy mit Firebase (nachgebildet, langsames Netz): Es hatte schon gespielt und hat Kopien von Einträgen und
+// Tagebuch im Speicher. Nach NEUER ANFANG vergisst es alles, auch nach schnellem PRESS START taucht nichts Altes auf,
+// und es schreibt nichts auf den Server.
+{
+  const ctx2 = await b.newContext({ viewport: { width: 852, height: 393 }, isMobile: true, hasTouch: true });
+  const schreibt = [];
+  await ctx2.route('**firebasedatabase.app/**', async r => {
+    if (r.request().method() !== 'GET') { schreibt.push(r.request().method()); return r.fulfill({ status: 200, body: 'null' }); }
+    await warte(2500);
+    const spiel = /dennis-jga-2026\.json/.test(r.request().url());
+    return r.fulfill({ status: 200, contentType: 'application/json', body: spiel ? JSON.stringify({ neustart: 1790000000000, stand: 1790000000001 }) : 'null' });
+  });
+  await ctx2.addInitScript(() => {
+    window.EventSource = undefined;
+    window.__fenster = [];
+    document.addEventListener('DOMContentLoaded', () => { const o = document.getElementById('overlay'); new MutationObserver(() => { if (!o.hidden) window.__fenster.push(o.textContent.replace(/\s+/g, ' ').trim().slice(0, 60)); }).observe(o, { attributes: true, childList: true, subtree: true }); });
+    if (sessionStorage.vorher) return;
+    sessionStorage.vorher = 1;
+    localStorage.setItem('dq-gesehen-v1', JSON.stringify({ quests: { logbuch: 'bestanden' }, zeiten: { logbuch: 1 } }));
+    ['dq-prolog-v2', 'dq-onboarding-v1', 'dq-gps'].forEach(k => localStorage.setItem(k, '1'));
+    localStorage.setItem('dennis-quest-doc:dennis-jga-2026', JSON.stringify({ stand: 5 }));
+    localStorage.setItem('dennis-quest-eintraege:dennis-jga-2026-dennis', JSON.stringify({ q_logbuch: { status: 'bestanden', zeit: 1 } }));
+    localStorage.setItem('dennis-quest-logbuch:dennis-jga-2026-logbuch', JSON.stringify({ 1: { antwort: 'Kino', zeit: 1 } }));
+  });
+  const p = await ctx2.newPage(); p.on('pageerror', e => fehler.push('Firebase-Handy: ' + e.message));
+  await p.goto(BASE); await warte(400);
+  await p.click('#introScreen'); await warte(800);
+  await p.evaluate(() => { while (!document.getElementById('coach').hidden) document.getElementById('coach').click(); });
+  await warte(3500);
+  pruefe((await p.evaluate(() => window.__fenster.slice(-1)[0] || '')).includes('NEUER ANFANG'), 'Firebase-Handy: Fenster NEUER ANFANG');
+  const speicher = await p.evaluate(() => ['dennis-quest-eintraege:dennis-jga-2026-dennis', 'dennis-quest-logbuch:dennis-jga-2026-logbuch', 'dq-gps', 'dq-prolog-v2', 'dq-onboarding-v1'].map(k => localStorage.getItem(k)));
+  pruefe(speicher.join('|') === '{}|{}|||', 'Firebase-Handy vergisst Einträge, Tagebuch, GPS, Prolog, Beutel: ' + speicher.join('|'));
+  await p.click('#overlay'); await warte(700);
+  await p.click('#introScreen'); await warte(700);
+  pruefe(await p.isVisible('#prolog'), 'Firebase-Handy: nach dem Neuladen gleich PRESS START, der Prolog kommt');
+  if (await p.isVisible('#prologSkip')) await p.click('#prologSkip');
+  await warte(4000);
+  const f = await p.evaluate(() => window.__fenster);
+  pruefe(!f.length && (await p.$eval('.q-row[data-id="logbuch"]', e => e.classList.contains('st-offen'))), 'Firebase-Handy: nichts Altes taucht auf: ' + JSON.stringify(f));
+  pruefe(!schreibt.length, 'Firebase-Handy schreibt nichts auf den Server: ' + schreibt.join(','));
+  await ctx2.close();
+}
+
 await b.close();
 console.log(ok.map(t => 'ok    ' + t).join('\n'));
 console.log(fehler.length ? fehler.map(t => 'FEHLT ' + t).join('\n') : 'Alles in Ordnung.');

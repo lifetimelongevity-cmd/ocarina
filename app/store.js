@@ -171,7 +171,8 @@
           k.subscribe(fn)          fn(eintraege) bei jedem neuen Stand
           k.setzen(schluessel, e)  schreiben (Dennis, oder der Admin beim Wiederherstellen)
           k.loeschen(schluessel)   nur Admin: einen Eintrag löschen (Promise, scheitert ohne Netz)
-          k.zuruecksetzen()        nur Admin: alle Einträge löschen (Promise, scheitert ohne Netz) */
+          k.zuruecksetzen()        nur Admin: alle Einträge löschen (Promise, scheitert ohne Netz)
+          k.vergessen()            nur im Gerät: Kopie und Ungesendetes weg (Dennis' Handy nach „Alles zurücksetzen“) */
   function kanal(cfg, name, speicherName) {
     const s = cfg.speicher || {};
     const id = (s.spielId || "standard") + "-" + name;
@@ -271,6 +272,11 @@
           schreiben(key, remote); schreiben(pendingKey, pending); melden();
         });
       },
+      vergessen() {
+        pending = {}; schreiben(pendingKey, pending);
+        if (firebase) { remote = {}; schreiben(key, remote); }
+        melden();
+      },
       zuruecksetzen() {
         pending = {}; schreiben(pendingKey, pending);
         remote = {}; schreiben(key, remote); melden();
@@ -285,7 +291,7 @@
   function logbuch(cfg) {
     const k = kanal(cfg, "logbuch", "logbuch");
     return {
-      subscribe: k.subscribe, zuruecksetzen: k.zuruecksetzen, setzen: k.setzen,
+      subscribe: k.subscribe, zuruecksetzen: k.zuruecksetzen, setzen: k.setzen, vergessen: k.vergessen,
       besiegeln(nr, text) { return k.setzen(String(nr), { antwort: String(text).slice(0, 500), zeit: Date.now() }); }
     };
   }
