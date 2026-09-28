@@ -21,7 +21,9 @@
       databaseURL: "https://dennis-quest-default-rtdb.europe-west1.firebasedatabase.app"
     },
 
-    startitems: ["beutel"],
+    // Einziges Startitem (28.09.): Der Heilige Beutel des Helden entpuppt sich beim ersten Besuch der Ausrüstung
+    // als Wasserspritze. Ein Feld, kein zusätzliches.
+    startitems: ["spritze"],
 
     /* Items und Fähigkeiten (Regel vom 28.09.: Hauptquests geben Items, Sidequests und laufende Quests Fähigkeiten)
        gruppe:   "item" (Gegenstand, links in der Ausrüstung, hilft bei genau einem späteren Spiel und bleibt)
@@ -29,17 +31,29 @@
        stapel:   kann mehrfach besessen werden (Anzahl wird gezählt)
        einmalig: ist nach dem Einsetzen verbraucht
        tor:      wird am Tor zum Gipfel eingesetzt statt bei einer Quest (Rikes Segen)
+       ersetzt:  Items, die dieses ablöst (Stufen wie Zoras Schuppe): Wer es hat, setzt die schwächeren nicht mehr ein
        einsatz:  was im Siegel-Fenster steht, wenn Dennis es einsetzt (sonst text)
+       fund:     Startitem: Satz, wenn es sich beim ersten Besuch der Ausrüstung entpuppt
+       tarnSymbol: Sprite, solange es getarnt ist (sonst der Schatten von symbol)
        symbol:   Sprite aus index.html
        tarn:     So heißt das Item, solange Dennis es nicht erspielt hat (Ausrüstung und Vorschau einer Belohnung).
                  Beim Gewinnen „entpuppt" es sich. Bis dahin zeigt die Ausrüstung seinen Schatten: Die Form ist zu erkennen.
-       Texte nennen keine Quest beim Namen, sonst verraten sie, was im Nebel liegt. */
+       Texte nennen keine Quest beim Namen, sonst verraten sie, was im Nebel liegt.
+       Wasserwaffen in drei Stufen (28.09.): Spritze (Start), kleine Pistole (Sieg im Podrennen),
+       große Pistole (Glanzsieg im Kartenwurf). Im Auge des Jägers zählt die stärkste. */
     items: [
-      { id: "beutel", nr: "I1", gruppe: "item", name: "Dennis' Eier", kurz: "Eier", farbe: "#d9a441", symbol: "i-beutel",
-        text: "Klein, aber oho. Hier landet alles, was du dir erspielst.",
+      // Startitem: getarnt als Beutel (tarnSymbol), entpuppt sich als Spritze. Hieß bis 28.09. „Dennis' Eier“ (Beutel, I1).
+      { id: "spritze", nr: "I7", gruppe: "item", name: "Wasserspritze", kurz: "Spritze", farbe: "#a8e4f5", symbol: "i-spritze", tarnSymbol: "i-beutel",
+        text: "Klein und schnell leer. Deine erste Wasserwaffe.",
+        fund: "Deine erste Wasserwaffe. Stärkere erspielst du dir, sie lösen die Spritze ab.",
         tarn: { name: "Heiliger Beutel des Helden", kurz: "Beutel", text: "Seit jeher an deiner Seite. Was steckt wohl darin?" } },
-      { id: "pistole_gross", nr: "I2", gruppe: "item", name: "Große Wasserpistole", kurz: "Pistole", farbe: "#4fb8e8", symbol: "i-pistol",
-        text: "Dreifacher Tank. Du kannst länger schießen als jeder andere.",
+      { id: "pistole_klein", nr: "I8", gruppe: "item", name: "Kleine Wasserpistole", kurz: "Kleine Pistole", farbe: "#7fd0ee", symbol: "i-pistol-klein",
+        ersetzt: ["spritze"],
+        text: "Mehr Wasser, mehr Reichweite. Sie löst die Spritze ab.",
+        tarn: { name: "Silberne Schuppe", kurz: "Schuppe", text: "Kühl und glatt. Ein erster Hauch von Zoras Macht." } },
+      { id: "pistole_gross", nr: "I2", gruppe: "item", name: "Große Wasserpistole", kurz: "Große Pistole", farbe: "#4fb8e8", symbol: "i-pistol",
+        ersetzt: ["spritze", "pistole_klein"],
+        text: "Die Monsterpistole: elektrisch, mit Dauerfeuer und Licht. Keiner schießt so lange wie du.",
         tarn: { name: "Zoras Quellstab", kurz: "Quellstab", text: "Ein Relikt aus Zoras Reich. Wer es führt, hat den längsten Atem." } },
       { id: "karten_gepanzert", nr: "I4", gruppe: "item", name: "Gepanzerte Karten", kurz: "Karten", farbe: "#9fd0f0", symbol: "i-cards",
         text: "Zwei Karten mehr, in festen Hüllen. Sie fliegen weiter und stabiler.",
@@ -108,6 +122,8 @@
        qm:         Notiz nur für den Quest Master, mit der Grenze für bestanden
        farbe, emblem: Medaillon einer Hauptquest (Sprite aus index.html)
        win / lose: packs (Zahl), items (Liste), ziffer (1 bis 4, nur bei win)
+       glanz:      Glanzsieg (28.09.): ein besonders deutlicher Sieg bringt zusätzlich zu win noch das hier.
+                   bedingung steht bei Dennis auf der Quest-Karte. Er trägt ihn selbst ein, der Quest Master kann ihn zurücknehmen.
        einsetzbar: Items und Fähigkeiten, die Dennis hier einsetzen kann (er besiegelt selbst, der Quest Master kann zurücknehmen)
        ergebnisWort: Wort auf dem Knopf, mit dem Dennis den Sieg besiegelt (sonst „Bestanden")
        duell:      ein Spiel gegen einen aus dem Bund
@@ -144,25 +160,26 @@
       { id: "podrennen", nr: 7, typ: "kern", name: "Das Podrennen", ort: "Wiese am Anstieg", station: "wiese",
         farbe: "#a468e6", emblem: "z-shadow",
         text: "Ein kleiner Gleiter, ein Parcours, eine Uhr. Fahr schneller als die Zeit.",
-        qm: "RC-Auto auf Zeit, ein Versuch. Zeitgrenze so, dass du es beim Testen nur jedes zweite Mal schaffst.",
-        win:  { packs: 3, ziffer: 2, items: ["pistole_gross"] },
+        qm: "RC-Auto auf Zeit, ein Versuch, auf festem Boden (auf Gras bleibt das kleine Auto hängen). Zeitgrenze so, dass du es beim Testen nur jedes zweite Mal schaffst.",
+        win:  { packs: 3, ziffer: 2, items: ["pistole_klein"] },
         lose: { packs: -2 },
         einsetzbar: ["spruchrolle"], revanche: true },
 
       { id: "kartenwurf", nr: 9, typ: "side", name: "Kartenwurf", ort: "Erstes Waldstück", station: "wald",
         text: "Ein Duell mit Karten aus deinen Packs. Wer mehr ins Ziel bringt, gewinnt.",
-        qm: "Duell mit Karten aus schon geöffneten Packs, fester Abstand, je 3 Karten. Gleichstand zählt als verloren. Gepanzerte Karten geben +2.",
+        qm: "Duell mit Karten aus schon geöffneten Packs, fester Abstand, je 3 Karten. Gleichstand zählt als verloren. Gepanzerte Karten geben +2. Glanzsieg: mindestens 2 Karten mehr im Ziel als der Gegner, bringt die Große Wasserpistole.",
         win:  { items: ["spruchrolle"] },
+        glanz: { bedingung: "2 Karten Vorsprung", items: ["pistole_gross"] },   // einzige Sidequest mit Item, nur als Glanzsieg
         lose: { packs: -2 },
         einsetzbar: ["karten_gepanzert", "spruchrolle", "schild", "nakama"], duell: true, revanche: true },
 
       { id: "auge", nr: 2, typ: "kern", name: "Auge des Jägers", ort: "Erstes Waldstück", station: "wald",
         farbe: "#e2472f", emblem: "e-flame",
-        text: "Fünf Flammen, ein Tank. Lösch sie, bevor dir das Wasser ausgeht.",
-        qm: "5 Teelichter aus 4 m, ein Tank. Bestanden nur, wenn alle 5 aus sind. Die große Pistole hat den dreifachen Tank.",
+        text: "Fünf Flammen, ein Tank, deine stärkste Wasserwaffe. Lösch sie, bevor dir das Wasser ausgeht.",
+        qm: "5 Teelichter aus 4 m, ein Tank. Bestanden nur, wenn alle 5 aus sind. Es zählt die stärkste Wasserwaffe, die Dennis hat: Spritze, kleine Pistole oder große Pistole.",
         win:  { packs: 4, ziffer: 3, items: ["stich"] },
         lose: { packs: -2 },
-        einsetzbar: ["pistole_gross", "spruchrolle"], revanche: true },
+        einsetzbar: ["spritze", "pistole_klein", "pistole_gross", "spruchrolle"], revanche: true },
 
       { id: "deku", nr: 12, typ: "kern", name: "Klingen des Deku-Baums", ort: "Erstes Waldstück", station: "wald",
         farbe: "#48b454", emblem: "z-forest",

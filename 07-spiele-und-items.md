@@ -36,12 +36,14 @@ Stand 25.09.2026, Namen und Aussichtspunkt geändert am 28.09. Sammelt, was der 
 
 | Nr. | Item | Hilft bei | Stand |
 |---|---|---|---|
-| I1 | Beutel (Dennis' Eier) | nirgends, Onboarding | fertig im Entwurf |
-| I2 | Wasserpistole, Stufen klein und groß | 2 | Stärkstes Item. Wo es freigespielt wird, offen |
+| I1 | ~~Beutel (Dennis' Eier)~~ | | **Kein eigenes Feld mehr** (28.09.): Der Beutel ist die Tarnung der Spritze (I7) |
+| I2 | Große Wasserpistole (Monsterpistole, elektrisch) | 2 | Stärkste Stufe. **Glanzsieg im Kartenwurf** (28.09.), löst Spritze und kleine Pistole ab |
 | I3 | ~~Großer Ring~~ | | **Gestrichen** (25.09.) |
 | I4 | Gepanzerte Karten bzw. +2 Karten | 9 | Idee steht |
 | I5 | Beyblade-Vorteil (eigener Kreisel zum Üben oder erste Wahl) | 14 | Name offen |
 | I6 | **Stich** (Schwert aus Herr der Ringe, war F2, 25.09.) | 12 | Ein Schwert mehr, also ein Versuch mehr |
+| I7 | **Wasserspritze** (28.09.) | 2 | Einziges Startitem: Der Heilige Beutel des Helden entpuppt sich beim ersten Besuch der Ausrüstung als Spritze, im selben Feld, und die Fee erklärt die Stufen |
+| I8 | **Kleine Wasserpistole** (28.09.) | 2 | Sieg im Podrennen, löst die Spritze ab |
 
 ## Fähigkeiten (Magie, kein physischer Gegenstand nötig)
 
@@ -89,8 +91,8 @@ Stand 25.09.2026, Namen und Aussichtspunkt geändert am 28.09. Sammelt, was der 
 | 1 | 1 | Rikes Tagebuch | Hauptquest | Zug | +2, Ziffer 1, Kreisel (I5) | 0 | 5 von 7 Antworten treffen |
 | 2 | 4 | Die drei Zeichen | Sidequest | Wiese | Nakama-Ruf (F5) | −1 | er zwei Gegner nacheinander schlägt, jeweils Best of 3 |
 | 3 | 14 | Wirbel der Götter | Hauptquest | Wiese | +3, Gepanzerte Karten (I4) | −2 | 2 von 3 gegen den besten Blader |
-| 4 | 7 | Das Podrennen | Hauptquest | Wiese | +3, Ziffer 2, Große Wasserpistole (I2) | −2 | ein Versuch unter einer Zeit, die der Quest Master nur jedes zweite Mal schafft |
-| 5 | 9 | Kartenwurf | Sidequest | Wald | Fluch (F1) | −2 | mehr Karten im Ziel, Gleichstand zählt als verloren |
+| 4 | 7 | Das Podrennen | Hauptquest | Wiese | +3, Ziffer 2, Kleine Wasserpistole (I8) | −2 | ein Versuch unter einer Zeit, die der Quest Master nur jedes zweite Mal schafft |
+| 5 | 9 | Kartenwurf | Sidequest | Wald | Fluch (F1), **Glanzsieg** (2 Karten Vorsprung): dazu Große Wasserpistole (I2) | −2 | mehr Karten im Ziel, Gleichstand zählt als verloren |
 | 6 | 2 | Auge des Jägers | Hauptquest | Wald | +4, Ziffer 3, Stich (I6) | −2 | alle 5 Flammen aus 4 m mit einem Tank |
 | 7 | 12 | Klingen des Deku-Baums | Hauptquest | Wald | +4, Ziffer 4 | −2 | 2 von 4 Schwertern aus 4 m stecken (Stich: ein Schwert mehr) |
 | 8 | 3 | Hüter der Flamme | Sidequest | Aussicht | Schild (F3) | −2 | das Teelicht 100 Schritte bergauf brennt |
@@ -99,17 +101,18 @@ Stand 25.09.2026, Namen und Aussichtspunkt geändert am 28.09. Sammelt, was der 
 | läuft | 6 | Prophezeiung | Zähler (max. 3) | den ganzen Tag | je Treffer 1 Fluch | | |
 | läuft | 15 | Rikes Amulett | Schritt „Gefunden“ | bis zum Gipfel | Rikes Segen (F6) | 0 | gefunden und zusammengesetzt |
 
-Einsetzbar: Kreisel bei Wirbel, Karten beim Kartenwurf, Wasserpistole beim Auge, Stich beim Deku-Baum. Fluch fast überall, Schild und Nakama-Ruf bei den Duellen (Wirbel, Kartenwurf, Die drei Zeichen nur Schild) und im Showdown, Rikes Segen nur am Tor.
+Einsetzbar: Kreisel bei Wirbel, Karten beim Kartenwurf, die stärkste Wasserwaffe beim Auge (Spritze, kleine oder große Pistole), Stich beim Deku-Baum. Fluch fast überall, Schild und Nakama-Ruf bei den Duellen (Wirbel, Kartenwurf, Die drei Zeichen nur Schild) und im Showdown, Rikes Segen nur am Tor.
 
 **Packs (28.09.):** Das Kästchen hat 20 Packs (`waehrung.max`). Alle Siege zusammen 22, alle Niederlagen −17. Packs zählen in der Reihenfolge, in der gebucht wurde, und bleiben immer zwischen 0 und 20: Wer bei 0 verliert, verliert nichts, was über 20 geht, verfällt. Nachrechnen mit `node tests/balance.js`: Gewinnt Dennis jedes Spiel mit 50 %, bleiben ihm im Schnitt 5 Packs, am Tor fehlen ihm im Schnitt 2 Ziffern, in 43 % der Tage braucht er eine Bußprüfung, und etwa jeder dritte Tag endet ohne Packs. Mit 70 % sind es im Schnitt 10 Packs.
 
-Sechs Hauptquests = sechs Medaillons (28.09.): Rikes Tagebuch (Wasser, blau), Wirbel der Götter (Geister, orange), Das Podrennen (Schatten, violett), Auge des Jägers (Feuer, rot, fünf Flammen), Klingen des Deku-Baums (Wald, grün) und Prüfung des Bundes (Triforce, gold). Dennis sieht die Quests in zwei Kammern: oben HAUPTQUESTS, unten SIDEQUESTS samt Prophezeiung und Rikes Amulett. Den Ort unter dem Quest-Titel gibt es nicht mehr, der steht auf der Karte. Items gehen bei Niederlagen nicht verloren.
+Sechs Hauptquests = sechs Medaillons (28.09.): Rikes Tagebuch (Wasser, blau), Wirbel der Götter (Geister, orange), Das Podrennen (Schatten, violett), Auge des Jägers (Feuer, rot, fünf Flammen), Klingen des Deku-Baums (Wald, grün) und Prüfung des Bundes (Triforce, gold). Dennis sieht die Quests in zwei Kammern: oben HAUPTQUESTS, unten SIDEQUESTS samt Prophezeiung und Rikes Amulett. Den Ort unter dem Quest-Titel gibt es nicht mehr, der steht auf der Karte. Items gehen bei Niederlagen nicht verloren. Einziges Startitem ist die Spritze: Beim ersten Besuch der Ausrüstung entpuppt sich der Heilige Beutel des Helden als Wasserspritze, im selben Feld (28.09., vorher Beutel und Spritze als zwei Felder). Einzige Ausnahme von der Regel ist der Glanzsieg im Kartenwurf, der zusätzlich ein Item bringt.
 
 **Tarnnamen** (so heißt ein Item in der Vorschau einer Belohnung, bis Dennis es erspielt):
 
 | Nr. | Item | Tarnname |
 |---|---|---|
-| I1 | Dennis' Eier (Beutel) | Heiliger Beutel des Helden |
+| I7 | Wasserspritze (Startitem, als Beutel getarnt) | Heiliger Beutel des Helden |
+| I8 | Kleine Wasserpistole | Silberne Schuppe |
 | I2 | Große Wasserpistole | Zoras Quellstab |
 | I4 | Gepanzerte Karten (+2 Karten) | Federn der Eule |
 | I5 | Götterkreisel (üben, erste Wahl) | Kern der Goronen |
@@ -124,3 +127,42 @@ Sechs Hauptquests = sechs Medaillons (28.09.): Rikes Tagebuch (Wasser, blau), Wi
 **Log-Buch:** Umgedreht am 26.09.: Rike beantwortet 7 Fragen über Dennis, Dennis tippt in ein bis drei Worten, was sie gesagt hat. Fragen stehen fest (in `config.js` an Dennis gerichtet, so wie Rike sie bekommt in `app/assets/logbuch/LIESMICH.md`). Dateien `app/assets/logbuch/frage1.m4a` bis `frage7.m4a` fehlen noch, bis dahin spielt ein Platzhalter-Klang. Hinweise zum Format in `app/assets/logbuch/LIESMICH.md`.
 
 **Offen:** Reihenfolge und Belohnungen bestätigen, Sprachdateien, genaue Anzahl Packs (20 gesetzt), was passiert, wenn die Packs für die fehlenden Ziffern nicht reichen, welches Spiel die Schwerter für 12 vergibt, Frist und Versteck für 15.
+
+**28.09.:** Wasserwaffen in drei Stufen und Glanzsieg im Kartenwurf gebaut (Abschnitt Material und Kosten unten).
+
+## Material und Kosten (28.09.)
+
+Gekauft auf Amazon vom 22. bis 25.09., alles zugestellt. Die Reinigungslotion aus derselben Bestellung wie die Wasserpistole gehört nicht zum JGA und ist rausgerechnet.
+
+| Für | Material | Kosten |
+|---|---|---|
+| 12 Klingen des Deku-Baums | 4 Brieföffner-Schwerter aus Metall, 20 cm (gold, bronze, silber, schwarz) | 7,99 € |
+| 14 Wirbel der Götter | Beyblade X Star Wars: Obi-Wan Kenobi 4-60P gegen General Grievous 3-80HN, zwei Kreisel, zwei Starter | 15,46 € |
+| 15 Rikes Amulett, dazu ein bis zwei Sidequests | 9 Knobelspiele aus Metall | 17,99 € |
+| 2 Auge des Jägers | Elektrische Wasserpistole mit LED | ca. 10,50 € (Bestellung 24,24 € zusammen mit der Lotion, die bei Amazon etwa 13 bis 14 € kostet; genauer Preis in den Bestelldetails) |
+| 7 Das Podrennen | Revell Control Ultra Racers Series 1 Itasha: ein Auto (zufälliges Design aus sechs) mit Fernbedienung | 12,49 € |
+| **Summe** | | **ca. 64 €** (53,93 € fest plus Pistole) |
+
+Schon vorhanden: eine ganz kleine Wasserpistole und eine kleine Spritze.
+
+**Vor dem Spieltag testen:**
+
+- **Schwerter:** Brieföffner haben meist eine stumpfe Spitze. An einem Baum ausprobieren, ob sie stecken bleiben. Wenn nicht: ein morscher Stumpf als Ziel, oder es zählt, was mit der Spitze trifft. Nur werfen, wenn niemand hinter dem Baum ist.
+- **Nur 4 Schwerter:** „1 bis 4, mit Stich eins mehr“ bräuchte 5. Vorschlag: Das silberne ist Stich, Dennis bekommt 1 bis 3, mit Stich eins mehr. Dann `qm` bei `deku` in `config.js` anpassen.
+- **Beyblade:** Auf dem Bild sind nur Kreisel und Starter, keine Arena. Draußen reicht eine große Salatschüssel oder ein Wok.
+- **RC-Auto:** Klein und für glatten Boden. Auf Gras bleibt es vermutlich hängen, also Parcours auf festem Weg (Teer oder feiner Schotter), Tore aus Wanderstöcken oder Trinkflaschen. Akku oder Batterien prüfen. Zeitgrenze: Einer aus dem Bund fährt vor, seine Zeit muss Dennis schlagen.
+- **Knobelspiele:** Vorher selbst lösen und Zeit stoppen. Für Sidequests welche nehmen, die 10 bis 20 Minuten dauern. Unterwegs ohne Frist ist riskant, gut passt der Zug am Freitag nach dem Log-Buch (Frist bis München).
+
+### Drei Wasserwaffen als Stufen und Glanzsieg (entschieden und gebaut am 28.09.)
+
+Wie Zoras Schuppe in Ocarina of Time (erst Silber, dann Gold): Im Auge des Jägers zählt die stärkste Waffe, die Dennis hat. In der App leuchtet dort nur sie, die schwächeren sind „abgelöst“.
+
+| Stufe | Waffe | Tarnname | Woher |
+|---|---|---|---|
+| 0 | Wasserspritze (I7) | Heiliger Beutel des Helden | **Startitem.** Beim ersten Besuch der Ausrüstung entpuppt sich der Beutel als Spritze, im selben Feld (28.09., kein zusätzlicher Platz). Dabei erklärt die App die Stufen |
+| 1 | Kleine Wasserpistole (I8) | Silberne Schuppe | Sieg im Podrennen (die erste Chance) |
+| 2 | Große Wasserpistole, die Monsterpistole (I2) | Zoras Quellstab | **Glanzsieg im Kartenwurf**: mindestens 2 Karten mehr im Ziel als der Gegner. Der Kartenwurf ist das einzige Spiel zwischen Podrennen und Auge des Jägers. Die Gepanzerten Karten (+2) machen den Glanzsieg leichter. Auch ohne kleine Pistole bringt der Glanzsieg die große |
+
+**Glanzsieg:** ein dritter Ausgang neben bestanden und verloren, nur wo `glanz` in `config.js` steht. Er zählt als bestanden (gleiche Packs) und bringt zusätzlich, was unter `glanz` steht. Dennis sieht auf der Quest-Karte eine eigene Zeile GLANZSIEG mit Bedingung und getarnter Belohnung und trägt ihn selbst ein (Siegel halten). Der Quest Master sieht „Kartenwurf: Glanzsieg“, kann im Admin auf Bestanden zurückstufen (die Fee sagt Dennis, dass ein Sieg bleibt) oder den Glanzsieg selbst buchen. In der Quest-Liste steht dann ein Stern. Weitere Glanzsiege: in `config.js` bei einer Quest `glanz: { bedingung, items }` ergänzen.
+
+Regel für alle Stufen gleich: ein Tank, gleicher Abstand. Vorher testen, wie viele der 5 Flammen jede Stufe schafft, dann die Grenze für bestanden setzen. Die Spritze sollte knapp scheitern, sonst ist das Upgrade wertlos. Physisch: Spritze und ganz kleine Wasserpistole sind schon da, die Monsterpistole ist gekauft.

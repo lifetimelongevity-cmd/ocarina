@@ -37,9 +37,9 @@ Zusätze für Dennis' Seite: `?probe` (liest den Probelauf des Quest Masters, ro
 ## Gespeicherter Stand
 
 ```
-/spiele/dennis-jga-2026            { quests, zaehler, schritte, einsaetze, duelle, buchungen, items, zeiten, stand }   schreibt nur der Admin
+/spiele/dennis-jga-2026            { quests, glanz, zaehler, schritte, einsaetze, duelle, buchungen, items, zeiten, stand }   schreibt nur der Admin
 /spiele/dennis-jga-2026-logbuch    { "1": { antwort, zeit }, … }                                              schreibt Dennis (Log-Buch)
-/spiele/dennis-jga-2026-dennis     { q_klingen: { status, zeit }, e_…: { item, quest, zeit }, d_2: { ergebnis, zeit },
+/spiele/dennis-jga-2026-dennis     { q_klingen: { status, zeit }, q_kartenwurf: { status: "bestanden", glanz: true, zeit }, e_…: { item, quest, zeit }, d_2: { ergebnis, zeit },
                                      s_amulett_gefunden: { zeit }, z_3: { zeit } }                            schreibt Dennis, der Admin löscht
 ```
 
@@ -68,7 +68,9 @@ Dennis' Antworten und Einträge liegen bewusst neben dem Spiel, damit das Speich
 - **Rikes Amulett:** „Starten", wenn die Brosche versteckt ist. Dennis meldet „Gefunden“ und „Zusammengesetzt“. Verpasst er die Frist, buchst du Verloren.
 - **Showdown:** Dennis sieht am Gipfel die Duell-Tafel (verlorene Spiele vom Tag zuerst, aufgefüllt mit Wirbel der Götter) und trägt jedes Duell ein. Nach der Mehrheit trägt er die Prüfung ein. Den Schild setzt er vor dem Besiegeln einer Niederlage ein und spielt das Duell noch einmal.
 - **Rikes Tagebuch** (intern Log-Buch, hieß bis 28.09. so): Dennis' Antworten erscheinen live unter der Quest und unten im Bereich „Rikes Tagebuch“. Sind alle sieben besiegelt, trägt er das Ergebnis selbst ein.
-- **Die drei Zeichen** (Schnick Schnack Schnuck, Best of 3, Dennis wählt seinen Gegner) und **Hüter der Flamme** (offenes Teelicht 50 Schritte bergauf, der Bund lenkt ab, pustet nicht) ersetzen seit 28.09. Kreuzung der Klingen und Feuerprobe. Für Hüter der Flamme Feuerzeug und Ersatz-Teelicht einpacken.
+- **Die drei Zeichen** (Schnick Schnack Schnuck, zwei Gegner nacheinander, jeweils Best of 3) und **Hüter der Flamme** (offenes Teelicht 100 Schritte bergauf, der Bund lenkt ab, pustet nicht) ersetzen seit 28.09. Kreuzung der Klingen und Feuerprobe. Für Hüter der Flamme Feuerzeug und Ersatz-Teelicht einpacken.
+- **Glanzsieg (Kartenwurf):** Gewinnt Dennis mit mindestens 2 Karten Vorsprung, trägt er GLANZSIEG ein und bekommt zusätzlich zum Fluch die Große Wasserpistole (Monsterpistole). Du siehst „Kartenwurf: Glanzsieg“. Stimmt es nicht, tippst du beim Kartenwurf auf **Bestanden**: Es bleibt ein Sieg, die Pistole ist weg, die Fee sagt es ihm. Umgekehrt bucht **Glanzsieg** (unten bei der Quest oder bei der nächsten Quest neben Bestanden) ihn nachträglich.
+- **Wasserwaffen:** Spritze (hat Dennis von Anfang an: Beim ersten Besuch der Ausrüstung entpuppt sich der Heilige Beutel des Helden als Spritze, im selben Feld), kleine Pistole (Podrennen), große Pistole (Glanzsieg im Kartenwurf). Im Auge des Jägers zählt die stärkste, nur sie leuchtet bei ihm.
 - **Verpasste Momente:** War Dennis' App zu oder ohne Netz, laufen die Momente nach PRESS START nacheinander ab. Die nächste Quest tritt erst danach aus dem Nebel.
 
 ## Auf den Startbildschirm (App installieren)
@@ -88,7 +90,7 @@ python3 -m http.server 8000
 
 `http://localhost:8000/?demo` zeigt Dennis' Menü mit Demo-Knöpfen ohne Datenbank. Für Admin und Dennis zusammen in `config.js` `typ: "lokal"` setzen und beide Seiten in zwei Tabs desselben Browsers öffnen.
 
-Geräte-Test (iPhone 13 und 15 in Safari und vom Home-Bildschirm, Samsung mit gedrosselter CPU): `tests/geraete.mjs`, siehe Kopf der Datei. Dazu `tests/nebel.mjs` (verrät nichts, auch nicht in den Stationstafeln und der Ausrüstung), `tests/probe.mjs` (Probelauf, Rückgängig), `tests/karte.mjs` (Karte, GPS, Prolog) und `tests/selbst.mjs` (Dennis trägt selbst ein, Zurücknehmen, verpasste Momente, Tor, Duelle).
+Geräte-Test (iPhone 13 und 15 in Safari und vom Home-Bildschirm, Samsung mit gedrosselter CPU): `tests/geraete.mjs`, siehe Kopf der Datei. Dazu `tests/nebel.mjs` (verrät nichts, auch nicht in den Stationstafeln und der Ausrüstung), `tests/probe.mjs` (Probelauf, Rückgängig), `tests/karte.mjs` (Karte, GPS, Prolog), `tests/selbst.mjs` (Dennis trägt selbst ein, Zurücknehmen, verpasste Momente, Tor, Duelle), `tests/glanz.mjs` (Beutel wird Spritze, Wasserwaffen in Stufen, Glanzsieg eintragen, zurücknehmen, nachholen) und `tests/durchlauf.mjs` (der ganze Tag vom Tagebuch bis zum offenen Kästchen).
 
 ## Firebase
 

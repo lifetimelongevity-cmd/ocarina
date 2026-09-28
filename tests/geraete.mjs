@@ -150,8 +150,9 @@ for (const g of GERAETE) {
   await page.click('.sc-close'); await page.waitForTimeout(200);
   await seite(page, 2); await page.waitForTimeout(300);
   // Onboarding durchklicken
-  // Der Beutel tritt erst aus dem Schatten, danach beginnen die Hinweise der Fee
-  if (!(await page.$('#overlay[hidden]'))) { await shot(page, g, '3a-onboarding'); await page.click('#overlay'); await page.waitForTimeout(1600); }
+  // Der Beutel entpuppt sich als Spritze (ein Feld), danach beginnen die Hinweise der Fee
+  if (!(await page.$('#overlay[hidden]'))) { await shot(page, g, '3a-onboarding'); alleProbleme += (await pruefen(page, g, 'BEUTEL WIRD SPRITZE')).length; await page.click('#overlay'); await page.waitForTimeout(1600); }
+  else { log('  PROBLEM: Der Beutel entpuppt sich nicht'); alleProbleme++; }
   for (let i = 0; i < 4; i++) { if (await page.$('#coach:not([hidden])')) { if (i === 2) await shot(page, g, '3b-coach'); await page.click('#coach'); await page.waitForTimeout(300); } }
   await shot(page, g, '3-ausruestung');
   alleProbleme += (await pruefen(page, g, 'AUSRÜSTUNG')).length;
@@ -305,7 +306,8 @@ for (const g of GERAETE) {
   // Dennis' Ausrüstung am Gipfel: was leuchtet?
   await dennis.evaluate(() => { document.querySelector('.shoulder-right').click(); });
   await dennis.waitForTimeout(700);
-  while (await dennis.$('#overlay:not([hidden])')) { await dennis.click('#overlay'); await dennis.waitForTimeout(300); }
+  // Onboarding (erzwungen): Beutel, dann öffnet Dennis ihn und die Spritze kommt heraus
+  for (let i = 0; i < 2; i++) { while (await dennis.$('#overlay:not([hidden])')) { await dennis.click('#overlay'); await dennis.waitForTimeout(300); } await dennis.waitForTimeout(1800); }
   while (await dennis.$('#coach:not([hidden])')) { await dennis.click('#coach'); await dennis.waitForTimeout(250); }
   const slots = await dennis.$$eval('.slot', els => els.map(e => `${e.dataset.id}:${e.classList.contains('schatten') ? 'Schatten' : e.classList.contains('usable') ? 'LEUCHTET' : [...e.classList].filter(c => c.startsWith('st-')).join('')}`));
   log(`  Ausrüstung am Gipfel: ${slots.join(', ')}`);

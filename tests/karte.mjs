@@ -52,7 +52,7 @@ for (const url of ['?demo', '?demo=bund']) {
   pruefe(!(await p.isVisible('#prolog')), `${url}: später am Tag kein Prolog`);
   await p.click('.shoulder-right'); await warte(900);
   pruefe(await p.$('#overlay[hidden]') && await p.$('#coach[hidden]'), `${url}: Ausrüstung ohne Beutel-Fund und ohne Hinweise`);
-  pruefe(await p.$eval('.slot[data-id="beutel"]', e => !e.classList.contains('schatten')), `${url}: Beutel ist ausgepackt`);
+  pruefe(await p.$eval('.slot[data-id="spritze"]', e => !e.classList.contains('schatten')), `${url}: Der Beutel ist schon zur Spritze geworden`);
   await p.click('.shoulder-left'); await warte(500); await p.click('.shoulder-left'); await warte(900);
   pruefe(!(await p.isVisible('#coach')), `${url}: Karte ohne Hinweis`);
   await ctx.close();

@@ -1,7 +1,7 @@
 // Test der Logik v1: node app/engine.test.js
 const assert = require("assert");
 const config = require("./config.js");
-const { derive, emptyDoc, normalize, mitEintraegen, showdownDuelle, einsetzbar, jetztEinsetzbar } = require("./engine.js");
+const { derive, emptyDoc, normalize, mitEintraegen, showdownDuelle, einsetzbar, abgeloest, jetztEinsetzbar } = require("./engine.js");
 
 const reihe = config.quests.filter(q => q.typ !== "lauf");
 const itemIds = config.items.map(i => i.id);
@@ -14,17 +14,19 @@ config.quests.forEach(q => {
   if (q.typ !== "lauf") assert.ok(stationen.includes(q.station), q.id + ": Station fehlt");
   if (q.typ !== "side") assert.ok(q.farbe && q.emblem, q.id + ": Medaillon braucht Farbe und Emblem");
   (q.einsetzbar || []).forEach(id => assert.ok(itemIds.includes(id), q.id + ": unbekanntes Item " + id));
-  [q.win, q.lose].filter(Boolean).forEach(e => (e.items || []).forEach(id => assert.ok(itemIds.includes(id), q.id + ": unbekanntes Item " + id)));
+  [q.win, q.lose, q.glanz].filter(Boolean).forEach(e => (e.items || []).forEach(id => assert.ok(itemIds.includes(id), q.id + ": unbekanntes Item " + id)));
 });
 config.items.forEach(it => assert.ok(it.name && it.kurz && it.symbol && it.text && it.tarn && it.tarn.name, it.id + ": Texte und Tarnung"));
+config.items.forEach(it => (it.ersetzt || []).forEach(id => assert.ok(itemIds.includes(id) && id !== it.id, it.id + ": ersetzt unbekanntes Item " + id)));
+config.quests.filter(q => q.glanz).forEach(q => assert.ok(q.win && q.glanz.bedingung && q.typ !== "lauf" && !q.showdown, q.id + ": Glanzsieg braucht Sieg und Bedingung"));
 assert.deepStrictEqual(config.quests.map(q => q.nr).sort((a, b) => a - b), [1, 2, 3, 4, 5, 6, 7, 9, 12, 14, 15]);
-assert.deepStrictEqual(config.items.map(i => i.nr), ["I1", "I2", "I4", "I5", "I6", "F1", "F3", "F5", "F6"]);
+assert.deepStrictEqual(config.items.map(i => i.nr), ["I7", "I8", "I2", "I4", "I5", "I6", "F1", "F3", "F5", "F6"]);
 assert.strictEqual(reihe.filter(q => q.typ === "kern").length, 6, "sechs Medaillons");
 assert.deepStrictEqual(reihe.filter(q => q.win && q.win.ziffer).map(q => q.win.ziffer).sort(), [1, 2, 3, 4], "jede Ziffer genau einmal");
 assert.strictEqual(config.logbuch.fragen.length, 7);
 // Jedes erspielbare Item wird irgendwo gewonnen und irgendwo eingesetzt
 config.items.filter(i => !config.startitems.includes(i.id)).forEach(it => {
-  const quelle = config.quests.some(q => (q.win && (q.win.items || []).includes(it.id)) || (q.zaehler && (q.zaehler.proTreffer.items || []).includes(it.id)));
+  const quelle = config.quests.some(q => [q.win, q.glanz].some(e => e && (e.items || []).includes(it.id)) || (q.zaehler && (q.zaehler.proTreffer.items || []).includes(it.id)));
   assert.ok(quelle, it.id + ": wird nirgends gewonnen");
   assert.ok(it.tor || config.quests.some(q => (q.einsetzbar || []).includes(it.id)), it.id + ": nirgends einsetzbar");
 });
@@ -42,7 +44,9 @@ assert.ok(torIndex > 0 && reihe.slice(0, torIndex).filter(q => q.win && q.win.zi
 let s = derive(config, emptyDoc());
 assert.strictEqual(s.packs, 0);
 assert.deepStrictEqual(s.ziffern, [null, null, null, null]);
-assert.strictEqual(s.items.beutel, "besitz");
+assert.strictEqual(s.items.beutel, undefined);          // kein eigenes Feld mehr: Der Beutel entpuppt sich als Spritze
+assert.strictEqual(s.items.spritze, "besitz");
+assert.deepStrictEqual(config.startitems, ["spritze"]);
 assert.strictEqual(s.items.stich, "nicht");
 assert.strictEqual(s.items.spruchrolle, "nicht");
 assert.strictEqual(s.anzahl.spruchrolle, 0);
@@ -63,9 +67,10 @@ assert.strictEqual(s.packs, stufen([P("logbuch", "win"), P("klingen", "win"), P(
 assert.deepStrictEqual(s.ziffern, [7, 4, null, null]);
 assert.strictEqual(s.items.kreisel, "besitz");
 assert.strictEqual(s.items.karten_gepanzert, "nicht");   // Wirbel verloren
-assert.strictEqual(s.items.pistole_gross, "besitz");
+assert.strictEqual(s.items.pistole_klein, "besitz");   // Podrennen gewonnen
+assert.strictEqual(s.items.pistole_gross, "nicht");    // nur mit Glanzsieg im Kartenwurf
 assert.strictEqual(s.next, "auge");
-assert.deepStrictEqual(s.erhalten, ["beutel", "kreisel", "nakama", "pistole_gross"]);
+assert.deepStrictEqual(s.erhalten, ["spritze", "kreisel", "nakama", "pistole_klein"]);
 assert.deepStrictEqual(s.zaehler, { bestanden: 3, verloren: 2, erledigt: 5, gesamt: 9 });
 
 // 3. Ziffer kaufen über Buchung, Deckel unten bei 0
@@ -133,11 +138,14 @@ assert.strictEqual(s.items.spruchrolle, "verbraucht");
 assert.strictEqual(derive(config, { buchungen: [{ id: "b", packs: 0, grund: "x", item: "spruchrolle", menge: 1 }] }).anzahl.spruchrolle, 1);
 
 // 10. Was ist wo einsetzbar?
-assert.deepStrictEqual(einsetzbar(config, derive(config, {}), "auge"), ["pistole_gross", "spruchrolle"]);
+assert.deepStrictEqual(einsetzbar(config, derive(config, {}), "auge"), ["spritze", "pistole_klein", "pistole_gross", "spruchrolle"]);
+assert.deepStrictEqual([...jetztEinsetzbar(config, derive(config, { quests: { logbuch: "bestanden", klingen: "bestanden", wirbel: "bestanden", podrennen: "verloren", kartenwurf: "verloren" } }))], ["spritze"]);
 assert.deepStrictEqual(einsetzbar(config, derive(config, {}), "logbuch"), []);
 s = derive(config, { quests: { logbuch: "bestanden", klingen: "bestanden", wirbel: "bestanden", podrennen: "bestanden", kartenwurf: "bestanden" } });
 assert.strictEqual(s.next, "auge");
-assert.deepStrictEqual([...jetztEinsetzbar(config, s)], ["pistole_gross", "spruchrolle"]);   // Kreisel und Karten helfen hier nicht
+assert.deepStrictEqual([...jetztEinsetzbar(config, s)], ["pistole_klein", "spruchrolle"]);   // Kreisel und Karten helfen hier nicht, die Spritze ist abgelöst
+assert.strictEqual(abgeloest(config, s, "spritze"), "pistole_klein");
+assert.strictEqual(abgeloest(config, s, "pistole_klein"), null);
 s = derive(config, { quests: { amulett: "laeuft", prophezeiung: "laeuft", logbuch: "bestanden" }, zaehler: { prophezeiung: 1 } });
 assert.deepStrictEqual([...jetztEinsetzbar(config, s)], ["spruchrolle"]);       // Amulett läuft, dort hilft die Rolle
 
@@ -152,7 +160,7 @@ s = derive(config, { quests: { klingen: "verloren", wirbel: "verloren", podrenne
 assert.deepStrictEqual(showdownDuelle(config, s).map(d => d.quest), ["klingen", "wirbel", "podrennen"]);
 // Im Showdown hilft auch, was bei den Spielen der Duelle hilft
 s = derive(config, { quests: { auge: "verloren" } });
-assert.deepStrictEqual(einsetzbar(config, s, "bund"), ["pistole_gross", "kreisel", "spruchrolle", "schild", "nakama"]);
+assert.deepStrictEqual(einsetzbar(config, s, "bund"), ["spritze", "pistole_klein", "pistole_gross", "kreisel", "spruchrolle", "schild", "nakama"]);
 
 // 12. Amulett: Schritt „gefunden" zählt nur, solange die Quest gestartet ist
 s = derive(config, { quests: { amulett: "laeuft" }, schritte: { amulett: { gefunden: true } } });
@@ -249,5 +257,30 @@ s = mit({ quests: bisGipfel }, { z_2: { zeit: 1 } });
 assert.strictEqual(s.packs, vorher - config.ziffer_preis);
 assert.deepStrictEqual(s.tor, { quest: "bund", fehlend: [4] });
 assert.strictEqual(s.zifferWeg[1], "packs");
+
+// 19. Glanzsieg (Kartenwurf): bringt zusätzlich die Große Wasserpistole, die löst Spritze und kleine Pistole ab
+const bisKarten = { logbuch: "bestanden", klingen: "bestanden", wirbel: "bestanden", podrennen: "bestanden", kartenwurf: "bestanden" };
+s = derive(config, { quests: bisKarten, glanz: { kartenwurf: true } });
+assert.strictEqual(s.glanz.kartenwurf, true);
+assert.strictEqual(s.items.pistole_gross, "besitz");
+assert.strictEqual(s.packs, derive(config, { quests: bisKarten }).packs);   // gleiche Packs wie ein normaler Sieg
+assert.deepStrictEqual([...jetztEinsetzbar(config, s)], ["pistole_gross", "spruchrolle"]);   // der Sieg im Kartenwurf bringt auch einen Fluch
+assert.strictEqual(abgeloest(config, s, "spritze"), "pistole_gross");
+assert.strictEqual(abgeloest(config, s, "pistole_klein"), "pistole_gross");
+// Auch ohne kleine Pistole (Podrennen verloren) bringt der Glanzsieg die große
+s = derive(config, { quests: { ...bisKarten, podrennen: "verloren" }, glanz: { kartenwurf: true } });
+assert.strictEqual(s.items.pistole_gross, "besitz");
+assert.strictEqual(s.items.pistole_klein, "nicht");
+// Glanz zählt nur bei bestanden und nur bei Quests mit glanz
+assert.strictEqual(derive(config, { quests: { ...bisKarten, kartenwurf: "verloren" }, glanz: { kartenwurf: true } }).items.pistole_gross, "nicht");
+assert.deepStrictEqual(derive(config, { quests: bisKarten, glanz: { klingen: true } }).glanz, {});
+assert.deepStrictEqual(normalize({}).glanz, {});
+// Dennis trägt den Glanzsieg selbst ein. Der Admin hat Vorrang: sein „bestanden" ohne Glanz gilt.
+s = mit({ quests: { logbuch: "bestanden", klingen: "bestanden", wirbel: "bestanden", podrennen: "bestanden" } }, { q_kartenwurf: { status: "bestanden", glanz: true, zeit: 5 } });
+assert.strictEqual(s.quests.kartenwurf, "bestanden");
+assert.strictEqual(s.items.pistole_gross, "besitz");
+assert.strictEqual(mit({ quests: bisKarten }, { q_kartenwurf: { status: "bestanden", glanz: true, zeit: 5 } }).items.pistole_gross, "nicht");
+assert.strictEqual(mit({}, { q_logbuch: { status: "bestanden", glanz: true, zeit: 5 } }).glanz.logbuch, undefined);   // Log-Buch kennt keinen Glanz
+assert.strictEqual(mit({}, { q_kartenwurf: { status: "verloren", glanz: true, zeit: 5 } }).glanz.kartenwurf, undefined);
 
 console.log("Alle Tests bestanden.");

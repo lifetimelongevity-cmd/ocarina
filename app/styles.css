@@ -247,6 +247,8 @@ svg { display: block; }
 @media (max-height: 360px) {
   .quest-card .fx-head.einsatz { display: none; }
   .quest-card .fx-row { margin-top: 4px; }
+  .quest-card .fx-rows:has(.glanz) { padding-top: 3px; }
+  .quest-card .fx-rows:has(.glanz) .fx-row { margin-top: 2px; }
   .quest-card .helps { margin-top: 5px; padding-bottom: 3px; }
   .quest-card .qc-head { margin-bottom: 5px; }
 }
@@ -408,7 +410,7 @@ html.schwach .map-fog, html.schwach .map-gps::after { animation: none; }
 .equip-group.magic::before { content: ""; position: absolute; inset: 5px; border: 1px solid rgba(201,164,255,.38); border-radius: 9px; pointer-events: none; }
 
 .slots { display: grid; grid-template-columns: repeat(2, var(--rslot)); gap: 9px 16px; justify-content: center; padding: 5px 2px 2px; }
-#slotsGear { display: flex; flex-wrap: wrap; justify-content: center; gap: 7px 8px; width: calc(3 * var(--eslot) + 16px); padding: 3px 0 0; }
+#slotsGear { --spalten: 3; display: flex; flex-wrap: wrap; justify-content: center; gap: 7px 8px; width: calc(var(--spalten) * var(--eslot) + (var(--spalten) - 1) * 8px); padding: 3px 0 0; }
 .slot { --kl: 11px; --kb: 3px; position: relative; display: grid; place-items: center; width: var(--eslot); height: var(--eslot); padding: 0; border: 0; background: none; cursor: pointer; }
 .slot:focus-visible { outline: 2px solid #fff; outline-offset: 5px; border-radius: 8px; }
 .well { position: relative; display: grid; place-items: center; width: var(--slot); height: var(--slot); border-radius: 2px; color: var(--c, var(--gold)); background: rgba(4,7,5,.52);
@@ -556,7 +558,7 @@ html.probe body::after { content: ""; position: fixed; inset: 0; z-index: 9999; 
 .result-lines li .ri { display: grid; place-items: center; width: 26px; flex: none; }
 .result-lines li .ri svg { width: 20px; height: 20px; }
 .result-lines li .ri .ic-card { width: 15px; height: 21px; }
-.result-lines .tarn { display: block; font: italic 400 calc(var(--fs-body) * .8)/1.2 Georgia, serif; color: #c9c3a2; margin-bottom: 2px; }
+.result-lines .tarn { display: block; font: italic 400 max(10px, calc(var(--fs-body) * .8))/1.2 Georgia, serif; color: #c9c3a2; margin-bottom: 2px; }
 .result-lines .reveal > span:last-child { animation: revealName 900ms ease-out calc(var(--d, 0) * 220ms + 500ms) both; }
 @keyframes revealName { from { opacity: .35; filter: blur(3px); } to { opacity: 1; filter: none; } }
 /* Das Symbol tritt dabei aus dem Schatten, wie später in der Ausrüstung */
@@ -763,6 +765,13 @@ html.probe body::after { content: ""; position: fixed; inset: 0; z-index: 9999; 
 .qc-eintrag.lose { color: #fff3dc; background: linear-gradient(#d4523b, #a42a1d 60%, #7c1a12); box-shadow: inset 1px 1px 0 rgba(255,255,255,.25), 1px 2px 0 #000; }
 .qc-eintrag:active { transform: translateY(1px); filter: brightness(1.12); }
 .qc-eintrag:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+/* Glanzsieg: eigene Zeile auf der Quest-Karte, Knopf mit Lichtschein, Stern in der Liste */
+.fx-row.glanz .fx-lbl b { display: flex; align-items: center; gap: 3px; font: inherit; }
+.fx-row.glanz .fx-lbl svg { width: 1.2em; height: 1.2em; }
+.fx-row.glanz .fx-lbl small { display: block; margin-top: 2px; color: #cfd6ee; font: 600 var(--fs-tiny)/1.1 "Trebuchet MS", sans-serif; letter-spacing: 0; white-space: nowrap; }
+.qc-eintrag.glanz { color: #1c1604; background: linear-gradient(#fff6c4, #f2c94c 45%, #c8921a); box-shadow: inset 1px 1px 0 rgba(255,255,255,.7), 1px 2px 0 #000, 0 0 10px rgba(255,226,122,.55); }
+.q-row .q-mark svg.glanz { width: 17px; height: 17px; filter: drop-shadow(0 0 3px rgba(255,226,122,.8)); }
+.result-head .big.glanz { color: #fff1a8; text-shadow: 2px 2px 0 #3a2a05, 0 0 14px rgba(255,226,122,.8); }
 /* Einsetzbar: die Symbole sind Knöpfe */
 /* EINSETZBAR in einer Zeile mit den Symbolen, damit die Knöpfe zum Eintragen auch auf kleinen Handys Platz haben */
 .quest-card .helps { display: flex; align-items: center; gap: 4px 10px; margin-top: 6px; padding-bottom: 4px; }

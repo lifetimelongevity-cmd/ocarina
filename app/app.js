@@ -80,16 +80,17 @@
   const questById = id => C.quests.find(q => q.id === id);
   const itemById = id => C.items.find(i => i.id === id);
   // Was Dennis von einem Item sieht: Solange er es nicht erspielt hat, nur den Schatten (die Form ist zu erkennen)
-  // und die Tarnung als Name. Beim Gewinnen „entpuppt" es sich. Der Beutel ist Startitem: seine Tarnung fällt beim
-  // ersten Besuch der Ausrüstung.
-  const verborgen = id => id === "beutel" ? !onboarded() : state.items[id] === "nicht";
+  // und die Tarnung als Name. Beim Gewinnen „entpuppt" es sich. Das Startitem enthüllt der erste Besuch der Ausrüstung:
+  // Der Heilige Beutel des Helden entpuppt sich als Wasserspritze, im selben Feld (tarnSymbol zeigt bis dahin den Beutel).
+  const START = C.startitems || [];
+  const verborgen = id => START.includes(id) ? !onboarded() : state.items[id] === "nicht";
   const getarnt = id => !!itemById(id).tarn && verborgen(id);
   const itemSicht = id => {
     const x = itemById(id);
-    return getarnt(id) ? { ...x, ...x.tarn } : x;
+    return getarnt(id) ? { ...x, ...x.tarn, symbol: x.tarnSymbol || x.symbol } : x;
   };
   // Welche Quest ein Item bringt (Sieg oder Treffer), für „Erbeutet bei" und „Zu erbeuten bei"
-  const quelle = id => C.quests.find(q => (q.win && q.win.items || []).includes(id) || (q.zaehler && q.zaehler.proTreffer.items || []).includes(id));
+  const quelle = id => C.quests.find(q => [q.win, q.glanz].some(e => e && (e.items || []).includes(id)) || (q.zaehler && q.zaehler.proTreffer.items || []).includes(id));
   // Nicht erspielt, und die Quest, die es bringt, ist schon vorbei (verloren, oder ohne Treffer beendet)
   const entgangen = id => { const q = verborgen(id) && quelle(id); return !!q && !["offen", "laeuft"].includes(state.quests[q.id]); };
   const useSvg = (id, cls = "") => `<svg class="${cls}" aria-hidden="true"><use href="#${id}"></use></svg>`;
@@ -253,7 +254,9 @@
         + `${rune ? useSvg("i-rune", "rune-ring") : ""}${useSvg(it.symbol, "ic")}<b class="count"></b></span>`
         + `<span class="funken" aria-hidden="true"></span><span class="neu-tag" aria-hidden="true">NEU</span></button>`;
     };
-    $("#slotsGear").innerHTML = C.items.filter(it => it.gruppe !== "faehigkeit").map(slot).join("");
+    const gear = C.items.filter(it => it.gruppe !== "faehigkeit");
+    $("#slotsGear").innerHTML = gear.map(slot).join("");
+    $("#slotsGear").style.setProperty("--spalten", gear.length > 6 ? 4 : 3);
     $("#slotsSkill").innerHTML = C.items.filter(it => it.gruppe === "faehigkeit").map(slot).join("");
     document.querySelectorAll(".slot").forEach(b => b.addEventListener("click", () => selectItem(b.dataset.id)));
   }
@@ -325,8 +328,8 @@
       mark.className = "q-mark" + (st === "bestanden" || st === "beendet" ? " won" : st === "verloren" ? " lost" : "");
       mark.innerHTML = isNext ? `<span class="tag now">JETZT</span>`
         : st === "laeuft" ? (q.zaehler ? `<span class="tag run">${state.treffer[q.id]}/${q.zaehler.max}</span>` : "")
-        : st === "bestanden" || st === "beendet" ? useSvg("i-check") : st === "verloren" ? useSvg("i-x") : "";
-      b.setAttribute("aria-label", `${q.name}, ${artWort(q)}, ${statusWort(q.id)}`);
+        : state.glanz[q.id] ? useSvg("i-star", "glanz") : st === "bestanden" || st === "beendet" ? useSvg("i-check") : st === "verloren" ? useSvg("i-x") : "";
+      b.setAttribute("aria-label", `${q.name}, ${artWort(q)}, ${state.glanz[q.id] ? "Glanzsieg" : statusWort(q.id)}`);
     });
     const nebel = $(".q-row.nebel"), nk = verdeckteKern();
     nebel.parentElement.hidden = !verdeckt.length;
@@ -362,6 +365,7 @@
       unten = `<div class="fx-rows">
         ${schritte ? `<div class="fx-row"><span class="fx-lbl">STAND</span><span class="fx">${schritte}</span>${ein.schritt ? knopf("", `data-schritt="${ein.schritt.id}"`, ein.schritt.name.toUpperCase()) : ""}</div>` : ""}
         <div class="fx-row${st === "verloren" ? " dim" : ""}"><span class="fx-lbl win">SIEG</span><span class="fx">${fxChips(q.win, true)}</span>${kann("bestanden") ? knopf("win", `data-ergebnis="bestanden"`, (q.ergebnisWort || "Bestanden").toUpperCase()) : ""}</div>
+        ${q.glanz ? `<div class="fx-row glanz${st === "verloren" || (st === "bestanden" && !state.glanz[id]) ? " dim" : ""}"><span class="fx-lbl win"><b>${useSvg("i-star")}GLANZSIEG</b><small>${esc(q.glanz.bedingung)}</small></span><span class="fx">${fxChips(q.glanz, true)}</span>${kann("glanz") ? knopf("win glanz", `data-ergebnis="glanz"`, "GLANZSIEG") : ""}</div>` : ""}
         <div class="fx-row${st === "bestanden" ? " dim" : ""}"><span class="fx-lbl lose">NIEDERLAGE</span><span class="fx">${fxChips(q.lose, false)}</span>${kann("verloren") ? knopf("lose", `data-ergebnis="verloren"`, "VERLOREN") : ""}</div>
       </div>`;
       if (ein.duelle) unten = duellTafel(ein.duelle) + unten;
@@ -374,8 +378,8 @@
       ${q.logbuch && isNext ? logbuchKnopf() : ""}
       ${einsatzHtml(id)}
       ${unten}`;
-    // Kleine Handys: Ist der Knopf zum Eintragen unter dem Rand, rollt die Karte hin
-    const knopf = card.querySelector(".duell.jetzt, .qc-eintrag");
+    // Kleine Handys: Ist ein Knopf zum Eintragen unter dem Rand, rollt die Karte hin (bis zum letzten, sonst fehlt VERLOREN)
+    const knopf = card.querySelector(".duell.jetzt") || [...card.querySelectorAll(".qc-eintrag")].pop();
     card.scrollTop = 0;
     if (knopf) {
       const k = knopf.getBoundingClientRect(), c = card.getBoundingClientRect();
@@ -402,7 +406,7 @@
     if (id !== state.next || (q.logbuch && !logbuchFertig())) return {};
     if (state.tor && state.tor.quest === id) return { tor: state.tor };   // erst alle vier Ziffern, dann das Finale
     if (q.showdown) { const sd = showdownStand(); return { duelle: sd, ergebnis: sd.entschieden ? [sd.entschieden] : [] }; }
-    return { ergebnis: ["bestanden", "verloren"] };
+    return { ergebnis: q.glanz ? ["bestanden", "glanz", "verloren"] : ["bestanden", "verloren"] };
   }
 
   // Duell-Tafel am Gipfel (08-erlebnis-plan.md, 3.9): drei Duelle, Revanchen zuerst. Das nächste offene trägt Dennis ein.
@@ -707,7 +711,7 @@
   // Schatten = noch nicht erspielt, Farbe mit Goldrand = deins, leuchtet = jetzt einsetzbar, grau = verbraucht oder verloren.
   function renderEquip() {
     const jetzt = E.jetztEinsetzbar(C, state);
-    if (!sel[2]) sel[2] = [...jetzt][0] || state.erhalten[state.erhalten.length - 1] || "beutel";
+    if (!sel[2]) sel[2] = [...jetzt][0] || state.erhalten[state.erhalten.length - 1] || START[0];
     document.querySelectorAll(".slot").forEach(b => {
       const id = b.dataset.id, st = state.items[id], x = itemSicht(id), schatten = verborgen(id);
       b.className = `slot${b.classList.contains("rune") ? " rune" : ""} st-${schatten ? "nicht" : st}${schatten ? " schatten" : ""}${entgangen(id) ? " entgangen" : ""}`
@@ -727,7 +731,8 @@
     const em = qid => `<em>${esc(questById(qid).name)}</em>`;
     let tag = "", extra = "";
     if (schatten) {
-      if (q) extra = entgangen(id) ? `Entgangen bei ${em(q.id)}.` : aufgedeckt(q.id) ? `Zu erbeuten bei ${em(q.id)}.` : "Wartet noch im Nebel.";
+      const wie = q && q.glanz && (q.glanz.items || []).includes(id) ? "mit einem Glanzsieg " : "";
+      if (q) extra = entgangen(id) ? `Entgangen bei ${em(q.id)}.` : aufgedeckt(q.id) ? `Zu erbeuten ${wie}bei ${em(q.id)}.` : "Wartet noch im Nebel.";
     } else if (st === "verloren") {
       tag = `<span class="tag lost">VERLOREN</span>`;
       const nahm = C.quests.find(k => (k.lose && k.lose.items || []).includes(id) && state.quests[k.id] === "verloren");
@@ -740,7 +745,9 @@
       tag = `<span class="tag now">JETZT</span>`;
       const wo = E.aktuelleQuests(C, state).filter(qid => E.einsetzbar(C, state, qid).includes(id));
       extra = x.tor ? "Einsetzbar am Tor zum Gipfel." : `Einsetzbar bei ${wo.map(em).join(" und ")}.`;
-    } else if (q && state.quests[q.id] !== "offen") extra = `Erbeutet bei ${em(q.id)}.`;
+    } else if (E.abgeloest(C, state, id)) extra = `Abgelöst von: ${esc(itemById(E.abgeloest(C, state, id)).name)}.`;
+    else if (q && state.quests[q.id] !== "offen") extra = `Erbeutet bei ${em(q.id)}${state.glanz[q.id] && (q.glanz.items || []).includes(id) ? " (Glanzsieg)" : ""}.`;
+    else if (START.includes(id)) extra = "Dein Beutel hat sich als Spritze entpuppt.";
     if (!schatten && neuMarke.has(id)) tag = `<span class="tag won">NEU</span>` + tag;
     box.style.setProperty("--c", x.farbe);
     box.classList.toggle("schatten", schatten);
@@ -826,13 +833,14 @@
     merkeGesehen();
     if (!alt || !neu || JSON.stringify({ ...alt, stand: 0 }) === JSON.stringify({ ...neu, stand: 0 })) return;
     const reihe = C.quests.map(q => q.id), zeit = id => Number(neu.zeiten[id]) || 9e15;
-    const ids = reihe.filter(id => (alt.quests[id] || "offen") !== (neu.quests[id] || "offen"))
+    const ids = reihe.filter(id => (alt.quests[id] || "offen") !== (neu.quests[id] || "offen") || !alt.glanz[id] !== !neu.glanz[id])
       .sort((x, y) => zeit(x) - zeit(y) || reihe.indexOf(x) - reihe.indexOf(y));
     const docs = [alt];
     ids.forEach(id => {
       const d = JSON.parse(JSON.stringify(docs[docs.length - 1]));
       if (neu.quests[id]) d.quests[id] = neu.quests[id]; else delete d.quests[id];
       if (neu.zeiten[id]) d.zeiten[id] = neu.zeiten[id]; else delete d.zeiten[id];
+      if (neu.glanz[id]) d.glanz[id] = true; else delete d.glanz[id];
       docs.push(d);
     });
     docs.push(neu);
@@ -873,7 +881,8 @@
   // dann tritt die nächste Quest erst am Ende der Reihe aus dem Nebel.
   function announce(prev, next, prevDoc, doc, opt = {}) {
     prevDoc = E.normalize(prevDoc); doc = E.normalize(doc);
-    const fertig = C.quests.filter(q => prev.quests[q.id] !== next.quests[q.id] && ["bestanden", "verloren", "beendet"].includes(next.quests[q.id]));
+    const glanzNeu = q => next.glanz[q.id] && !prev.glanz[q.id];
+    const fertig = C.quests.filter(q => (prev.quests[q.id] !== next.quests[q.id] && ["bestanden", "verloren", "beendet"].includes(next.quests[q.id])) || glanzNeu(q));
     const gestartet = LAUF.filter(q => prev.quests[q.id] === "offen" && next.quests[q.id] === "laeuft");
     const treffer = LAUF.filter(q => q.zaehler && (next.treffer[q.id] || 0) > (prev.treffer[q.id] || 0));
     const schritte = LAUF.filter(q => q.schritte && q.schritte.some(sx => next.schritte[q.id][sx.id] && !prev.schritte[q.id][sx.id]));
@@ -889,6 +898,7 @@
       e: prevDoc.einsaetze.filter(e => !nE.has(e.id)),
       d: Object.keys(prev.duelle).filter(k => !next.duelle[k]),
       s: LAUF.filter(q => q.schritte && q.schritte.some(sx => prev.schritte[q.id][sx.id] && !next.schritte[q.id][sx.id])),
+      g: C.quests.filter(q => prev.glanz[q.id] && !next.glanz[q.id] && next.quests[q.id] === "bestanden"),
       b: prevDoc.buchungen.filter(b => !nB.has(b.id))
     };
     const vorwaerts = fertig.length || gestartet.length || treffer.length || schritte.length || neueE.length || neueD.length || neueB.length;
@@ -926,12 +936,12 @@
 
     let head, klang = dPacks < 0 ? "minus" : "plus", gross = false;
     if (fertig.length) {
-      const q = fertig[0], st = next.quests[q.id], won = st !== "verloren";
+      const q = fertig[0], st = next.quests[q.id], won = st !== "verloren", glanz = !!next.glanz[q.id];
       const art = q.typ === "kern" ? "PRÜFUNG" : q.typ === "side" ? "SIDEQUEST" : "QUEST";
       const farbe = q.typ === "side" ? "#3ddc97" : q.farbe;
-      klang = !won ? "verloren" : q.typ === "kern" ? "pruefung" : "side";
+      klang = !won ? "verloren" : q.typ === "kern" || glanz ? "pruefung" : "side";
       gross = true;
-      head = `${stage(q, won, farbe)}<p class="big${won ? "" : " lost"}">${art} ${st === "beendet" ? "BEENDET" : won ? "BESTANDEN" : "VERLOREN"}</p>
+      head = `${stage(q, won, farbe)}<p class="big${won ? "" : " lost"}${glanz ? " glanz" : ""}">${glanz ? "GLANZSIEG" : `${art} ${st === "beendet" ? "BEENDET" : won ? "BESTANDEN" : "VERLOREN"}`}</p>
               <p class="sub">${esc(q.name)}${fertig.length > 1 ? ` und ${fertig.length - 1} weitere` : ""}</p>`;
       if (!lines.length) lines.push(`<li><span class="ri"></span>Keine Folgen</li>`);
     } else if (gestartet.length) {
@@ -988,6 +998,7 @@
     const zeilen = [];
     weg.q.forEach(q => zeilen.push([questIcon(q, "offen", false), `Der Quest Master hat das Ergebnis von <b>${esc(q.name)}</b> zurückgenommen.`
       + (q.id === next.next ? " Trag es neu ein." : next.quests[q.id] === "laeuft" ? " Die Quest läuft wieder." : "")]));
+    weg.g.forEach(q => zeilen.push([questIcon(q, "bestanden", false), `Der Quest Master hat den Glanzsieg bei <b>${esc(q.name)}</b> zurückgenommen. Es bleibt ein Sieg.`]));
     weg.d.forEach(k => zeilen.push([useSvg("z-triforce"), `Duell ${esc(k)} ist wieder offen. Trag es neu ein.`]));
     weg.s.forEach(q => q.schritte.filter(sx => prev.schritte[q.id][sx.id] && !next.schritte[q.id][sx.id])
       .forEach(sx => zeilen.push([questIcon(q, "laeuft", false), `${esc(q.name)}: „${esc(sx.name)}“ ist zurückgenommen.`])));
@@ -1071,26 +1082,33 @@
   }
 
   /* ---------- Onboarding: erster Besuch der Ausrüstung ---------- */
-  // Erst das Fundfenster mit Enthüllung des Beutels, dann tritt er in seinem Feld aus dem Schatten, dann kurze Hinweise.
+  // Das Fundfenster zeigt den Heiligen Beutel des Helden, der sich als Wasserspritze entpuppt (ein Feld, 28.09.).
+  // Dann tritt die Spritze in ihrem Feld aus dem Schatten, danach kurze Hinweise der Fee.
+  let obLaeuft = false;
   function onboarding() {
-    const x = itemById("beutel");
-    melody("pruefung");
-    showOverlay({
-      head: `<span class="medal-stage won" style="--m:${x.farbe}"><span class="medal">${useSvg(x.symbol)}</span></span><p class="big">ERSTES ITEM GEFUNDEN</p><p class="sub">${esc(x.tarn.name)}</p>`,
-      lines: `<li class="plus reveal"><span class="ri" style="color:${x.farbe}">${useSvg(x.symbol)}</span><span><small class="tarn">${esc(x.tarn.name)} entpuppt sich als</small>${esc(x.name)}</span></li>`,
-      next: "", gross: true
-    }, () => {
-      beutelGezeigt = true;
+    if (obLaeuft) return;
+    obLaeuft = true;
+    const id = START[0], x = itemById(id);
+    const fertig = () => {
+      beutelGezeigt = true; obLaeuft = false;
       obMerken(OB_KEY);
       funde();                                   // erster Besuch: alles, was da ist, gilt als gesehen
-      aufleuchten(["beutel"]);
+      aufleuchten([id]);
       setTimeout(() => coach([
         [$("#slotsGear").parentElement, "Hier landet, was du dir erspielst. Die Schatten zeigen, was noch zu holen ist."],
         [$("#slotsSkill").parentElement, "Hier ruhen Flüche und Segen, sobald du sie dir verdient hast."],
         [$(".equip-body"), "Was leuchtet, kannst du bei der aktuellen Quest einsetzen: antippen, dann das Siegel halten."],
         [$(".hud"), "Packs und Ziffern für dein Kästchen."]
       ]), STILL.matches ? 0 : 1100);
-    });
+    };
+    if (!x) return fertig();
+    melody("pruefung");
+    showOverlay({
+      head: `<span class="medal-stage won" style="--m:${x.farbe}"><span class="medal">${useSvg(x.tarnSymbol || x.symbol)}</span></span><p class="big">ERSTES ITEM GEFUNDEN</p><p class="sub">${esc(x.tarn.name)}</p>`,
+      lines: `<li class="plus reveal"><span class="ri" style="color:${x.farbe}">${useSvg(x.symbol)}</span><span><small class="tarn">${esc(x.tarn.name)} entpuppt sich als</small>${esc(x.name)}</span></li>`
+        + (x.fund ? `<li><span class="ri"></span><span>${esc(x.fund)}</span></li>` : ""),
+      next: "", gross: true
+    }, fertig);
   }
   /* ---------- Onboarding: erster Besuch der Karte ---------- */
   // Zwei Hinweise der Fee, einmal pro Handy und nur am Anfang des Spiels (wie das Onboarding oben)
@@ -1437,16 +1455,18 @@
   const eintrag = (schluessel, e) => einStore.setzen(schluessel, { ...e, zeit: Date.now() });
   const fxZeile = (lbl, cls, inhalt) => `<span class="fx-lbl ${cls}">${lbl}</span><span class="fx">${inhalt}</span>`;
 
+  // status: "bestanden", "verloren" oder "glanz" (Glanzsieg: bestanden und besonders deutlich)
   function schwurErgebnis(qid, status) {
-    const q = questById(qid), won = status === "bestanden";
+    const q = questById(qid), glanz = status === "glanz", won = status === "bestanden" || glanz;
     if (!(eintragbar(qid).ergebnis || []).includes(status)) return;
+    const folgen = [fxZeile(won ? "SIEG" : "NIEDERLAGE", won ? "win" : "lose", fxChips(won ? q.win : q.lose, won))];
+    if (glanz) folgen.push(fxZeile("GLANZSIEG", "win", fxChips(q.glanz, true)), `<span class="fx dim">Nur mit ${esc(q.glanz.bedingung)}. Der Quest Master kann es zurücknehmen.</span>`);
     schwur.oeffnen({
       art: q.typ === "kern" ? "PRÜFUNG" : q.typ === "side" ? "SIDEQUEST" : "QUEST",
       icon: questIcon(q, won ? "bestanden" : "verloren", false), titel: q.name,
-      sub: (won ? q.ergebnisWort || "Bestanden" : "Verloren").toUpperCase(), ton: won ? "win" : "lose",
-      folgen: [fxZeile(won ? "SIEG" : "NIEDERLAGE", won ? "win" : "lose", fxChips(won ? q.win : q.lose, won))],
+      sub: (glanz ? "Glanzsieg" : won ? q.ergebnisWort || "Bestanden" : "Verloren").toUpperCase(), ton: won ? "win" : "lose", folgen,
       gueltig: () => (eintragbar(qid).ergebnis || []).includes(status),
-      ausfuehren: () => eintrag("q_" + qid, { status })
+      ausfuehren: () => eintrag("q_" + qid, glanz ? { status: "bestanden", glanz: true } : { status })
     });
   }
   function schwurSchritt(qid, schritt) {
@@ -1720,6 +1740,8 @@
         const s = E.derive(C, d), qid = E.aktuelleQuests(C, s).find(id => E.einsetzbar(C, s, id).some(i => s.items[i] === "besitz"));
         const item = qid && E.einsetzbar(C, s, qid).find(i => s.items[i] === "besitz");
         if (item) d.einsaetze.push({ id: uid(), item, quest: qid });
+      } else if (a === "glanz") {
+        if (state.next && questById(state.next).glanz) { d.quests[state.next] = "bestanden"; d.glanz = { ...d.glanz, [state.next]: true }; }
       } else if (state.next) d.quests[state.next] = a;
       store.save(d);
     });

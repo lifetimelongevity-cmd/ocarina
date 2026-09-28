@@ -45,7 +45,9 @@ h2 { margin: 0 0 12px; font-size: 15px; letter-spacing: .08em; text-transform: u
 .btn.danger { border-color: #6a2a24; color: #f08b80; background: transparent; }
 .btn.ghost { background: transparent; }
 .btn[disabled] { opacity: .45; cursor: default; }
-.big-actions { margin-top: 14px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.big-actions { margin-top: 14px; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 10px; }
+.big-actions:has(.btn.glanz:not([hidden])) { gap: 8px; }
+.big-actions:has(.btn.glanz:not([hidden])) .btn { padding: 0 6px; font-size: 16px; }
 .big-actions .btn { min-height: 56px; font-size: 18px; }
 .next.all-done .big-actions { display: none; }
 
@@ -64,6 +66,10 @@ h2 { margin: 0 0 12px; font-size: 15px; letter-spacing: .08em; text-transform: u
 .seg button[aria-pressed="true"][data-v="offen"] { background: #2e3524; }
 .seg button[aria-pressed="true"][data-v="bestanden"] { background: var(--win); color: #fff; }
 .seg button[aria-pressed="true"][data-v="verloren"] { background: var(--lose); color: #fff; }
+.seg.vier { grid-template-columns: repeat(4, 1fr); }
+.seg button[aria-pressed="true"][data-v="glanz"] { background: linear-gradient(#f2c94c, #c8921a); color: #1c1604; font-weight: 700; }
+.btn.glanz { background: linear-gradient(#f2c94c, #c8921a); color: #1c1604; }
+.btn[hidden] { display: none; }
 
 .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
 .custom { display: grid; grid-template-columns: 80px 1fr; gap: 8px; align-items: center; margin-bottom: 12px; }
