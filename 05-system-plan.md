@@ -28,6 +28,8 @@ Die konkrete Konfiguration liegt in `app/config.js`, die Logik in `app/engine.js
 | 14 | Quest Master | **Du.** Eine Person, den ganzen Tag. |
 | 15 | Zwei Handys | **Deployen, Admin-Menü mit Toggles, Stand wird online gespeichert.** Dennis' Menü liest den gespeicherten Stand. Siehe A7. |
 | 16 | Sichtbarkeit für Dennis (23.09.) | **Nur Erledigtes und die nächste Quest.** Kommende Prüfungen verdeckt mit „?" (Anzahl bekannt), kommende Sidequests unsichtbar. Details in `06-design-plan.md` 3.1. |
+| 17 | Wasserwaffen in Stufen (28.09.) | **Spritze, kleine Pistole, große Pistole.** Die Spritze ist zweites Startitem und kommt beim ersten Öffnen des Beutels heraus. Die kleine Pistole bringt der Sieg im Podrennen, die große ein Glanzsieg im Kartenwurf. Die stärkere löst die schwächere ab (`ersetzt`). Ändert Nr. 10. |
+| 18 | Glanzsieg (28.09.) | **Dritter Ausgang, nur wo `glanz` in der Konfiguration steht** (derzeit Kartenwurf, 2 Karten Vorsprung). Zählt als bestanden und bringt zusätzlich, was unter `glanz` steht. Dennis trägt ihn selbst ein, der Quest Master kann ihn zurücknehmen (es bleibt ein Sieg). Ergänzt Nr. 7. |
 
 ### A1. Vier Begriffe, mehr nicht
 

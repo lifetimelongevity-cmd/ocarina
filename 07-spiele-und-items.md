@@ -37,11 +37,13 @@ Stand 25.09.2026. Sammelt, was der Nutzer pro Spiel und Item festgelegt hat. Die
 | Nr. | Item | Hilft bei | Stand |
 |---|---|---|---|
 | I1 | Beutel (Dennis' Eier) | nirgends, Onboarding | fertig im Entwurf |
-| I2 | Wasserpistole, Stufen klein und groß | 2 | Stärkstes Item. Wo es freigespielt wird, offen |
+| I2 | Große Wasserpistole (Monsterpistole, elektrisch) | 2 | Stärkste Stufe. **Glanzsieg im Kartenwurf** (28.09.), löst Spritze und kleine Pistole ab |
 | I3 | ~~Großer Ring~~ | | **Gestrichen** (25.09.) |
 | I4 | Gepanzerte Karten bzw. +2 Karten | 9 | Idee steht |
 | I5 | Beyblade-Vorteil (eigener Kreisel zum Üben oder erste Wahl) | 14 | Name offen |
 | I6 | **Stich** (Schwert aus Herr der Ringe, war F2, 25.09.) | 12 | Ein Schwert mehr, also ein Versuch mehr |
+| I7 | **Wasserspritze** (28.09.) | 2 | Zweites Startitem: kommt beim ersten Öffnen des Beutels heraus und erklärt die Stufen |
+| I8 | **Kleine Wasserpistole** (28.09.) | 2 | Sieg im Podrennen, löst die Spritze ab |
 
 ## Fähigkeiten (Magie, kein physischer Gegenstand nötig)
 
@@ -81,9 +83,9 @@ Stand 25.09.2026. Sammelt, was der Nutzer pro Spiel und Item festgelegt hat. Die
 | 1 | 1 | Log-Buch | Prüfung | Zug | +1, Ziffer 1 | 0 | nichts |
 | 2 | 4 | Kreuzung der Klingen | Prüfung | Wiese | +2, Ziffer 2, Kreisel (I5) | −1 | Spruchrolle, Schild |
 | 3 | 14 | Wirbel der Götter | Sidequest | Wiese | +1, Gepanzerte Karten (I4) | −1 | Kreisel, Spruchrolle, Schild |
-| 4 | 7 | Das Podrennen | Prüfung | Wiese | +2, Große Wasserpistole (I2) | −1 | Spruchrolle |
-| 5 | 9 | Kartenwurf | Sidequest | Wald | +2 | −1 | Karten, Spruchrolle, Schild |
-| 6 | 2 | Auge des Jägers | Prüfung | Wald | +3, Stich (I6) | −2 | Wasserpistole, Spruchrolle |
+| 4 | 7 | Das Podrennen | Prüfung | Wiese | +2, Kleine Wasserpistole (I8) | −1 | Spruchrolle |
+| 5 | 9 | Kartenwurf | Sidequest | Wald | +2, **Glanzsieg** (2 Karten Vorsprung): dazu Große Wasserpistole (I2) | −1 | Karten, Spruchrolle, Schild |
+| 6 | 2 | Auge des Jägers | Prüfung | Wald | +3, Stich (I6) | −2 | stärkste Wasserwaffe (Spritze, kleine oder große Pistole), Spruchrolle |
 | 7 | 12 | Klingen des Deku-Baums | Sidequest | Wald | +2 | −1 | Stich, Spruchrolle |
 | 8 | 3 | Feuerprobe | Prüfung | Aussicht | +3, Ziffer 3, Schild (F3) | −2 | Spruchrolle |
 | 9 | 5 | Prüfung des Bundes | Prüfung | Gipfel | +5, Ziffer 4 | −4 | Spruchrolle, Schild, dazu alles, was bei den Spielen der Duelle hilft |
@@ -99,6 +101,8 @@ Sechs Prüfungen = sechs Medaillons. Das Podrennen trägt das Schatten-Medaillon
 | Nr. | Item | Tarnname |
 |---|---|---|
 | I1 | Dennis' Eier (Beutel) | Heiliger Beutel des Helden |
+| I7 | Wasserspritze | Zoras Träne |
+| I8 | Kleine Wasserpistole | Silberne Schuppe |
 | I2 | Große Wasserpistole | Zoras Quellstab |
 | I4 | Gepanzerte Karten (+2 Karten) | Federn der Eule |
 | I5 | Götterkreisel (üben, erste Wahl) | Kern der Goronen |
@@ -111,6 +115,8 @@ Sechs Prüfungen = sechs Medaillons. Das Podrennen trägt das Schatten-Medaillon
 **Log-Buch:** Umgedreht am 26.09.: Rike beantwortet 7 Fragen über Dennis, Dennis tippt in ein bis drei Worten, was sie gesagt hat. Fragen stehen fest (in `config.js` an Dennis gerichtet, so wie Rike sie bekommt in `app/assets/logbuch/LIESMICH.md`). Dateien `app/assets/logbuch/frage1.m4a` bis `frage7.m4a` fehlen noch, bis dahin spielt ein Platzhalter-Klang. Hinweise zum Format in `app/assets/logbuch/LIESMICH.md`.
 
 **Offen:** Reihenfolge und Belohnungen bestätigen, Sprachdateien, genaue Anzahl Packs (20 gesetzt), was passiert, wenn die Packs für die fehlenden Ziffern nicht reichen, welches Spiel die Schwerter für 12 vergibt, Frist und Versteck für 15.
+
+**28.09.:** Wasserwaffen in drei Stufen und Glanzsieg im Kartenwurf gebaut (Abschnitt Material und Kosten unten).
 
 ## Material und Kosten (28.09.)
 
@@ -135,16 +141,16 @@ Schon vorhanden: eine ganz kleine Wasserpistole und eine kleine Spritze.
 - **RC-Auto:** Klein und für glatten Boden. Auf Gras bleibt es vermutlich hängen, also Parcours auf festem Weg (Teer oder feiner Schotter), Tore aus Wanderstöcken oder Trinkflaschen. Akku oder Batterien prüfen. Zeitgrenze: Einer aus dem Bund fährt vor, seine Zeit muss Dennis schlagen.
 - **Knobelspiele:** Vorher selbst lösen und Zeit stoppen. Für Sidequests welche nehmen, die 10 bis 20 Minuten dauern. Unterwegs ohne Frist ist riskant, gut passt der Zug am Freitag nach dem Log-Buch (Frist bis München).
 
-### Vorschlag: drei Wasserwaffen als Stufen (offen, noch nicht gebaut)
+### Drei Wasserwaffen als Stufen und Glanzsieg (entschieden und gebaut am 28.09.)
 
-Wie Zoras Schuppe in Ocarina of Time (erst Silber, dann Gold): Im Auge des Jägers zählt die stärkste Waffe, die Dennis hat.
+Wie Zoras Schuppe in Ocarina of Time (erst Silber, dann Gold): Im Auge des Jägers zählt die stärkste Waffe, die Dennis hat. In der App leuchtet dort nur sie, die schwächeren sind „abgelöst“.
 
-| Stufe | Waffe | Woher |
-|---|---|---|
-| 0 | Spritze (oder die ganz kleine Pistole, je nachdem, welche im Test schwächer ist) | hat Dennis immer, kein Item in der App (einziges Startitem bleibt der Beutel) |
-| 1 | Kleine Wasserpistole | neu: Sieg im Kartenwurf (Sidequest direkt vor dem Auge des Jägers, gibt bisher kein Item). Wer das Podrennen verliert, hat so eine zweite Chance |
-| 2 | Große elektrische Wasserpistole | Sieg im Podrennen, wie bisher (I2) |
+| Stufe | Waffe | Tarnname | Woher |
+|---|---|---|---|
+| 0 | Wasserspritze (I7) | Zoras Träne | **Startitem.** Beim ersten Besuch der Ausrüstung entpuppt sich erst der Beutel, dann öffnet Dennis ihn, und die Spritze kommt heraus. Dabei erklärt die App die Stufen |
+| 1 | Kleine Wasserpistole (I8) | Silberne Schuppe | Sieg im Podrennen (die erste Chance) |
+| 2 | Große Wasserpistole, die Monsterpistole (I2) | Zoras Quellstab | **Glanzsieg im Kartenwurf**: mindestens 2 Karten mehr im Ziel als der Gegner. Der Kartenwurf ist das einzige Spiel zwischen Podrennen und Auge des Jägers. Die Gepanzerten Karten (+2) machen den Glanzsieg leichter. Auch ohne kleine Pistole bringt der Glanzsieg die große |
 
-Regel für alle Stufen gleich: ein Tank, gleicher Abstand. Vorher testen, wie viele der 5 Flammen jede Stufe schafft, dann die Grenze für bestanden setzen. Stufe 0 sollte knapp scheitern, sonst ist das Upgrade wertlos.
+**Glanzsieg:** ein dritter Ausgang neben bestanden und verloren, nur wo `glanz` in `config.js` steht. Er zählt als bestanden (gleiche Packs) und bringt zusätzlich, was unter `glanz` steht. Dennis sieht auf der Quest-Karte eine eigene Zeile GLANZSIEG mit Bedingung und getarnter Belohnung und trägt ihn selbst ein (Siegel halten). Der Quest Master sieht „Kartenwurf: Glanzsieg“, kann im Admin auf Bestanden zurückstufen (die Fee sagt Dennis, dass ein Sieg bleibt) oder den Glanzsieg selbst buchen. In der Quest-Liste steht dann ein Stern. Weitere Glanzsiege: in `config.js` bei einer Quest `glanz: { bedingung, items }` ergänzen.
 
-Für die App, wenn der Nutzer es sagt: neues Item `pistole_klein` in `config.js` (Tarnname etwa „Zoras Schuppe“), `kartenwurf` gibt es bei Sieg, `auge` macht es einsetzbar. Text der großen Pistole („Dreifacher Tank“) an die echte anpassen.
+Regel für alle Stufen gleich: ein Tank, gleicher Abstand. Vorher testen, wie viele der 5 Flammen jede Stufe schafft, dann die Grenze für bestanden setzen. Die Spritze sollte knapp scheitern, sonst ist das Upgrade wertlos. Physisch: Spritze und ganz kleine Wasserpistole sind schon da, die Monsterpistole ist gekauft.
