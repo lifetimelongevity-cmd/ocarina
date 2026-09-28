@@ -7,7 +7,7 @@ Zwei Seiten, ein gespeicherter Stand.
 | `index.html` | Dennis | Menü im N64-Stil: Startbildschirm, beim ersten Start der Prolog mit Rikes Fee, drei Seiten KARTE, QUESTS, AUSRÜSTUNG, HUD mit Packs, nächster Quest und Code. **Trägt selbst ein** (seit 27.09.): Ergebnis, Einsatz, Duelle, Rikes Amulett, Ziffern am Kästchen, jeweils mit gedrückt gehaltenem Siegel. Ergebnis-Fenster sofort, auch ohne Netz, verpasste Momente nach PRESS START. Schreibt dazu seine Log-Buch-Antworten. |
 | `admin.html` | Quest Master | Schiedsrichter: sieht live, was Dennis einträgt, und kann jeden Eintrag **zurücknehmen** (die Fee sagt es Dennis). Nächste Quest mit Bestanden/Verloren als Notlösung, Einsetzen, Showdown-Duelle und Log-Buch-Antworten. Laufende Quests (Prophezeiung mit Zähler, Rikes Amulett), Packs buchen, Ziffern kaufen, Items korrigieren, Zurücksetzen. Oben rechts **Rückgängig** für jede Änderung. `admin.html?probe` ist der **Probelauf**. |
 
-Adressen: Dennis `https://dd-ocarina.netlify.app/`, Quest Master `https://dd-ocarina.netlify.app/admin.html`.
+Adressen: Dennis `https://docarina.vercel.app/`, Quest Master `https://docarina.vercel.app/admin.html`.
 Zusätze für Dennis' Seite: `?probe` (liest den Probelauf des Quest Masters, roter Rahmen), `?demo` (Beispielstand mit Demo-Knöpfen, ohne Datenbank, auch `?demo=start`, `?demo=bund` kurz vor dem Showdown, `?demo=ende`), `?direkt` (ohne Startbildschirm), `?onboarding` (Prolog, Hinweise auf der Karte und Beutel-Onboarding noch einmal, auch später am Tag. Ohne diesen Zusatz kommt das Onboarding nur am Anfang des Spiels, solange noch keine Quest entschieden ist, in der Demo also nur mit `?demo=start`), `?schwach` (Sparmodus erzwingen). Die alte Adresse `entwurf.html` leitet auf die Hauptseite um.
 
 ## Dateien
@@ -50,7 +50,7 @@ Dennis' Antworten und Einträge liegen bewusst neben dem Spiel, damit das Speich
 ## Probelauf (zwei Handys, echtes Spiel unberührt)
 
 - Quest Master: `admin.html?probe` (oder im Admin unten „Probelauf öffnen“). Oben steht ein rotes Band.
-- Zweites Handy: `dd-ocarina.netlify.app/?probe`. Dennis' Seite mit rotem Rahmen und „PROBE“ unten links. Vom Home-Bildschirm aus heißt sie „DQ Probe“ und startet wieder im Probelauf.
+- Zweites Handy: `docarina.vercel.app/?probe`. Dennis' Seite mit rotem Rahmen und „PROBE“ unten links. Vom Home-Bildschirm aus heißt sie „DQ Probe“ und startet wieder im Probelauf.
 - Gespeichert wird in eigenen Pfaden (`/spiele/dennis-jga-2026-probe`, Log-Buch `…-probe-logbuch`), das echte Spiel sieht davon nichts.
 - Sprungknöpfe: Start, Nach dem Zug, Mitte, Vor dem Bund, Ende, Zufall. Danach ganz normal weiterbuchen.
 - Test im Browser: `tests/probe.mjs`.
@@ -108,7 +108,9 @@ Ohne Netz puffert das Admin-Handy Änderungen und schickt sie nach. Dennis' Antw
 
 ## Deployen
 
-Netlify ist mit dem Repo verknüpft: Jeder Push auf `main` ist nach wenigen Sekunden live (`netlify.toml` veröffentlicht den Ordner `app/`).
+Vercel (Projekt `docarina`, Hobby-Plan, kostenlos) ist mit dem Repo verknüpft: Jeder Push auf `main` ist nach wenigen Sekunden unter `docarina.vercel.app` live, jeder andere Branch bekommt eine eigene Vorschau-Adresse. `vercel.json` veröffentlicht den Ordner `app/` (in Vercel bleibt das Root Directory auf `./`). Grenze: 100 Deploys am Tag.
+
+Bis zum 28.09. lief die App auf Netlify (`dd-ocarina.netlify.app`, `netlify.toml`). Der Free-Plan dort kostet 15 Credits pro Deploy bei 300 im Monat und pausiert die Seite, wenn sie aufgebraucht sind. Die alte Adresse nicht mehr verwenden und in Netlify „Stop builds“ einschalten.
 
 ## Neue Quests oder Items
 
