@@ -104,7 +104,7 @@ pruefe(Number(await admin.textContent('#packs')) === erwartet.packs, `Admin: ${e
 const code = await dennis.$$eval('#tumblers .tumbler', els => els.map(e => e.textContent).join(''));
 pruefe(code === C.code.join(''), 'Code vollständig: ' + code);
 const inv = await admin.textContent('#inv');
-pruefe(['Spritze', 'Kleine Pistole', 'Große Pistole', 'Kreisel', 'Stich', 'Schild', 'Nakama', 'Segen'].every(x => inv.includes(x)), 'Admin-Inventar: alle drei Wasserwaffen, Kreisel, Stich, Schild, Nakama-Ruf, Rikes Segen');
+pruefe(['Spritze', 'Kleine Pistole', 'Große Pistole', 'Kreisel', 'Stich', 'Schild', 'Segen'].every(x => inv.includes(x)) && !inv.includes('Nakama'), 'Admin-Inventar: alle drei Wasserwaffen, Kreisel, Stich, Schild, Rikes Segen, kein Nakama-Ruf');
 const liste = await admin.textContent('#dennisListe');
 pruefe(liste.includes('Kartenwurf: Glanzsieg') && !liste.includes('gilt nicht'), 'Admin: alle Einträge von Dennis gelten, Kartenwurf als Glanzsieg');
 await dennis.click('#hudNext'); await warte(400);

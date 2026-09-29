@@ -7,7 +7,8 @@
      glanz:     { [questId]: true }                   // Glanzsieg: bestanden und besonders deutlich (nur Quests mit glanz)
      zaehler:   { [questId]: Zahl }                   // Treffer einer Zähler-Quest (Prophezeiung)
      schritte:  { [questId]: { [schrittId]: true } }  // Zwischenschritte einer laufenden Quest (Amulett gefunden)
-     einsaetze: [ { id, item, quest } ]               // Dennis hat ein Item oder eine Fähigkeit eingesetzt
+     einsaetze: [ { id, item, quest, zeit?, raub?, fuer? } ]   // Dennis hat ein Item oder eine Fähigkeit eingesetzt. Fluch: raub = Packs,
+                                                      // die der Schattendieb stiehlt, fuer = Spiel, dessen Vorteil gilt
      duelle:    { "1": "sieg" | "niederlage", ... }    // Ergebnisse der Showdown-Duelle
      buchungen: [ { id, packs, grund, zeit?, ziffer?, weg?, item?, menge? } ]   // ziffer am Tor geholt (weg: packs, busse, segen), item/menge = Fluch o. Ä.
      items:     { [itemId]: "besitz" | "verloren" | "nicht" }      // manuelle Korrektur, schlägt die Regel
@@ -134,12 +135,19 @@
       if (b.item && m < 0) for (let i = 0; i < -m; i++) nehmen(b.item);
     });
 
-    // Einsätze: Flüche zählen runter, einmalige Fähigkeiten sind danach verbraucht
-    doc.einsaetze.forEach(e => {
+    // Einsätze: Flüche zählen runter, einmalige Fähigkeiten sind danach verbraucht.
+    // Fluch: Der Schattendieb stiehlt, was gewürfelt wurde, zum Zeitpunkt des Einsatzes
+    const raube = [];
+    doc.einsaetze.forEach((e, i) => {
       const it = itemCfg(config, e.item);
       if (!it) return;
       (eingesetzt[e.quest] = eingesetzt[e.quest] || []).push(e.item);
       if (!it.einmalig) return;
+      if (it.dieb && (!it.stapel || anzahl[e.item] > 0)) {
+        const n = diebZahl(it, e.raub);
+        raube.push({ id: e.id, quest: e.quest, raub: n });
+        if (n) schrittePacks.push({ t: Number(e.zeit) || 0, seq: config.quests.length + doc.buchungen.length + i, packs: -n });
+      }
       if (it.stapel) anzahl[e.item] = Math.max(0, anzahl[e.item] - 1);
       else if (items[e.item] === "besitz") items[e.item] = "verbraucht";
     });
@@ -178,7 +186,7 @@
 
     return {
       packs, max, kappung, items, anzahl, erhalten: erhalten.filter(id => items[id] !== "nicht"),
-      ziffern, gekauft, zifferWeg, quests, glanz, treffer, schritte, eingesetzt, duelle, tor,
+      ziffern, gekauft, zifferWeg, quests, glanz, treffer, schritte, eingesetzt, raube, duelle, tor,
       next: nextQuest ? nextQuest.id : null,
       laufend: config.quests.filter(q => q.typ === "lauf" && quests[q.id] !== "offen").map(q => q.id),
       zaehler: { bestanden, verloren, erledigt: bestanden + verloren, gesamt: r.length },
@@ -195,6 +203,41 @@
     const out = revanchen.slice(0, n).map(q => ({ quest: q.id, art: "revanche" }));
     while (out.length < n) out.push({ quest: sd.showdown.auffuellen, art: "auffuellen" });
     return out.map((d, i) => ({ ...d, nr: i + 1, ergebnis: state.duelle[String(i + 1)] || null }));
+  }
+
+  // Wie viele Packs der Dieb stiehlt: ganze Zahl zwischen 0 und der höchsten, die gewürfelt werden kann
+  function diebZahl(it, raub) {
+    const max = ((it.dieb && it.dieb.gewichte) || [1]).length - 1;
+    return Math.max(0, Math.min(max, Math.trunc(Number(raub)) || 0));
+  }
+
+  // Der Schattendieb würfelt, gewichtet nach dieb.gewichte (zufall: Zahl in [0, 1), zum Testen austauschbar)
+  function diebWurf(config, zufall = Math.random) {
+    const it = config.items.find(i => i.dieb);
+    const g = (it && it.dieb.gewichte) || [1];
+    let x = zufall() * g.reduce((a, b) => a + b, 0);
+    for (let n = 0; n < g.length; n++) { x -= g[n]; if (x < 0) return n; }
+    return g.length - 1;
+  }
+
+  /* Was bringt ein Fluch bei dieser Quest? { quest, text, duell? } oder null.
+     quest ist das Spiel, dessen Vorteil gilt: im Showdown das Spiel des ersten offenen Duells.
+     Bei Stufen (Auge des Jägers) wird die stärkste Waffe, die Dennis hat, eine Stufe stärker. */
+  function fluchVorteil(config, state, questId) {
+    const q = config.quests.find(x => x.id === questId);
+    if (!q) return null;
+    if (q.showdown) {
+      const d = showdownDuelle(config, state).find(x => !x.ergebnis);
+      const v = d && d.quest !== q.id ? fluchVorteil(config, state, d.quest) : null;
+      return v ? { ...v, duell: d.nr } : null;
+    }
+    if (!q.fluch) return null;
+    if (typeof q.fluch === "string") return { quest: q.id, text: q.fluch };
+    const st = q.fluch.stufen || [];
+    let i = -1;
+    st.forEach((id, k) => { if (state.items[id] === "besitz") i = k; });
+    const naechste = i < st.length - 1 ? itemCfg(config, st[i + 1]) : null;
+    return { quest: q.id, text: naechste ? `Für dieses Spiel wird deine Wasserwaffe eine Stufe stärker: ${naechste.name}.` : q.fluch.sonst || "" };
   }
 
   // Was ist bei dieser Quest einsetzbar? Im Showdown kommt dazu, was bei den Spielen der Duelle hilft.
@@ -236,7 +279,7 @@
      derive() rechnet damit wie immer. Was der Admin selbst entschieden hat, gilt vor Dennis' Eintrag.
        q_<quest>             { status: "bestanden" | "verloren", glanz?, zeit }   Ergebnis einer Quest (bei laufenden auch nach „läuft"),
                                                                           glanz: true = Glanzsieg (nur Quests mit glanz)
-       e_<id>                { item, quest, zeit }                          Einsatz eines Items oder einer Fähigkeit
+       e_<id>                { item, quest, raub?, fuer?, zeit }            Einsatz eines Items oder einer Fähigkeit (Fluch: raub, fuer)
        d_<nr>                { ergebnis: "sieg" | "niederlage", zeit }      Duell im Showdown
        s_<quest>_<schritt>   { zeit }                                      Schritt einer laufenden Quest (Amulett gefunden)
        z_<nr>                { weg?, zeit }                                fehlende Ziffer am Tor geholt: weg "packs" (Standard, kostet
@@ -257,8 +300,14 @@
         if (e.status === "bestanden" && e.glanz === true && quest(rest).glanz) out.glanz[rest] = true;
         else delete out.glanz[rest];
       } else if (art === "e") {
-        if (!itemCfg(config, e.item) || !quest(e.quest)) return;
-        out.einsaetze.push({ id: k, item: e.item, quest: e.quest, zeit, von: "dennis" });
+        const it = itemCfg(config, e.item);
+        if (!it || !quest(e.quest)) return;
+        const x = { id: k, item: e.item, quest: e.quest, zeit, von: "dennis" };
+        if (it.dieb) {
+          x.raub = diebZahl(it, e.raub);
+          if (quest(e.fuer)) x.fuer = e.fuer;
+        }
+        out.einsaetze.push(x);
       } else if (art === "d") {
         if (!["sieg", "niederlage"].includes(e.ergebnis) || out.duelle[rest]) return;
         out.duelle[rest] = e.ergebnis;
@@ -294,7 +343,7 @@
     return teile.length ? teile.join(", ") : "nichts";
   }
 
-  const api = { derive, emptyDoc, normalize, mitEintraegen, effektText, zifferGrund, showdownDuelle, einsetzbar, abgeloest, aktuelleQuests, jetztEinsetzbar, STATUS, STATUS_LAUF };
+  const api = { derive, emptyDoc, normalize, mitEintraegen, effektText, zifferGrund, showdownDuelle, einsetzbar, fluchVorteil, diebWurf, abgeloest, aktuelleQuests, jetztEinsetzbar, STATUS, STATUS_LAUF };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.QuestEngine = api;
 })(typeof window !== "undefined" ? window : globalThis);

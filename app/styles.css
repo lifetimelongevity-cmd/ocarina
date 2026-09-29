@@ -822,6 +822,24 @@ html.probe body::after { content: ""; position: fixed; inset: 0; z-index: 9999; 
 /* Die Fee meldet, was der Quest Master zurückgenommen hat */
 .result-head .ri-big.fee img { width: 78%; height: auto; filter: drop-shadow(0 0 8px rgba(160,220,255,.9)); animation: feeHover 2.2s ease-in-out infinite; }
 .result-lines li b { color: #fff; }
+/* Fluch (29.09.): Fund mit Warnung, Geheimnis in der Vorschau, der Schattendieb */
+.result-lines .warnung { display: block; font: italic 400 max(10px, calc(var(--fs-body) * .8))/1.25 Georgia, serif; color: #d9b8ff; margin-top: 2px; }
+.chip.geheim .mini-tumbler { color: #c9a4ff; }
+.result-lines li.dieb { color: #d8d2f0; }
+.result-lines li.dieb .dieb-ic { color: #cfc6ff; opacity: 0; transform: translateX(-14px) scale(.7); transition: opacity .5s, transform .5s cubic-bezier(.3, 1.6, .5, 1); }
+.result-lines li.dieb .dieb-ic svg { width: 24px; height: 24px; filter: drop-shadow(0 0 5px rgba(160, 130, 255, .7)); }
+.result-lines li.dieb.kommt .dieb-ic { opacity: 1; transform: none; animation: diebSchweben 1.1s ease-in-out .5s infinite alternate; }
+.result-lines li.dieb .dieb-zahl { margin-left: auto; flex: none; min-width: 2.2em; text-align: center; font: 900 calc(var(--fs-body) * 1.35)/1 Georgia, serif; color: #fff;
+  border: 1px solid rgba(201, 164, 255, .6); border-radius: 6px; padding: 3px 5px; background: rgba(60, 30, 90, .55); }
+.result-lines li.dieb .dieb-zahl:empty { visibility: hidden; }
+.result-lines li.dieb.fertig .dieb-zahl { animation: diebZahl .4s ease-out; }
+.result-lines li.dieb.fertig.minus { color: #ff9b90; } .result-lines li.dieb.fertig.minus .dieb-zahl { color: #ff9b90; border-color: #ff9b90; }
+.result-lines li.dieb.fertig.plus { color: #ffe27a; }
+.result-lines li.dieb.fertig.minus .dieb-ic { animation: diebWeg 1.1s ease-in .7s forwards; }
+@keyframes diebSchweben { to { transform: translateY(-3px); } }
+@keyframes diebZahl { 0% { transform: scale(1.6); } 100% { transform: none; } }
+@keyframes diebWeg { 0% { opacity: 1; transform: none; } 30% { transform: translate(-4px, -2px); } 100% { opacity: 0; transform: translate(60px, -10px) scale(.6); } }
+@media (prefers-reduced-motion: reduce) { .result-lines li.dieb .dieb-ic, .result-lines li.dieb .dieb-zahl { animation: none !important; transition: none; } }
 
 /* Siegel-Fenster: gedrückt halten, bis sich der Ring schließt */
 .schwur { --ton: var(--gold); position: absolute; inset: 0; z-index: 53; display: grid; place-items: center; background: rgba(2,3,6,.74);

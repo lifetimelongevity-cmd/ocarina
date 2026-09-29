@@ -277,15 +277,17 @@ for (const g of GERAETE) {
   await dennis.click('#overlay'); await dennis.waitForTimeout(800);
   await admin.click('button.btn:has-text("Fluch geschenkt")'); await dennis.waitForTimeout(700);
   await dennis.click('#overlay').catch(() => {}); await dennis.waitForTimeout(300);
-  // Einsetzen: Spruchrolle bei Die drei Zeichen
+  // Die drei Zeichen gewonnen (zweiter Fluch), dann einen Fluch beim Wirbel der Götter sprechen (Notlösung im Admin)
+  await admin.click('#nextWin'); await dennis.waitForTimeout(600);
+  await dennis.click('#overlay').catch(() => {}); await dennis.waitForTimeout(300);
   await admin.screenshot({ path: `${OUT}/admin-2-naechste.png`, fullPage: true });
-  await admin.click('#nextUse .use-btn[data-item="spruchrolle"]'); await dennis.waitForTimeout(700);
+  await admin.click('#nextUse .use-btn[data-item="spruchrolle"]'); await dennis.waitForTimeout(3200);
   log(`  Einsatz: ${await dennis.$eval('#resultHead .big', e => e.textContent).catch(() => '–')} ${await dennis.$eval('#resultHead .sub', e => e.textContent).catch(() => '')}`);
   await dennis.click('#overlay'); await dennis.waitForTimeout(300);
   const rolle = await admin.$eval('#items li[data-id="spruchrolle"] small', e => e.textContent);
   log(`  Admin zeigt Spruchrolle: ${rolle}`);
   // Showdown: alles bis zum Gipfel, zwei verloren
-  for (const v of ['bestanden', 'verloren', 'bestanden', 'bestanden', 'verloren', 'bestanden', 'bestanden']) { await admin.click(v === 'bestanden' ? '#nextWin' : '#nextLose'); await admin.waitForTimeout(150); }
+  for (const v of ['verloren', 'bestanden', 'bestanden', 'verloren', 'bestanden', 'bestanden']) { await admin.click(v === 'bestanden' ? '#nextWin' : '#nextLose'); await admin.waitForTimeout(150); }
   const duelle = await admin.$$eval('.duel-list .d-name', els => els.map(e => e.textContent.replace(/\s+/g, ' ').trim()));
   log(`  Showdown-Duelle im Admin: ${duelle.join(' | ')}`);
   await admin.click('.duel-list button[data-nr="1"][data-v="sieg"]'); await admin.waitForTimeout(200);

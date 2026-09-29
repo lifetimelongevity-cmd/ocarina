@@ -117,10 +117,25 @@
   }
   const buchung = b => ({ id: uid(), zeit: Date.now(), ...b });
 
+  // Fluch (29.09.): Auch als Notlösung würfelt der Schattendieb, und das Spiel mit dem Vorteil wird gemerkt
   function einsetzen(item, quest) {
     const it = itemById(item);
-    commit(d => d.einsaetze.push({ id: uid(), item, quest }), `${it.name} eingesetzt (${questById(quest).name})`);
+    if (!it.dieb) return commit(d => d.einsaetze.push({ id: uid(), item, quest, zeit: Date.now() }), `${it.name} eingesetzt (${questById(quest).name})`);
+    const v = E.fluchVorteil(C, state, quest), raub = E.diebWurf(C);
+    commit(d => d.einsaetze.push({ id: uid(), item, quest, zeit: Date.now(), raub, ...(v ? { fuer: v.quest } : {}) }),
+      `${it.name} gesprochen (${questById(quest).name}), ${it.dieb.name} stiehlt ${raub}`);
   }
+  // Vorteil und Raub eines gesprochenen Fluchs, als Text für Liste und Meldung
+  function fluchFolgen(e) {
+    const it = C.items.find(i => i.dieb), v = E.fluchVorteil(C, state, e.fuer || e.quest);
+    const raub = Math.max(0, Math.min(it.dieb.gewichte.length - 1, Math.trunc(Number(e.raub)) || 0));
+    return `${v ? ` · Vorteil${e.fuer && e.fuer !== e.quest ? ` (${questById(e.fuer)?.name})` : ""}: ${v.text}` : ""} · ${it.dieb.name} stiehlt ${raub}`;
+  }
+  // Was ein Fluch hier bringt, als Zeile für dich
+  const fluchZeile = qid => {
+    const v = E.fluchVorteil(C, state, qid);
+    return v ? `<p class="used">Fluch hier: ${v.duell ? `Duell ${v.duell}, ${esc(questById(v.quest).name)}: ` : ""}${esc(v.text)}</p>` : "";
+  };
 
   function fxHtml(q) {
     if (q.zaehler) return `<span class="w">Pro ${esc(q.zaehler.name)}: ${esc(E.effektText(C, q.zaehler.proTreffer, true))}</span>`;
@@ -145,7 +160,7 @@
       return `<button type="button" class="btn use-btn" data-item="${id}" data-quest="${qid}" ${hat ? "" : "disabled"}>${esc(it.name)} einsetzen <small>${esc(besitzText(id))}</small></button>`;
     }).join("");
     const liste = schon.length ? `<p class="used">Eingesetzt: ${schon.map(id => esc(itemById(id).name)).join(", ")}</p>` : "";
-    return `<p class="sub-h">Einsetzbar</p><div class="chips">${knoepfe || '<span class="hint">nichts</span>'}</div>${liste}`;
+    return `<p class="sub-h">Einsetzbar</p><div class="chips">${knoepfe || '<span class="hint">nichts</span>'}</div>${ids.some(id => itemById(id).dieb) ? fluchZeile(qid) : ""}${liste}`;
   }
 
   function bindUse(root) {
@@ -348,7 +363,8 @@
     mdoc.einsaetze.slice().reverse().forEach(e => {
       const li = document.createElement("li");
       li.innerHTML = `<span class="why"></span><button type="button" class="del" aria-label="Einsatz rückgängig">✕</button>`;
-      li.querySelector(".why").textContent = `${itemById(e.item)?.name || e.item} bei ${questById(e.quest)?.name || e.quest}${e.von === "dennis" ? " · von Dennis" : ""}`;
+      const it = itemById(e.item);
+      li.querySelector(".why").textContent = `${it?.name || e.item} bei ${questById(e.quest)?.name || e.quest}${it && it.dieb ? fluchFolgen(e) : ""}${e.von === "dennis" ? " · von Dennis" : ""}`;
       li.querySelector(".del").addEventListener("click", () => e.von === "dennis"
         ? commit(() => {}, "Einsatz zurückgenommen", { dennis: [e.id] })
         : commit(d => { d.einsaetze = d.einsaetze.filter(x => x.id !== e.id); }, "Einsatz rückgängig"));
@@ -473,6 +489,7 @@
   function eintragText(k, e) {
     const i = k.indexOf("_"), art = k.slice(0, i), rest = k.slice(i + 1);
     if (art === "q") return `${questById(rest)?.name || rest}: ${e.glanz && e.status === "bestanden" ? "Glanzsieg" : STATUS_WORT[e.status] || e.status}`;
+    if (art === "e" && itemById(e.item)?.dieb) return `Fluch gesprochen bei ${questById(e.quest)?.name || e.quest}${fluchFolgen(e)}`;
     if (art === "e") return `${itemById(e.item)?.name || e.item} eingesetzt bei ${questById(e.quest)?.name || e.quest}`;
     if (art === "d") return `Duell ${rest}: ${e.ergebnis === "sieg" ? "Sieg" : "Niederlage"}`;
     if (art === "s") { const j = rest.indexOf("_"), q = questById(rest.slice(0, j)), sx = q && (q.schritte || []).find(x => x.id === rest.slice(j + 1)); return `${q ? q.name : rest}: ${sx ? sx.name : rest}`; }

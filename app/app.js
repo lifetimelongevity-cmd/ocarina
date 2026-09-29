@@ -236,6 +236,8 @@
       out.push(`<span class="chip plus"><span class="mini-tumbler">${v == null ? "?" : v}</span>Ziffer ${effekt.ziffer}</span>`);
     }
     (effekt.items || []).forEach(id => {
+      // Geheim (Fluch): Dennis soll nicht wissen, dass er ihn bekommt
+      if (gewonnen && itemById(id).geheim) { out.push(`<span class="chip geheim"><span class="mini-tumbler">?</span>Geheimnis</span>`); return; }
       const x = itemSicht(id), cls = [gewonnen ? "" : "x-over", verborgen(id) ? "schatten" : ""].join(" ").trim();
       out.push(`<span class="chip${gewonnen ? "" : " minus"}"><span class="${cls}" style="color:${x.farbe}">${useSvg(x.symbol)}</span>${esc(x.kurz)}${gewonnen ? "" : " weg"}</span>`);
     });
@@ -336,15 +338,16 @@
     renderEquip();
   }
 
+  let diebHalt = null;                          // Packs, die das HUD zeigt, solange der Schattendieb noch würfelt
   function renderHud() {
-    const s = state;
+    const s = state, packs = diebHalt ?? s.packs;
     document.querySelectorAll("#packRow .ic-card").forEach((c, i) => {
-      const leer = i >= s.packs;
+      const leer = i >= packs;
       c.classList.toggle("empty", leer);
       c.querySelector("use").setAttribute("href", leer ? "#i-card-empty" : "#i-card");
     });
-    $("#packsVal").textContent = s.packs;
-    $("#hudPacks").setAttribute("aria-label", `${s.packs} von ${s.max} Packs gehören dir`);
+    $("#packsVal").textContent = packs;
+    $("#hudPacks").setAttribute("aria-label", `${packs} von ${s.max} Packs gehören dir`);
     document.querySelectorAll("#tumblers .tumbler").forEach((t, i) => {
       const v = s.ziffern[i];
       t.textContent = v == null ? "?" : v;
@@ -953,13 +956,16 @@
       b: prevDoc.buchungen.filter(b => !nB.has(b.id))
     };
     const vorwaerts = fertig.length || gestartet.length || treffer.length || schritte.length || neueE.length || neueD.length || neueB.length;
+    // Fluch gesprochen (29.09.): Der Moment zeigt erst den Vorteil, dann würfelt der Schattendieb. Die Packs nennt erst er.
+    const fluchE = !fertig.length && !gestartet.length && !treffer.length && !schritte.length && !neueB.some(b => b.ziffer) && neueE.length
+      && itemById(neueE[neueE.length - 1].item).dieb ? neueE[neueE.length - 1] : null;
     if (!vorwaerts && Object.values(weg).some(x => x.length)) return zurueckgenommen(prev, next, weg);
     if (!vorwaerts && !handItems) return false;
 
     // Zeilen: Packs, Ziffern, Items (mit Enthüllung beim ersten Fund)
     const lines = [];
     const dPacks = next.packs - prev.packs;
-    if (dPacks) lines.push(`<li class="${dPacks > 0 ? "plus" : "minus"}"><span class="ri">${cardSvg()}</span>${dPacks > 0 ? "+" : "−"}${Math.abs(dPacks)} ${packsWort(dPacks)}</li>`);
+    if (dPacks && !fluchE) lines.push(`<li class="${dPacks > 0 ? "plus" : "minus"}"><span class="ri">${cardSvg()}</span>${dPacks > 0 ? "+" : "−"}${Math.abs(dPacks)} ${packsWort(dPacks)}</li>`);
     next.ziffern.forEach((v, i) => {
       if (v != null && prev.ziffern[i] == null) lines.push(`<li class="plus"><span class="ri"><span class="tumbler known" style="--hud-h:30px">${v}</span></span>Ziffer ${i + 1}: ${v}</li>`);
     });
@@ -967,7 +973,8 @@
       const erstmals = prev.items[it.id] === "nicht";
       if (it.stapel) {
         const d = next.anzahl[it.id] - prev.anzahl[it.id];
-        if (d > 0) lines.push(itemZeile(it.id, `+${d} ${esc(it.name)}`, "plus", erstmals));
+        if (d > 0 && it.gefunden) lines.push(fundZeile(it, d, erstmals));
+        else if (d > 0) lines.push(itemZeile(it.id, `+${d} ${esc(it.name)}`, "plus", erstmals));
         if (d < 0) lines.push(itemZeile(it.id, `${esc(it.name)} eingesetzt`, "minus"));
         return;
       }
@@ -979,7 +986,7 @@
     neueE.forEach(e => { if (!itemById(e.item).einmalig) lines.push(itemZeile(e.item, `${esc(itemById(e.item).name)} eingesetzt`, "plus")); });
     // Packs zählen nur zwischen 0 und max (engine.js): sagen, warum Dennis weniger verloren hat als gedacht.
     // Über max kommt er mit den Quests nicht (alle Siege zusammen sind genau max), nur mit einem Bonus des Quest Masters.
-    if (next.kappung.unten > prev.kappung.unten) lines.push(`<li><span class="ri">${cardSvg("empty")}</span>${prev.packs ? "Mehr Packs hattest du nicht." : "Du hattest keine Packs mehr, die du verlieren konntest."}</li>`);
+    if (next.kappung.unten > prev.kappung.unten && !fluchE) lines.push(`<li><span class="ri">${cardSvg("empty")}</span>${prev.packs ? "Mehr Packs hattest du nicht." : "Du hattest keine Packs mehr, die du verlieren konntest."}</li>`);
 
     // Neue Packs und Ziffern im HUD aufblinken lassen
     document.querySelectorAll("#packRow .ic-card").forEach((c, i) => c.classList.toggle("gain", i >= prev.packs && i < next.packs));
@@ -1015,11 +1022,18 @@
       const ic = weg === "segen" ? `<span class="ri-big" style="color:${torSegen().farbe}">${useSvg(torSegen().symbol)}</span>` : `<span class="ri-big lock">${useSvg("i-lock")}</span>`;
       head = `${ic}<p class="big">${weg === "busse" ? "BUSSE BESTANDEN" : weg === "segen" ? "RIKES SEGEN" : "ZIFFER GEKAUFT"}</p><p class="sub">${esc(b.grund || "")}</p>`;
       if (prev.tor && !next.tor && next.next) lines.push(`<li class="plus"><span class="ri">${useSvg("z-triforce")}</span>Das Tor ist offen. Der Bund erwartet dich.</li>`);
+    } else if (fluchE) {
+      const it = itemById(fluchE.item), v = E.fluchVorteil(C, prev, fluchE.quest);
+      const raub = (next.raube.find(x => x.id === fluchE.id) || {}).raub || 0;
+      klang = "zauber";
+      head = `<span class="ri-big" style="color:${it.farbe}">${useSvg(it.symbol)}</span><p class="big">FLUCH GESPROCHEN</p><p class="sub">bei ${esc(questById(fluchE.quest).name)}</p>`;
+      if (v) lines.unshift(`<li class="plus"><span class="ri">${useSvg("i-check")}</span><span>${v.duell ? `Duell ${v.duell}, ${esc(questById(v.quest).name)}: ` : ""}${esc(v.text)}</span></li>`);
+      lines.push(`<li class="dieb" data-raub="${raub}" data-weg="${Math.max(0, prev.packs - next.packs)}"><span class="ri dieb-ic">${useSvg("i-dieb")}</span>`
+        + `<span class="dieb-txt">Doch jeder Fluch hat seinen Preis …</span><b class="dieb-zahl" aria-hidden="true"></b></li>`);
     } else if (neueE.length) {
       const e = neueE[neueE.length - 1], it = itemById(e.item);
       klang = "zauber";
       head = `<span class="ri-big" style="color:${it.farbe}">${useSvg(it.symbol)}</span><p class="big">${esc(it.name.toUpperCase())}</p><p class="sub">eingesetzt bei ${esc(questById(e.quest).name)}</p>`;
-      if (it.id === "spruchrolle") lines.push(`<li><span class="ri"></span>Der Fluch ist gesprochen. Welche Gestalt er annimmt, enthüllt dir der Quest Master.</li>`);
     } else if (neueD.length) {
       const k = neueD[0], sieg = next.duelle[k] === "sieg";
       klang = sieg ? "plus" : "minus";
@@ -1040,8 +1054,45 @@
     if (fq) fensterQuest = { id: fq.id, status: next.quests[fq.id] };
     melody(klang);
     showOverlay({ head, lines: lines.join(""), next: next.next || !fertig.length ? "" : "Zum Kästchen", gross }, !opt.kette && (fertig.length || gestartet.length) ? showNextQuest : null);
+    if (fluchE && !STILL.matches) diebHalt = prev.packs;
     renderHud(); renderQuests();
+    if (fluchE) diebAuftritt();
     return true;
+  }
+
+  // Ein Item mit Fund-Sätzen (Fluch): „Du hast etwas gefunden …“, dann der Name, darunter die Warnung
+  const fundZeile = (it, d, tarn) => `<li class="plus${tarn ? " reveal" : ""}"><span class="ri" style="color:${it.farbe}">${useSvg(it.symbol)}</span>`
+    + `<span><small class="tarn">${esc(it.gefunden.titel)}</small>${d > 1 ? `+${d} ` : ""}${esc(it.name)}<small class="warnung">${esc(it.gefunden.warnung)}</small></span></li>`;
+
+  // Der Schattendieb (Kehrseite des Fluchs): taucht auf, die Zahl rattert und bleibt bei dem stehen, was gewürfelt wurde.
+  // Hatte Dennis weniger Packs, sagt er, was er wirklich erwischt hat.
+  function diebAuftritt() {
+    const li = $("#resultLines .dieb");
+    if (!li) return;
+    const raub = +li.dataset.raub, weg = +li.dataset.weg, zahl = li.querySelector(".dieb-zahl"), txt = li.querySelector(".dieb-txt");
+    const name = ((C.items.find(i => i.dieb) || {}).dieb || {}).name || "Dieb";
+    const ende = () => {
+      if (diebHalt != null) { diebHalt = null; renderHud(); }
+      if (!li.isConnected) return;
+      zahl.textContent = raub ? `−${raub}` : "0";
+      li.classList.add("fertig", weg ? "minus" : "plus");
+      txt.textContent = !raub ? `Glück gehabt! Der ${name} ist leer abgezogen.`
+        : weg < raub ? `Der ${name} wollte ${raub} ${packsWort(raub)}, ${weg ? `du hattest nur ${weg}` : "doch du hattest keine"}.`
+        : `Der ${name} hat dir ${raub} ${packsWort(raub)} gestohlen.`;
+      melody(weg ? "minus" : "plus");
+    };
+    if (STILL.matches) { li.classList.add("kommt"); ende(); return; }
+    setTimeout(() => { if (li.isConnected) { li.classList.add("kommt"); tone("confirm"); } }, 900);
+    let n = 0;
+    const rattern = setInterval(() => {
+      if (!li.isConnected) return clearInterval(rattern);
+      zahl.textContent = String(n++ % 4); tone("move");
+    }, 90);
+    setTimeout(() => { clearInterval(rattern); ende(); }, 2600);
+    // Schließt Dennis das Fenster vorher, zeigt das HUD gleich den echten Stand
+    const zu = new MutationObserver(() => { if ($("#overlay").hidden || !li.isConnected) { zu.disconnect(); if (diebHalt != null) { diebHalt = null; renderHud(); } } });
+    zu.observe($("#overlay"), { attributes: true, attributeFilter: ["hidden"] });
+    setTimeout(() => zu.disconnect(), 3000);
   }
 
   // Der Quest Master hat etwas zurückgenommen: Die Fee sagt es Dennis. Packs, Items und Nebel springen still mit zurück.
@@ -1053,7 +1104,8 @@
     weg.d.forEach(k => zeilen.push([useSvg("z-triforce"), `Duell ${esc(k)} ist wieder offen. Trag es neu ein.`]));
     weg.s.forEach(q => q.schritte.filter(sx => prev.schritte[q.id][sx.id] && !next.schritte[q.id][sx.id])
       .forEach(sx => zeilen.push([questIcon(q, "laeuft", false), `${esc(q.name)}: „${esc(sx.name)}“ ist zurückgenommen.`])));
-    weg.e.forEach(e => { const it = itemById(e.item); if (it) zeilen.push([`<span style="color:${it.farbe}">${useSvg(it.symbol)}</span>`, `Der Einsatz von <b>${esc(it.name)}</b> ist zurückgenommen.`]); });
+    weg.e.forEach(e => { const it = itemById(e.item); if (it) zeilen.push([`<span style="color:${it.farbe}">${useSvg(it.symbol)}</span>`, `Der Einsatz von <b>${esc(it.name)}</b> ist zurückgenommen.`
+      + (it.dieb && Number(e.raub) > 0 ? ` Was der ${esc(it.dieb.name)} gestohlen hat, ist zurück.` : "")]); });
     weg.b.forEach(b => zeilen.push([cardSvg(), b.ziffer ? `Der Kauf von Ziffer ${esc(b.ziffer)} ist zurückgenommen.` : `Die Buchung „${esc(b.grund || "Buchung")}“ ist zurückgenommen.`]));
     const mehr = zeilen.length > 4 ? zeilen.length - 3 : 0;
     const lines = zeilen.slice(0, mehr ? 3 : 4).map(([ic, t]) => `<li><span class="ri">${ic}</span><span>${t}</span></li>`).join("")
@@ -1558,13 +1610,19 @@
     const n = state.anzahl[item];
     const folgen = [`<span class="fx">${esc(x.einsatz || x.text)}</span>`,
       `<span class="fx dim">${x.einmalig ? (x.stapel ? `Du hast ${n}, danach ${n - 1}.` : "Einmalig, danach verbraucht.") : "Bleibt in deinem Beutel."}</span>`];
+    // Fluch: vorn steht, was er hier bringt (bei mehreren Orten je Ort)
+    if (x.dieb) orte.map(id => [id, E.fluchVorteil(C, state, id)]).filter(([, v]) => v).reverse().forEach(([id, v]) =>
+      folgen.unshift(fxZeile("VORTEIL", "win", `${orte.length > 1 ? esc(questById(id).name) + ": " : v.duell ? `Duell ${v.duell}, ${esc(questById(v.quest).name)}: ` : ""}${esc(v.text)}`)));
     schwur.oeffnen({
       art: x.gruppe === "faehigkeit" ? "FÄHIGKEIT EINSETZEN" : "ITEM EINSETZEN",
       icon: `<span class="sw-item" style="color:${x.farbe}">${useSvg(x.symbol)}</span>`, titel: x.name,
       sub: orte.length === 1 ? "bei " + questById(orte[0]).name : "Wo setzt du es ein?", ton: "magie",
       wahlen: orte.map(id => ({ id, name: questById(id).name })), folgen,
       gueltig: () => state.items[item] === "besitz",
-      ausfuehren: w => eintrag("e_" + uid(), { item, quest: w || orte[0] })
+      ausfuehren: w => {
+        const quest = w || orte[0], v = x.dieb && E.fluchVorteil(C, state, quest);
+        eintrag("e_" + uid(), x.dieb ? { item, quest, raub: E.diebWurf(C), ...(v ? { fuer: v.quest } : {}) } : { item, quest });
+      }
     });
   }
   function schwurTor(nr, weg) {
@@ -1949,7 +2007,7 @@
       } else if (a === "einsetzen") {
         const s = E.derive(C, d), qid = E.aktuelleQuests(C, s).find(id => E.einsetzbar(C, s, id).some(i => s.items[i] === "besitz"));
         const item = qid && E.einsetzbar(C, s, qid).find(i => s.items[i] === "besitz");
-        if (item) d.einsaetze.push({ id: uid(), item, quest: qid });
+        if (item) d.einsaetze.push({ id: uid(), item, quest: qid, zeit: Date.now(), ...(itemById(item).dieb ? { raub: E.diebWurf(C) } : {}) });
       } else if (a === "glanz") {
         if (state.next && questById(state.next).glanz) { d.quests[state.next] = "bestanden"; d.glanz = { ...d.glanz, [state.next]: true }; }
       } else if (state.next) d.quests[state.next] = a;

@@ -36,6 +36,10 @@
        einsatz:  was im Siegel-Fenster steht, wenn Dennis es einsetzt (sonst text)
        fund:     Startitem: Satz, wenn es sich beim ersten Besuch der Ausrüstung entpuppt
        tarnSymbol: Sprite, solange es getarnt ist (sonst der Schatten von symbol)
+       geheim:   Dennis soll nicht wissen, dass er es bekommt: Die Vorschau einer Belohnung zeigt nur „Geheimnis“
+       gefunden: Sätze im Moment, in dem er es bekommt (titel über dem Namen, warnung darunter)
+       dieb:     Kehrseite beim Einsetzen (Fluch, 29.09.): Der Schattendieb stiehlt Packs. gewichte[n] = Gewicht für n Packs,
+                 gewürfelt auf dem Handy, das den Einsatz besiegelt
        symbol:   Sprite aus index.html
        tarn:     So heißt das Item, solange Dennis es nicht erspielt hat (Ausrüstung und Vorschau einer Belohnung).
                  Beim Gewinnen „entpuppt" es sich. Bis dahin zeigt die Ausrüstung seinen Schatten: Die Form ist zu erkennen.
@@ -65,19 +69,19 @@
       { id: "stich", nr: "I6", gruppe: "item", name: "Stich", kurz: "Stich", farbe: "#b8d4ff", symbol: "i-sword",
         text: "Eine Elbenklinge. Ein Schwert mehr heißt ein Versuch mehr.",
         tarn: { name: "Verrostete Klinge", kurz: "Klinge", text: "Alt und stumpf. Doch sie wartet auf ihren Moment." } },
-      // Hieß bis 28.09. Spruchrolle (id bleibt, damit gespeicherte Stände passen). Ein Fluch trifft immer den Bund, nie Dennis.
-      { id: "spruchrolle", nr: "F1", gruppe: "faehigkeit", stapel: true, einmalig: true, name: "Fluch", kurz: "Fluch", farbe: "#c9a4ff", symbol: "i-fluch",
-        text: "Ein alter Fluch, gebannt für dich. Sprich ihn in einem Spiel, und er trifft den Bund. Welche Gestalt er annimmt, weiß niemand, bis er gesprochen ist.",
-        einsatz: "Der Fluch erwacht und trifft den Bund. Welche Gestalt er annimmt, enthüllt dir der Quest Master.",
+      // Hieß bis 28.09. Spruchrolle (id bleibt, damit gespeicherte Stände passen).
+      // Seit 29.09. zweischneidig: Vor einem Spiel gesprochen bringt er dort einen Vorteil (fluch bei der Quest),
+      // danach stiehlt der Schattendieb 0 bis 3 Packs (gewichtet 30/35/25/10). Zwei gibt es: Die drei Zeichen und Kartenwurf.
+      { id: "spruchrolle", nr: "F1", gruppe: "faehigkeit", stapel: true, einmalig: true, geheim: true, name: "Fluch", kurz: "Fluch", farbe: "#c9a4ff", symbol: "i-fluch",
+        text: "Ein alter Fluch. Sprich ihn vor einem Spiel, und er verschafft dir dort einen Vorteil. Doch jeder Fluch hat seinen Preis.",
+        einsatz: "Jeder Fluch hat seinen Preis. Welchen, erfährst du, wenn er gesprochen ist.",
+        gefunden: { titel: "Du hast etwas gefunden …", warnung: "Sei vorsichtig. Flüche haben es in sich." },
+        dieb: { name: "Schattendieb", gewichte: [30, 35, 25, 10] },
         tarn: { name: "Versiegeltes Pergament", kurz: "Pergament", text: "Niemand weiß, was darauf steht." } },
       { id: "schild", nr: "F3", gruppe: "faehigkeit", einmalig: true, name: "Schild des Bundes", kurz: "Schild", farbe: "#7aa7ff", symbol: "i-shield",
         text: "Wiederhole ein verlorenes Duell. Einmal.",
         einsatz: "Du spielst ein verlorenes Duell noch einmal. Besiegle danach das neue Ergebnis.",
         tarn: { name: "Zerbrochenes Wappen", kurz: "Wappen", text: "Ein Bruchstück eines alten Bundes. Es schützt, wer es heilt." } },
-      { id: "nakama", nr: "F5", gruppe: "faehigkeit", einmalig: true, name: "Nakama-Ruf", kurz: "Nakama", farbe: "#f0b84a", symbol: "i-nakama",
-        text: "Rufe einen Gefährten. Einer aus dem Bund kämpft ein Duell für dich, sein Ergebnis zählt als deins. Einmal.",
-        einsatz: "Du wählst einen aus dem Bund, der für dich antritt. Sein Ergebnis zählt als deins.",
-        tarn: { name: "Zerschlissener Hut", kurz: "Hut", text: "Er hat schon bessere Tage gesehen. Wem er wohl gehört hat?" } },
       { id: "segen", nr: "F6", gruppe: "faehigkeit", einmalig: true, tor: true, name: "Rikes Segen", kurz: "Segen", farbe: "#f08cbc", symbol: "i-segen",
         text: "Rike wacht über dich. Am Tor zum Gipfel schenkt dir ihr Segen eine fehlende Ziffer.",
         einsatz: "Rikes Segen schenkt dir eine fehlende Ziffer.",
@@ -130,6 +134,8 @@
        duell:      ein Spiel gegen einen aus dem Bund
        revanche:   kann im Showdown als Revanche wiederkommen, wenn Dennis es verloren hat
        tor:        Dennis darf erst antreten, wenn er alle vier Ziffern hat (fehlende holt er am Tor)
+       fluch:      Vorteil, wenn Dennis hier einen Fluch spricht (29.09.). Text, oder { stufen, sonst }: Die Waffe wird eine Stufe
+                   stärker, hat er schon die stärkste, gilt sonst. Im Showdown gilt der Vorteil des Spiels im aktuellen Duell.
        Regel (28.09.): Hauptquests geben Packs und eine Ziffer oder ein Item, Sidequests und laufende Quests eine Fähigkeit.
        Jede Niederlage kostet nur Packs. Die vier Ziffern liegen vor dem Gipfel, ohne sie kein Finale.
        Packs: Siege zusammen 22, Niederlagen −17. Werte ändern, dann node tests/balance.js (rechnet 50 000 Tage durch). */
@@ -146,9 +152,9 @@
       { id: "klingen", nr: 4, typ: "side", name: "Die drei Zeichen", ort: "Wiese am Anstieg", station: "wiese",
         text: "Schlag zwei aus dem Bund nacheinander im Schnick Schnack Schnuck. Wer zuerst zwei Runden gewinnt, siegt.",
         qm: "Bestanden, wenn Dennis zwei Gegner nacheinander schlägt, jeweils Best of 3. Er wählt die Gegner selbst.",
-        win:  { items: ["nakama"] },
+        win:  { items: ["spruchrolle"] },
         lose: { packs: -1 },
-        einsetzbar: ["spruchrolle", "schild"], duell: true, revanche: true },
+        einsetzbar: ["schild"], duell: true, revanche: true },
 
       { id: "wirbel", nr: 14, typ: "kern", name: "Wirbel der Götter", ort: "Wiese am Anstieg", station: "wiese",
         farbe: "#ec8f2e", emblem: "z-spirit",
@@ -156,7 +162,8 @@
         qm: "Beyblade gegen den besten Blader des Bundes, bestanden bei 2 von 3. Mit Götterkreisel übt Dennis vorher und wählt zuerst. Füllt auch den Showdown auf.",
         win:  { packs: 2, items: ["karten_gepanzert"] },
         lose: { packs: -2 },
-        einsetzbar: ["kreisel", "spruchrolle", "schild", "nakama"], duell: true, revanche: true },
+        fluch: "Dein Gegner muss den Kreisel mit der schwachen Hand starten.",
+        einsetzbar: ["kreisel", "spruchrolle", "schild"], duell: true, revanche: true },
 
       { id: "podrennen", nr: 7, typ: "kern", name: "Das Podrennen", ort: "Wiese am Anstieg", station: "wiese",
         farbe: "#a468e6", emblem: "z-shadow",
@@ -164,6 +171,7 @@
         qm: "RC-Auto auf Zeit, ein Versuch, auf festem Boden (auf Gras bleibt das kleine Auto hängen). Zeitgrenze so, dass du es beim Testen nur jedes zweite Mal schaffst.",
         win:  { packs: 3, ziffer: 2, items: ["pistole_klein"] },
         lose: { packs: -2 },
+        fluch: "3 Sekunden mehr auf der Uhr.",
         einsetzbar: ["spruchrolle"], revanche: true },
 
       { id: "kartenwurf", nr: 9, typ: "side", name: "Kartenwurf", ort: "Erstes Waldstück", station: "wald",
@@ -172,7 +180,8 @@
         win:  { items: ["spruchrolle"] },
         glanz: { bedingung: "2 Karten Vorsprung", items: ["pistole_gross"] },   // einzige Sidequest mit Item, nur als Glanzsieg
         lose: { packs: -2 },
-        einsetzbar: ["karten_gepanzert", "spruchrolle", "schild", "nakama"], duell: true, revanche: true },
+        fluch: "5 Karten statt 3.",
+        einsetzbar: ["karten_gepanzert", "spruchrolle", "schild"], duell: true, revanche: true },
 
       { id: "auge", nr: 2, typ: "kern", name: "Auge des Jägers", ort: "Erstes Waldstück", station: "wald",
         farbe: "#e2472f", emblem: "e-flame",
@@ -180,6 +189,7 @@
         qm: "5 Teelichter aus 4 m, ein Tank. Bestanden nur, wenn alle 5 aus sind. Es zählt die stärkste Wasserwaffe, die Dennis hat: Spritze, kleine Pistole oder große Pistole.",
         win:  { packs: 4, ziffer: 3, items: ["stich"] },
         lose: { packs: -2 },
+        fluch: { stufen: ["spritze", "pistole_klein", "pistole_gross"], sonst: "Du darfst 1 m näher ran." },
         einsetzbar: ["spritze", "pistole_klein", "pistole_gross", "spruchrolle"], revanche: true },
 
       { id: "deku", nr: 12, typ: "kern", name: "Klingen des Deku-Baums", ort: "Erstes Waldstück", station: "wald",
@@ -188,6 +198,7 @@
         qm: "4 Mini-Schwerter aus 4 m auf einen Baum, bestanden, wenn 2 stecken. Stich gibt ein Schwert mehr.",
         win:  { packs: 4, ziffer: 4 },
         lose: { packs: -2 },
+        fluch: "Ein Schwert mehr.",
         einsetzbar: ["stich", "spruchrolle"], revanche: true },
 
       // Ersetzt am 28.09. die Feuerprobe („Der Ruf“) und ist eine Sidequest, id bleibt
@@ -196,6 +207,7 @@
         qm: "Offenes Teelicht ohne Glas, 100 Schritte bergauf. Erlischt es, verloren. Der Bund lenkt ab, pustet nicht, berührt nicht. Feuerzeug und Ersatzlicht mitnehmen.",
         win:  { items: ["schild"] },
         lose: { packs: -2 },
+        fluch: "Nur die halbe Strecke: 50 statt 100 Schritte.",
         einsetzbar: ["spruchrolle"] },
 
       { id: "bund", nr: 5, typ: "kern", name: "Prüfung des Bundes", ort: "Gipfel Neureuth", station: "gipfel",
@@ -204,7 +216,7 @@
         qm: "Erst das Tor: Fehlt eine Ziffer, holt Dennis sie für 2 Packs, mit Rikes Segen oder per Bußprüfung, die du bestimmst. Dann 3 Duelle, bestanden bei 2 Siegen: erst verlorene Spiele vom Tag, aufgefüllt mit Wirbel der Götter. Die App zeigt sie unten.",
         win:  { packs: 5 },
         lose: { packs: -4 },
-        einsetzbar: ["spruchrolle", "schild", "nakama"], tor: true,
+        einsetzbar: ["spruchrolle", "schild"], tor: true,
         showdown: { duelle: 3, auffuellen: "wirbel" } },
 
       /* Laufende Quests: sichtbar, sobald der Quest Master sie startet */
@@ -215,6 +227,7 @@
         schritte: [{ id: "gefunden", name: "Gefunden" }], ergebnisWort: "Zusammengesetzt",
         win:  { items: ["segen"] },
         lose: { packs: 0 },
+        fluch: "Der Quest Master gibt dir einen Tipp zum Knobelspiel.",
         einsetzbar: ["spruchrolle"] }
     ],
 
