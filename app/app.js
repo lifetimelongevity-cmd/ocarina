@@ -1054,8 +1054,9 @@
       klang = "zauber";
       head = `<span class="ri-big" style="color:${it.farbe}">${useSvg(it.symbol)}</span><p class="big">FLUCH GESPROCHEN</p><p class="sub">bei ${esc(questById(fluchE.quest).name)}</p>`;
       if (v) lines.unshift(`<li class="plus"><span class="ri">${useSvg("i-check")}</span><span>${v.duell ? `Duell ${v.duell}, ${esc(questById(v.quest).name)}: ` : ""}${esc(v.text)}</span></li>`);
-      lines.push(`<li class="dieb" data-raub="${raub}" data-weg="${Math.max(0, prev.packs - next.packs)}" data-karten="${Math.max(0, (next.karten || 0) - (prev.karten || 0))}"><span class="ri dieb-ic">${useSvg("i-dieb")}</span>`
-        + `<span class="dieb-txt">Doch jeder Fluch hat seinen Preis …</span><b class="dieb-zahl" aria-hidden="true"></b></li>`);
+      const weg = Math.max(0, prev.packs - next.packs), karten = Math.max(0, (next.karten || 0) - (prev.karten || 0));
+      lines.push(`<li class="dieb kommt fertig ${weg || karten ? "minus" : "plus"}"><span class="ri dieb-ic">${useSvg("i-dieb")}</span>`
+        + `<span class="dieb-txt">${esc(diebSatz(raub, weg, karten))}</span><b class="dieb-zahl" aria-hidden="true">${raub ? "−" + raub : "0"}</b></li>`);
     } else if (neueE.length) {
       const e = neueE[neueE.length - 1], it = itemById(e.item);
       klang = "zauber";
@@ -1079,11 +1080,18 @@
     if (!opt.kette && next.next && !warSichtbar(next.next)) revealPending = next.next;
     const fq = fertig[0] || gestartet[0];
     if (fq) fensterQuest = { id: fq.id, status: next.quests[fq.id] };
-    melody(klang);
-    showOverlay({ head, lines: lines.join(""), next: next.next || !fertig.length ? "" : "Zum Kästchen", gross }, !opt.kette && (fertig.length || gestartet.length) ? showNextQuest : null);
-    if (fluchE && !STILL.matches) diebHalt = prev.packs;
-    renderHud(); renderQuests();
-    if (fluchE) diebAuftritt();
+    const zeigen = () => {
+      melody(klang);
+      showOverlay({ head, lines: lines.join(""), next: next.next || !fertig.length ? "" : "Zum Kästchen", gross }, !opt.kette && (fertig.length || gestartet.length) ? showNextQuest : null);
+      renderHud(); renderQuests();
+    };
+    if (fluchE && !STILL.matches) {
+      diebHalt = prev.packs;
+      renderHud(); renderQuests();
+      const it = itemById(fluchE.item), v = E.fluchVorteil(C, prev, fluchE.quest);
+      fluchSzene(it, v, +(next.raube.find(x => x.id === fluchE.id) || {}).raub || 0, Math.max(0, prev.packs - next.packs), prev.packs, zeigen,
+        Math.max(0, (next.karten || 0) - (prev.karten || 0)));
+    } else zeigen();
     return true;
   }
 
@@ -1091,36 +1099,88 @@
   const fundZeile = (it, d, tarn) => `<li class="plus${tarn ? " reveal" : ""}"><span class="ri" style="color:${it.farbe}">${useSvg(it.symbol)}</span>`
     + `<span><small class="tarn">${esc(it.gefunden.titel)}</small>${d > 1 ? `+${d} ` : ""}${esc(it.name)}<small class="warnung">${esc(it.gefunden.warnung)}</small></span></li>`;
 
-  // Der Schattendieb (Kehrseite des Fluchs): taucht auf, die Zahl rattert und bleibt bei dem stehen, was gewürfelt wurde.
-  // Hatte Dennis weniger Packs, sagt er, was er wirklich erwischt hat.
-  function diebAuftritt() {
-    const li = $("#resultLines .dieb");
-    if (!li) return;
-    const raub = +li.dataset.raub, weg = +li.dataset.weg, karten = +li.dataset.karten || 0, zahl = li.querySelector(".dieb-zahl"), txt = li.querySelector(".dieb-txt");
-    const name = ((C.items.find(i => i.dieb) || {}).dieb || {}).name || "Dieb";
+  const diebName = () => ((C.items.find(i => i.dieb) || {}).dieb || {}).name || "Dieb";
+  // karten: was er statt fehlender geschlossener Packs in Karten nimmt (29.09.)
+  const diebSatz = (raub, weg, karten = 0) => !raub ? `Glück gehabt! Der ${diebName()} ist leer abgezogen.`
+    : weg < raub && karten ? `Der ${diebName()} wollte ${raub} ${packsWort(raub)}, ${weg ? `du hattest nur ${weg}` : "du hattest keine geschlossenen"}. Dafür nimmt er ${karten === 1 ? "deine beste Karte" : `${karten} Karten`}.`
+    : weg < raub ? `Der ${diebName()} wollte ${raub} ${packsWort(raub)}, ${weg ? `du hattest nur ${weg}` : "doch du hattest keine"}.`
+    : `Der ${diebName()} hat dir ${raub} ${packsWort(raub)} gestohlen.`;
+
+  /* Fluch gesprochen (30.09.): Der Fluch greift (Ringe um das Symbol, der Vorteil erscheint), dann fliegt der Schattendieb
+     zur Pack-Leiste und holt die Karten eine nach der anderen, jede verschwindet im HUD, wenn er sie greift.
+     Hat er nichts zu holen, sucht er kurz und zieht leer ab. Danach das Fenster mit allem. */
+  function fluchSzene(it, v, raub, weg, vorher, fertig, karten = 0) {
+    const el = $("#fluchSzene"), base = () => el.getBoundingClientRect();
+    const timer = [], warte = (ms, f) => timer.push(setTimeout(f, ms));
+    $("#fsIcon").innerHTML = `<span style="color:${it.farbe}">${useSvg(it.symbol)}</span>`;
+    $("#fsText").innerHTML = `<b>DER FLUCH GREIFT</b>${v ? `<span>${esc(v.text)}</span>` : ""}`;
+    el.querySelectorAll(".fs-geist, .fs-karte").forEach(x => x.remove());
+    el.classList.remove("dieb-phase");
+    el.hidden = false;
+    melody("zauber");
     const ende = () => {
-      if (diebHalt != null) { diebHalt = null; renderHud(); }
-      if (!li.isConnected) return;
-      zahl.textContent = raub ? `−${raub}` : "0";
-      li.classList.add("fertig", weg || karten ? "minus" : "plus");
-      txt.textContent = !raub ? `Glück gehabt! Der ${name} ist leer abgezogen.`
-        : weg < raub && karten ? `Der ${name} wollte ${raub} ${packsWort(raub)}, ${weg ? `du hattest nur ${weg}` : "du hattest keine geschlossenen"}. Dafür nimmt er ${karten === 1 ? "deine beste Karte" : `${karten} Karten`}.`
-        : weg < raub ? `Der ${name} wollte ${raub} ${packsWort(raub)}, ${weg ? `du hattest nur ${weg}` : "doch du hattest keine"}.`
-        : `Der ${name} hat dir ${raub} ${packsWort(raub)} gestohlen.`;
-      melody(weg || karten ? "minus" : "plus");
+      timer.forEach(clearTimeout);
+      el.hidden = true;
+      el.querySelectorAll(".fs-geist, .fs-karte").forEach(x => x.remove());
+      diebHalt = null;
+      fertig();
     };
-    if (STILL.matches) { li.classList.add("kommt"); ende(); return; }
-    setTimeout(() => { if (li.isConnected) { li.classList.add("kommt"); tone("confirm"); } }, 900);
-    let n = 0;
-    const rattern = setInterval(() => {
-      if (!li.isConnected) return clearInterval(rattern);
-      zahl.textContent = String(n++ % 4); tone("move");
-    }, 90);
-    setTimeout(() => { clearInterval(rattern); ende(); }, 2600);
-    // Schließt Dennis das Fenster vorher, zeigt das HUD gleich den echten Stand
-    const zu = new MutationObserver(() => { if ($("#overlay").hidden || !li.isConnected) { zu.disconnect(); if (diebHalt != null) { diebHalt = null; renderHud(); } } });
-    zu.observe($("#overlay"), { attributes: true, attributeFilter: ["hidden"] });
-    setTimeout(() => zu.disconnect(), 3000);
+    el.onclick = ende;                                  // Antippen überspringt
+
+    // Wo liegt eine Karte der Leiste, relativ zur Szene
+    const kartenPos = i => {
+      const c = document.querySelectorAll("#packRow .ic-card")[i], r = c.getBoundingClientRect(), b = base();
+      return { x: r.left - b.left + r.width / 2, y: r.top - b.top + r.height / 2 };
+    };
+    const geist = document.createElement("span");
+    geist.className = "fs-geist";
+    geist.innerHTML = useSvg("i-dieb");
+    const setzen = (x, y) => { geist.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%)`; };
+
+    warte(1900, () => {
+      el.classList.add("dieb-phase");
+      $("#fsText").innerHTML = `<b>DOCH JEDER FLUCH HAT SEINEN PREIS …</b>`;
+      const b = base();
+      el.appendChild(geist);
+      setzen(b.width + 40, b.height * .55);
+      tone("confirm");
+      void geist.offsetWidth;
+      const ziele = Array.from({ length: weg }, (_, k) => vorher - 1 - k);   // von der letzten vollen Karte rückwärts
+      let t = 250;
+      const hin = ziele.length ? kartenPos(ziele[0]) : kartenPos(Math.max(0, vorher - 1));
+      warte(t, () => setzen(hin.x, hin.y + 26)); t += 850;
+      if (!ziele.length) {
+        // Nichts zu holen (oder 0 gewürfelt): sucht und zieht leer ab
+        warte(t, () => { geist.classList.add("sucht"); $("#fsText").innerHTML = `<b>${esc(diebSatz(raub, 0, karten).toUpperCase())}</b>`; melody("plus"); }); t += 1400;
+      }
+      ziele.forEach((ci, k) => {
+        warte(t, () => {
+          const p = kartenPos(ci);
+          setzen(p.x, p.y + 26);
+          // Die Karte löst sich aus der Leiste und hängt am Geist
+          const karte = document.createElement("span");
+          karte.className = "fs-karte";
+          karte.innerHTML = cardSvg();
+          karte.style.transform = `translate(${p.x}px, ${p.y}px) translate(-50%, -50%)`;
+          el.appendChild(karte);
+          diebHalt = ci; renderHud(); tone("error");
+          warte(60, () => { karte.style.transform = `translate(${p.x + 14 + k * 5}px, ${p.y + 34 - k * 3}px) translate(-50%, -50%) rotate(${-12 + k * 9}deg) scale(.8)`; });
+          geist._karten = (geist._karten || []).concat(karte);
+        });
+        t += 700;
+      });
+      if (ziele.length) warte(t, () => { $("#fsText").innerHTML = `<b>${esc(diebSatz(raub, weg, karten).toUpperCase())}</b>`; melody("minus"); });
+      t += 300;
+      warte(t, () => {
+        // Mit der Beute davon, nach rechts oben aus dem Bild
+        const w = base().width;
+        geist.classList.add("flieht");
+        setzen(w + 80, -40);
+        (geist._karten || []).forEach((k, i) => { k.classList.add("flieht"); k.style.transform = `translate(${w + 90 + i * 6}px, ${-10 - i * 4}px) translate(-50%, -50%) rotate(${20 + i * 15}deg) scale(.6)`; });
+      });
+      t += 1300;
+      warte(t, ende);
+    });
   }
 
   // Der Quest Master hat etwas zurückgenommen: Die Fee sagt es Dennis. Packs, Items und Nebel springen still mit zurück.
