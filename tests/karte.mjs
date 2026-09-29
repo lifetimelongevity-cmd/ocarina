@@ -32,7 +32,7 @@ pruefe((await p.$$('#prologDots i')).length === 6, 'Prolog hat sechs Tafeln');
 await warte(1500);
 pruefe((await p.textContent('#prologText')).includes('Ich bin die Fee. Rike hat mich'), 'Tafel 1: Die Fee stellt sich vor, Rike hat sie geschickt');
 await p.click('#prolog'); await warte(1800);
-pruefe((await p.textContent('#prologBild')).includes('Mini-JGA') && (await p.textContent('#prologText')).startsWith('Willkommen auf deinem Mini-JGA'), 'Tafel 2: Willkommen auf deinem Mini-JGA');
+pruefe((await p.textContent('#prologBild')).includes('The Legend of Dennis') && (await p.textContent('#prologText')).startsWith('Willkommen in deiner eigenen Legende'), 'Tafel 2: Willkommen in The Legend of Dennis');
 await p.click('#prolog'); await warte(1800);
 pruefe((await p.$$('#prologBild .medal.covered')).length === 6 && (await p.textContent('#prologText')).includes('geprüft werden'), 'Tafel 3: die Reise, sechs Prüfungen im Nebel');
 for (let i = 0; i < 20 && await p.isVisible('#prolog'); i++) { await p.click('#prolog'); await warte(250); }

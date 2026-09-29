@@ -1149,8 +1149,9 @@
       const pruefungen = C.quests.filter(q => q.typ === "kern").length;
       return [
         { bild: "fee", text: "Hey, wach auf, Dennis! Ich bin die Fee. Rike hat mich zu dir geschickt." },
-        { bild: `<span class="pb-titel"><small>Willkommen auf deinem</small><b>Mini-JGA</b></span>`, ton: "pruefung",
-          text: "Willkommen auf deinem Mini-JGA! Ab jetzt weiche ich dir nicht mehr von der Seite." },
+        // Der Titel vom Startbild (29.09., statt „Mini-JGA“)
+        { bild: `<span class="pb-titel"><small>Willkommen in</small><b>The Legend of Dennis</b></span>`, ton: "pruefung",
+          text: "Willkommen in deiner eigenen Legende! Ab jetzt weiche ich dir nicht mehr von der Seite." },
         // Die Reise: vom Zug bis zum Gipfel, jede Prüfung noch im Nebel
         { bild: `<span class="pb-reise"><span class="pb-ort">${useSvg("i-train")}</span>${Array.from({ length: pruefungen }, (_, k) =>
             `<span class="medal covered" style="--k:${k + 1}"><b>?</b></span>`).join("")}<span class="pb-ort gipfel" style="--k:${pruefungen + 1}">${useSvg("i-mountain")}</span></span>`,
