@@ -63,19 +63,11 @@ await admin.click('#undo'); await warte(700);
 pruefe((await fenster(dennis)).includes('PRÜFUNG BESTANDEN'), 'Rückgängig: Eintrag ist wieder da, Dennis sieht den Moment');
 await zu(dennis); await warte(1200);
 
-// Einsetzen: ein Fluch aus der Prophezeiung, bei Die drei Zeichen
-await admin.click('#lauf .lauf-q[data-id="prophezeiung"] [data-a="start"]'); await warte(400);
-await admin.click('#lauf .lauf-q[data-id="prophezeiung"] [data-a="plus"]'); await warte(600);
-await zu(dennis); await warte(800);
+// Die drei Zeichen bringen einen Fluch, verraten ihn aber nicht
 await dennis.evaluate(() => { const r = document.querySelector('.q-row[data-id="klingen"]'); r && r.click(); }); await warte(300);
-pruefe(await dennis.isVisible('#questCard [data-einsetzen="spruchrolle"]'), 'Der Fluch leuchtet unter EINSETZBAR');
-await dennis.tap('#questCard [data-einsetzen="spruchrolle"]'); await warte(400);
-pruefe((await dennis.textContent('#swFolgen')).includes('Fluch'), 'Siegel-Fenster erklärt den Fluch');
-await halten(dennis);
-pruefe((await fenster(dennis)).includes('FLUCH') && (await fenster(dennis)).includes('Fluch ist gesprochen'), 'Einsatz: Moment „Fluch gesprochen“');
-await warte(300);
-pruefe((await admin.textContent('#einsaetze')).includes('von Dennis'), 'Admin: Einsatz von Dennis unter Eingesetzt');
-await zu(dennis);
+const vorschau = await dennis.textContent('#questCard');
+pruefe(vorschau.includes('Geheimnis') && !vorschau.includes('Fluch') && !vorschau.includes('Pergament'), 'Die drei Zeichen: Belohnung heißt nur „Geheimnis“');
+pruefe(!(await dennis.$('#questCard [data-einsetzen="spruchrolle"]')), 'Bei Die drei Zeichen gibt es keinen Fluch zum Sprechen');
 
 // Verpasste Momente: Dennis lädt neu, der Admin bucht, während der Startbildschirm offen ist
 await dennis.goto(BASE); await warte(600);
@@ -85,10 +77,40 @@ await dennis.click('#introScreen'); await warte(1200);
 pruefe(!(await dennis.isVisible('#prolog')), 'Später am Tag kein Prolog');
 const nachgeholt = await fenster(dennis);
 pruefe(nachgeholt.includes('BESTANDEN') && nachgeholt.includes('Die drei Zeichen'), 'Nach PRESS START: verpasster Moment läuft nach');
+pruefe(nachgeholt.includes('Du hast etwas gefunden') && nachgeholt.includes('Flüche haben es in sich'), 'Fund: „Du hast etwas gefunden … Flüche haben es in sich“');
 pruefe((await dennis.textContent('#hudNextName')) === '?', 'Die nächste Quest bleibt im Nebel, bis der Moment vorbei ist');
 await dennis.screenshot({ path: `${OUT}/selbst-5-nachgeholt.png` });
 await zu(dennis); await warte(1500);
 pruefe((await dennis.textContent('#hudNextName')) === 'Wirbel der Götter', 'Danach tritt die nächste Quest aus dem Nebel');
+
+// Fluch sprechen beim Wirbel der Götter: erst der Vorteil, dann würfelt der Schattendieb (hier fest auf 2)
+const packsVor = Number(await dennis.textContent('#packsVal'));
+await dennis.evaluate(() => { const r = document.querySelector('.q-row[data-id="wirbel"]'); r && r.click(); }); await warte(300);
+pruefe(await dennis.isVisible('#questCard [data-einsetzen="spruchrolle"]'), 'Der Fluch leuchtet unter EINSETZBAR');
+await dennis.tap('#questCard [data-einsetzen="spruchrolle"]'); await warte(400);
+const siegelText = await dennis.textContent('#swFolgen');
+pruefe(siegelText.includes('VORTEIL') && siegelText.includes('schwachen Hand') && siegelText.includes('seinen Preis'), 'Siegel-Fenster: Vorteil beim Wirbel und die Warnung');
+pruefe(!siegelText.includes('Schattendieb'), 'Siegel-Fenster verrät den Dieb nicht');
+await dennis.evaluate(() => { Math.random = () => 0.7; });
+await halten(dennis);
+const gesprochen = await fenster(dennis);
+pruefe(gesprochen.includes('FLUCH GESPROCHEN') && gesprochen.includes('schwachen Hand') && gesprochen.includes('seinen Preis'), 'Moment: Fluch gesprochen, Vorteil, dann der Preis');
+await dennis.screenshot({ path: `${OUT}/selbst-5b-fluch.png` });
+pruefe(Number(await dennis.textContent('#packsVal')) === packsVor, 'Solange der Dieb würfelt, zeigt das HUD noch die alten Packs');
+await warte(2800);
+const dieb = await dennis.textContent('#resultLines .dieb');
+pruefe(dieb.includes('Schattendieb') && dieb.includes('2 Packs gestohlen') && dieb.includes('−2'), 'Der Schattendieb stiehlt 2 Packs');
+await dennis.screenshot({ path: `${OUT}/selbst-5c-dieb.png` });
+pruefe(Number(await dennis.textContent('#packsVal')) === Math.max(0, packsVor - 2), `Packs: ${packsVor} → ${Math.max(0, packsVor - 2)}`);
+await warte(300);
+const einsAdmin = await admin.textContent('#einsaetze');
+pruefe(einsAdmin.includes('von Dennis') && einsAdmin.includes('schwachen Hand') && einsAdmin.includes('Schattendieb stiehlt 2'), 'Admin: Fluch mit Vorteil und Raub unter Eingesetzt');
+await zu(dennis); await warte(600);
+// Zurücknehmen: die gestohlenen Packs sind zurück
+await admin.click('#einsaetze .del'); await warte(1400);
+pruefe((await fenster(dennis)).includes('gestohlen hat, ist zurück'), 'Rücknahme: Was der Dieb gestohlen hat, ist zurück');
+pruefe(Number(await dennis.textContent('#packsVal')) === packsVor, 'Packs wieder wie vorher');
+await zu(dennis);
 await ctx.close();
 
 // Gipfel (Demo): Tor mit fehlender Ziffer 3, Amulett bringt Rikes Segen, dann Duelle und Ergebnis nach der Mehrheit

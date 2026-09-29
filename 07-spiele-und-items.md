@@ -52,18 +52,31 @@ Stand 25.09.2026, Namen und Aussichtspunkt geändert am 28.09. Sammelt, was der 
 
 | Nr. | Fähigkeit | Stand |
 |---|---|---|
-| F1 | **Fluch** (hieß bis 28.09. Spruchrolle, ersetzt Token und die einzelnen Flüche) | Trifft immer den Bund, nie Dennis. Gewinnt Dennis über erfüllte Prophezeiungen (6) und den Kartenwurf (9), kann mehrere haben |
+| F1 | **Fluch** (hieß bis 28.09. Spruchrolle, ersetzt Token und die einzelnen Flüche) | **Zweischneidig (29.09.):** bringt beim Spiel, vor dem Dennis ihn spricht, einen Vorteil (Tabelle Flüche unten), danach stiehlt der Schattendieb gewürfelt 0 bis 3 Packs. Genau zwei: Sieg bei Die drei Zeichen (4) und beim Kartenwurf (9). Die Prophezeiung ist gestrichen |
 | F2 | ~~Schwert~~ | Jetzt Item I6 |
 | F3 | Schild: verlorenes Duell wiederholen | Gut so, als Magie |
 | F4 | ~~Brosche~~ | **Gestrichen** (25.09.) |
-| F5 | **Nakama-Ruf** (neu 28.09., Strohhut) | Einer aus dem Bund kämpft ein Duell für Dennis, sein Ergebnis zählt. Einmalig. Aus Die drei Zeichen (4) |
+| F5 | ~~Nakama-Ruf~~ | **Gestrichen** (29.09.): Der Bund sind nur Bene und Fabio, einer von ihnen müsste für Dennis antreten |
 | F6 | **Rikes Segen** (neu 28.09., Herz) | Schenkt am Tor zum Gipfel eine fehlende Ziffer. Einmalig. Aus Rikes Amulett (15) |
 | F7 | ~~Roter Faden~~ | **Verworfen** (29.09.): Rikes Rache bringt Packs, keine Fähigkeit |
 
 ## Regel: Einsetzen pro Quest (25.09.)
 
 - Jede Quest hat eine Liste, was dort einsetzbar ist. Im Menü sieht Dennis bei der nächsten Quest, welche Items und Fähigkeiten er dort nutzen kann. Alles andere ist ausgegraut.
-- **Fluch (früher Spruchrolle):** Beim Einsetzen steht nicht da, was er bewirkt. Es passiert eine Sache, die zum jeweiligen Spiel passt (zum Beispiel näher ran, nur einer vom Bund spielt, ein Versuch mehr). Die konkrete Wirkung bestimmt der Quest Master je Spiel. Für die App ist es nur „Fluch eingesetzt".
+- **Fluch (seit 29.09.):** Dennis weiß vorher nicht, dass er einen bekommt (die Belohnung heißt nur „Geheimnis“). Beim Fund: „Du hast etwas gefunden … Sei vorsichtig. Flüche haben es in sich.“ Er wählt ihn bei einer Quest und hält das Siegel: Das Fenster zeigt vorher den Vorteil für dieses Spiel und „Jeder Fluch hat seinen Preis“. Danach erscheint der **Schattendieb** (eigene Figur, Geist mit Maske und Beutel), die Zahl rattert und bleibt bei 0 bis 3 stehen, gewichtet 30/35/25/10 % (im Schnitt gut 1 Pack). So viele Packs sind weg, bei 0 heißt es „Glück gehabt“. Gewürfelt wird auf dem Handy, das besiegelt, der Quest Master sieht Vorteil und Raub im Admin und kann den Einsatz zurücknehmen (die Packs kommen zurück).
+
+| Quest | Vorteil, wenn Dennis dort einen Fluch spricht |
+|---|---|
+| Wirbel der Götter | Der Gegner startet den Kreisel mit der schwachen Hand |
+| Das Podrennen | 3 Sekunden mehr auf der Uhr |
+| Kartenwurf | 5 Karten statt 3 |
+| Auge des Jägers | Die Wasserwaffe wird für dieses Spiel eine Stufe stärker, mit der großen Pistole 1 m näher |
+| Klingen des Deku-Baums | Ein Schwert mehr |
+| Hüter der Flamme | Nur die halbe Strecke, 50 statt 100 Schritte |
+| Rikes Amulett | Ein Tipp vom Quest Master zum Knobelspiel |
+| Prüfung des Bundes | Der Vorteil des Spiels im aktuellen Duell |
+
+Bei Rikes Tagebuch und Die drei Zeichen gibt es keinen. Texte in `config.js` (`fluch` je Quest).
 - **Entschieden (25.09.):** Dennis sagt an, der Quest Master bucht das Einsetzen im Admin. Dennis hat keinen Knopf.
 
 ## Laufende Quests (25.09.)
@@ -85,7 +98,7 @@ Stand 25.09.2026, Namen und Aussichtspunkt geändert am 28.09. Sammelt, was der 
 **Die Regel (28.09.):**
 - **Hauptquests** bringen Packs und eine Ziffer oder ein Item.
 - **Sidequests** und die laufenden Quests bringen eine Fähigkeit.
-- **Jede Niederlage kostet nur Packs.** Es gibt keine Flüche gegen Dennis. Ein Fluch ist eine Fähigkeit, die den Bund trifft.
+- **Jede Niederlage kostet nur Packs.** Einzige Ausnahme seit 29.09.: Spricht Dennis einen Fluch, stiehlt ihm der Schattendieb 0 bis 3 Packs. Das Risiko wählt er selbst.
 - **Ohne alle vier Ziffern kein Finale.** Die Ziffern liegen vor dem Gipfel. Fehlt eine, holt Dennis sie sich am **Tor zum Gipfel**: für 2 Packs, mit Rikes Segen oder per Bußprüfung, die der Quest Master bestimmt. Er besiegelt selbst, der Quest Master kann zurücknehmen oder im Admin selbst buchen.
 - **Items** helfen jeweils bei genau einem späteren Spiel und bleiben. **Fähigkeiten** sind einmalig und wirken bei Duellen und im Showdown.
 - Die Spiele sind bewusst schwer (Grenzen in der Tabelle, jeweils in `config.js` als Notiz für den Quest Master).
@@ -93,7 +106,7 @@ Stand 25.09.2026, Namen und Aussichtspunkt geändert am 28.09. Sammelt, was der 
 | # | Nr. | Quest | Art | Ort | Sieg | Niederlage | Bestanden, wenn … |
 |---|---|---|---|---|---|---|---|
 | 1 | 1 | Rikes Tagebuch | Hauptquest | Zug | +2, Ziffer 1, Kreisel (I5) | 0 | 5 von 7 Antworten treffen |
-| 2 | 4 | Die drei Zeichen | Sidequest | Wiese | Nakama-Ruf (F5) | −1 | er zwei Gegner nacheinander schlägt, jeweils Best of 3 |
+| 2 | 4 | Die drei Zeichen | Sidequest | Wiese | Fluch (F1) | −1 | er zwei Gegner nacheinander schlägt, jeweils Best of 3 |
 | 3 | 14 | Wirbel der Götter | Hauptquest | Wiese | +2, Gepanzerte Karten (I4) | −2 | 2 von 3 gegen den besten Blader |
 | 4 | 7 | Das Podrennen | Hauptquest | Wiese | +3, Ziffer 2, Kleine Wasserpistole (I8) | −2 | ein Versuch unter einer Zeit, die der Quest Master nur jedes zweite Mal schafft |
 | 5 | 9 | Kartenwurf | Sidequest | Wald | Fluch (F1), **Glanzsieg** (2 Karten Vorsprung): dazu Große Wasserpistole (I2) | −2 | mehr Karten im Ziel, Gleichstand zählt als verloren |
@@ -102,10 +115,9 @@ Stand 25.09.2026, Namen und Aussichtspunkt geändert am 28.09. Sammelt, was der 
 | 8 | 3 | Hüter der Flamme | Sidequest | Aussicht | Schild (F3) | −2 | das Teelicht 100 Schritte bergauf brennt |
 | Tor | | fehlende Ziffern | | Gipfel | je Ziffer 2 Packs, Rikes Segen oder Bußprüfung | | |
 | 9 | 5 | Prüfung des Bundes | Hauptquest | Gipfel | +5 | −4 | 2 von 3 Duellen |
-| läuft | 6 | Prophezeiung | Zähler (max. 3) | den ganzen Tag | je Treffer 1 Fluch | | |
 | läuft | 15 | Rikes Amulett | Schritt „Gefunden“ | bis zum Gipfel | Rikes Segen (F6) | 0 | gefunden und zusammengesetzt |
 
-Einsetzbar: Kreisel bei Wirbel, Karten beim Kartenwurf, die stärkste Wasserwaffe beim Auge (Spritze, kleine oder große Pistole), Stich beim Deku-Baum. Fluch fast überall, Schild und Nakama-Ruf bei den Duellen (Wirbel, Kartenwurf, Die drei Zeichen nur Schild) und im Showdown, Rikes Segen nur am Tor.
+Einsetzbar: Kreisel bei Wirbel, Karten beim Kartenwurf, die stärkste Wasserwaffe beim Auge (Spritze, kleine oder große Pistole), Stich beim Deku-Baum. Fluch überall, wo er einen Vorteil hat (Tabelle oben), Schild bei den Duellen (Die drei Zeichen, Wirbel, Kartenwurf) und im Showdown, Rikes Segen nur am Tor.
 
 **Packs (29.09.):** Über den Tag gibt es 20 Packs (`waehrung.max`, die Leiste oben), der Bund hütet sie. Alle Siege zusammen sind genau 20 (Wirbel +2 und Bund +5, vorher +3 und +6, zusammen 22), alle Niederlagen −17. Gewinnt Dennis alles, gehören ihm alle 20, kein Sieg verpufft. Packs zählen in der Reihenfolge, in der gebucht wurde, und bleiben immer zwischen 0 und 20: Wer bei 0 verliert, verliert nichts, über 20 kommt er nur mit einem Bonus des Quest Masters. Nachrechnen mit `node tests/balance.js`: Gewinnt Dennis jedes Spiel mit 50 %, bleiben ihm im Schnitt 4 bis 5 Packs, am Tor fehlen ihm im Schnitt 2 Ziffern, in 45 % der Tage braucht er eine Bußprüfung, und etwa jeder dritte Tag endet ohne Packs. Mit 70 % sind es im Schnitt 9 Packs.
 
@@ -135,7 +147,6 @@ Sechs Hauptquests = sechs Medaillons (28.09.): Rikes Tagebuch (Wasser, blau), Wi
 | I10 | Dicke Nadel (Vorschlag) | Uralter Dorn |
 | F1 | Fluch (mehrfach, einmalig) | Versiegeltes Pergament |
 | F3 | Schild des Bundes (einmalig) | Zerbrochenes Wappen |
-| F5 | Nakama-Ruf (einmalig) | Zerschlissener Hut |
 | F6 | Rikes Segen (einmalig, am Tor) | Versiegelter Brief |
 
 **Showdown:** Revanche möglich bei 2, 4, 7, 9, 12, 14 (Rikes Tagebuch und Hüter der Flamme kommen nicht wieder). Verlorene Spiele in Tagesreihenfolge, höchstens drei, dann mit Wirbel der Götter aufgefüllt. Der Quest Master tippt je Duell Sieg oder Niederlage, die App sagt, wann es reicht (2 von 3).
