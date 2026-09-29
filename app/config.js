@@ -100,21 +100,22 @@
     ],
 
     /* Karte
-       stationen: Lage in Prozent der Kartenfläche, Reihenfolge = Weg.
-                  gps: echte Stelle am Weg [Breite, Länge], ungefähr. Wo der Quest Master am Samstag wirklich
-                  aufbaut, kann er hier nachtragen (auf dem Handy lange auf die Stelle in Google Maps drücken).
+       stationen: Lage in Prozent der Kartenfläche, Reihenfolge = Weg. Von Station zu Station schickt der Quest Master
+                  Dennis von Hand (Freigabe der nächsten Quest im Admin, 30.09.), kein GPS.
+                  zu: „zur“ oder „zum“, für „Weiter zur WIESE“.
+                  gps: Stelle am Weg [Breite, Länge], ungefähr. Nur für Höhe und Kilometer in der Kartusche.
                   hoehe: nur, wenn das Schild etwas anderes sagt als das Höhenmodell.
        weg:       der echte Weg vom Bahnhof Tegernsee über den Wanderweg 681a zum Gipfel und zum Berggasthof,
                   [Breite, Länge, Höhe in m]. Quelle: © OpenStreetMap-Mitwirkende (ODbL), Höhen EU-DEM (opentopodata.org).
-                  Für GPS, Höhe und Strecke auf der Karte. */
+                  Für Höhe und Strecke auf der Karte. */
     karte: {
       stationen: [
-        { id: "zug",      name: "ZUG",      ort: "Freitag im Zug",   x: 10, y: 79 },
-        { id: "wiese",    name: "WIESE",    ort: "Wiese am Anstieg", x: 27, y: 66, gps: [47.71836, 11.75569] },
-        { id: "wald",     name: "WALD",     ort: "Erstes Waldstück", x: 45, y: 55, gps: [47.72257, 11.75415] },
-        { id: "aussicht", name: "AUSSICHT", ort: "Aussichtspunkt",   x: 62, y: 43, gps: [47.72736, 11.76612] },
-        { id: "gipfel",   name: "GIPFEL",   ort: "Gipfel Neureuth",  x: 78, y: 28, gps: [47.72846, 11.77209], hoehe: 1261 },
-        { id: "huette",   name: "HÜTTE",    ort: "Berggasthaus",     x: 91, y: 52, gps: [47.72858, 11.77199] }
+        { id: "zug",      name: "ZUG",      ort: "Freitag im Zug",   zu: "zum", x: 10, y: 79 },
+        { id: "wiese",    name: "WIESE",    ort: "Wiese am Anstieg", zu: "zur", x: 27, y: 66, gps: [47.71836, 11.75569] },
+        { id: "wald",     name: "WALD",     ort: "Erstes Waldstück", zu: "zum", x: 45, y: 55, gps: [47.72257, 11.75415] },
+        { id: "aussicht", name: "AUSSICHT", ort: "Aussichtspunkt",   zu: "zur", x: 62, y: 43, gps: [47.72736, 11.76612] },
+        { id: "gipfel",   name: "GIPFEL",   ort: "Gipfel Neureuth",  zu: "zum", x: 78, y: 28, gps: [47.72846, 11.77209], hoehe: 1261 },
+        { id: "huette",   name: "HÜTTE",    ort: "Berggasthaus",     zu: "zur", x: 91, y: 52, gps: [47.72858, 11.77199] }
       ],
       start: "Bahnhof Tegernsee",
       weg: [

@@ -39,6 +39,7 @@ async function tagebuch(p, text) {
 const admin = await seite('admin.html');
 await admin.$$eval('details', ds => ds.forEach(d => { d.open = true; }));
 admin.on('dialog', d => d.accept());
+await admin.click('#freigeben').catch(() => {}); await warte(300);   // Tagebuch freigeben (30.09.)
 // Dennis öffnet die App wie am Spieltag: Titelbild, PRESS START, Prolog überspringen
 let dennis = await seite('');
 await dennis.click('#introScreen'); await warte(900);
@@ -71,13 +72,16 @@ await dennis.click('#prologSkip'); await warte(500);
 f = await fenster(dennis);
 pruefe(!f.some(t => t.includes('ZURÜCK')), 'Nach dem Neustart keine Meldungen über Zurückgenommenes: ' + JSON.stringify(f));
 await zu(dennis);
+// Nach dem Neustart ist nichts freigegeben: der Quest Master gibt das Tagebuch wieder frei
+await admin.click('#freigeben'); await warte(800); await zu(dennis); await warte(800);
 // Tagebuch wieder beschreibbar
 await dennis.click('[data-logbuch]'); await warte(300);
 pruefe(await dennis.isVisible('#lbInput') && (await dennis.textContent('#lbStep')).startsWith('1 /'), 'Tagebuch: Frage 1 ist wieder offen und beschreibbar');
 await dennis.click('#lbClose'); await warte(300);
 
-// Rückgängig holt alles zurück, still (keine Kette von Momenten)
+// Rückgängig holt alles zurück, still (keine Kette von Momenten). Zweimal: erst die Freigabe, dann das Zurücksetzen
 await leeren(dennis);
+await admin.click('#undo'); await warte(1000);
 await admin.click('#undo'); await warte(2500);
 f = await fenster(dennis);
 pruefe(f.length === 0, 'Rückgängig: kein Fenster bei Dennis: ' + JSON.stringify(f));
@@ -96,6 +100,7 @@ await dennis.click('#prologSkip'); await warte(800);
 f = await fenster(dennis);
 pruefe(!f.length, 'Titelbild: danach keine Meldungen: ' + JSON.stringify(f));
 await zu(dennis);
+await admin.click('#freigeben'); await warte(800); await zu(dennis); await warte(500);
 
 // Nur das Tagebuch leeren (eigener Knopf), mit Rückgängig
 await tagebuch(dennis, 'Neu ');
@@ -127,7 +132,7 @@ pruefe((await admin.textContent('#lbList')).includes('Neu 7'), 'Tagebuch-Knopf: 
     if (sessionStorage.vorher) return;
     sessionStorage.vorher = 1;
     localStorage.setItem('dq-gesehen-v1', JSON.stringify({ quests: { logbuch: 'bestanden' }, zeiten: { logbuch: 1 } }));
-    ['dq-prolog-v2', 'dq-onboarding-v1', 'dq-gps'].forEach(k => localStorage.setItem(k, '1'));
+    ['dq-prolog-v2', 'dq-onboarding-v1'].forEach(k => localStorage.setItem(k, '1'));
     localStorage.setItem('dennis-quest-doc:dennis-jga-2026', JSON.stringify({ stand: 5 }));
     localStorage.setItem('dennis-quest-eintraege:dennis-jga-2026-dennis', JSON.stringify({ q_logbuch: { status: 'bestanden', zeit: 1 } }));
     localStorage.setItem('dennis-quest-logbuch:dennis-jga-2026-logbuch', JSON.stringify({ 1: { antwort: 'Kino', zeit: 1 } }));
@@ -138,8 +143,8 @@ pruefe((await admin.textContent('#lbList')).includes('Neu 7'), 'Tagebuch-Knopf: 
   await p.evaluate(() => { while (!document.getElementById('coach').hidden) document.getElementById('coach').click(); });
   await warte(3500);
   pruefe((await p.evaluate(() => window.__fenster.slice(-1)[0] || '')).includes('NEUER ANFANG'), 'Firebase-Handy: Fenster NEUER ANFANG');
-  const speicher = await p.evaluate(() => ['dennis-quest-eintraege:dennis-jga-2026-dennis', 'dennis-quest-logbuch:dennis-jga-2026-logbuch', 'dq-gps', 'dq-prolog-v2', 'dq-onboarding-v1'].map(k => localStorage.getItem(k)));
-  pruefe(speicher.join('|') === '{}|{}|||', 'Firebase-Handy vergisst Einträge, Tagebuch, GPS, Prolog, Beutel: ' + speicher.join('|'));
+  const speicher = await p.evaluate(() => ['dennis-quest-eintraege:dennis-jga-2026-dennis', 'dennis-quest-logbuch:dennis-jga-2026-logbuch', 'dq-prolog-v2', 'dq-onboarding-v1'].map(k => localStorage.getItem(k)));
+  pruefe(speicher.join('|') === '{}|{}||', 'Firebase-Handy vergisst Einträge, Tagebuch, Prolog, Beutel: ' + speicher.join('|'));
   await p.click('#overlay'); await warte(700);
   await p.click('#introScreen'); await warte(700);
   pruefe(await p.isVisible('#prolog'), 'Firebase-Handy: nach dem Neuladen gleich PRESS START, der Prolog kommt');

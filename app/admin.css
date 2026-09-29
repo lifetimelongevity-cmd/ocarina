@@ -73,6 +73,13 @@ details { padding: 0; }
 .chips { display: flex; flex-wrap: wrap; gap: 8px; }
 .chips + .chips { margin-top: 8px; }
 
+/* Freigabe: der wichtigste Knopf des Tages, groß und oben */
+.frei { margin: 14px 0 4px; display: grid; gap: 8px; }
+.frei[hidden] { display: none; }
+.frei-btn { min-height: 56px; font-size: 18px; }
+.frei .hint { margin: 0; }
+.jetzt.nebel h1 { color: var(--muted); }
+
 /* Nächste Quest: erst lesen, unten klein der Notfall */
 .notfall { margin-top: 18px; display: grid; grid-template-columns: auto 1fr 1fr; gap: 8px; align-items: center; }
 .notfall:has(.btn.glanz:not([hidden])) { grid-template-columns: auto 1fr 1fr 1fr; }

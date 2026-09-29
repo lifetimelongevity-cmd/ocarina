@@ -543,7 +543,7 @@ Auf Wunsch des Nutzers: „am Anfang noch einen Ticken mehr Onboarding“ und me
 - **Karte (3.7, Richtung B):** gegangener Weg golden, Dennis läuft zur neuen Station, sobald er die Karte ansieht (Rückgängig springt ohne Laufen), der Nebel treibt.
 - **Stationstafel:** Tippen auf eine Station zeigt Ort, Höhe, Kilometer ab Bahnhof, die Quests mit Status und im Nebel nur „1 Prüfung im Nebel“. Zeile oder zweites Tippen öffnet die Quest. An der Hütte das Kästchen mit Code, Packs und fehlenden Ziffern. Die Tafel liegt immer auf der anderen Seite als die Station.
 - **Kartusche:** Höhe, Strecke und Höhenmeter bis zum Gipfel, Höhenprofil des echten Wegs mit den Stationen.
-- **GPS:** freiwillig per Knopf, nur solange die Karte offen ist. Feenlicht auf dem Weg, weit weg die Luftlinie, ohne Erlaubnis ein Hinweis.
+- **GPS:** freiwillig per Knopf, nur solange die Karte offen ist. Feenlicht auf dem Weg, weit weg die Luftlinie, ohne Erlaubnis ein Hinweis. Seit 30.09. gestrichen, siehe Abschnitt 16.
 - **Getestet:** `tests/karte.mjs`, `tests/nebel.mjs` prüft auch alle Stationstafeln, `tests/geraete.mjs` mit Prolog, Rundgang und Tafeln auf allen sechs Geräten.
 
 ---
@@ -594,3 +594,16 @@ Wünsche vom 28.09.: In der App alles etwas kleiner, weil es an manchen Stellen 
   4. bis 6. wie bisher: Kästchen mit den Packs, Packs und Ziffern gewinnen und verlieren, was am Ende dir gehört.
 - **Wieder neu:** Der Prolog merkt sich unter einem neuen Namen, dass er gesehen wurde. Wer die alten vier Tafeln schon auf seinem Handy gesehen hat, bekommt am Anfang des Spiels die neuen sechs.
 - **Geprüft:** `node app/engine.test.js`, `tests/karte.mjs` (neu: sechs Tafeln, Fee, Willkommen, Reise), `tests/geraete.mjs` (0 Probleme auf allen sechs Geräten), `tests/nebel.mjs`, `tests/selbst.mjs`, `tests/probe.mjs`. Die Stilprobe zeigt die neuen Tafeln ebenfalls.
+
+## 16. Freigabe von Hand, kein GPS (umgesetzt am 30.09.)
+
+Frage vom 29.09.: Dennis macht die erste Aufgabe am Freitag im Zug, die anderen am Samstag, aber jede erst, wenn er an der nächsten Station angekommen ist. Reicht GPS dafür? Entscheidung des Nutzers: Nein, die App hakt ohnehin noch manchmal, GPS kommt komplett raus. Der Quest Master gibt jede Quest von Hand frei, Dennis wandert dann auf der Karte zur Station.
+
+- **Tor je Quest:** Die erste offene Quest „kommt“, dran ist sie für Dennis erst, wenn der Quest Master sie im Admin freigibt (großer Knopf **Nächste Quest freigeben** unter „Jetzt“). Immer von Hand, auch im Zug fürs Tagebuch und zwischen zwei Quests an derselben Station. Gespeichert im Spiel als `frei`.
+- **Dennis vorher:** Die Quest bleibt im Nebel. Das HUD sagt „Weiter zur WIESE“ (am Anfang „Die Reise beginnt bald“, an derselben Station „Gleich geht es weiter“), die Nebel-Karte einen Satz dazu. Auf der Karte steht er noch an der Station der zuletzt entschiedenen Quest, der Nebel liegt vor ihm. Es gibt nichts zum Eintragen und nichts leuchtet in der Ausrüstung.
+- **Dennis bei der Freigabe:** Die Fee: „WEITER ZUR WIESE. Der Weg führt weiter zur WIESE (Wiese am Anstieg). Dort wartet die nächste Quest.“ Fenster zu, die Karte kommt, Dennis wandert zur Station, der Weg hinter ihm wird golden, am Ziel springt es zu QUESTS und die Quest tritt aus dem Nebel. Ohne Stationswechsel: „ES GEHT WEITER“, im Zug „DIE REISE BEGINNT“, dann gleich das Aufdecken. Ist sein Ergebnis-Fenster noch offen, kommt die Freigabe danach dran. War die App zu, läuft es nach PRESS START nach, in der Reihe der Momente als letztes.
+- **Zurück:** Die Freigabe steht im Verlauf des Admins (nur die der offenen Quest). Löschen oder Rückgängig holt sie bei Dennis still in den Nebel zurück, er steht wieder an der alten Station.
+- **Weg:** `config.karte.weg` und die `gps`-Stellen der Stationen bleiben für Höhe und Kilometer in der Kartusche. GPS-Knopf, Feenlicht, Standortabfrage und der Speicher `dq-gps` sind weg.
+- **Warum nicht GPS:** Es wäre genau genug gewesen (Stationen 500 m bis 2 km auseinander, Handy-GPS 5 bis 30 m, im Wald bis 60 m), aber die Stellen der Stationen sind geschätzt, GPS läuft nur bei offener App und nur mit Erlaubnis, und ein Tor, das manchmal nicht aufgeht, wäre am Berg ärgerlicher als ein Knopf.
+- **Geprüft:** `node app/engine.test.js`, `tests/freigabe.mjs` (neu), alle anderen Tests geben die Quests per Helfer frei.
+

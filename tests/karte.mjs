@@ -1,4 +1,4 @@
-// Karte und Prolog: Stationstafel, zweites Tippen, Höhe und Strecke, GPS (gefälscht), Dennis läuft, Prolog mit der Fee
+// Karte und Prolog: Stationstafel, zweites Tippen, Höhe und Strecke, Dennis läuft, Prolog mit der Fee (GPS seit 30.09. gestrichen)
 // Aufruf: cd app && python3 -m http.server 8765 &   dann   node tests/karte.mjs /tmp/shots
 import { chromium } from 'playwright';
 import fs from 'fs';
@@ -10,8 +10,8 @@ const ok = [], fehler = [];
 const pruefe = (bed, text) => (bed ? ok : fehler).push(text);
 const b = await chromium.launch();
 
-async function seite(url, { w = 852, h = 393, geo = null, erlaubt = true } = {}) {
-  const ctx = await b.newContext({ viewport: { width: w, height: h }, isMobile: true, hasTouch: true, ...(geo ? { geolocation: geo } : {}), permissions: erlaubt ? ['geolocation'] : [] });
+async function seite(url, { w = 852, h = 393 } = {}) {
+  const ctx = await b.newContext({ viewport: { width: w, height: h }, isMobile: true, hasTouch: true });
   await ctx.route('**firebasedatabase.app**', r => r.abort());
   const p = await ctx.newPage();
   p.on('pageerror', e => fehler.push(url + ': ' + e.message));
@@ -84,7 +84,7 @@ pruefe(!(await p.isVisible('#prolog')), 'Prolog kommt auf einem Handy nur einmal
 await ctx.close();
 
 // Stationstafel und zweites Tippen (Mitte des Tages, kleinster Bildschirm)
-({ ctx, p } = await seite('?demo&direkt', { w: 844, h: 340, geo: { latitude: 47.7270, longitude: 11.7650 } }));
+({ ctx, p } = await seite('?demo&direkt', { w: 844, h: 340 }));
 await zurKarte(p); await weg(p);
 await p.click('.mark[data-station="wiese"]'); await warte(300);
 const tafel = await p.textContent('#stationCard');
@@ -101,23 +101,10 @@ await p.click('#overlay'); await warte(300);
 await p.click('.sc-close'); await warte(200);
 pruefe(!(await p.$eval('#mapLegend', e => e.classList.contains('verdeckt'))), 'Tafel zu: Kartusche wieder sichtbar');
 
-// Höhe und Strecke, GPS am Weg
+// Höhe und Strecke: die Kartusche zeigt die Station, kein GPS-Knopf mehr
 pruefe((await legende(p)).startsWith('910 m | WALD'), 'Kartusche zeigt die Station: ' + await legende(p));
-await p.click('#gpsBtn'); await warte(1200);
-pruefe((await legende(p)).includes('GPS') && await p.isVisible('#mapGps'), 'GPS am Weg: ' + await legende(p));
-await p.screenshot({ path: `${OUT}/karte-gps.png` });
-await ctx.close();
-
-// GPS in München und ohne Erlaubnis
-({ ctx, p } = await seite('?demo&direkt', { geo: { latitude: 48.1402, longitude: 11.5586 } }));
-await zurKarte(p); await weg(p);
-await p.click('#gpsBtn'); await warte(1200);
-pruefe((await legende(p)).includes('Luftlinie') && !(await p.isVisible('#mapGps')), 'GPS weit weg: ' + await legende(p));
-await ctx.close();
-({ ctx, p } = await seite('?demo&direkt', { erlaubt: false }));
-await zurKarte(p); await weg(p);
-await p.click('#gpsBtn'); await warte(1500);
-pruefe((await legende(p)).includes('Einstellungen') && (await p.$eval('#gpsBtn', e => e.getAttribute('aria-pressed'))) === 'false', 'GPS verweigert: ' + await legende(p));
+pruefe(!(await p.$('#gpsBtn')) && !(await p.$('#mapGps')), 'Kein GPS mehr (30.09.)');
+await p.screenshot({ path: `${OUT}/karte-kartusche.png` });
 await ctx.close();
 
 // Dennis läuft: drei Siege im Wald, dann zur Aussicht

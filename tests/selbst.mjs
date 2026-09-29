@@ -28,6 +28,15 @@ await admin.$$eval('details', ds => ds.forEach(d => { d.open = true; }));
 const dennis = await seite('?direkt');
 await admin.click('#reset').catch(() => {});
 admin.on('dialog', d => d.accept());
+// Freigabe (30.09.): Der Quest Master gibt jede Quest frei. Dennis sieht die Fee, wandert auf der Karte zur Station,
+// dann tritt die Quest aus dem Nebel. Wartet, bis er wieder auf der Quest-Seite steht.
+async function frei(p = dennis) {
+  if (await admin.isVisible('#freigeben')) { await admin.click('#freigeben'); await warte(800); }
+  await zu(p);
+  for (let i = 0; i < 24; i++) { if (await p.$('#overlay[hidden]') && !(await p.isVisible('#mapWalker')) && await p.evaluate(() => document.querySelector('.face.active').dataset.page) === '1') break; await warte(250); }
+  await warte(500); await zu(p);
+}
+await frei();
 
 // Log-Buch: Knöpfe zum Eintragen erst, wenn alle Antworten besiegelt sind
 pruefe(!(await dennis.$('[data-ergebnis]')), 'Log-Buch: kein Ergebnis-Knopf vor den Antworten');
@@ -63,6 +72,7 @@ pruefe(await dennis.isVisible('[data-ergebnis="bestanden"]'), 'Nach dem Zurückn
 await admin.click('#undo'); await warte(700);
 pruefe((await fenster(dennis)).includes('PRÜFUNG BESTANDEN'), 'Rückgängig: Eintrag ist wieder da, Dennis sieht den Moment');
 await zu(dennis); await warte(1200);
+await frei();                                   // Die drei Zeichen freigeben
 
 // Die drei Zeichen bringen einen Fluch, verraten ihn aber nicht
 await dennis.evaluate(() => { const r = document.querySelector('.q-row[data-id="klingen"]'); r && r.click(); }); await warte(300);
@@ -73,6 +83,7 @@ pruefe(!(await dennis.$('#questCard [data-einsetzen="spruchrolle"]')), 'Bei Die 
 // Verpasste Momente: Dennis lädt neu, der Admin bucht, während der Startbildschirm offen ist
 await dennis.goto(BASE); await warte(600);
 await admin.click('#nextWin'); await warte(600);
+await admin.click('#freigeben'); await warte(400);   // Wirbel der Götter freigeben, Dennis holt beides nach
 pruefe(!(await fenster(dennis)), 'Startbildschirm: noch kein Fenster');
 await dennis.click('#introScreen'); await warte(1200);
 pruefe(!(await dennis.isVisible('#prolog')), 'Später am Tag kein Prolog');

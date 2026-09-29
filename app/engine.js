@@ -16,6 +16,8 @@
      zeiten:    { [questId]: Zeitstempel }             // wann die Quest entschieden wurde (für die Reihenfolge der Packs)
      stand:     Zeitstempel der letzten Änderung
      neustart:  Zeitstempel, wann der Quest Master zuletzt alles zurückgesetzt hat (Dennis' Handy fängt dann von vorn an)
+     frei:      { [questId]: Zeitstempel }               // Freigabe (30.09.): Der Quest Master gibt jede Quest von Hand frei, wenn Dennis
+                                                      // an ihrer Station ankommt. Bis dahin bleibt sie für Dennis im Nebel (next = null)
    }
 
    Packs zählen Schritt für Schritt in der Reihenfolge, in der sie passiert sind (zeiten, buchung.zeit),
@@ -31,7 +33,7 @@
   const list = x => (Array.isArray(x) ? x.filter(Boolean) : x && typeof x === "object" ? Object.values(x).filter(Boolean) : []);
 
   function emptyDoc() {
-    return { quests: {}, glanz: {}, zaehler: {}, schritte: {}, einsaetze: [], duelle: {}, buchungen: [], items: {}, zeiten: {}, stand: 0, neustart: 0 };
+    return { quests: {}, glanz: {}, zaehler: {}, schritte: {}, einsaetze: [], duelle: {}, buchungen: [], items: {}, zeiten: {}, stand: 0, neustart: 0, frei: {} };
   }
 
   function normalize(doc) {
@@ -51,7 +53,8 @@
       items: obj(d.items),
       zeiten: obj(d.zeiten),
       stand: Number(d.stand) || 0,
-      neustart: Number(d.neustart) || 0
+      neustart: Number(d.neustart) || 0,
+      frei: obj(d.frei)
     };
   }
 
@@ -187,7 +190,10 @@
       packs = Math.max(0, Math.min(max, roh));
     });
     const r = reihe(config);
-    const nextQuest = r.find(q => quests[q.id] === "offen") || null;
+    // Die erste offene Quest kommt als Nächstes (kommt). Dran (next) ist sie erst, wenn der Quest Master sie freigegeben hat.
+    // Ohne offene Quest ist der Tag zu Ende (ende).
+    const kommt = r.find(q => quests[q.id] === "offen") || null;
+    const nextQuest = kommt && doc.frei[kommt.id] ? kommt : null;
     const duelle = {};
     Object.keys(doc.duelle).forEach(k => { if (doc.duelle[k] === "sieg" || doc.duelle[k] === "niederlage") duelle[k] = doc.duelle[k]; });
     // Das Tor zum Gipfel: Ist die Quest mit „tor" dran und fehlt noch eine Ziffer, darf Dennis nicht antreten
@@ -198,6 +204,8 @@
       packs, max, kappung, geoeffnet, karten, items, anzahl, erhalten: erhalten.filter(id => items[id] !== "nicht"),
       ziffern, gekauft, zifferWeg, quests, glanz, treffer, schritte, eingesetzt, raube, duelle, tor,
       next: nextQuest ? nextQuest.id : null,
+      kommt: kommt ? kommt.id : null,
+      ende: !kommt,
       laufend: config.quests.filter(q => q.typ === "lauf" && quests[q.id] !== "offen").map(q => q.id),
       zaehler: { bestanden, verloren, erledigt: bestanden + verloren, gesamt: r.length },
       stand: doc.stand
