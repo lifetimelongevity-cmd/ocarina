@@ -30,7 +30,7 @@ const zurAusruestung = async p => { await p.evaluate(() => document.querySelecto
   await zurAusruestung(p);
   const fund = await fenster(p);
   pruefe(fund.includes('ERSTES ITEM GEFUNDEN') && fund.includes('Heiliger Beutel des Helden entpuppt sich als') && fund.includes('Wasserspritze'), 'Ausrüstung: Der Beutel entpuppt sich als Wasserspritze');
-  pruefe(fund.includes('Stärkere erspielst du dir'), 'Die Fee erklärt die Stufen');
+  pruefe(fund.includes('Stärkere landen im selben Feld'), 'Die Fee erklärt die Stufen');
   pruefe(await slot(p, 'spritze') === 'schatten' && await p.$eval('.slot[data-id="spritze"] .ic use', u => u.getAttribute('href')) === '#i-beutel', 'Vorher: im Feld der Schatten des Beutels');
   pruefe((await p.$$('#slotsGear .slot')).length === 5 && !(await p.$('.slot[data-id="beutel"]')), 'Ein Feld je Stufen-Reihe (29.09.): fünf Felder, keins für den Beutel');
   await p.screenshot({ path: `${OUT}/glanz-1-beutel-wird-spritze.png` });
@@ -84,7 +84,8 @@ await admin.screenshot({ path: `${OUT}/glanz-6-admin.png`, fullPage: true });
 await zu(dennis); await warte(1500);
 
 // Auge des Jägers: nur die stärkste Wasserwaffe leuchtet
-const hier = async () => dennis.$$eval('#questCard [data-einsetzen]', els => els.map(e => e.dataset.einsetzen));
+// Was Dennis hier mitnehmen kann, steht als Symbol neben AUSRÜSTEN (29.09.)
+const hier = async () => dennis.$$eval('#questCard .ruest-minis [data-item]', els => els.map(e => e.dataset.item));
 pruefe((await dennis.textContent('#hudNextName')) === 'Auge des Jägers', 'Weiter zum Auge des Jägers');
 pruefe(JSON.stringify(await hier()) === '["pistole_gross","spruchrolle"]', 'Auge: von den Wasserwaffen leuchtet nur die Große Wasserpistole (dazu der Fluch)');
 pruefe(await wasserFeld() === 'pistole_gross', 'Im selben Feld jetzt die große Pistole');

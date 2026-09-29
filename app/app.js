@@ -112,6 +112,10 @@
   let followNext = true;                        // Quest-Seite folgt der nächsten Quest, bis Dennis selbst etwas antippt
   let followHier = true;                        // Karte zeigt die Station der nächsten Quest, bis Dennis eine andere antippt
   let revealPending = null;                     // Quest, die nach dem Ergebnis-Fenster aus dem Nebel tritt
+  // Ausrüsten beim Spiel (29.09., 08-erlebnis-plan.md Abschnitt 16)
+  let ruestFuer = null;                         // Quest, für die die Ausrüstung rüstet (AUSRÜSTEN auf ihrer Quest-Karte), sonst von selbst
+  let cWahl = [], cWahlFuer = "", cNeu = null;  // was auf den C-Tasten liegt und noch nicht besiegelt ist, für welches Spiel, was gerade dazukam
+  let zuQuests = false;                         // nach dem Mitnehmen zurück zu QUESTS, sobald der Moment zu ist
   let audio;
 
   function tone(kind = "move") {
@@ -235,6 +239,30 @@
   const pruefungen = n => `${n} ${n === 1 ? "Prüfung" : "Prüfungen"}`;
   const aktiv = id => id === state.next || state.quests[id] === "laeuft";
 
+  /* Ausrüsten beim Spiel (29.09.): Vor dem Spiel legt Dennis in der Ausrüstung auf die C-Tasten, was er mitnimmt, und
+     besiegelt alles auf einmal (MITNEHMEN). Die Plakette sagt, wofür: die Quest, von der er mit AUSRÜSTEN kam, solange sie
+     aktiv ist, sonst die erste aktuelle, bei der er etwas mitnehmen kann oder schon hat, sonst die nächste.
+     Im Showdown rüstet er sich für jedes Duell einzeln. Schild und Rikes Segen nimmt er nicht mit, sie melden sich selbst. */
+  const kannMit = qid => qid ? E.mitnehmbar(C, state, qid).filter(id => !verborgen(id)) : [];
+  const schonDabei = qid => qid ? E.dabei(C, state, qid) : [];
+  function fuerQuest() {
+    if (!state) return null;
+    if (ruestFuer && aktiv(ruestFuer)) return ruestFuer;
+    return E.aktuelleQuests(C, state).find(qid => kannMit(qid).length || schonDabei(qid).length) || state.next;
+  }
+  // Das Spiel, um das es bei einer Quest gerade geht: im Showdown das aktuelle Duell
+  function spielVon(qid) {
+    const q = questById(qid), d = q && q.showdown ? E.aktuellesDuell(C, state) : null;
+    return { q, d, spiel: d ? questById(d.quest) : q, schluessel: qid + (d ? "#" + d.nr : "") };
+  }
+  // Die Wahl auf den C-Tasten gilt nur für ein Spiel und nur, solange alles darin noch mitnehmbar ist
+  function pruefeWahl() {
+    const fq = fuerQuest(), k = fq ? spielVon(fq).schluessel : "";
+    if (k !== cWahlFuer) { cWahl = []; cWahlFuer = k; }
+    const mit = kannMit(fq);
+    cWahl = cWahl.filter(id => mit.includes(id));
+  }
+
   // Was eine Quest gibt oder nimmt, als kleine Symbole
   function fxChips(effekt, gewonnen) {
     const out = [];
@@ -272,15 +300,16 @@
     document.querySelectorAll(".q-row").forEach(b => b.addEventListener("click", () => { followNext = b.dataset.id === state.next; selectQuest(b.dataset.id); }));
     $("#questCard").addEventListener("click", e => {
       if (e.target.closest("[data-logbuch]")) return logbuch.oeffnen();
-      const t = e.target.closest("[data-ergebnis], [data-schritt], [data-duell], [data-einsetzen], [data-tor]");
+      const t = e.target.closest("[data-ergebnis], [data-schritt], [data-duell], [data-ausruesten], [data-tor]");
       if (!t) return;
       if (t.dataset.tor) schwurTor(+t.dataset.tor, t.dataset.weg);
       else if (t.dataset.ergebnis) schwurErgebnis(sel[1], t.dataset.ergebnis);
       else if (t.dataset.schritt) schwurSchritt(sel[1], t.dataset.schritt);
       else if (t.dataset.duell) schwurDuell(t.dataset.duell, t.dataset.v);
-      else schwurEinsatz(t.dataset.einsetzen, t.dataset.quest);
+      else ausruesten(t.dataset.ausruesten);
     });
-    $("#itemBox").addEventListener("click", e => { const b = e.target.closest("[data-einsetzen]"); if (b) schwurEinsatz(b.dataset.einsetzen); });
+    $("#itemBox").addEventListener("click", e => { if (e.target.closest("[data-mitnehmen]")) schwurMitnehmen(); });
+    document.querySelectorAll(".c-taste").forEach(b => b.addEventListener("click", () => { if (b.dataset.id) tippeFeld(b.dataset.id); else tone("move"); }));
 
     // Karte: Weg durch die Stationen, eine Marke pro Station. Tippen zeigt die Stationstafel, zweites Tippen die Quest.
     $("#mapRoute").setAttribute("d", pfad(ABSCHNITTE.length));
@@ -304,14 +333,14 @@
       const rune = it.gruppe === "faehigkeit";
       return `<button type="button" class="slot${rune ? " rune" : ""}" data-id="${it.id}"${it.feld ? ` data-feld="${it.feld}"` : ""} style="--i:${i};--c:${it.farbe}"><span class="well">`
         + `${rune ? useSvg("i-rune", "rune-ring") : ""}${useSvg(it.symbol, "ic")}<b class="count"></b></span>`
-        + `<span class="funken" aria-hidden="true"></span><span class="neu-tag" aria-hidden="true">NEU</span></button>`;
+        + `<span class="funken" aria-hidden="true"></span><span class="neu-tag" aria-hidden="true">NEU</span><span class="haken" aria-hidden="true">${useSvg("i-check")}</span></button>`;
     };
     // Stufen (Wasserwaffen, Nadeln) teilen sich ein Feld (29.09.): nur die erste Stufe bekommt einen Platz
     const gear = C.items.filter(it => it.gruppe !== "faehigkeit" && (!it.feld || C.items.find(x => x.feld === it.feld) === it));
     $("#slotsGear").innerHTML = gear.map(slot).join("");
     $("#slotsGear").style.setProperty("--spalten", gear.length > 6 ? 4 : 3);
     $("#slotsSkill").innerHTML = C.items.filter(it => it.gruppe === "faehigkeit").map(slot).join("");
-    document.querySelectorAll(".slot").forEach(b => b.addEventListener("click", () => selectItem(b.dataset.id)));
+    document.querySelectorAll(".slot").forEach(b => b.addEventListener("click", () => tippeFeld(b.dataset.id)));
   }
 
   /* ---------- Weg auf der Karte ---------- */
@@ -428,11 +457,14 @@
       if (ein.tor) unten = torTafel(ein.tor) + unten;
       card.classList.toggle("showdown", !!ein.duelle);
     }
+    const ruest = ausruestenHtml(id);
+    // Eine Farbe pro Schritt: Solange AUSRÜSTEN dran ist, sind die Knöpfe zum Eintragen nur umrandet
+    card.classList.toggle("vor-dem-spiel", ruest.vor);
     card.innerHTML = `
       <div class="qc-head">${questIcon(q, st, false)}<div><p class="tb-title">${esc(q.name)}</p></div></div>
       <p class="tb-text">${esc(q.text)}</p>
       ${q.logbuch && isNext ? logbuchKnopf() : ""}
-      ${einsatzHtml(id)}
+      ${ruest.html}
       ${unten}`;
     // Kleine Handys: Ist ein Knopf zum Eintragen unter dem Rand, rollt die Karte hin (bis zum letzten, sonst fehlt VERLOREN)
     const knopf = card.querySelector(".duell.jetzt") || [...card.querySelectorAll(".qc-eintrag")].pop();
@@ -489,20 +521,23 @@
       + knopf(nr, "busse", "BUSSE", "lose") + `</li>`).join("")}</ol></div>`;
   }
 
-  // Einsetzbar: nur bei der Quest, die gerade dran ist oder läuft. Leuchtet, was Dennis dabeihat.
-  // Schon Eingesetztes steht darunter, auch bei erledigten Quests.
-  function einsatzHtml(id) {
-    const schon = state.eingesetzt[id] || [];
-    const teile = [];
-    if (aktiv(id) && !(state.tor && state.tor.quest === id)) {
-      const hier = E.einsetzbar(C, state, id).filter(i => state.items[i] === "besitz");
-      if (hier.length) teile.push(`<div class="helps"><span class="fx-head">EINSETZBAR</span><span class="helps-row">${hier.map(i => {
-        const x = itemById(i);
-        return `<button type="button" class="well mini usable" data-einsetzen="${i}" data-quest="${id}" style="--c:${x.farbe}" aria-label="${esc(x.name)} einsetzen" title="${esc(x.name)}">${useSvg(x.symbol)}${x.stapel ? `<b class="count">${state.anzahl[i]}</b>` : ""}</button>`;
-      }).join("")}</span></div>`);
+  // Ausrüsten beim Spiel (29.09.): Bei der Quest, die dran ist oder läuft, steht AUSRÜSTEN mit den Symbolen dessen, was hilft.
+  // Ist schon etwas dabei, steht DABEI mit den Namen (antippen führt wieder zur Ausrüstung). Bei erledigten Quests steht,
+  // was dabei war. vor: Der nächste Schritt ist das Ausrüsten.
+  const dabeiChips = ids => ids.filter((id, i) => ids.indexOf(id) === i).map(i => { const x = itemById(i);
+    return `<span class="chip"><svg aria-hidden="true" style="color:${x.farbe}"><use href="#${x.symbol}"></use></svg>${esc(x.kurz || x.name)}</span>`; }).join("");
+  function ausruestenHtml(id) {
+    if (!aktiv(id)) {
+      const schon = state.eingesetzt[id] || [];
+      return { vor: false, html: schon.length ? `<p class="dabei-zeile"><span class="fx-lbl">DABEI</span><span class="fx">${dabeiChips(schon)}</span></p>` : "" };
     }
-    if (schon.length) teile.push(`<p class="used-line">${useSvg("i-star")}Eingesetzt: ${schon.map(i => esc(itemById(i).name)).join(", ")}</p>`);
-    return teile.join("");
+    const mit = kannMit(id), schon = schonDabei(id);
+    const minis = ids => ids.map(i => { const x = itemById(i); return `<span class="well mini usable" data-item="${i}" style="--c:${x.farbe}">${useSvg(x.symbol)}</span>`; }).join("");
+    if (schon.length) return { vor: false, html: `<button type="button" class="dabei-zeile" data-ausruesten="${id}" aria-label="Dabei: ${esc(schon.map(i => itemById(i).name).join(", "))}. Zur Ausrüstung">`
+      + `<span class="fx-lbl">DABEI</span><span class="fx">${dabeiChips(schon)}</span>${mit.length ? `<span class="noch">+${minis(mit)}</span>` : ""}</button>` };
+    if (!mit.length) return { vor: false, html: "" };
+    return { vor: true, html: `<div class="ruesten"><button type="button" class="qc-action" data-ausruesten="${id}">${useSvg("i-beutel")}AUSRÜSTEN</button>`
+      + `<span class="ruest-minis" aria-hidden="true">${minis(mit)}</span></div>` };
   }
 
   function logbuchKnopf() {
@@ -765,30 +800,61 @@
   }
   document.addEventListener("visibilitychange", () => { if (document.hidden) gpsStopp(); else if (page === 0) gpsStart(); });
 
-  // Ausrüstung: vier Zustände, überall gleich (08-erlebnis-plan.md, 3.8 und 3.12):
-  // Schatten = noch nicht erspielt, Farbe mit Goldrand = deins, leuchtet = jetzt einsetzbar, grau = verbraucht oder verloren.
+  // Ausrüstung: Zustände, überall gleich (08-erlebnis-plan.md, 3.8, 3.12 und 16): Schatten = noch nicht erspielt,
+  // Farbe mit Goldrand = deins, leuchtet = hilft beim Spiel, für das gerade gerüstet wird, Haken = liegt auf einer C-Taste
+  // oder ist schon dabei, grau = verbraucht oder verloren.
   function renderEquip() {
-    const jetzt = E.jetztEinsetzbar(C, state);
-    if (!sel[2]) sel[2] = [...jetzt][0] || state.erhalten[state.erhalten.length - 1] || START[0];
+    pruefeWahl();
+    const fq = fuerQuest(), mit = new Set(kannMit(fq)), schon = schonDabei(fq);
+    if (!sel[2]) sel[2] = [...mit][0] || state.erhalten[state.erhalten.length - 1] || START[0];
     sel[2] = slotId(sel[2]);
     document.querySelectorAll(".slot").forEach(b => {
       if (b.dataset.feld) { b.dataset.id = feldZeigt(b.dataset.feld); b.style.setProperty("--c", itemById(b.dataset.id).farbe); }
       const id = b.dataset.id, st = state.items[id], x = itemSicht(id), schatten = verborgen(id);
+      const gewaehlt = !schatten && cWahl.includes(id), drin = gewaehlt || (!schatten && schon.includes(id));
       b.className = `slot${b.classList.contains("rune") ? " rune" : ""} st-${schatten ? "nicht" : st}${schatten ? " schatten" : ""}${entgangen(id) ? " entgangen" : ""}`
-        + `${!schatten && jetzt.has(id) ? " usable" : ""}${neuMarke.has(id) ? " neu" : ""}${fundLaeuft.has(id) ? " fund" : ""}${sel[2] === id ? " is-selected" : ""}`;
+        + `${!schatten && mit.has(id) && !gewaehlt ? " usable" : ""}${drin ? " dabei" : ""}${neuMarke.has(id) ? " neu" : ""}${fundLaeuft.has(id) ? " fund" : ""}${sel[2] === id ? " is-selected" : ""}`;
       b.querySelector(".ic use").setAttribute("href", "#" + x.symbol);
       b.querySelector(".count").textContent = x.stapel && !schatten && st === "besitz" ? "×" + state.anzahl[id] : "";
-      b.setAttribute("aria-label", `${x.name}, ${schatten ? "noch nicht erspielt" : { besitz: jetzt.has(id) ? "jetzt einsetzbar" : "im Beutel", verloren: "verloren", verbraucht: "verbraucht" }[st]}`);
+      b.setAttribute("aria-label", `${x.name}, ${schatten ? "noch nicht erspielt" : { besitz: gewaehlt ? "auf einer C-Taste" : drin ? "dabei" : mit.has(id) ? "hilft jetzt, tippen nimmt es mit" : "im Beutel", verloren: "verloren", verbraucht: "verbraucht" }[st]}`);
     });
+    renderCTasten(fq, schon);
     renderItemBox(sel[2]);
   }
 
-  // Textbox zum gewählten Feld: Name, Beschreibung und ein Satz dazu, woher es kommt oder wo es jetzt hilft.
-  // Eine Quest steht nur da, wenn sie schon aus dem Nebel getreten ist.
+  // Plakette und C-Tasten: wofür Dennis sich rüstet und was er mitnimmt. Besiegeltes steht fest, Gewähltes lässt sich zurücklegen.
+  const C_NAME = ["links", "unten", "rechts"];
+  function renderCTasten(fq, schon) {
+    const auf = [...schon, ...cWahl].slice(0, 3);
+    const zeigen = !!fq && (auf.length > 0 || kannMit(fq).length > 0);
+    $("#ruestFuer").hidden = !zeigen;
+    $("#cTasten").hidden = !zeigen;
+    $("#charWindow").classList.toggle("ruesten", zeigen);
+    if (!zeigen) return;
+    const { d, spiel } = spielVon(fq);
+    $("#ruestFuer").textContent = d ? `FÜR DUELL ${d.nr} · ${spiel.name.toUpperCase()}` : `FÜR ${spiel.name.toUpperCase()}`;
+    document.querySelectorAll(".c-taste").forEach((b, i) => {
+      const id = auf[i], x = id ? itemById(id) : null, fest = !!id && schon.includes(id);
+      b.dataset.id = id || "";
+      b.className = `c-taste ${["l", "d", "r"][i]}${id ? "" : " leer"}${fest ? " fest" : ""}${id && id === cNeu ? " neu" : ""}`;
+      b.style.setProperty("--c", x ? x.farbe : "");
+      b.querySelector("use").setAttribute("href", "#" + (x ? x.symbol : "i-card"));
+      b.setAttribute("aria-label", !x ? `C-Taste ${C_NAME[i]}, frei` : `${x.name}, ${fest ? "dabei" : "nochmal tippen legt es zurück"}`);
+    });
+    cNeu = null;
+  }
+
+  // Textbox zum gewählten Feld: Name, was es bewirkt, und ein Satz dazu, was es jetzt heißt (hilft hier, dabei, meldet sich
+  // selbst) oder woher es kommt. Eine Quest steht nur da, wenn sie schon aus dem Nebel getreten ist.
+  // Rechts ist immer Platz für MITNEHMEN, damit der Text nicht umbricht, wenn der Knopf kommt oder geht.
   function renderItemBox(id) {
     const box = $("#itemBox");
-    const x = itemSicht(id), st = state.items[id], jetzt = E.jetztEinsetzbar(C, state), schatten = verborgen(id), q = quelle(id);
+    const x = itemSicht(id), st = state.items[id], schatten = verborgen(id), q = quelle(id);
+    const fq = fuerQuest(), mit = kannMit(fq), schon = schonDabei(fq);
     const em = qid => `<em>${esc(questById(qid).name)}</em>`;
+    // Beim Fluch, der hier hilft, steht statt des allgemeinen Satzes, was er hier bringt (so passt alles in zwei Zeilen)
+    const v = !schatten && x.dieb && fq && (cWahl.includes(id) || mit.includes(id)) ? E.fluchVorteil(C, state, fq) : null;
+    const satz = v ? `Hier: ${v.text}` : x.text;
     let tag = "", extra = "";
     if (schatten) {
       const wie = q && q.glanz && (q.glanz.items || []).includes(id) ? "mit einem Glanzsieg " : "";
@@ -801,11 +867,12 @@
       tag = `<span class="tag open">VERBRAUCHT</span>`;
       const bei = Object.keys(state.eingesetzt).filter(k => state.eingesetzt[k].includes(id)).pop();
       if (bei) extra = `Eingesetzt bei ${em(bei)}.`;
-    } else if (jetzt.has(id)) {
-      tag = `<span class="tag now">JETZT</span>`;
-      const wo = E.aktuelleQuests(C, state).filter(qid => E.einsetzbar(C, state, qid).includes(id));
-      extra = x.tor ? "Einsetzbar am Tor zum Gipfel." : `Einsetzbar bei ${wo.map(em).join(" und ")}.`;
-    } else if (E.abgeloest(C, state, id)) extra = `Abgelöst von: ${esc(itemById(E.abgeloest(C, state, id)).name)}.`;
+    } else if (cWahl.includes(id)) extra = v ? "Kommt mit." : `Kommt mit. Nochmal tippen legt es zurück.`;
+    else if (schon.includes(id)) extra = `Dabei bei ${em(spielVon(fq).spiel.id)}.`;
+    else if (mit.includes(id)) extra = v ? "Jeder Fluch hat seinen Preis." : "Hilft hier. Tippen nimmt es mit.";
+    else if (x.rettung) extra = "Meldet sich, wenn du ein Duell verlierst.";
+    else if (x.tor) extra = "Meldet sich am Tor zum Gipfel.";
+    else if (E.abgeloest(C, state, id)) extra = `Abgelöst von: ${esc(itemById(E.abgeloest(C, state, id)).name)}.`;
     else if (q && state.quests[q.id] !== "offen") extra = `Erbeutet bei ${em(q.id)}${state.glanz[q.id] && (q.glanz.items || []).includes(id) ? " (Glanzsieg)" : ""}.`;
     else if (START.includes(id)) extra = "Dein Beutel hat sich als Spritze entpuppt.";
     // Stufen in einem Feld: welche Stufe gerade drin ist
@@ -814,17 +881,39 @@
     box.style.setProperty("--c", x.farbe);
     box.classList.toggle("schatten", schatten);
     box.innerHTML = `<span class="ib-stage">${useSvg(x.symbol, "ib-icon")}</span><p class="tb-title">${esc(x.name)}${tag}</p>`
-      + `<p class="tb-text">${esc(x.text)}${extra ? ` <span class="ib-use">${extra}</span>` : ""}</p>`
-      + (!schatten && jetzt.has(id) ? `<button type="button" class="qc-action ib-einsetzen" data-einsetzen="${id}">${useSvg("i-seal")}EINSETZEN</button>` : "");
-    box.classList.toggle("mit-knopf", !schatten && jetzt.has(id));
+      + `<p class="tb-text">${esc(satz)}${extra ? ` <span class="ib-use">${extra}</span>` : ""}</p>`
+      + `<button type="button" class="qc-action ib-mitnehmen" data-mitnehmen${cWahl.length ? "" : " hidden"}>${useSvg("i-seal")}MITNEHMEN · ${cWahl.length}</button>`;
   }
 
+  // Pfeiltasten: nur auswählen
   function selectItem(id, play = true) {
     sel[2] = id;
     if (play && neuMarke.delete(id)) { renderEquip(); tone("move"); return; }   // Antippen nimmt die Marke NEU
     document.querySelectorAll(".slot").forEach(b => b.classList.toggle("is-selected", b.dataset.id === id));
     renderItemBox(id);
     if (play) tone("move");
+  }
+  // Tippen: Was hier hilft, kommt auf die nächste freie C-Taste, liegt es schon dort, geht es zurück in den Beutel.
+  // Alles andere zeigt nur, was es ist.
+  function tippeFeld(id) {
+    const fq = fuerQuest(), schon = schonDabei(fq);
+    sel[2] = id;
+    neuMarke.delete(id);
+    if (cWahl.includes(id)) { cWahl = cWahl.filter(x => x !== id); tone("move"); }
+    else if (kannMit(fq).includes(id) && schon.length + cWahl.length < 3) { cWahl.push(id); cNeu = id; tone("confirm"); }
+    else tone("move");
+    renderEquip();
+  }
+
+  // AUSRÜSTEN auf der Quest-Karte: zur Ausrüstung, gerüstet wird für diese Quest. Gewählt ist, was als Erstes hilft.
+  function ausruesten(qid) {
+    if (!state || !aktiv(qid)) return;
+    ruestFuer = qid;
+    pruefeWahl();
+    const mit = kannMit(qid), schon = schonDabei(qid);
+    sel[2] = mit[0] || schon[0] || sel[2];
+    renderEquip();
+    if (page !== 2) goTo(2); else tone("move");
   }
 
   /* Funde: Was seit dem letzten Besuch dazugekommen ist, tritt beim nächsten Besuch der Ausrüstung aus dem Schatten.
@@ -972,9 +1061,11 @@
       b: prevDoc.buchungen.filter(b => !nB.has(b.id))
     };
     const vorwaerts = fertig.length || gestartet.length || treffer.length || schritte.length || neueE.length || neueD.length || neueB.length;
+    // Mitgenommen oder eingesetzt, und sonst nichts Großes: eigener Moment (AUSGERÜSTET, FLUCH GESPROCHEN, Schild)
+    const eMoment = !fertig.length && !gestartet.length && !treffer.length && !schritte.length && !neueB.some(b => b.ziffer) && neueE.length > 0;
+    const eIds = new Set(neueE.map(e => e.item));
     // Fluch gesprochen (29.09.): Der Moment zeigt erst den Vorteil, dann würfelt der Schattendieb. Die Packs nennt erst er.
-    const fluchE = !fertig.length && !gestartet.length && !treffer.length && !schritte.length && !neueB.some(b => b.ziffer) && neueE.length
-      && itemById(neueE[neueE.length - 1].item).dieb ? neueE[neueE.length - 1] : null;
+    const fluchE = eMoment ? neueE.find(e => itemById(e.item).dieb) || null : null;
     // Nur ein Pack geöffnet (29.09.): eigener kleiner Moment
     const nurOffen = !fertig.length && !gestartet.length && !treffer.length && !schritte.length && !neueE.length && !neueD.length
       && neueB.length && neueB.every(b => b.offen);
@@ -987,7 +1078,7 @@
     if (dPacks && !fluchE && !nurOffen) lines.push(`<li class="${dPacks > 0 ? "plus" : "minus"}"><span class="ri">${cardSvg()}</span>${dPacks > 0 ? "+" : "−"}${Math.abs(dPacks)} ${packsWort(dPacks)}</li>`);
     // Reichten die geschlossenen Packs nicht, zahlt er in Karten (29.09.)
     const dKarten = (next.karten || 0) - (prev.karten || 0);
-    if (dKarten > 0 && !fluchE) lines.push(`<li class="minus"><span class="ri">${cardSvg("offen")}</span><span>−${dKarten} ${dKarten === 1 ? "Karte" : "Karten"}: Mehr geschlossene Packs hattest du nicht. Der Bund nimmt sich ${dKarten === 1 ? "deine beste Karte" : `je deine beste aus ${dKarten} geöffneten Packs`}.</span></li>`);
+    if (dKarten > 0 && !fluchE) lines.push(`<li class="minus"><span class="ri">${cardSvg("offen")}</span><span>−${dKarten} ${dKarten === 1 ? "Karte, deine beste" : "Karten, je deine beste"}. Geschlossene Packs hattest du keine mehr.</span></li>`);
     next.ziffern.forEach((v, i) => {
       if (v != null && prev.ziffern[i] == null) lines.push(`<li class="plus"><span class="ri"><span class="tumbler known" style="--hud-h:30px">${v}</span></span>Ziffer ${i + 1}: ${v}</li>`);
     });
@@ -997,18 +1088,20 @@
         const d = next.anzahl[it.id] - prev.anzahl[it.id];
         if (d > 0 && it.gefunden) lines.push(fundZeile(it, d, erstmals));
         else if (d > 0) lines.push(itemZeile(it.id, `+${d} ${esc(it.name)}`, "plus", erstmals));
-        if (d < 0) lines.push(itemZeile(it.id, `${esc(it.name)} eingesetzt`, "minus"));
+        if (d < 0 && !eIds.has(it.id)) lines.push(itemZeile(it.id, `${esc(it.name)} eingesetzt`, "minus"));
         return;
       }
       if (prev.items[it.id] !== "besitz" && next.items[it.id] === "besitz") lines.push(itemZeile(it.id, esc(it.name), "plus", erstmals));
       if (prev.items[it.id] === "besitz" && next.items[it.id] === "verloren") lines.push(itemZeile(it.id, `${esc(it.name)} weg`, "minus"));
-      if (prev.items[it.id] === "besitz" && next.items[it.id] === "verbraucht") lines.push(itemZeile(it.id, `${esc(it.name)} eingesetzt`, "minus"));
+      if (prev.items[it.id] === "besitz" && next.items[it.id] === "verbraucht" && !eIds.has(it.id)) lines.push(itemZeile(it.id, `${esc(it.name)} eingesetzt`, "minus"));
     });
-    // Nicht verbrauchende Einsätze (Kreisel, Pistole …) bekommen trotzdem eine Zeile
-    neueE.forEach(e => { if (!itemById(e.item).einmalig) lines.push(itemZeile(e.item, `${esc(itemById(e.item).name)} eingesetzt`, "plus")); });
+    // Einsätze: Was Dennis mitnimmt, holt er sich beim Bund. Schild und Segen setzt er ein. Kommen sie mit anderem (nachgeholt),
+    // stehen sie als Zeilen darunter, sonst baut der eigene Moment sie unten.
+    const eZeile = e => { const x = itemById(e.item), ein = x.rettung || x.tor; return itemZeile(e.item, `${esc(x.name)} ${ein ? "eingesetzt" : "mitgenommen"}`, ein ? "minus" : "plus"); };
+    if (!eMoment) neueE.forEach(e => lines.push(eZeile(e)));
     // Packs zählen nur zwischen 0 und max (engine.js): sagen, warum Dennis weniger verloren hat als gedacht.
     // Über max kommt er mit den Quests nicht (alle Siege zusammen sind genau max), nur mit einem Bonus des Quest Masters.
-    if (next.kappung.unten > prev.kappung.unten && !fluchE) lines.push(`<li><span class="ri">${cardSvg("empty")}</span>${prev.packs || dKarten > 0 ? "Mehr hattest du nicht." : "Du hattest keine Packs mehr, die du verlieren konntest."}</li>`);
+    if (next.kappung.unten > prev.kappung.unten && !fluchE) lines.push(`<li><span class="ri">${cardSvg("empty")}</span>Mehr Packs hattest du nicht.</li>`);
 
     // Neue Packs und Ziffern im HUD aufblinken lassen
     document.querySelectorAll("#packRow .ic-card").forEach((c, i) => c.classList.toggle("gain", i >= prev.packs && i < next.packs));
@@ -1048,19 +1141,32 @@
       const ic = weg === "segen" ? `<span class="ri-big" style="color:${torSegen().farbe}">${useSvg(torSegen().symbol)}</span>` : `<span class="ri-big lock">${useSvg("i-lock")}</span>`;
       head = `${ic}<p class="big">${weg === "busse" ? "BUSSE BESTANDEN" : weg === "segen" ? "RIKES SEGEN" : "ZIFFER GEKAUFT"}</p><p class="sub">${esc(b.grund || "")}</p>`;
       if (prev.tor && !next.tor && next.next) lines.push(`<li class="plus"><span class="ri">${useSvg("z-triforce")}</span>Das Tor ist offen. Der Bund erwartet dich.</li>`);
-    } else if (fluchE) {
-      const it = itemById(fluchE.item), v = E.fluchVorteil(C, prev, fluchE.quest);
-      const raub = (next.raube.find(x => x.id === fluchE.id) || {}).raub || 0;
-      klang = "zauber";
-      head = `<span class="ri-big" style="color:${it.farbe}">${useSvg(it.symbol)}</span><p class="big">FLUCH GESPROCHEN</p><p class="sub">bei ${esc(questById(fluchE.quest).name)}</p>`;
-      if (v) lines.unshift(`<li class="plus"><span class="ri">${useSvg("i-check")}</span><span>${v.duell ? `Duell ${v.duell}, ${esc(questById(v.quest).name)}: ` : ""}${esc(v.text)}</span></li>`);
-      const weg = Math.max(0, prev.packs - next.packs), karten = Math.max(0, (next.karten || 0) - (prev.karten || 0));
-      lines.push(`<li class="dieb kommt fertig ${weg || karten ? "minus" : "plus"}"><span class="ri dieb-ic">${useSvg("i-dieb")}</span>`
-        + `<span class="dieb-txt">${esc(diebSatz(raub, weg, karten))}</span><b class="dieb-zahl" aria-hidden="true">${raub ? "−" + raub : "0"}</b></li>`);
-    } else if (neueE.length) {
-      const e = neueE[neueE.length - 1], it = itemById(e.item);
-      klang = "zauber";
-      head = `<span class="ri-big" style="color:${it.farbe}">${useSvg(it.symbol)}</span><p class="big">${esc(it.name.toUpperCase())}</p><p class="sub">eingesetzt bei ${esc(questById(e.quest).name)}</p>`;
+    } else if (eMoment) {
+      // Ausrüsten beim Spiel (29.09.): Mitgenommenes je eine Zeile, beim Fluch danach Vorteil und Schattendieb.
+      // Nur ein Fluch: FLUCH GESPROCHEN wie bisher. Nur der Schild: noch einmal spielen.
+      const spielName = e => { const dq = e.duell && questById(e.quest).showdown ? E.showdownDuelle(C, prev).find(x => x.nr === e.duell) : null;
+        return dq ? `Duell ${dq.nr} · ${questById(dq.quest).name}` : questById(e.quest).name; };
+      const mitE = neueE.filter(e => !itemById(e.item).rettung && !itemById(e.item).tor), andere = mitE.filter(e => e !== fluchE);
+      const e0 = neueE[neueE.length - 1], x0 = itemById(e0.item);
+      klang = fluchE || !mitE.length ? "zauber" : "side";
+      if (!mitE.length) {
+        head = `<span class="ri-big" style="color:${x0.farbe}">${useSvg(x0.symbol)}</span><p class="big">${esc(x0.name.toUpperCase())}</p><p class="sub">${esc(spielName(e0))}</p>`;
+        lines.push(`<li><span class="ri"></span><span>Spiel noch einmal und trag dann das neue Ergebnis ein.</span></li>`);
+      } else if (fluchE && !andere.length) {
+        const it = itemById(fluchE.item);
+        head = `<span class="ri-big" style="color:${it.farbe}">${useSvg(it.symbol)}</span><p class="big">FLUCH GESPROCHEN</p><p class="sub">${esc(spielName(fluchE))}</p>`;
+      } else {
+        head = `<span class="ri-big">${useSvg("i-beutel")}</span><p class="big">AUSGERÜSTET</p><p class="sub">${esc(spielName(mitE[0]))}</p>`;
+        andere.forEach(e => lines.push(itemZeile(e.item, esc(itemById(e.item).name), "plus")));
+        if (!fluchE) lines.push(`<li class="dim"><span class="ri"></span><span>Hol ${andere.length === 1 ? "es" : "sie"} dir beim Bund.</span></li>`);
+      }
+      if (fluchE) {
+        const v = E.fluchVorteil(C, prev, fluchE.quest), raub = (next.raube.find(x => x.id === fluchE.id) || {}).raub || 0;
+        if (v) lines.push(`<li class="plus"><span class="ri" style="color:${itemById(fluchE.item).farbe}">${useSvg(itemById(fluchE.item).symbol)}</span><span>${esc(v.text)}</span></li>`);
+        const weg = Math.max(0, prev.packs - next.packs), karten = Math.max(0, (next.karten || 0) - (prev.karten || 0));
+        lines.push(`<li class="dieb kommt fertig ${weg || karten ? "minus" : "plus"}"><span class="ri dieb-ic">${useSvg("i-dieb")}</span>`
+          + `<span class="dieb-txt">${esc(diebSatz(raub, weg, karten))}</span><b class="dieb-zahl" aria-hidden="true">${raub ? "−" + raub : "0"}</b></li>`);
+      }
     } else if (neueD.length) {
       const k = neueD[0], sieg = next.duelle[k] === "sieg";
       klang = sieg ? "plus" : "minus";
@@ -1082,7 +1188,10 @@
     if (fq) fensterQuest = { id: fq.id, status: next.quests[fq.id] };
     const zeigen = () => {
       melody(klang);
-      showOverlay({ head, lines: lines.join(""), next: next.next || !fertig.length ? "" : "Zum Kästchen", gross }, !opt.kette && (fertig.length || gestartet.length) ? showNextQuest : null);
+      // Nach dem Mitnehmen geht es zurück zu QUESTS: dort wird gespielt und eingetragen
+      const danach = !opt.kette && (fertig.length || gestartet.length) ? showNextQuest
+        : eMoment && zuQuests ? () => { zuQuests = false; if (page !== 1) goTo(1); } : null;
+      showOverlay({ head, lines: lines.join(""), next: next.next || !fertig.length ? "" : "Zum Kästchen", gross }, danach);
       renderHud(); renderQuests();
     };
     if (fluchE && !STILL.matches) {
@@ -1209,11 +1318,11 @@
     const oeffnen = s.packs > 0 ? `<button type="button" class="qc-eintrag win kauf" data-oeffnen>PACK ÖFFNEN</button>` : "";
     showOverlay({
       head: `<span class="ri-big">${cardSvg()}</span><p class="big">${s.packs} ${s.packs === 1 ? "PACK" : "PACKS"}</p><p class="sub">geschlossen</p>`,
-      lines: `<li><span class="ri">${cardSvg()}</span><span>${s.packs} geschlossen: Damit zahlst du, wenn du verlierst.</span>${oeffnen}</li>`
+      lines: `<li><span class="ri">${cardSvg()}</span><span>${s.packs} geschlossen</span>${oeffnen}</li>`
         + (offen ? `<li><span class="ri">${cardSvg("offen")}</span><span>${offen} geöffnet</span></li>` : "")
         + (s.karten ? `<li class="minus"><span class="ri">${cardSvg("offen")}</span><span>${s.karten} ${s.karten === 1 ? "Karte" : "Karten"} an den Bund</span></li>` : "")
         + `<li><span class="ri">${cardSvg("empty")}</span><span>${bund} beim Bund</span></li>`
-        + `<li class="dim"><span class="ri"></span><span>Keine geschlossenen mehr? Dann zahlst du mit Karten: pro Pack deine beste aus einem geöffneten.</span></li>`,
+        + `<li class="dim"><span class="ri"></span><span>Ohne geschlossene Packs zahlst du mit deiner besten Karte.</span></li>`,
       next: ""
     });
   }
@@ -1294,9 +1403,8 @@
       funde();                                   // erster Besuch: alles, was da ist, gilt als gesehen
       aufleuchten([id]);
       setTimeout(() => coach([
-        [$("#slotsGear").parentElement, "Hier landet, was du dir erspielst. Die Schatten zeigen, was noch zu holen ist."],
-        [$("#slotsSkill").parentElement, "Hier ruhen Flüche und Segen, sobald du sie dir verdient hast."],
-        [$(".equip-body"), "Was leuchtet, kannst du bei der aktuellen Quest einsetzen: antippen, dann das Siegel halten."],
+        [$("#slotsGear").parentElement, "Hier landet, was du dir erspielst. Schatten zeigen, was noch fehlt."],
+        [$(".equip-body"), "Vor jedem Spiel: Tippe, was du mitnimmst."],
         [$(".hud"), "Deine Packs und die Ziffern für das Kästchen."]
       ]), STILL.matches ? 0 : 1100);
     };
@@ -1319,8 +1427,8 @@
     obMerken(KARTE_KEY);
     const hier = document.querySelector(`.mark[data-station="${STATIONEN[kartenHier ?? hierIndex()].id}"]`);
     coach([
-      [hier, "Hier stehst du. Tippe eine Station an: Du siehst, was dort war und was dort wartet."],
-      ...(WEG ? [[$("#mapLegend"), "Höhe und Weg bis zum Gipfel. Tippe GPS, dann zeigt dir die Karte am Berg, wo du wirklich bist."]] : [])
+      [hier, "Hier stehst du. Tippe eine Station an, dann siehst du, was dort wartet."],
+      ...(WEG ? [[$("#mapLegend"), "Höhe und Weg bis zum Gipfel. Mit GPS zeigt dir die Karte, wo du wirklich bist."]] : [])
     ]);
   }
 
@@ -1350,7 +1458,7 @@
         { bild: `<span class="pb-chest">${useSvg("i-chest")}${useSvg("i-lock", "pb-lock")}</span><span class="pb-tumblers">${C.code.map(() => `<span class="tumbler">?</span>`).join("")}</span>`,
           text: "Die vier Ziffern öffnen am Ende ein verschlossenes Kästchen. Was darin liegt, verrät dir niemand. Ohne alle vier lässt dich der Bund nicht auf den Gipfel." },
         { bild: `<span class="pb-split"><span class="pb-cards mine" style="--n:${Math.min(halb, 10)}">${karten(halb)}</span><small>deins</small></span><span class="pb-split"><span class="pb-cards" style="--n:${Math.min(max - halb, 10)}">${karten(max - halb, "empty")}</span><small>beim Bund</small></span>`,
-          text: `Verlierst du, holt sich der Bund Packs zurück. Unterwegs darfst du welche öffnen. Hast du dann keine geschlossenen mehr, zahlst du mit Karten.` }
+          text: `Verlierst du, holt sich der Bund Packs zurück. Öffnen darfst du deine jederzeit.` }
       ];
     };
     let tafeln = [];
@@ -1390,7 +1498,7 @@
         [$("#hudPacks"), "Deine geschlossenen Packs. Tipp drauf, dann kannst du eins öffnen."],
         [$("#hudCode"), "Der Code des Kästchens. Hier rastet jede Ziffer ein."],
         [$(".shoulder-right"), "Mit Z und R oder Wischen blätterst du: Karte, Quests, Ausrüstung."],
-        [$("#questCard"), "Hier steht, was jetzt dran ist und was auf dem Spiel steht. Dein Ergebnis trägst du hier selbst ein."]
+        [$("#questCard"), "Was jetzt dran ist und was auf dem Spiel steht. Hier trägst du dein Ergebnis ein."]
       ]), 250);
     }
     function start() {
@@ -1527,7 +1635,7 @@
       const fertig = nr > fragen.length;
       $("#lbStep").textContent = fertig ? "" : `${nr} / ${fragen.length}`;
       if (fertig) {
-        $("#lbFrage").textContent = "Alle Antworten sind besiegelt. Trag jetzt auf der Quest-Karte ein, ob du bestanden hast.";
+        $("#lbFrage").textContent = "Alle sieben besiegelt. Trag dein Ergebnis auf der Quest-Karte ein.";
         $("#lbForm").hidden = true; $("#lbSealed").hidden = true;
         return;
       }
@@ -1614,14 +1722,20 @@
     function oeffnen(o) {
       aktuell = o; wahl = o.wahlen ? o.wahlen[0].id : null;
       $("#swArt").textContent = o.art;
-      $("#swKopf").innerHTML = `<span class="sw-ic">${o.icon}</span><div><p class="tb-title">${esc(o.titel)}</p>${o.sub ? `<p class="sw-sub ${o.ton || ""}">${esc(o.sub)}</p>` : ""}</div>`;
-      $("#swFolgen").innerHTML = (o.folgen || []).map(f => `<li>${f}</li>`).join("");
       $("#swWahl").innerHTML = o.wahlen && o.wahlen.length > 1
-        ? o.wahlen.map(w => `<button type="button" class="sw-w${w.id === wahl ? " an" : ""}" data-w="${w.id}">${esc(w.name)}</button>`).join("") : "";
-      el.dataset.ton = o.ton || "";
+        ? o.wahlen.map(w => `<button type="button" class="sw-w${w.id === wahl ? " an" : ""}" data-w="${w.id}"${w.ton ? ` style="--ton:${{ magie: "#c9a4ff", lose: "#ff6b5e", win: "var(--gold)" }[w.ton] || w.ton}"` : ""}>${w.symbol || ""}${esc(w.name)}</button>`).join("") : "";
+      zeigen();
       el.classList.remove("halten", "besiegelt");
       el.hidden = false;
       tone("confirm");
+    }
+    // Eine Wahl (zum Beispiel Schild oder Verloren) kann Untertitel, Ton, Folgen und Symbol ändern
+    function zeigen() {
+      const o = aktuell, w = (o.wahlen || []).find(x => x.id === wahl) || {};
+      const sub = w.sub ?? o.sub, ton = w.ton ?? o.ton, folgen = w.folgen ?? o.folgen, icon = w.icon ?? o.icon;
+      $("#swKopf").innerHTML = `<span class="sw-ic">${icon}</span><div><p class="tb-title">${esc(o.titel)}</p>${sub ? `<p class="sw-sub ${ton || ""}">${esc(sub)}</p>` : ""}</div>`;
+      $("#swFolgen").innerHTML = (folgen || []).map(f => `<li>${f}</li>`).join("");
+      el.dataset.ton = ton || "";
     }
     function schliessen() { abbrechen(); el.hidden = true; aktuell = null; }
     function start(e) {
@@ -1651,6 +1765,7 @@
       if (!b) return;
       wahl = b.dataset.w;
       document.querySelectorAll("#swWahl .sw-w").forEach(x => x.classList.toggle("an", x === b));
+      zeigen();
       tone("move");
     });
     el.addEventListener("click", e => { if (e.target === el) { schliessen(); tone("move"); } });
@@ -1665,14 +1780,30 @@
     const q = questById(qid), glanz = status === "glanz", won = status === "bestanden" || glanz;
     if (!(eintragbar(qid).ergebnis || []).includes(status)) return;
     const folgen = [fxZeile(won ? "SIEG" : "NIEDERLAGE", won ? "win" : "lose", fxChips(won ? q.win : q.lose, won))];
-    if (glanz) folgen.push(fxZeile("GLANZSIEG", "win", fxChips(q.glanz, true)), `<span class="fx dim">Nur mit ${esc(q.glanz.bedingung)}. Der Quest Master kann es zurücknehmen.</span>`);
+    if (glanz) folgen.push(fxZeile("GLANZSIEG", "win", fxChips(q.glanz, true)), `<span class="fx dim">Nur mit ${esc(q.glanz.bedingung)}.</span>`);
+    const schild = !won && !q.showdown ? E.rettung(C, state, qid) : null;
     schwur.oeffnen({
       art: q.typ === "kern" ? "PRÜFUNG" : q.typ === "side" ? "SIDEQUEST" : "QUEST",
       icon: questIcon(q, won ? "bestanden" : "verloren", false), titel: q.name,
       sub: (glanz ? "Glanzsieg" : won ? q.ergebnisWort || "Bestanden" : "Verloren").toUpperCase(), ton: won ? "win" : "lose", folgen,
+      wahlen: schild ? schildWahl(schild) : null,
       gueltig: () => (eintragbar(qid).ergebnis || []).includes(status),
-      ausfuehren: () => eintrag("q_" + qid, glanz ? { status: "bestanden", glanz: true } : { status })
+      ausfuehren: w => w === "schild" ? schildEinsetzen(schild, qid) : eintrag("q_" + qid, glanz ? { status: "bestanden", glanz: true } : { status })
     });
+  }
+  // Der Schild meldet sich selbst (29.09.): Wer ein Duell verliert und ihn hat, spielt statt zu verlieren noch einmal.
+  // Vorgewählt ist der Schild, „Verloren eintragen“ daneben.
+  function schildWahl(schild) {
+    const x = itemById(schild);
+    return [
+      { id: "schild", name: "Schild einsetzen", symbol: `<svg aria-hidden="true" style="color:${x.farbe}"><use href="#${x.symbol}"></use></svg>`, ton: "magie", sub: "NOCHMAL SPIELEN",
+        icon: `<span class="sw-item" style="color:${x.farbe}">${useSvg(x.symbol)}</span>`, folgen: [fxZeile("SCHILD", "magie", esc(x.einsatz || x.text))] },
+      { id: "verloren", name: "Verloren eintragen" }
+    ];
+  }
+  function schildEinsetzen(schild, qid, duell) {
+    if (state.items[schild] !== "besitz") return;
+    eintrag("e_" + uid(), { item: schild, quest: qid, ...(duell ? { duell: +duell } : {}) });
   }
   function schwurSchritt(qid, schritt) {
     const q = questById(qid), sx = (q.schritte || []).find(x => x.id === schritt);
@@ -1687,34 +1818,40 @@
     const sd = showdownStand(), d = sd.liste.find(x => String(x.nr) === String(nr)), sieg = v === "sieg";
     if (!d || d.ergebnis || sd.entschieden) return;
     const dq = questById(d.quest), folgen = [fxZeile("STAND DANACH", "", `${sd.siege + (sieg ? 1 : 0)} : ${sd.nied + (sieg ? 0 : 1)}`)];
-    if (!sieg && state.items.schild === "besitz") folgen.push(`<span class="fx">Du hast den Schild des Bundes. Setz ihn vorher ein, dann spielst du das Duell noch einmal.</span>`);
+    const qid = state.next, schild = !sieg ? E.rettung(C, state, qid) : null;
     schwur.oeffnen({
       art: `DUELL ${d.nr} VON ${sd.liste.length}`, icon: questIcon(dq, sieg ? "bestanden" : "verloren", false), titel: dq.name,
       sub: sieg ? "SIEG" : "NIEDERLAGE", ton: sieg ? "win" : "lose", folgen,
+      wahlen: schild ? schildWahl(schild) : null,
       gueltig: () => { const x = showdownStand(); return state.next && questById(state.next).showdown && !x.entschieden && !state.duelle[String(nr)]; },
-      ausfuehren: () => eintrag("d_" + d.nr, { ergebnis: v })
+      ausfuehren: w => w === "schild" ? schildEinsetzen(schild, qid, d.nr) : eintrag("d_" + d.nr, { ergebnis: v })
     });
   }
-  function schwurEinsatz(item, quest) {
-    const x = itemById(item);
-    if (x && x.tor) { if (state.tor) schwurTor(state.tor.fehlend[0], "segen"); return; }
-    const orte = E.aktuelleQuests(C, state).filter(qid => (!quest || qid === quest) && E.einsetzbar(C, state, qid).includes(item));
-    if (!x || !orte.length || state.items[item] !== "besitz") return;
-    const n = state.anzahl[item];
-    const folgen = [`<span class="fx">${esc(x.einsatz || x.text)}</span>`,
-      `<span class="fx dim">${x.einmalig ? (x.stapel ? `Du hast ${n}, danach ${n - 1}.` : "Einmalig, danach verbraucht.") : "Bleibt in deinem Beutel."}</span>`];
-    // Fluch: vorn steht, was er hier bringt (bei mehreren Orten je Ort)
-    if (x.dieb) orte.map(id => [id, E.fluchVorteil(C, state, id)]).filter(([, v]) => v).reverse().forEach(([id, v]) =>
-      folgen.unshift(fxZeile("VORTEIL", "win", `${orte.length > 1 ? esc(questById(id).name) + ": " : v.duell ? `Duell ${v.duell}, ${esc(questById(v.quest).name)}: ` : ""}${esc(v.text)}`)));
+  // MITNEHMEN (29.09.): alles auf den C-Tasten mit einem Siegel. Das Fenster zeigt, was dabei ist, beim Fluch den Vorteil.
+  // Geschrieben wird ein Einsatz je Ding, in einem Rutsch (der Fluch zuletzt, dann würfelt der Schattendieb).
+  function schwurMitnehmen() {
+    const fq = fuerQuest();
+    if (!fq) return;
+    const ids = cWahl.filter(id => kannMit(fq).includes(id)).sort((x, y) => !!itemById(x).dieb - !!itemById(y).dieb);
+    if (!ids.length) return;
+    const { d, spiel } = spielVon(fq), fluch = ids.find(id => itemById(id).dieb), v = fluch ? E.fluchVorteil(C, state, fq) : null;
+    const chip = id => { const x = itemById(id); return `<span class="chip">${`<svg aria-hidden="true" style="color:${x.farbe}"><use href="#${x.symbol}"></use></svg>`}${esc(x.kurz || x.name)}</span>`; };
+    const folgen = [fxZeile("DABEI", "", ids.map(chip).join(""))];
+    if (v) folgen.push(fxZeile("FLUCH", "magie", esc(v.text)), `<span class="fx dim">Doch jeder Fluch hat seinen Preis.</span>`);
+    const schluessel = spielVon(fq).schluessel;
     schwur.oeffnen({
-      art: x.gruppe === "faehigkeit" ? "FÄHIGKEIT EINSETZEN" : "ITEM EINSETZEN",
-      icon: `<span class="sw-item" style="color:${x.farbe}">${useSvg(x.symbol)}</span>`, titel: x.name,
-      sub: orte.length === 1 ? "bei " + questById(orte[0]).name : "Wo setzt du es ein?", ton: "magie",
-      wahlen: orte.map(id => ({ id, name: questById(id).name })), folgen,
-      gueltig: () => state.items[item] === "besitz",
-      ausfuehren: w => {
-        const quest = w || orte[0], v = x.dieb && E.fluchVorteil(C, state, quest);
-        eintrag("e_" + uid(), x.dieb ? { item, quest, raub: E.diebWurf(C), ...(v ? { fuer: v.quest } : {}) } : { item, quest });
+      art: d ? `AUSRÜSTEN FÜR DUELL ${d.nr}` : "AUSRÜSTEN FÜR", icon: questIcon(spiel, "offen", false), titel: spiel.name,
+      ton: fluch ? "magie" : "win", folgen,
+      gueltig: () => fuerQuest() === fq && spielVon(fq).schluessel === schluessel && ids.every(id => kannMit(fq).includes(id)),
+      ausfuehren: () => {
+        const zeit = Date.now(), neu = {};
+        ids.forEach((id, i) => {
+          const x = itemById(id);
+          neu["e_" + uid() + i] = { item: id, quest: fq, ...(d ? { duell: d.nr } : {}), ...(x.dieb ? { raub: E.diebWurf(C), ...(v ? { fuer: v.quest } : {}) } : {}), zeit: zeit + i };
+        });
+        cWahl = [];
+        zuQuests = true;
+        einStore.setzenAlle(neu);
       }
     });
   }
@@ -1753,7 +1890,7 @@
       art: "DEINE PACKS", icon: `<span class="sw-item">${cardSvg()}</span>`, titel: "Pack öffnen",
       sub: `${n} geschlossen, danach ${n - 1}`.toUpperCase(), ton: "win",
       folgen: [`<span class="fx"><span class="chip minus">${cardSvg()}−1 Pack</span><span class="chip plus">${cardSvg("offen")}zum Aufmachen</span></span>`,
-        `<span class="fx dim">Der Bund gibt es dir. Verlierst du später und hast keine geschlossenen Packs mehr, zahlst du mit Karten: pro Pack deine beste aus einem geöffneten.</span>`],
+        `<span class="fx dim">Der Bund gibt es dir.</span>`],
       gueltig: () => !!state && state.packs >= 1,
       ausfuehren: () => eintrag("o_" + uid(), {})
     });
@@ -2119,9 +2256,9 @@
         else if (!(d.schritte.amulett || {}).gefunden) d.schritte.amulett = { gefunden: true };
         else d.quests.amulett = "bestanden";
       } else if (a === "einsetzen") {
-        const s = E.derive(C, d), qid = E.aktuelleQuests(C, s).find(id => E.einsetzbar(C, s, id).some(i => s.items[i] === "besitz"));
-        const item = qid && E.einsetzbar(C, s, qid).find(i => s.items[i] === "besitz");
-        if (item) d.einsaetze.push({ id: uid(), item, quest: qid, zeit: Date.now(), ...(itemById(item).dieb ? { raub: E.diebWurf(C) } : {}) });
+        const s = E.derive(C, d), qid = E.aktuelleQuests(C, s).find(id => E.mitnehmbar(C, s, id).length);
+        const item = qid && E.mitnehmbar(C, s, qid)[0], dl = qid && questById(qid).showdown ? E.aktuellesDuell(C, s) : null;
+        if (item) d.einsaetze.push({ id: uid(), item, quest: qid, zeit: Date.now(), ...(dl ? { duell: dl.nr } : {}), ...(itemById(item).dieb ? { raub: E.diebWurf(C) } : {}) });
       } else if (a === "glanz") {
         if (state.next && questById(state.next).glanz) { d.quests[state.next] = "bestanden"; d.glanz = { ...d.glanz, [state.next]: true }; }
       } else if (state.next) d.quests[state.next] = a;

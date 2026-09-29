@@ -76,7 +76,7 @@ await admin.click('#undo'); await warte(1200);
 // Keine Schulden: Strafe bei 0 Packs, Dennis erfährt warum sich nichts tut
 while (await dennis.$('#overlay:not([hidden])')) { await dennis.click('#overlay'); await warte(300); }
 await admin.click('#quick button:has-text("Strafe")'); await warte(700);
-pruefe((await dennis.textContent('#overlay')).includes('keine Packs mehr'), 'Strafe bei 0: „keine Packs mehr"');
+pruefe((await dennis.textContent('#overlay')).includes('Mehr Packs hattest du nicht'), 'Strafe bei 0: „Mehr Packs hattest du nicht.“');
 pruefe(!(await admin.$eval('#kappung', e => e.hidden)), 'Admin zeigt, was bei 0 nicht abgezogen wurde');
 
 // Zweites Admin-Gerät ändert dazwischen: Rückgängig fragt nach, statt still zu überschreiben

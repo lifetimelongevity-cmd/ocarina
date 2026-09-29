@@ -597,7 +597,7 @@ Wünsche vom 28.09.: In der App alles etwas kleiner, weil es an manchen Stellen 
 
 ---
 
-## 16. Eine Aufgabe von vorn bis hinten: Ausrüsten beim Spiel, ruhigere Texte (Vorschlag, 29.09.)
+## 16. Eine Aufgabe von vorn bis hinten: Ausrüsten beim Spiel, ruhigere Texte (umgesetzt am 29.09.)
 
 Wunsch vom 29.09.: Den Ablauf einer Aufgabe aus Dennis' Sicht prüfen. Items und Fähigkeiten werden heute auf der Quest-Karte eingesetzt, dadurch braucht es die Ausrüstung kaum. Dennis soll **beim** Spiel (nicht vorher) auf die Ausrüstung gehen: „Das kann ich einsetzen, das habe ich. Klick, klick.“ Dazu überall den Text beruhigen, Informationen vereinfachen und weglassen, was es nicht braucht (impeccable clarify).
 
@@ -693,8 +693,17 @@ Regeln (clarify):
 
 **Bewusst geblieben:** Tarnnamen und Tarntexte der Schatten (das Geheimnis ist der Spaß, und sie stehen nur da, wenn Dennis danach fragt), „Siegel gedrückt halten“, die Sätze des Schattendiebs, alle Texte von Rike, der Fee im Prolog und im Abspann, SIEG und NIEDERLAGE als einzige Stelle, die zeigt, was auf dem Spiel steht.
 
-### 16.4 Zu entscheiden
+### 16.4 Entschieden und gebaut (29.09.)
 
-1. Mechanik wie in 16.2: C-Tasten auf der Ausrüstung, ein Siegel MITNEHMEN, Schild und Segen melden sich selbst?
-2. Texte wie in 16.3, auch Prolog-Tafel 6?
-3. Danach bauen: erst die Mechanik, dann die Texte, jeweils mit Tests auf allen Geräten.
+Der Nutzer hat 16.2 und 16.3 so freigegeben: erst die Mechanik, dann die Texte. Dazu kam sein Wunsch: **Jedes Fenster ist immer gleich groß** (ein oder vier Zeilen, nichts springt), und die Schrift ist überall dieselbe.
+
+- **Quest-Karte:** AUSRÜSTEN mit den Symbolen dessen, was hier hilft (pulsiert golden), BESTANDEN und VERLOREN solange nur umrandet. Nach dem Mitnehmen die Zeile DABEI mit Namen, dann leuchten die Knöpfe zum Eintragen. DABEI antippen führt wieder zur Ausrüstung (ein kleines Plus zeigt, was noch dazukönnte). Bei erledigten Quests steht, was dabei war.
+- **Ausrüstung:** Plakette „FÜR AUGE DES JÄGERS“ über dem Bogenfenster (am Gipfel „FÜR DUELL 2 · AUGE DES JÄGERS“), drei gelbe C-Tasten unter Dennis. Was hilft, leuchtet. Tippen legt es auf die nächste freie C-Taste (das Ding hüpft hinein, das Feld bekommt einen Haken), nochmal Tippen auf Feld oder Taste legt es zurück. Besiegeltes steht fest (gold). Hilft nichts, gibt es weder Plakette noch C-Tasten. Die Textbox sagt, was es hier heißt: „Hilft hier. Tippen nimmt es mit.“, „Kommt mit. Nochmal tippen legt es zurück.“, „Dabei bei …“, beim Fluch „Hier: …“ und „Jeder Fluch hat seinen Preis.“ (gewählt: „Kommt mit.“), beim Schild „Meldet sich, wenn du ein Duell verlierst.“, beim Segen „Meldet sich am Tor zum Gipfel.“. Rechts ist immer Platz für MITNEHMEN · n.
+- **Ein Siegel:** AUSRÜSTEN FÜR, DABEI mit allen Dingen, beim Fluch der Vorteil und „Doch jeder Fluch hat seinen Preis.“. Geschrieben wird je Ding ein Einsatz wie bisher (`e_…`, am Gipfel mit `duell`), in einem Rutsch (`store.js` `setzenAlle`). Moment AUSGERÜSTET mit einer Zeile je Ding („Hol es dir beim Bund.“), mit Fluch erst die Szene mit dem Schattendieb, nur ein Fluch heißt weiter FLUCH GESPROCHEN. Danach dreht das Menü zu QUESTS.
+- **Schild:** Tippt Dennis bei einer Quest mit Duell VERLOREN oder im Showdown NIEDERLAGE und hat den Schild, bietet das Siegel-Fenster „Schild einsetzen“ (vorgewählt, violett, NOCHMAL SPIELEN) und „Verloren eintragen“ an, dort wo sonst „Siegel gedrückt halten“ steht. Moment SCHILD DES BUNDES: „Spiel noch einmal und trag dann das neue Ergebnis ein.“
+- **Admin:** „… mitgenommen zu … (gib es ihm)“, beim Schild „… eingesetzt …: Duell wiederholen“. Notlösung Einsetzen bucht am Gipfel für das aktuelle Duell.
+- **Logik (`engine.js`):** `einsetzbar()` am Gipfel nur für das aktuelle Duell, neu `aktuellesDuell()`, `dabei()`, `mitnehmbar()` (ohne Schild und Segen, am Tor nichts, ein Fluch je Spiel), `rettung()`. `jetztEinsetzbar()` heißt jetzt: was Dennis gerade mitnehmen kann. Der Schild trägt in `config.js` `rettung: true`.
+- **Gleich große Fenster:** Ergebnis-Fenster, Siegel-Fenster, Stationstafel, Hinweise der Fee (drei Zeilen, 250 px breit) und Prolog (drei Zeilen) haben feste Höhen, gemessen am längsten Inhalt auf dem iPhone 13 in Safari. Die Textbox der Ausrüstung hat immer Name und zwei Zeilen. Wird etwas doch länger, scrollt es im Fenster. Die Tagebuch-Frage nimmt immer zwei Zeilen Platz.
+- **Gleiche Schrift:** Alle Größen hängen an der kleinsten Bildschirmhöhe (`svh` statt `dvh`), damit Safari beim Ein- und Ausblenden seiner Leisten keine Schrift umspringen lässt, und iOS vergrößert Texte nicht mehr von selbst (`text-size-adjust`). Im Siegel-Fenster haben alle Zeilen dieselbe Schrift (vorher war die Zeile neben VORTEIL größer und dünner).
+- **Texte** wie in 16.3, dazu vier kürzere Hinweise der Fee, damit jeder in drei Zeilen passt („Was jetzt dran ist und was auf dem Spiel steht. Hier trägst du dein Ergebnis ein.“, „Hier landet, was du dir erspielst. Schatten zeigen, was noch fehlt.“, „Hier stehst du. Tippe eine Station an, dann siehst du, was dort wartet.“, „Höhe und Weg bis zum Gipfel. Mit GPS zeigt dir die Karte, wo du wirklich bist.“).
+- **Geprüft:** `node app/engine.test.js` (neu: Ausrüsten, Schild als Rettung, je Duell), neu `tests/ausruesten.mjs` (der ganze Ablauf, Schild, Gipfel, gleiche Größen), angepasst `selbst.mjs`, `glanz.mjs`, `durchlauf.mjs`, `rubine.mjs`, dazu alle übrigen Tests.

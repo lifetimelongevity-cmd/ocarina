@@ -170,6 +170,7 @@
      API: const k = kanal(config, name, speicherName)
           k.subscribe(fn)          fn(eintraege) bei jedem neuen Stand
           k.setzen(schluessel, e)  schreiben (Dennis, oder der Admin beim Wiederherstellen)
+          k.setzenAlle({ schluessel: e, … })  mehrere auf einmal, eine Meldung
           k.loeschen(schluessel)   nur Admin: einen Eintrag löschen (Promise, scheitert ohne Netz)
           k.zuruecksetzen()        nur Admin: alle Einträge löschen (Promise, scheitert ohne Netz)
           k.vergessen()            nur im Gerät: Kopie und Ungesendetes weg (Dennis' Handy nach „Alles zurücksetzen“) */
@@ -254,15 +255,21 @@
       window.addEventListener("storage", e => { if (e.key === key) { remote = lesen(key); melden(); } });
     }
 
+    // Mehrere Einträge auf einmal, mit einer einzigen Meldung (Ausrüsten: ein Siegel für alles, 29.09.)
+    function setzenAlle(neu) {
+      Object.keys(neu).forEach(n => {
+        if (firebase) pending[String(n)] = neu[n];
+        else remote = { ...remote, [String(n)]: neu[n] };
+      });
+      if (firebase) schreiben(pendingKey, pending); else schreiben(key, remote);
+      melden();
+      return flush();
+    }
+
     return {
       subscribe(fn) { subs.push(fn); fn(alle()); },
-      setzen(n, eintrag) {
-        n = String(n);
-        if (firebase) { pending[n] = eintrag; schreiben(pendingKey, pending); }
-        else { remote = { ...remote, [n]: eintrag }; schreiben(key, remote); }
-        melden();
-        return flush();
-      },
+      setzen: (n, eintrag) => setzenAlle({ [n]: eintrag }),
+      setzenAlle,
       loeschen(n) {
         n = String(n);
         if (!firebase) { const r = { ...remote }; delete r[n]; delete pending[n]; remote = r; schreiben(key, remote); schreiben(pendingKey, pending); melden(); return Promise.resolve(); }
@@ -298,7 +305,7 @@
 
   /* Dennis' Einträge: was er selbst besiegelt (Ergebnis, Einsatz, Duell, Amulett, Ziffer). engine.js führt sie mit dem
      Dokument des Admins zusammen (mitEintraegen). Schlüssel: q_<quest>, e_<id>, d_<nr>, s_<quest>_<schritt>, z_<nr>.
-     API: const ein = QuestStore.eintraege(config), ein.subscribe(fn), ein.setzen(schluessel, e), ein.loeschen(schluessel) */
+     API: const ein = QuestStore.eintraege(config), ein.subscribe(fn), ein.setzen(schluessel, e), ein.setzenAlle({ … }), ein.loeschen(schluessel) */
   function eintraege(cfg) { return kanal(cfg, "dennis", "eintraege"); }
 
   /* Probelauf: ?probe in der Adresse (Admin und Dennis). Ein eigenes Spiel neben dem echten

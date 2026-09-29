@@ -31,11 +31,12 @@
                  oder "faehigkeit" (Magie, rechts, einmalig bei Duellen und im Showdown)
        stapel:   kann mehrfach besessen werden (Anzahl wird gezählt)
        einmalig: ist nach dem Einsetzen verbraucht
-       tor:      wird am Tor zum Gipfel eingesetzt statt bei einer Quest (Rikes Segen)
+       tor:      wird am Tor zum Gipfel eingesetzt statt bei einer Quest (Rikes Segen), meldet sich dort selbst
+       rettung:  wird nicht vorher mitgenommen, sondern meldet sich selbst, wenn Dennis ein Duell verliert (Schild, 29.09.)
        ersetzt:  Items, die dieses ablöst (Stufen wie Zoras Schuppe): Wer es hat, setzt die schwächeren nicht mehr ein
        feld:     Stufen teilen sich ein Feld in der Ausrüstung (29.09., Wunsch des Nutzers). Es zeigt die stärkste, die Dennis hat,
                  sonst den Schatten der ersten, die er noch bekommen kann. Reihenfolge der Stufen = Reihenfolge hier
-       einsatz:  was im Siegel-Fenster steht, wenn Dennis es einsetzt (sonst text)
+       einsatz:  was im Siegel-Fenster steht, wenn Dennis es einsetzt (Schild, Segen am Tor)
        fund:     Startitem: Satz, wenn es sich beim ersten Besuch der Ausrüstung entpuppt
        tarnSymbol: Sprite, solange es getarnt ist (sonst der Schatten von symbol)
        geheim:   Dennis soll nicht wissen, dass er es bekommt: Die Vorschau einer Belohnung zeigt nur „Geheimnis“
@@ -53,48 +54,47 @@
       // Startitem: getarnt als Beutel (tarnSymbol), entpuppt sich als Spritze. Hieß bis 28.09. „Dennis' Eier“ (Beutel, I1).
       { id: "spritze", nr: "I7", gruppe: "item", feld: "wasser", name: "Wasserspritze", kurz: "Spritze", farbe: "#a8e4f5", symbol: "i-spritze", tarnSymbol: "i-beutel",
         text: "Klein und schnell leer. Deine erste Wasserwaffe.",
-        fund: "Deine erste Wasserwaffe. Stärkere erspielst du dir, sie nehmen in diesem Feld ihren Platz ein.",
+        fund: "Deine erste Wasserwaffe. Stärkere landen im selben Feld.",
         tarn: { name: "Heiliger Beutel des Helden", kurz: "Beutel", text: "Seit jeher an deiner Seite. Was steckt wohl darin?" } },
       { id: "pistole_klein", nr: "I8", gruppe: "item", feld: "wasser", name: "Kleine Wasserpistole", kurz: "Kleine Pistole", farbe: "#7fd0ee", symbol: "i-pistol-klein",
         ersetzt: ["spritze"],
-        text: "Mehr Wasser, mehr Reichweite. Sie löst die Spritze ab.",
+        text: "Mehr Wasser, mehr Reichweite.",
         tarn: { name: "Silberne Schuppe", kurz: "Schuppe", text: "Kühl und glatt. Ein erster Hauch von Zoras Macht." } },
       { id: "pistole_gross", nr: "I2", gruppe: "item", feld: "wasser", name: "Große Wasserpistole", kurz: "Große Pistole", farbe: "#4fb8e8", symbol: "i-pistol",
         ersetzt: ["spritze", "pistole_klein"],
-        text: "Die Monsterpistole: elektrisch, mit Dauerfeuer und Licht. Keiner schießt so lange wie du.",
+        text: "Die Monsterpistole: elektrisch, mit Dauerfeuer.",
         tarn: { name: "Zoras Quellstab", kurz: "Quellstab", text: "Ein Relikt aus Zoras Reich. Wer es führt, hat den längsten Atem." } },
       { id: "karten_gepanzert", nr: "I4", gruppe: "item", name: "Gepanzerte Karten", kurz: "Karten", farbe: "#9fd0f0", symbol: "i-cards",
-        text: "Zwei Karten mehr, in festen Hüllen. Sie fliegen weiter und stabiler.",
+        text: "Zwei Karten mehr, in festen Hüllen.",
         tarn: { name: "Federn der Eule", kurz: "Federn", text: "Leicht und doch zielsicher. Sie fliegen, wohin du sie schickst." } },
       { id: "kreisel", nr: "I5", gruppe: "item", name: "Götterkreisel", kurz: "Kreisel", farbe: "#e7a14a", symbol: "i-top",
-        text: "Dein eigener Kreisel. Du darfst vorher üben und wählst zuerst.",
+        text: "Du übst vorher und wählst zuerst.",
         tarn: { name: "Kern der Goronen", kurz: "Kern", text: "Rund, schwer und nie ganz still." } },
       { id: "stich", nr: "I6", gruppe: "item", name: "Stich", kurz: "Stich", farbe: "#b8d4ff", symbol: "i-sword",
-        text: "Eine Elbenklinge. Ein Schwert mehr heißt ein Versuch mehr.",
+        text: "Eine Elbenklinge: ein Schwert mehr.",
         tarn: { name: "Verrostete Klinge", kurz: "Klinge", text: "Alt und stumpf. Doch sie wartet auf ihren Moment." } },
       // Nadeln für Rikes Rache (29.09.): Ohne Nadel-Item fädelt Dennis feine Nadeln. Die dickste, die er hat, zählt.
       { id: "nadel_stopf", nr: "I9", gruppe: "item", feld: "nadel", name: "Stopfnadel", kurz: "Stopfnadel", farbe: "#d6dde8", symbol: "i-nadel-stopf",
-        text: "Ein größeres Öhr als bei einer feinen Nadel. Da findet der Faden leichter hindurch.",
+        text: "Größeres Öhr, der Faden findet leichter durch.",
         tarn: { name: "Eisendorn", kurz: "Dorn", text: "Kräftiger als ein Splitter. Wer weiß, was er aufspießt." } },
       { id: "nadel_dick", nr: "I10", gruppe: "item", feld: "nadel", name: "Dicke Nadel", kurz: "Dicke Nadel", farbe: "#eef2f8", symbol: "i-nadel-dick",
         ersetzt: ["nadel_stopf"],
-        text: "Das größte Öhr von allen. Sie löst die Stopfnadel ab.",
+        text: "Das größte Öhr von allen.",
         tarn: { name: "Uralter Dorn", kurz: "Dorn", text: "Hart wie altes Holz, mit einem Loch, durch das Licht fällt." } },
       // Hieß bis 28.09. Spruchrolle (id bleibt, damit gespeicherte Stände passen).
       // Seit 29.09. zweischneidig: Vor einem Spiel gesprochen bringt er dort einen Vorteil (fluch bei der Quest),
       // danach stiehlt der Schattendieb 0 bis 3 Packs (gewichtet 30/35/25/10). Zwei gibt es: Die drei Zeichen und Kartenwurf.
       { id: "spruchrolle", nr: "F1", gruppe: "faehigkeit", stapel: true, einmalig: true, geheim: true, name: "Fluch", kurz: "Fluch", farbe: "#c9a4ff", symbol: "i-fluch",
-        text: "Ein alter Fluch. Sprich ihn vor einem Spiel, und er verschafft dir dort einen Vorteil. Doch jeder Fluch hat seinen Preis.",
-        einsatz: "Jeder Fluch hat seinen Preis. Welchen, erfährst du, wenn er gesprochen ist.",
+        text: "Bringt dir bei einem Spiel einen Vorteil. Doch jeder Fluch hat seinen Preis.",
         gefunden: { titel: "Du hast etwas gefunden …", warnung: "Sei vorsichtig. Flüche haben es in sich." },
         dieb: { name: "Schattendieb", gewichte: [30, 35, 25, 10] },
         tarn: { name: "Versiegeltes Pergament", kurz: "Pergament", text: "Niemand weiß, was darauf steht." } },
-      { id: "schild", nr: "F3", gruppe: "faehigkeit", einmalig: true, name: "Schild des Bundes", kurz: "Schild", farbe: "#7aa7ff", symbol: "i-shield",
-        text: "Wiederhole ein verlorenes Duell. Einmal.",
-        einsatz: "Du spielst ein verlorenes Duell noch einmal. Besiegle danach das neue Ergebnis.",
+      { id: "schild", nr: "F3", gruppe: "faehigkeit", einmalig: true, rettung: true, name: "Schild des Bundes", kurz: "Schild", farbe: "#7aa7ff", symbol: "i-shield",
+        text: "Verlierst du ein Duell, spielst du es noch einmal.",
+        einsatz: "Statt zu verlieren, spielst du noch einmal. Danach ist er weg.",
         tarn: { name: "Zerbrochenes Wappen", kurz: "Wappen", text: "Ein Bruchstück eines alten Bundes. Es schützt, wer es heilt." } },
       { id: "segen", nr: "F6", gruppe: "faehigkeit", einmalig: true, tor: true, name: "Rikes Segen", kurz: "Segen", farbe: "#f08cbc", symbol: "i-segen",
-        text: "Rike wacht über dich. Am Tor zum Gipfel schenkt dir ihr Segen eine fehlende Ziffer.",
+        text: "Rike wacht über dich. Am Tor schenkt ihr Segen dir eine fehlende Ziffer.",
         einsatz: "Rikes Segen schenkt dir eine fehlende Ziffer.",
         tarn: { name: "Versiegelter Brief", kurz: "Brief", text: "Öffne ihn, wenn du ihn am meisten brauchst." } }
     ],
@@ -134,13 +134,14 @@
 
     /* Quests
        nr:         feste Nummer aus 07-spiele-und-items.md
-       text:       was Dennis liest (Du-Form, höchstens zwei kurze Sätze)
+       text:       was Dennis liest (Du-Form, ein Satz: was zu tun ist. Die genauen Regeln erklärt der Bund vor Ort, 29.09.)
        qm:         Notiz nur für den Quest Master, mit der Grenze für bestanden
        farbe, emblem: Medaillon einer Hauptquest (Sprite aus index.html)
        win / lose: packs (Zahl), items (Liste), ziffer (1 bis 4, nur bei win)
        glanz:      Glanzsieg (28.09.): ein besonders deutlicher Sieg bringt zusätzlich zu win noch das hier.
                    bedingung steht bei Dennis auf der Quest-Karte. Er trägt ihn selbst ein, der Quest Master kann ihn zurücknehmen.
-       einsetzbar: Items und Fähigkeiten, die Dennis hier einsetzen kann (er besiegelt selbst, der Quest Master kann zurücknehmen)
+       einsetzbar: Items und Fähigkeiten, die hier helfen. Items und Flüche nimmt Dennis vor dem Spiel in der Ausrüstung mit
+                   (C-Tasten, ein Siegel, 29.09.), der Schild meldet sich bei einer Niederlage. Der Quest Master kann zurücknehmen.
        ergebnisWort: Wort auf dem Knopf, mit dem Dennis den Sieg besiegelt (sonst „Bestanden")
        duell:      ein Spiel gegen einen aus dem Bund
        revanche:   kann im Showdown als Revanche wiederkommen, wenn Dennis es verloren hat
@@ -153,7 +154,7 @@
     quests: [
       { id: "logbuch", nr: 1, typ: "kern", name: "Rikes Tagebuch", ort: "Zug nach München", station: "zug",
         farbe: "#4a8fe8", emblem: "z-water",
-        text: "Rike hat sieben Fragen über dich beantwortet. Schreib, was sie gesagt hat, dann hörst du ihre Antwort.",
+        text: "Sieben Fragen über dich: Errate, was Rike geantwortet hat.",
         qm: "Bestanden ab 5 von 7 Treffern, du urteilst, ob sinngemäß. Dennis tippt seine Antworten im Menü, danach spielt Rikes Sprachnachricht. Seine Antworten stehen unten im Admin. Das Ergebnis trägt er danach selbst ein.",
         win:  { packs: 1, ziffer: 1, items: ["kreisel"] },
         lose: { packs: 0 },
@@ -161,7 +162,7 @@
 
       // Hieß bis 28.09. „Kreuzung der Klingen“ und war eine Prüfung (id bleibt, damit gespeicherte Stände passen)
       { id: "klingen", nr: 4, typ: "side", name: "Die drei Zeichen", ort: "Wiese am Anstieg", station: "wiese",
-        text: "Schlag zwei aus dem Bund nacheinander im Schnick Schnack Schnuck. Wer zuerst zwei Runden gewinnt, siegt.",
+        text: "Schlag beide aus dem Bund im Schnick Schnack Schnuck, jeweils Best of 3.",
         qm: "Bestanden, wenn Dennis zwei Gegner nacheinander schlägt, jeweils Best of 3. Er wählt die Gegner selbst.",
         win:  { items: ["spruchrolle"] },
         lose: { packs: -1 },
@@ -178,7 +179,7 @@
 
       { id: "podrennen", nr: 7, typ: "kern", name: "Das Podrennen", ort: "Wiese am Anstieg", station: "wiese",
         farbe: "#a468e6", emblem: "z-shadow",
-        text: "Ein kleiner Gleiter, ein Parcours, eine Uhr. Fahr schneller als die Zeit.",
+        text: "Fahr den Gleiter durch den Parcours, schneller als die Uhr.",
         qm: "RC-Auto auf Zeit, ein Versuch, auf festem Boden (auf Gras bleibt das kleine Auto hängen). Zeitgrenze so, dass du es beim Testen nur jedes zweite Mal schaffst.",
         win:  { packs: 2, ziffer: 2, items: ["pistole_klein"] },
         lose: { packs: -2 },
@@ -186,7 +187,7 @@
         einsetzbar: ["spruchrolle"], revanche: true },
 
       { id: "kartenwurf", nr: 9, typ: "side", name: "Kartenwurf", ort: "Erstes Waldstück", station: "wald",
-        text: "Ein Duell mit Karten aus deinen Packs. Wer mehr ins Ziel bringt, gewinnt.",
+        text: "Wirf Karten aus deinen Packs ins Ziel, mehr als dein Gegner.",
         qm: "Duell mit Karten aus schon geöffneten Packs, fester Abstand, je 3 Karten. Gleichstand zählt als verloren. Gepanzerte Karten geben +2. Glanzsieg: mindestens 2 Karten mehr im Ziel als der Gegner, bringt die Große Wasserpistole.",
         win:  { items: ["spruchrolle"] },
         glanz: { bedingung: "2 Karten Vorsprung", items: ["pistole_gross"] },   // einzige Sidequest mit Item, nur als Glanzsieg
@@ -196,7 +197,7 @@
 
       { id: "auge", nr: 2, typ: "kern", name: "Auge des Jägers", ort: "Erstes Waldstück", station: "wald",
         farbe: "#e2472f", emblem: "e-flame",
-        text: "Fünf Flammen, ein Tank, deine stärkste Wasserwaffe. Lösch sie, bevor dir das Wasser ausgeht.",
+        text: "Lösch fünf Flammen mit einem Tank.",
         qm: "5 Teelichter aus 4 m, ein Tank. Bestanden nur, wenn alle 5 aus sind. Es zählt die stärkste Wasserwaffe, die Dennis hat: Spritze, kleine Pistole oder große Pistole.",
         win:  { packs: 3, ziffer: 3, items: ["stich"] },
         lose: { packs: -2 },
@@ -214,7 +215,7 @@
 
       // Ersetzt am 28.09. die Feuerprobe („Der Ruf“) und ist eine Sidequest, id bleibt
       { id: "feuerprobe", nr: 3, typ: "side", name: "Hüter der Flamme", ort: "Aussichtspunkt", station: "aussicht",
-        text: "Trag ein brennendes Teelicht 100 Schritte bergauf, ohne dass es erlischt. Der Bund darf dich ablenken, aber nicht anpusten.",
+        text: "Trag ein Teelicht 100 Schritte bergauf, ohne dass es ausgeht.",
         qm: "Offenes Teelicht ohne Glas, 100 Schritte bergauf. Erlischt es, verloren. Der Bund lenkt ab, pustet nicht, berührt nicht. Feuerzeug und Ersatzlicht mitnehmen.",
         win:  { items: ["schild"] },
         lose: { packs: -2 },
@@ -233,7 +234,7 @@
 
       { id: "bund", nr: 5, typ: "kern", name: "Prüfung des Bundes", ort: "Gipfel Neureuth", station: "gipfel",
         farbe: "#f2c94c", emblem: "z-triforce",
-        text: "Drei Duelle gegen den Bund, zuerst deine Revanchen. Antreten darfst du nur mit allen vier Ziffern.",
+        text: "Drei Duelle gegen den Bund. Zwei musst du gewinnen.",
         qm: "Erst das Tor: Fehlt eine Ziffer, holt Dennis sie für 2 Packs, mit Rikes Segen oder per Bußprüfung, die du bestimmst. Dann 3 Duelle, bestanden bei 2 Siegen: erst verlorene Spiele vom Tag, aufgefüllt mit Wirbel der Götter. Die App zeigt sie unten.",
         win:  { packs: 5 },
         lose: { packs: -4 },
@@ -243,7 +244,7 @@
       /* Laufende Quests: sichtbar, sobald der Quest Master sie startet */
       { id: "amulett", nr: 15, typ: "lauf", name: "Rikes Amulett", ort: "Den ganzen Tag",
         farbe: "#e56aa0", emblem: "i-amulet",
-        text: "Rikes Brosche ist versteckt. Finde sie und setz sie zusammen, bevor du am Gipfel stehst.",
+        text: "Finde Rikes versteckte Brosche und setz sie bis zum Gipfel zusammen.",
         qm: "Erst finden (Frist), dann knobeln bis zum Gipfel. Gelöst = bestanden, bringt Rikes Segen (eine fehlende Ziffer am Tor). Dennis meldet Gefunden und Zusammengesetzt selbst, Verloren buchst du. Versteck und Frist offen.",
         schritte: [{ id: "gefunden", name: "Gefunden" }], ergebnisWort: "Zusammengesetzt",
         win:  { items: ["segen"] },

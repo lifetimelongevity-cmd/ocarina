@@ -7,8 +7,9 @@
      glanz:     { [questId]: true }                   // Glanzsieg: bestanden und besonders deutlich (nur Quests mit glanz)
      zaehler:   { [questId]: Zahl }                   // Treffer einer Zähler-Quest (Prophezeiung)
      schritte:  { [questId]: { [schrittId]: true } }  // Zwischenschritte einer laufenden Quest (Amulett gefunden)
-     einsaetze: [ { id, item, quest, zeit?, raub?, fuer? } ]   // Dennis hat ein Item oder eine Fähigkeit eingesetzt. Fluch: raub = Packs,
-                                                      // die der Schattendieb stiehlt, fuer = Spiel, dessen Vorteil gilt
+     einsaetze: [ { id, item, quest, zeit?, raub?, fuer?, duell? } ]   // Dennis hat ein Item oder eine Fähigkeit eingesetzt (mitgenommen). Fluch:
+                                                      // raub = Packs, die der Schattendieb stiehlt, fuer = Spiel, dessen Vorteil gilt.
+                                                      // duell = Nummer des Duells im Showdown, für das er es mitgenommen hat
      duelle:    { "1": "sieg" | "niederlage", ... }    // Ergebnisse der Showdown-Duelle
      buchungen: [ { id, packs, grund, zeit?, ziffer?, weg?, item?, menge?, offen? } ]   // ziffer am Tor geholt (weg: packs, busse, segen), item/menge = Fluch o. Ä.,
                                                       // offen: Dennis hat ein Pack geöffnet (packs −1)
@@ -141,11 +142,12 @@
 
     // Einsätze: Flüche zählen runter, einmalige Fähigkeiten sind danach verbraucht.
     // Fluch: Der Schattendieb stiehlt, was gewürfelt wurde, zum Zeitpunkt des Einsatzes
-    const raube = [];
+    const raube = [], einsatzListe = [];
     doc.einsaetze.forEach((e, i) => {
       const it = itemCfg(config, e.item);
       if (!it) return;
       (eingesetzt[e.quest] = eingesetzt[e.quest] || []).push(e.item);
+      einsatzListe.push({ id: e.id, item: e.item, quest: e.quest, duell: Math.trunc(Number(e.duell)) || null });
       if (!it.einmalig) return;
       if (it.dieb && (!it.stapel || anzahl[e.item] > 0)) {
         const n = diebZahl(it, e.raub);
@@ -196,7 +198,7 @@
 
     return {
       packs, max, kappung, geoeffnet, karten, items, anzahl, erhalten: erhalten.filter(id => items[id] !== "nicht"),
-      ziffern, gekauft, zifferWeg, quests, glanz, treffer, schritte, eingesetzt, raube, duelle, tor,
+      ziffern, gekauft, zifferWeg, quests, glanz, treffer, schritte, eingesetzt, einsaetze: einsatzListe, raube, duelle, tor,
       next: nextQuest ? nextQuest.id : null,
       laufend: config.quests.filter(q => q.typ === "lauf" && quests[q.id] !== "offen").map(q => q.id),
       zaehler: { bestanden, verloren, erledigt: bestanden + verloren, gesamt: r.length },
@@ -247,19 +249,49 @@
     let i = -1;
     st.forEach((id, k) => { if (state.items[id] === "besitz") i = k; });
     const naechste = i < st.length - 1 ? itemCfg(config, st[i + 1]) : null;
-    return { quest: q.id, text: naechste ? `Für dieses Spiel wird deine Wasserwaffe eine Stufe stärker: ${naechste.name}.` : q.fluch.sonst || "" };
+    return { quest: q.id, text: naechste ? `Deine Wasserwaffe wird eine Stufe stärker: ${naechste.kurz || naechste.name}.` : q.fluch.sonst || "" };
   }
 
-  // Was ist bei dieser Quest einsetzbar? Im Showdown kommt dazu, was bei den Spielen der Duelle hilft.
+  // Das Duell, um das es im Showdown gerade geht: das erste offene (null, wenn alle entschieden sind oder es keins gibt)
+  function aktuellesDuell(config, state) {
+    return showdownDuelle(config, state).find(d => !d.ergebnis) || null;
+  }
+
+  // Was ist bei dieser Quest einsetzbar? Im Showdown kommt dazu, was beim Spiel des aktuellen Duells hilft
+  // (29.09.: Dennis rüstet sich für jedes Duell einzeln aus).
   function einsetzbar(config, state, questId) {
     const q = config.quests.find(x => x.id === questId);
     if (!q) return [];
     const ids = [...(q.einsetzbar || [])];
-    if (q.showdown) showdownDuelle(config, state).forEach(d => {
-      const dq = config.quests.find(x => x.id === d.quest);
-      (dq && dq.einsetzbar || []).forEach(id => { if (!ids.includes(id)) ids.push(id); });
-    });
+    const d = q.showdown ? aktuellesDuell(config, state) : null;
+    const dq = d && config.quests.find(x => x.id === d.quest);
+    ((dq && dq.einsetzbar) || []).forEach(id => { if (!ids.includes(id)) ids.push(id); });
     return config.items.map(i => i.id).filter(id => ids.includes(id) && !abgeloest(config, state, id));
+  }
+
+  /* Ausrüsten beim Spiel (29.09.): Vor dem Spiel legt Dennis Items und Flüche auf die C-Tasten und nimmt sie mit.
+     dabei:      was er für das aktuelle Spiel schon mitgenommen hat (im Showdown für das aktuelle Duell)
+     mitnehmbar: was er jetzt noch mitnehmen kann. Nicht dabei: was sich selbst meldet (Schild bei einer Niederlage im Duell,
+                 Rikes Segen am Tor), und am Tor gar nichts, dort zählen erst die Ziffern.
+     rettung:    der Schild, wenn Dennis ihn hat und er bei dieser Quest hilft (sonst null) */
+  function dabei(config, state, questId) {
+    const q = config.quests.find(x => x.id === questId);
+    if (!q) return [];
+    const d = q.showdown ? aktuellesDuell(config, state) : null;
+    const ids = (state.einsaetze || []).filter(e => e.quest === questId && (!q.showdown || (d && e.duell === d.nr))).map(e => e.item);
+    return config.items.map(i => i.id).filter(id => ids.includes(id));
+  }
+  function mitnehmbar(config, state, questId) {
+    if (state.tor && state.tor.quest === questId) return [];
+    const schon = dabei(config, state, questId);
+    return einsetzbar(config, state, questId).filter(id => {
+      const it = itemCfg(config, id);
+      return !it.tor && !it.rettung && state.items[id] === "besitz" && !schon.includes(id);
+    });
+  }
+  function rettung(config, state, questId) {
+    const it = config.items.find(i => i.rettung && state.items[i.id] === "besitz");
+    return it && einsetzbar(config, state, questId).includes(it.id) ? it.id : null;
   }
 
   // Hat Dennis ein stärkeres Item, das dieses ablöst (ersetzt)? Dann das stärkste davon, sonst null.
@@ -275,13 +307,10 @@
     return ids;
   }
 
-  // Items, die Dennis jetzt besitzt und bei einer aktuellen Quest einsetzen kann. Am Tor zählt nur, was dort hilft (Rikes Segen).
+  // Was Dennis jetzt bei einer aktuellen Quest mitnehmen kann (leuchtet in der Ausrüstung)
   function jetztEinsetzbar(config, state) {
     const set = new Set();
-    aktuelleQuests(config, state).forEach(qid => {
-      if (state.tor && state.tor.quest === qid) config.items.forEach(it => { if (it.tor && state.items[it.id] === "besitz") set.add(it.id); });
-      else einsetzbar(config, state, qid).forEach(id => { if (state.items[id] === "besitz") set.add(id); });
-    });
+    aktuelleQuests(config, state).forEach(qid => mitnehmbar(config, state, qid).forEach(id => set.add(id)));
     return set;
   }
 
@@ -289,7 +318,8 @@
      derive() rechnet damit wie immer. Was der Admin selbst entschieden hat, gilt vor Dennis' Eintrag.
        q_<quest>             { status: "bestanden" | "verloren", glanz?, zeit }   Ergebnis einer Quest (bei laufenden auch nach „läuft"),
                                                                           glanz: true = Glanzsieg (nur Quests mit glanz)
-       e_<id>                { item, quest, raub?, fuer?, zeit }            Einsatz eines Items oder einer Fähigkeit (Fluch: raub, fuer)
+       e_<id>                { item, quest, raub?, fuer?, duell?, zeit }    Einsatz eines Items oder einer Fähigkeit (Fluch: raub, fuer;
+                                                                             im Showdown duell = Nummer des Duells)
        d_<nr>                { ergebnis: "sieg" | "niederlage", zeit }      Duell im Showdown
        s_<quest>_<schritt>   { zeit }                                      Schritt einer laufenden Quest (Amulett gefunden)
        z_<nr>                { weg?, zeit }                                fehlende Ziffer am Tor geholt: weg "packs" (Standard, kostet
@@ -314,6 +344,8 @@
         const it = itemCfg(config, e.item);
         if (!it || !quest(e.quest)) return;
         const x = { id: k, item: e.item, quest: e.quest, zeit, von: "dennis" };
+        const nr = Math.trunc(Number(e.duell));
+        if (nr >= 1 && quest(e.quest).showdown) x.duell = nr;
         if (it.dieb) {
           x.raub = diebZahl(it, e.raub);
           if (quest(e.fuer)) x.fuer = e.fuer;
@@ -359,7 +391,8 @@
     return teile.length ? teile.join(", ") : "nichts";
   }
 
-  const api = { derive, emptyDoc, normalize, mitEintraegen, effektText, zifferGrund, zahlkraft, showdownDuelle, einsetzbar, fluchVorteil, diebWurf, abgeloest, aktuelleQuests, jetztEinsetzbar, STATUS, STATUS_LAUF };
+  const api = { derive, emptyDoc, normalize, mitEintraegen, effektText, zifferGrund, zahlkraft, showdownDuelle, aktuellesDuell, einsetzbar, dabei, mitnehmbar, rettung,
+    fluchVorteil, diebWurf, abgeloest, aktuelleQuests, jetztEinsetzbar, STATUS, STATUS_LAUF };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.QuestEngine = api;
 })(typeof window !== "undefined" ? window : globalThis);

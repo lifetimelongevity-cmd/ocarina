@@ -25,6 +25,16 @@ async function halten(p, ms = 1100) {
   const k = await p.locator('#swSiegel').boundingBox();
   await p.mouse.move(k.x + k.width / 2, k.y + k.height / 2); await p.mouse.down(); await warte(ms); await p.mouse.up(); await warte(700);
 }
+// Ausrüsten beim Spiel (29.09.): AUSRÜSTEN auf der Quest-Karte, Felder antippen (C-Tasten), MITNEHMEN, Siegel halten
+async function ausruesten(p, qid, ids) {
+  await p.tap(`#questCard [data-ausruesten="${qid}"]`); await warte(1300);
+  for (const id of ids) { await p.tap(`.slot[data-id="${id}"]`); await warte(200); }
+  await p.tap('[data-mitnehmen]'); await warte(350); await halten(p);
+  if (await p.isVisible('#fluchSzene')) { await p.click('#fluchSzene'); await warte(500); }
+  const f = await fenster(p);
+  await zu(p); await warte(900);
+  return f;
+}
 const questOeffnen = async (p, id) => { await p.evaluate(i => document.querySelector(`.q-row[data-id="${i}"]`).click(), id); await warte(250); };
 async function siegel(p, sel, erwartet, text) {
   await p.tap(sel); await warte(350); await halten(p);
@@ -58,8 +68,14 @@ pruefe(pod.includes('Kleine Wasserpistole'), 'Podrennen bringt die Kleine Wasser
 // Wald: Kartenwurf mit Glanzsieg, dann Auge des Jägers mit der großen Pistole
 const glanz = await siegel(dennis, '#questCard [data-ergebnis="glanz"]', 'GLANZSIEG', 'Kartenwurf');
 pruefe(glanz.includes('Große Wasserpistole'), 'Glanzsieg bringt die Große Wasserpistole');
-pruefe(await dennis.isVisible('#questCard [data-einsetzen="pistole_gross"]') && !(await dennis.$('#questCard [data-einsetzen="pistole_klein"]')) && !(await dennis.$('#questCard [data-einsetzen="spritze"]')), 'Auge: nur die große Pistole leuchtet');
-await siegel(dennis, '#questCard [data-einsetzen="pistole_gross"]', 'GROSSE WASSERPISTOLE', 'Große Wasserpistole eingesetzt');
+pruefe(await dennis.isVisible('#questCard [data-ausruesten="auge"]'), 'Auge: AUSRÜSTEN auf der Quest-Karte');
+await dennis.tap('#questCard [data-ausruesten="auge"]'); await warte(1300);
+const leuchtet = await dennis.$$eval('.slot.usable', els => els.map(e => e.dataset.id));
+pruefe(leuchtet.includes('pistole_gross') && !leuchtet.includes('pistole_klein') && !leuchtet.includes('spritze'), 'Auge: nur die große Pistole leuchtet (' + leuchtet.join(', ') + ')');
+await dennis.evaluate(() => document.querySelector('.shoulder-left').click()); await warte(1300);
+const ausgeruestet = await ausruesten(dennis, 'auge', ['pistole_gross']);
+pruefe(ausgeruestet.includes('AUSGERÜSTET') && ausgeruestet.includes('Große Wasserpistole'), 'Große Wasserpistole mitgenommen: „AUSGERÜSTET“');
+pruefe((await dennis.textContent('#questCard .dabei-zeile')).includes('Große Pistole') && await dennis.evaluate(() => document.querySelector('.face.active').dataset.page) === '1', 'Danach zurück auf QUESTS, DABEI: Große Pistole');
 await siegel(dennis, '#questCard [data-ergebnis="bestanden"]', 'PRÜFUNG BESTANDEN', 'Auge des Jägers');
 await siegel(dennis, '#questCard [data-ergebnis="bestanden"]', 'PRÜFUNG BESTANDEN', 'Klingen des Deku-Baums');
 
@@ -72,7 +88,10 @@ await questOeffnen(dennis, 'amulett');
 await siegel(dennis, '#questCard [data-ergebnis="bestanden"]', 'BESTANDEN', 'Amulett zusammengesetzt');
 // Rikes Rache (29.09.): nach Hüter der Flamme, die dicke Nadel vom Deku-Baum leuchtet, der Sieg bringt Ziffer 4
 await questOeffnen(dennis, 'rache');
-pruefe(await dennis.isVisible('#questCard [data-einsetzen="nadel_dick"]'), 'Rikes Rache: die dicke Nadel leuchtet');
+await dennis.tap('#questCard [data-ausruesten="rache"]'); await warte(1300);
+const nadeln = await dennis.$$eval('.slot.usable', els => els.map(e => e.dataset.id));
+pruefe(nadeln.includes('nadel_dick') && !nadeln.includes('nadel_stopf'), 'Rikes Rache: die dicke Nadel leuchtet');
+await dennis.evaluate(() => document.querySelector('.shoulder-left').click()); await warte(1300);
 const rache = await siegel(dennis, '#questCard [data-ergebnis="bestanden"]', 'PRÜFUNG BESTANDEN', 'Rikes Rache');
 pruefe(rache.includes('Ziffer 4'), 'Rikes Rache bringt Ziffer 4');
 
@@ -85,6 +104,15 @@ pruefe(duelle.length === 3 && duelle[0].includes('Wirbel der Götter REVANCHE'),
 await dennis.screenshot({ path: `${OUT}/durchlauf-1-gipfel.png` });
 for (const [nr, v] of [[1, 'sieg'], [2, 'niederlage'], [3, 'sieg']]) {
   await questOeffnen(dennis, 'bund');
+  if (v === 'niederlage') {
+    // Der Schild (Hüter der Flamme) meldet sich bei der Niederlage selbst. Hier trägt Dennis die Niederlage trotzdem ein.
+    await dennis.tap(`[data-duell="${nr}"][data-v="${v}"]`); await warte(350);
+    pruefe((await dennis.textContent('#swWahl')).includes('Schild einsetzen'), `Duell ${nr} verloren: Der Schild meldet sich`);
+    await dennis.tap('#swWahl [data-w="verloren"]'); await warte(200); await halten(dennis);
+    pruefe((await fenster(dennis)).includes(`DUELL ${nr} VERLOREN`), `Duell ${nr}: „DUELL ${nr} VERLOREN“`);
+    await zu(dennis); await warte(900);
+    continue;
+  }
   await siegel(dennis, `[data-duell="${nr}"][data-v="${v}"]`, `DUELL ${nr} ${v === 'sieg' ? 'GEWONNEN' : 'VERLOREN'}`, `Duell ${nr}`);
 }
 await questOeffnen(dennis, 'bund');

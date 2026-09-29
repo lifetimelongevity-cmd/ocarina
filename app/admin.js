@@ -118,11 +118,12 @@
   const buchung = b => ({ id: uid(), zeit: Date.now(), ...b });
 
   // Fluch (29.09.): Auch als Notlösung würfelt der Schattendieb, und das Spiel mit dem Vorteil wird gemerkt
+  // Im Showdown gilt ein Einsatz für das aktuelle Duell (29.09., Dennis rüstet sich je Duell aus)
   function einsetzen(item, quest) {
-    const it = itemById(item);
-    if (!it.dieb) return commit(d => d.einsaetze.push({ id: uid(), item, quest, zeit: Date.now() }), `${it.name} eingesetzt (${questById(quest).name})`);
+    const it = itemById(item), d = questById(quest).showdown ? E.aktuellesDuell(C, state) : null, duell = d ? { duell: d.nr } : {};
+    if (!it.dieb) return commit(d => d.einsaetze.push({ id: uid(), item, quest, zeit: Date.now(), ...duell }), `${it.name} eingesetzt (${questById(quest).name})`);
     const v = E.fluchVorteil(C, state, quest), raub = E.diebWurf(C);
-    commit(d => d.einsaetze.push({ id: uid(), item, quest, zeit: Date.now(), raub, ...(v ? { fuer: v.quest } : {}) }),
+    commit(d => d.einsaetze.push({ id: uid(), item, quest, zeit: Date.now(), raub, ...duell, ...(v ? { fuer: v.quest } : {}) }),
       `${it.name} gesprochen (${questById(quest).name}), ${it.dieb.name} stiehlt ${raub}`);
   }
   // Vorteil und Raub eines gesprochenen Fluchs, als Text für Liste und Meldung
@@ -495,7 +496,9 @@
     const i = k.indexOf("_"), art = k.slice(0, i), rest = k.slice(i + 1);
     if (art === "q") return `${questById(rest)?.name || rest}: ${e.glanz && e.status === "bestanden" ? "Glanzsieg" : STATUS_WORT[e.status] || e.status}`;
     if (art === "e" && itemById(e.item)?.dieb) return `Fluch gesprochen bei ${questById(e.quest)?.name || e.quest}${fluchFolgen(e)}`;
-    if (art === "e") return `${itemById(e.item)?.name || e.item} eingesetzt bei ${questById(e.quest)?.name || e.quest}`;
+    // Items nimmt Dennis vor dem Spiel mit (gib sie ihm), den Schild setzt er nach einer Niederlage ein (das Duell wird wiederholt)
+    if (art === "e" && itemById(e.item)?.rettung) return `${itemById(e.item).name} eingesetzt bei ${questById(e.quest)?.name || e.quest}${e.duell ? `, Duell ${e.duell}` : ""}: Duell wiederholen`;
+    if (art === "e") return `${itemById(e.item)?.name || e.item} mitgenommen zu ${questById(e.quest)?.name || e.quest}${e.duell ? `, Duell ${e.duell}` : ""} (gib es ihm)`;
     if (art === "d") return `Duell ${rest}: ${e.ergebnis === "sieg" ? "Sieg" : "Niederlage"}`;
     if (art === "s") { const j = rest.indexOf("_"), q = questById(rest.slice(0, j)), sx = q && (q.schritte || []).find(x => x.id === rest.slice(j + 1)); return `${q ? q.name : rest}: ${sx ? sx.name : rest}`; }
     if (art === "z") return E.zifferGrund(rest, e.weg) + (e.weg === "busse" || e.weg === "segen" ? "" : ` (−${C.ziffer_preis})`);

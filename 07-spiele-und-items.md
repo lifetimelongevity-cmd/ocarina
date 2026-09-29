@@ -77,7 +77,8 @@ Stand 25.09.2026, Namen und Aussichtspunkt geändert am 28.09. Sammelt, was der 
 | Prüfung des Bundes | Der Vorteil des Spiels im aktuellen Duell |
 
 Bei Rikes Tagebuch und Die drei Zeichen gibt es keinen. Texte in `config.js` (`fluch` je Quest).
-- **Entschieden (25.09.):** Dennis sagt an, der Quest Master bucht das Einsetzen im Admin. Dennis hat keinen Knopf.
+- **Entschieden (25.09.):** Dennis sagt an, der Quest Master bucht das Einsetzen im Admin. Dennis hat keinen Knopf. Überholt am 27.09. (Dennis besiegelt selbst) und am 29.09.:
+- **Ausrüsten beim Spiel (29.09., `08-erlebnis-plan.md` Abschnitt 16):** Items und Flüche nimmt Dennis vor dem Spiel in der Ausrüstung mit: AUSRÜSTEN auf der Quest-Karte, Tippen legt sie auf drei C-Tasten wie in Ocarina of Time, ein Siegel MITNEHMEN für alles. Der Bund gibt ihm dann das echte Ding. Der **Schild** wird nicht mitgenommen, er meldet sich, wenn Dennis ein Duell verliert (Schild einsetzen: noch einmal spielen, oder Verloren eintragen). Rikes Segen meldet sich am Tor. Am Gipfel rüstet sich Dennis für jedes Duell einzeln.
 
 ## Laufende Quests (25.09.)
 
