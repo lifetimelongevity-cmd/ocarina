@@ -241,6 +241,31 @@
       ]
     },
 
+    /* Finale (29.09.): Nach der Prüfung des Bundes kommen Siegbildschirm, die Geschichte als Laufschrift wie im Kino
+       und der Abspann (etwa 45 s), der bei THE END mit dem Code stehen bleibt. Hier stehen alle Namen und Texte.
+       In der Geschichte keine Gedankenstriche. Ein leerer questMaster lässt die Zeile weg. */
+    abspann: {
+      held: "Dennis",
+      questMaster: "Bene",
+      bund: ["Bene", "Fabio"],
+      dank: ["Rike"],
+      drehort: "Tegernsee und die Neureuth, 1261 m",
+      fortsetzung: "Episode II · Die Hochzeit",
+      geschichte: {
+        vorlange: "Vor langer Zeit, in einem Tal gar nicht so weit entfernt …",
+        episode: "EPISODE I",
+        titel: "DIE LETZTEN PRÜFUNGEN",
+        absaetze: [
+          "Es ist eine Zeit großer Gefühle. Der tapfere Held DENNIS hat das Herz von RIKE gewonnen, und sie hat seines schon lange. Der Tag, an dem die beiden sich das Ja-Wort geben, rückt unaufhaltsam näher.",
+          "Doch ein uraltes Gesetz der Junggesellen verlangt, dass kein Held vor den Altar tritt, ehe er sich in den Bergen bewiesen hat. Die finsteren Ritter BENE und FABIO haben dafür neun Prüfungen ersonnen, und sie kennen keine Gnade.",
+          "Bewaffnet mit einer Wasserspritze, dem Mut eines Piraten und einer Fee, die Rike ihm zur Seite schickte, zog Dennis vom Tegernsee hinauf zum Gipfel der Neureuth, um sich als würdig zu erweisen …"
+        ],
+        // Letzter Absatz, je nachdem, wie die Prüfung des Bundes ausgeht
+        sieg: "Er hat den Bund bezwungen. Die vier Ziffern sind sein, das Kästchen wartet. Doch die größte Quest seines Lebens beginnt erst: an Rikes Seite.",
+        niederlage: "Der Bund hat ihn am Gipfel bezwungen, doch aufgegeben hat er nie. Das Kästchen wartet. Und die größte Quest seines Lebens beginnt erst: an Rikes Seite."
+      }
+    },
+
     // Schnellbuchungen im Admin-Menü (Packs, Grund)
     schnellbuchungen: [
       { packs: 1,  grund: "Bonus vom Quest Master" },

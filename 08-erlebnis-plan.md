@@ -226,6 +226,7 @@ Seit 26.09. umgedreht (Branch `elegant-ramanujan`, auf `main`): Rike beantwortet
 - **Reise:** Das Ende braucht ein Ende. Der Abspann taugt abends in München zum Zeigen.
 - **UX:** Die Ansicht öffnet sich nach der letzten Quest einmal von selbst und danach über ZUM KÄSTCHEN im HUD.
 - **Erlebnis:** Öffnen-Moment (Richtung A), Abspann mit eigener Melodie.
+- **Gebaut am 29.09.:** Siegbildschirm, Geschichte als Laufschrift wie bei Star Wars (Wunsch des Nutzers) und Abspann mit THE END, Code und „Öffne jetzt das Kästchen“. Die Chronik steht im Abspann (Quests mit Ergebnis, Beute, Zahlen, ohne Uhrzeit). Noch offen aus diesem Abschnitt: Kästchen-Ansicht mit Öffnen-Moment und Rikes Botschaft vor dem Abspann (braucht die Aufnahme).
 
 ### 3.11 Rahmen: Navigation, Ton, Netz, Hochformat
 

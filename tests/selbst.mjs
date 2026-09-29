@@ -52,7 +52,7 @@ await admin.screenshot({ path: `${OUT}/selbst-3-admin.png`, fullPage: true });
 await zu(dennis); await warte(1200);
 
 // Zurücknehmen: Die Fee sagt es Dennis, die Quest ist wieder offen
-await admin.click('#dennisListe .zurueck'); await warte(700);
+await admin.click('#dennisListe .zurueck'); await warte(1400);   // Rücknahmen sammelt Dennis' Seite 0,7 s
 const zurueck = await fenster(dennis);
 pruefe(zurueck.includes('ZURÜCKGENOMMEN') && zurueck.includes('Rikes Tagebuch') && zurueck.includes('Trag es neu ein'), 'Zurücknehmen: Fee meldet es Dennis');
 await dennis.screenshot({ path: `${OUT}/selbst-4-zurueck.png` });
@@ -125,6 +125,10 @@ pruefe(await p.isVisible('#questCard [data-ergebnis="bestanden"]') && !(await p.
 await p.tap('#questCard [data-ergebnis="bestanden"]'); await warte(400); await halten(p);
 pruefe((await fenster(p)).includes('PRÜFUNG BESTANDEN'), 'Prüfung des Bundes bestanden');
 await zu(p); await warte(1200);
+// Danach das Finale (tests/abspann.mjs prüft es genau): hier nur bis THE END springen und zurück ins Menü
+pruefe(await p.evaluate(() => document.getElementById('abspann').dataset.phase) === 'sieg', 'Nach dem Bund: Siegbildschirm');
+for (let i = 0; i < 4 && await p.isVisible('#abSkip'); i++) { await p.click('#abSkip'); await warte(400); }
+await p.click('[data-ab="zu"]'); await warte(400);
 await p.click('#hudCode'); await warte(300);
 pruefe((await fenster(p)).includes('durch Rikes Segen'), 'Code: Ziffer 3 kam durch Rikes Segen');
 await ctx2.close();

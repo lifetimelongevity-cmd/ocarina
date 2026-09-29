@@ -90,6 +90,12 @@ for (const [nr, v] of [[1, 'sieg'], [2, 'niederlage'], [3, 'sieg']]) {
 }
 await questOeffnen(dennis, 'bund');
 await siegel(dennis, '#questCard [data-ergebnis="bestanden"]', 'PRÜFUNG BESTANDEN', 'Prüfung des Bundes');
+// Das Finale: Siegbildschirm, Geschichte, Abspann. Die Zahlen im Abspann stimmen mit dem Tag überein
+pruefe(await dennis.evaluate(() => document.getElementById('abspann').dataset.phase) === 'sieg', 'Finale: Siegbildschirm nach dem Bund');
+const abspann = await dennis.textContent('#abRoll');
+pruefe(abspann.includes('Kartenwurf · Glanzsieg') && abspann.includes('Große Wasserpistole') && abspann.includes('Prüfungen bestanden5 von 6'), 'Abspann: Glanzsieg, Beute und Zahlen des Tages');
+for (let i = 0; i < 4 && await dennis.isVisible('#abSkip'); i++) { await dennis.click('#abSkip'); await warte(400); }
+await dennis.click('[data-ab="zu"]'); await warte(400);
 await admin.click('#lauf .lauf-q[data-id="prophezeiung"] [data-a="beendet"]'); await warte(500);
 await zu(dennis);
 

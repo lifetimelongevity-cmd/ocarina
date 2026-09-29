@@ -161,6 +161,48 @@
     } catch (_) { return 0; }
   }
 
+  // Thema für Geschichte und Abspann (eigene Komposition, keine Originalmusik): zwei Phrasen zu je acht Takten im Wechsel,
+  // Melodie über Bass (Grundton und Quinte). Wird Phrase für Phrase eingeplant, bis musik() zurückgibt, dass sie aufhört.
+  const THEMA = {
+    schlag: .45,                                                    // Sekunden je Viertel
+    a: { melodie: [[659, 1], [784, 1], [1047, 2], [988, 1], [784, 1], [587, 2], [523, 1], [659, 1], [880, 1.5], [784, .5], [698, 1], [880, 1], [1047, 2],
+                   [784, 1], [659, 1], [523, 1], [659, 1], [587, 1], [784, 1], [988, 2], [880, 1], [698, 1], [587, 1], [698, 1], [659, 1.5], [587, .5], [523, 2]],
+         bass: [131, 98, 110, 87, 131, 98, 87, 131] },
+    b: { melodie: [[880, 2], [659, 1], [880, 1], [1047, 2], [880, 1], [698, 1], [784, 2], [659, 1], [1047, 1], [988, 3], [784, 1],
+                   [880, 1], [988, 1], [1047, 1], [1319, 1], [1175, 2], [1047, 1], [880, 1], [988, 1], [1047, 1], [1175, 1], [988, 1], [1047, 4]],
+         bass: [110, 87, 131, 98, 110, 87, 98, 131] }
+  };
+  function musik() {
+    try {
+      audio ??= new (window.AudioContext || window.webkitAudioContext)();
+      if (audio.state === "suspended") audio.resume();
+      const haupt = audio.createGain(), s = THEMA.schlag;
+      haupt.connect(audio.destination);
+      const ton = (f, t, d, typ, vol) => {
+        const o = audio.createOscillator(), g = audio.createGain();
+        o.type = typ; o.frequency.setValueAtTime(f, t);
+        g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + .02);
+        g.gain.setValueAtTime(vol, t + d * .75); g.gain.exponentialRampToValueAtTime(.0001, t + d + .06);
+        o.connect(g).connect(haupt); o.start(t); o.stop(t + d + .1);
+      };
+      let t = audio.currentTime + .1, n = 0, timer = null, aus = false;
+      const phrase = () => {
+        if (aus) return;
+        const p = THEMA[n++ % 2 ? "b" : "a"];
+        let m = t;
+        p.melodie.forEach(([f, b]) => { ton(f, m, b * s * .94, "triangle", .045); m += b * s; });
+        p.bass.forEach((f, i) => { ton(f, t + i * 4 * s, 2 * s * .95, "sine", .08); ton(f * 1.5, t + (i * 4 + 2) * s, 2 * s * .95, "sine", .05); });
+        t += 32 * s;
+        timer = setTimeout(phrase, (t - audio.currentTime - 1.5) * 1000);   // die nächste kurz vor dem Ende einplanen
+      };
+      phrase();
+      return () => {
+        aus = true; clearTimeout(timer);
+        try { const j = audio.currentTime; haupt.gain.setValueAtTime(1, j); haupt.gain.linearRampToValueAtTime(0, j + 1.2); setTimeout(() => haupt.disconnect(), 1500); } catch (_) {}
+      };
+    } catch (_) { return () => {}; }
+  }
+
   /* ---------- Symbole für Quests ---------- */
   function medalHtml(q, st, isNext) {
     const cls = st === "bestanden" || st === "beendet" ? "won" : st === "verloren" ? "lost" : st === "laeuft" ? "running" : "";
@@ -817,6 +859,7 @@
     else if (revealPending) showNextQuest();
     // Kam etwas dazu, während Dennis in der Ausrüstung steht (Treffer, Geschenk): gleich hier aus dem Schatten holen
     if (page === 2 && onboarded() && $("#overlay").hidden) funde();
+    setTimeout(abspannPruefen, 600);
   }
 
   /* ---------- Verpasste Momente nachholen (08-erlebnis-plan.md, 3.6) ---------- */
@@ -1045,9 +1088,11 @@
         ? `<button type="button" class="qc-eintrag win kauf" data-kauf="${i + 1}">KAUFEN · ${C.ziffer_preis} ${packsWort(C.ziffer_preis).toUpperCase()}</button>` : `<small class="kauf-fehlt">zu wenig Packs</small>`) : "";
       return `<li class="${v == null ? "" : "plus"}"><span class="ri"><span class="tumbler${v == null ? "" : " known"}" style="--hud-h:30px">${v == null ? "?" : v}</span></span><span>${v == null ? (s.next ? offen : "fehlt") : s.gekauft[i] ? { busse: "durch Bußprüfung", segen: "durch Rikes Segen" }[s.zifferWeg[i]] || "gekauft" : wo}</span>${kauf}</li>`;
     }).join("");
+    // Am Ende: den Abspann noch einmal ansehen (zum Beispiel abends in München)
+    const nochmal = spielEnde() ? `<li><span class="ri">${useSvg("z-triforce")}</span><span>Deine Legende</span><button type="button" class="qc-eintrag win kauf" data-abspann>ABSPANN ▶</button></li>` : "";
     showOverlay({
       head: `<span class="ri-big lock">${useSvg("i-lock")}</span><p class="big">CODE</p>`,
-      lines,
+      lines: lines + nochmal,
       next: ""
     });
   }
@@ -1276,9 +1321,10 @@
   $("#hudPacks").addEventListener("click", explainPacks);
   $("#hudCode").addEventListener("click", explainCode);
   $("#overlay").addEventListener("click", e => {
-    const k = e.target.closest("[data-kauf]");
+    const k = e.target.closest("[data-kauf]"), ab = e.target.closest("[data-abspann]");
     closeOverlay();
     if (k) schwurZiffer(+k.dataset.kauf);
+    if (ab) abspann.start(true);
   });
 
   // Wischen: nur waagerecht zählt, senkrecht scrollt die Liste
@@ -1298,6 +1344,7 @@
   window.addEventListener("keydown", e => {
     if (!$("#introScreen").hidden || !$("#logbuch").hidden) return;
     const k = e.key.toLowerCase();
+    if (abspann.offen()) { if (["enter", " ", "escape"].includes(k)) { e.preventDefault(); if ($("#abspann").dataset.phase === "ende") abspann.schliessen(); else abspann.weiter(); } return; }
     if (!$("#schwur").hidden) { if (k === "escape") schwur.schliessen(); return; }
     if (!$("#prolog").hidden) { if (["enter", " ", "a"].includes(k)) { e.preventDefault(); prolog.weiter(); } else if (k === "escape") prolog.ende(true); return; }
     if (!$("#overlay").hidden) { if (["enter", " ", "escape", "a"].includes(k)) { e.preventDefault(); closeOverlay(); } return; }
@@ -1553,6 +1600,144 @@
     });
   }
 
+  /* ---------- Finale: Siegbildschirm, Geschichte wie im Kino, Abspann (29.09.) ---------- */
+  // Nach der Prüfung des Bundes einmal pro Handy von selbst: Siegbildschirm, „Vor langer Zeit …“, der Titel fliegt davon,
+  // die Geschichte von Rike und Dennis zieht schräg in die Tiefe, dann rollt der Abspann (45 s) und bleibt bei THE END
+  // mit dem Code stehen. ÜBERSPRINGEN springt einen Teil weiter. Später noch einmal über das Code-Fenster (ABSPANN).
+  // Texte und Namen in config.js (abspann). Nimmt der Quest Master den Bund zurück, geht alles still zu.
+  const ABSPANN_KEY = "dq-abspann-v1" + (PROBE ? "-probe" : "");
+  const FINALE = REIHE[REIHE.length - 1];
+  const spielEnde = () => !!state && !state.next && ["bestanden", "verloren"].includes(state.quests[FINALE.id]);
+  const abspann = (() => {
+    const el = $("#abspann"), A = C.abspann || {}, G = A.geschichte || {};
+    const DAUER = { sieg: 6500, vorlange: 4200, logo: 7500, crawl: 48000, credits: 45000 };
+    let gezeigt = obGemerkt(ABSPANN_KEY), warEnde = false, timer = [], anim = [], stopMusik = null;
+    const warte = (ms, f) => timer.push(setTimeout(f, ms));
+    // Hylia Serif kennt keine Umlaute: nur reine ASCII-Namen bekommen die Zelda-Schrift
+    const schrift = t => /^[\x20-\x7e]*$/.test(t) ? "hy" : "";
+    const code = () => `<span class="ab-code">${state.ziffern.map(v => `<span class="tumbler${v == null ? "" : " known"}">${v == null ? "?" : v}</span>`).join("")}</span>`;
+    function stille() { timer.forEach(clearTimeout); timer = []; anim.forEach(a => { try { a.cancel(); } catch (_) {} }); anim = []; }
+    function musikAus() { if (stopMusik) { stopMusik(); stopMusik = null; } }
+    const phase = p => { el.dataset.phase = p; $("#abSkip").hidden = p === "ende"; };
+
+    function bauen() {
+      const s = state, won = s.quests[FINALE.id] === "bestanden", doc = E.normalize(lastDoc || {});
+      $("#abSieg").innerHTML = `<span class="ab-triforce${won ? "" : " matt"}">${useSvg("z-triforce")}</span>
+        <p class="ab-sieg-titel">${won ? "DIE LEGENDE IST VOLLBRACHT" : "DER BUND HAT GESIEGT"}</p>
+        <p class="ab-sieg-sub">${won ? "Du hast die Prüfung des Bundes bestanden." : "Doch deine Legende ist geschrieben."}</p>
+        <p class="ab-sieg-packs">${cardSvg()}<span><b>${s.packs}</b> von ${s.max} ${packsWort(s.max)} gehören dir</span></p>${code()}`;
+      $("#abVorlange").textContent = G.vorlange || "";
+      $("#abCrawlText").innerHTML = `<p class="ab-episode">${esc(G.episode || "")}</p><p class="ab-ep-titel">${esc(G.titel || "")}</p>`
+        + [...(G.absaetze || []), won ? G.sieg : G.niederlage].filter(Boolean).map(t => `<p>${esc(t)}</p>`).join("");
+      // Abspann: Rollen, der Tag in Quests, Beute und Zahlen, Dank, THE END
+      const rolle = (titel, namen) => (namen || []).filter(Boolean).length
+        ? `<div class="ab-rolle"><small>${esc(titel)}</small>${namen.filter(Boolean).map(n => `<b class="${schrift(n)}">${esc(n)}</b>`).join("")}</div>` : "";
+      const zeit = id => Number(doc.zeiten[id]) || 9e15, ordnung = C.quests.map(q => q.id);
+      const gespielt = C.quests.filter(q => ["bestanden", "verloren", "beendet"].includes(s.quests[q.id]))
+        .sort((x, y) => zeit(x.id) - zeit(y.id) || ordnung.indexOf(x.id) - ordnung.indexOf(y.id));
+      const quests = gespielt.map(q => {
+        const st = s.quests[q.id], erg = st === "verloren" ? useSvg("i-x") : useSvg("i-check");
+        return `<li><span class="ab-ic">${questIcon(q, st, false)}</span><span class="ab-name">${esc(q.name)}${s.glanz[q.id] ? " · Glanzsieg" : ""}</span><span class="ab-erg ${st === "verloren" ? "lost" : "won"}">${erg}</span></li>`;
+      }).join("");
+      const beute = C.items.filter(it => s.items[it.id] && s.items[it.id] !== "nicht")
+        .map(it => `<li><span class="ab-ic" style="color:${it.farbe}">${useSvg(it.symbol)}</span><span class="ab-name">${esc(it.name)}</span></li>`).join("");
+      const zahl = (label, wert) => `<li><span class="ab-ic"></span><span class="ab-name">${label}</span><b>${wert}</b></li>`;
+      const typ = t => REIHE.filter(q => q.typ === t), bestanden = l => l.filter(q => s.quests[q.id] === "bestanden").length;
+      const duelle = Object.values(s.duelle), siege = duelle.filter(d => d === "sieg").length;
+      const zahlen = zahl("Prüfungen bestanden", `${bestanden(typ("kern"))} von ${typ("kern").length}`)
+        + zahl("Sidequests bestanden", `${bestanden(typ("side"))} von ${typ("side").length}`)
+        + (duelle.length ? zahl("Duelle am Gipfel", `${siege} : ${duelle.length - siege}`) : "")
+        + zahl(C.waehrung.name, `${s.packs} von ${s.max}`);
+      const block = (titel, inhalt) => inhalt ? `<div class="ab-block"><small>${esc(titel)}</small><ul>${inhalt}</ul></div>` : "";
+      $("#abRoll").innerHTML = `<div class="ab-kopf"><b class="hy">The Legend of Dennis</b><small>A Link to Rike</small></div>`
+        + rolle("Der Held", [A.held || "Dennis"]) + rolle("Die Fee", ["gesandt von Rike"]) + rolle("Quest Master", [A.questMaster]) + rolle("Der Bund", A.bund)
+        + block("Die Prüfungen des Tages", quests) + block("Die Beute", beute) + block("Der Tag in Zahlen", zahlen)
+        + rolle("Drehort", [A.drehort]) + rolle("Besonderer Dank", A.dank)
+        + `<div class="ab-ende" id="abEnde"><b class="hy">THE END</b><p class="ab-folgt">Fortsetzung folgt …</p>${A.fortsetzung ? `<p class="ab-fortsetzung">${esc(A.fortsetzung)}</p>` : ""}
+           ${code()}<p class="ab-oeffne">Öffne jetzt das Kästchen.</p>
+           <div class="ab-knoepfe"><button type="button" data-ab="nochmal">NOCHMAL</button><button type="button" data-ab="zu">ZUM MENÜ</button></div></div>`;
+    }
+
+    function start(nochmal) {
+      if (!spielEnde()) return false;
+      gezeigt = true; obMerken(ABSPANN_KEY);
+      stille(); musikAus(); bauen();
+      el.hidden = false; $("#coach").hidden = true;
+      if (nochmal) geschichte(); else sieg();
+      return true;
+    }
+    function sieg() {
+      stille(); phase("sieg");
+      melody(state.quests[FINALE.id] === "bestanden" ? "pruefung" : "verloren");
+      if (!STILL.matches) warte(DAUER.sieg, geschichte);
+    }
+    // „Vor langer Zeit …“, dann der Titel, der in die Tiefe fliegt, und die Laufschrift, die schräg davonzieht
+    function geschichte() {
+      stille(); phase("geschichte");
+      if (STILL.matches) { musikAus(); stopMusik = musik(); return; }   // ohne Bewegung: die Geschichte steht still da
+      anim.push($("#abVorlange").animate([{ opacity: 0 }, { opacity: 1, offset: .15 }, { opacity: 1, offset: .8 }, { opacity: 0 }], { duration: DAUER.vorlange, fill: "both" }));
+      $("#abLogo").style.opacity = 0; $("#abCrawlText").style.transform = "translateY(0)";
+      warte(DAUER.vorlange, () => {
+        musikAus(); stopMusik = musik();
+        anim.push($("#abLogo").animate([{ transform: "translate(-50%, -50%) scale(2.2)", opacity: 1 }, { transform: "translate(-50%, -50%) scale(.1)", opacity: 1, offset: .88 },
+          { transform: "translate(-50%, -50%) scale(.05)", opacity: 0 }], { duration: DAUER.logo, easing: "cubic-bezier(.25,.1,.6,1)", fill: "both" }));
+        warte(1600, () => {
+          const t = $("#abCrawlText"), weg = t.offsetHeight + t.parentElement.offsetHeight * .95;
+          const a = t.animate([{ transform: "translateY(0)" }, { transform: `translateY(${-weg}px)` }], { duration: DAUER.crawl, fill: "both" });
+          anim.push(a); a.onfinish = () => credits();
+        });
+      });
+    }
+    // Der Abspann rollt von unten herauf und bleibt stehen, wenn THE END in der Mitte ist
+    function credits() {
+      stille(); phase("credits");
+      if (!stopMusik) stopMusik = musik();
+      const roll = $("#abRoll"), ende = $("#abEnde"), H = $("#abCredits").clientHeight;
+      const ziel = -(ende.offsetTop - Math.max(0, (H - ende.offsetHeight) / 2));
+      if (STILL.matches) { roll.style.transform = "none"; return fertig(); }
+      const a = roll.animate([{ transform: `translateY(${H}px)` }, { transform: `translateY(${ziel}px)` }], { duration: DAUER.credits, fill: "both" });
+      anim.push(a); a.onfinish = fertig;
+    }
+    function fertig() {
+      phase("ende");
+      musikAus();
+      setTimeout(() => { if (!el.hidden) melody("pruefung"); }, 900);
+    }
+    function weiter() {
+      const p = el.dataset.phase;
+      if (p === "sieg") geschichte();
+      else if (p === "geschichte") { musikAus(); credits(); }
+      else if (p === "credits") { const a = anim[anim.length - 1]; if (a) a.finish(); else fertig(); }
+    }
+    function schliessen() {
+      if (el.hidden) return;
+      stille(); musikAus();
+      el.hidden = true; delete el.dataset.phase;
+      renderHud(); renderQuests();
+    }
+    // Bei jedem neuen Stand: Wird der Bund zurückgenommen, geht der Abspann still zu und kommt beim nächsten Ende wieder
+    function pruefen() {
+      const ende = spielEnde();
+      if (warEnde && !ende) { schliessen(); vergessen(); }
+      warEnde = ende;
+    }
+    function vergessen() { gezeigt = false; try { localStorage.removeItem(ABSPANN_KEY); } catch (_) {} }
+
+    $("#abSkip").addEventListener("click", e => { e.stopPropagation(); tone("confirm"); weiter(); });
+    el.addEventListener("click", e => {
+      const k = e.target.closest("[data-ab]");
+      if (k) { tone("confirm"); if (k.dataset.ab === "nochmal") start(true); else schliessen(); return; }
+      if (el.dataset.phase === "sieg") weiter();               // Siegbildschirm: Tippen geht weiter
+    });
+    return { start, weiter, schliessen, pruefen, vergessen, offen: () => !el.hidden, gezeigt: () => gezeigt };
+  })();
+  // Von selbst nur, wenn Dennis im Menü ist und gerade nichts anderes offen hat
+  function abspannPruefen() {
+    if (!spielEnde() || abspann.offen() || abspann.gezeigt() || schlange.length) return;
+    if (!intro.hidden || !$("#overlay").hidden || !$("#prolog").hidden || !$("#schwur").hidden || !$("#logbuch").hidden) return;
+    abspann.start();
+  }
+
   /* ---------- Startbildschirm und Vollbild ---------- */
   const intro = $("#introScreen");
   const playElements = [...document.querySelectorAll(".hud, .shoulder, .stage, .foot")];
@@ -1569,6 +1754,7 @@
       if (row) scrollIntoList(row);
       // Beim ersten Mal erklärt Rikes Fee, worum es geht. Sonst laufen die Momente, die Dennis verpasst hat.
       if (prolog.start()) merkeGesehen(); else nachholen();
+      setTimeout(abspannPruefen, 900);
     }, 500);
   }
   intro.addEventListener("click", beginQuest);        // PRESS START: Tippen irgendwo startet
@@ -1801,6 +1987,8 @@
     renderSync();
     fensterZuruecknehmen();
     prolog.pruefen();
+    abspann.pruefen();
+    setTimeout(abspannPruefen, 900);        // Spielende: Finale, sobald nichts anderes mehr offen ist
     if (!$("#schwur").hidden) schwur.pruefen();
     // Log-Buch-Sprachnachrichten vorladen, solange das Log-Buch noch nicht entschieden ist
     if (state.quests.logbuch === "offen") logbuch.vorladen();
@@ -1853,6 +2041,7 @@
   function neuerAnfang(zeigen) {
     if (sammel) { clearTimeout(sammel.t); sammel = null; }
     try { [OB_KEY, KARTE_KEY, FUND_KEY, GPS_KEY].forEach(k => localStorage.removeItem(k)); } catch (e) {}
+    abspann.schliessen(); abspann.vergessen();
     beutelGezeigt = false; karteGesehen = false; gesehen = null; neuMarke.clear();
     prolog.vergessen();
     gpsStopp(); gps.an = false; gps.lage = null; gps.hinweis = "";
