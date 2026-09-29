@@ -23,6 +23,7 @@ Stand 25.09.2026, Namen und Aussichtspunkt geändert am 28.09. Sammelt, was der 
 | 13 | ~~Rast der Ahnen~~ | **Gestrichen** (25.09.). Die Hütte ist nur noch Abrechnung und Öffnen des Kästchens. | |
 | 14 | **Wirbel der Götter** (Beyblade) | Name steht (25.09.). Duell gegeneinander, nur zwei Kreisel. Eigenes Spiel, nicht der Showdown. | Gegen wen, Best of 3, wo im Ablauf |
 | 15 | **Rikes Amulett** (Knobelspiel, Brosche) | Zeitquest: Die Brosche ist versteckt, Dennis muss sie in einer Frist finden. Dann darf er den ganzen Tag über versuchen, sie zusammenzusetzen. Gelöst = Belohnung, eher Packs. | Versteck, Frist, Anzahl Packs |
+| 16 | **Rikes Rache** (Nadel einfädeln) | **Vorschlag (29.09.), noch nicht gebaut:** laufende Quest, an jeder Station ein Stich auf Zeit, Details im Abschnitt „Vorschlag: Rikes Rache“ unten. | Name, Zeit, Belohnung bestätigen |
 
 ## Beobachtungen
 
@@ -55,6 +56,7 @@ Stand 25.09.2026, Namen und Aussichtspunkt geändert am 28.09. Sammelt, was der 
 | F4 | ~~Brosche~~ | **Gestrichen** (25.09.) |
 | F5 | **Nakama-Ruf** (neu 28.09., Strohhut) | Einer aus dem Bund kämpft ein Duell für Dennis, sein Ergebnis zählt. Einmalig. Aus Die drei Zeichen (4) |
 | F6 | **Rikes Segen** (neu 28.09., Herz) | Schenkt am Tor zum Gipfel eine fehlende Ziffer. Einmalig. Aus Rikes Amulett (15) |
+| F7 | **Roter Faden** (Vorschlag 29.09., Armband) | Dennis wählt eines der drei Duelle im Showdown selbst. Einmalig. Aus Rikes Rache (16) |
 
 ## Regel: Einsetzen pro Quest (25.09.)
 
@@ -168,3 +170,43 @@ Wie Zoras Schuppe in Ocarina of Time (erst Silber, dann Gold): Im Auge des Jäge
 **Glanzsieg:** ein dritter Ausgang neben bestanden und verloren, nur wo `glanz` in `config.js` steht. Er zählt als bestanden (gleiche Packs) und bringt zusätzlich, was unter `glanz` steht. Dennis sieht auf der Quest-Karte eine eigene Zeile GLANZSIEG mit Bedingung und getarnter Belohnung und trägt ihn selbst ein (Siegel halten). Der Quest Master sieht „Kartenwurf: Glanzsieg“, kann im Admin auf Bestanden zurückstufen (die Fee sagt Dennis, dass ein Sieg bleibt) oder den Glanzsieg selbst buchen. In der Quest-Liste steht dann ein Stern. Weitere Glanzsiege: in `config.js` bei einer Quest `glanz: { bedingung, items }` ergänzen.
 
 Regel für alle Stufen gleich: ein Tank, gleicher Abstand. Vorher testen, wie viele der 5 Flammen jede Stufe schafft, dann die Grenze für bestanden setzen. Die Spritze sollte knapp scheitern, sonst ist das Upgrade wertlos. Physisch: Spritze und ganz kleine Wasserpistole sind schon da, die Monsterpistole ist gekauft.
+
+## Vorschlag: Rikes Rache (29.09., noch nicht gebaut)
+
+Wunsch des Nutzers (29.09.): Rike hat im Tagebuch auf „Was kannst du laut Rike überhaupt nicht?“ geantwortet: Nadel einfädeln. Daraus wird ein Spiel: Faden durchs Nadelöhr, auf Zeit, mehrmals an verschiedenen Stellen. `app/config.js` ist noch unverändert.
+
+**Name: Rikes Rache** (Empfehlung). Kurz, mit Stabreim, die Gruppe kann es rufen, und es passt zu Rikes Tagebuch, Rikes Amulett und Rikes Segen. Die Geschichte dazu: Rike hat verraten, was Dennis überhaupt nicht kann, jetzt nimmt sie Rache. Alternativen: „Der rote Faden“ (Doppelsinn, siehe unten), „Das Nadelöhr“. Nicht „Rikes Revanche“, weil Revanche schon das Wiederholen verlorener Spiele im Showdown heißt.
+
+**Art und Platz:** eine laufende Quest wie die Prophezeiung, mit einem Zähler „Stiche“ (höchstens 5). Laufend, weil sie an mehreren Stellen stattfindet. So bleiben die feste Reihe der neun Quests, der Nebel und die Summe von 20 Packs unberührt. Bei Dennis steht sie in der Kammer der Sidequests unter Prophezeiung und Amulett.
+
+**Start:** Der Quest Master startet sie, sobald Dennis das Tagebuch besiegelt hat. Dennis sieht NEUE QUEST, die Fee sagt: „Rike hat verraten, was du überhaupt nicht kannst. Jetzt nimmt sie Rache.“ So bekommt Rikes erste Antwort einen zweiten Auftritt. Text auf der Quest-Karte: „Rike hat verraten, was du überhaupt nicht kannst. An jeder Station wartet eine Nadel: Fädle ein, bevor die Zeit abläuft.“
+
+**Fünf Stiche, einer pro Station.** Die Karte hat genau fünf Stationen bis zum Gipfel. Schwerer wird es über die Nadel und einen Dreh je Station:
+
+| Stich | Station | Nadel | Dreh |
+|---|---|---|---|
+| 1 | Zug (Freitag) | dicke Stopfnadel, großes Öhr | im fahrenden Zug. Sitzt Dennis allein im Zug, filmt er sich und schickt das Video an den Bund |
+| 2 | Wiese | Stopfnadel | einer aus dem Bund hält die Nadel, Dennis wählt, wem er vertraut |
+| 3 | Wald | Nähnadel | direkt nach 15 Kniebeugen, mit zitternden Händen |
+| 4 | Aussicht | Nähnadel | auf einem Bein, mit Blick ins Tal (mit Abstand zur Kante) |
+| 5 | Gipfel | feinste Nadel | vor dem Tor, der Bund zählt die letzten zehn Sekunden laut herunter |
+
+**Zeit, geknüpft an Rikes Tagebuch:** Pro Stich hat Dennis 10 Sekunden für jede Antwort, die er im Tagebuch über Rike richtig hatte, mindestens 20 Sekunden (5 Treffer = 50 Sekunden). Je besser er sie kennt, desto gnädiger ist ihre Rache. Die Zeit steht nach dem Tagebuch fest und bleibt den ganzen Tag gleich. Alternative ohne Kopplung: 60, 50, 40, 30, 20 Sekunden.
+
+**Regeln:** Ein Versuch je Station. Faden etwa 30 cm, vorher abgeschnitten. Anlecken und Zwirbeln erlaubt, Einfädelhilfe verboten. Die Uhr läuft, sobald er Nadel und Faden in der Hand hat. Geschafft ist ein Stich, wenn der Faden auf der anderen Seite des Öhrs herausschaut.
+
+**Belohnung:** Bestanden ab 3 von 5 Stichen, dann bringt sie die neue Fähigkeit **Roter Faden** (F7, einmalig): Im Showdown wählt Dennis eines der drei Duelle selbst, statt einer Revanche. Tarnname „Verhedderter Faden“ („Wirr und verknotet. Wer ihn entwirrt, hält das Ende in der Hand.“). Hat er nach dem fünften Stich weniger als 3, ist die Quest verloren und kostet 0 Packs wie das Amulett. Die Strafe ist, dass Rike recht hatte. Die übrigen Stiche nach dem dritten spielt er trotzdem, wegen des Armbands. Möglich wäre ein Glanzsieg bei 5 von 5 (zum Beispiel zusätzlich ein Fluch), gesetzt ist er nicht.
+
+**Der rote Faden (Bezug zu Rike):** Nach einer Legende aus Japan und China verbindet ein unsichtbarer roter Faden zwei Menschen, die füreinander bestimmt sind. Er kann sich dehnen und verheddern, aber nie reißen. Darum ist der Faden rot, und jeder Faden, den Dennis durchbringt, wird ihm ums Handgelenk geknotet. Am Abend trägt er ein rotes Armband mit so vielen Knoten, wie er Stiche geschafft hat. Rike könnte das Gegenstück bekommen. Nebenbei heißt der Zähler „Stiche“, und vielleicht trägt Dennis dann schon das Schwert Stich.
+
+**Symbol:** Nadel mit Herzfaden: Der Faden läuft durchs Öhr und wird unten zum Herz. Farbe Karmin `#d8405e`, Rikes Rosa, nur zorniger. Die Fähigkeit Roter Faden ist ein Faden als Armband, unten verknotet. Vorschau mit den echten Stilen der App in `entwuerfe/rikes-rache/symbole.png` (dort auch Entwurf B, das Öhr als Schlüsselloch, und Entwurf C, die Garnrolle), die Symbole zum Einbauen in `entwuerfe/rikes-rache/symbole.svg.html`.
+
+**Momente in der App:** NEUE QUEST beim Start. Bei jedem Stich „EINGEFÄDELT“ mit „2 von 5 Stichen“ (statt PROPHEZEIUNG ERFÜLLT). Beim dritten Stich der Fund des Roten Fadens. Verloren: „RIKE HATTE RECHT“. Schön wären zwei kurze Sprachnachrichten von Rike, eine für den Sieg („Na gut, ich nehm's zurück.“) und eine für die Niederlage („Hab ich's nicht gesagt?“).
+
+**Nebenbei:** Die feinste Nadel taugt auch als Bußprüfung am Tor zum Gipfel (offener Punkt 5 in `CLAUDE.md`).
+
+**Material:** Nadelset mit Stopf- und Nähnadeln (Drogerie, etwa 2 bis 4 €), rotes Nähgarn oder Stickgarn, kleine Schere, pro Station ein vorgeschnittener Faden plus Ersatz, Stoppuhr am Handy. Vorher selbst testen, wie lange die feinste Nadel mit Dreh dauert.
+
+**Umsetzung, sobald freigegeben:** In `config.js` eine laufende Quest `rache` (nr 16, Zähler „Stiche“ mit max 5, Sieg: Roter Faden, Niederlage 0 Packs) und ein Item `roter_faden` (F7, Fähigkeit, einmalig), zwei Sprites in `index.html`. Neu im Code: ein Zähler mit Ziel (bestanden bei 3, heute kann eine Zähler-Quest nur beendet werden), der Moment-Text je Quest statt fest PROPHEZEIUNG ERFÜLLT, die Duell-Wahl des Roten Fadens in `showdownDuelle()` und ein fünfter Runenkreis in der Ausrüstung (heute 2 mal 2, danach mit `tests/geraete.mjs` prüfen). Die Packs ändern sich nicht, `tests/balance.js` bleibt gleich.
+
+**Offen:** Name, Zeit an das Tagebuch knüpfen oder feste Zeiten, Belohnung Roter Faden, Stich 1 im Zug per Video oder erst bei der Ankunft in München, Armband und Gegenstück für Rike, Sprachnachrichten.
