@@ -45,7 +45,8 @@
                  Beim Gewinnen „entpuppt" es sich. Bis dahin zeigt die Ausrüstung seinen Schatten: Die Form ist zu erkennen.
        Texte nennen keine Quest beim Namen, sonst verraten sie, was im Nebel liegt.
        Wasserwaffen in drei Stufen (28.09.): Spritze (Start), kleine Pistole (Sieg im Podrennen),
-       große Pistole (Glanzsieg im Kartenwurf). Im Auge des Jägers zählt die stärkste. */
+       große Pistole (Glanzsieg im Kartenwurf). Im Auge des Jägers zählt die stärkste.
+       Nadeln (29.09.): Stopfnadel (Sieg im Wirbel), dicke Nadel (Sieg am Deku-Baum). In Rikes Rache zählt die dickste. */
     items: [
       // Startitem: getarnt als Beutel (tarnSymbol), entpuppt sich als Spritze. Hieß bis 28.09. „Dennis' Eier“ (Beutel, I1).
       { id: "spritze", nr: "I7", gruppe: "item", name: "Wasserspritze", kurz: "Spritze", farbe: "#a8e4f5", symbol: "i-spritze", tarnSymbol: "i-beutel",
@@ -69,6 +70,14 @@
       { id: "stich", nr: "I6", gruppe: "item", name: "Stich", kurz: "Stich", farbe: "#b8d4ff", symbol: "i-sword",
         text: "Eine Elbenklinge. Ein Schwert mehr heißt ein Versuch mehr.",
         tarn: { name: "Verrostete Klinge", kurz: "Klinge", text: "Alt und stumpf. Doch sie wartet auf ihren Moment." } },
+      // Nadeln für Rikes Rache (29.09.): Ohne Nadel-Item fädelt Dennis feine Nadeln. Die dickste, die er hat, zählt.
+      { id: "nadel_stopf", nr: "I9", gruppe: "item", name: "Stopfnadel", kurz: "Stopfnadel", farbe: "#d6dde8", symbol: "i-nadel-stopf",
+        text: "Ein größeres Öhr als bei einer feinen Nadel. Da findet der Faden leichter hindurch.",
+        tarn: { name: "Eisendorn", kurz: "Dorn", text: "Kräftiger als ein Splitter. Wer weiß, was er aufspießt." } },
+      { id: "nadel_dick", nr: "I10", gruppe: "item", name: "Dicke Nadel", kurz: "Dicke Nadel", farbe: "#eef2f8", symbol: "i-nadel-dick",
+        ersetzt: ["nadel_stopf"],
+        text: "Das größte Öhr von allen. Sie löst die Stopfnadel ab.",
+        tarn: { name: "Uralter Dorn", kurz: "Dorn", text: "Hart wie altes Holz, mit einem Loch, durch das Licht fällt." } },
       // Hieß bis 28.09. Spruchrolle (id bleibt, damit gespeicherte Stände passen).
       // Seit 29.09. zweischneidig: Vor einem Spiel gesprochen bringt er dort einen Vorteil (fluch bei der Quest),
       // danach stiehlt der Schattendieb 0 bis 3 Packs (gewichtet 30/35/25/10). Zwei gibt es: Die drei Zeichen und Kartenwurf.
@@ -138,13 +147,13 @@
                    stärker, hat er schon die stärkste, gilt sonst. Im Showdown gilt der Vorteil des Spiels im aktuellen Duell.
        Regel (28.09.): Hauptquests geben Packs und eine Ziffer oder ein Item, Sidequests und laufende Quests eine Fähigkeit.
        Jede Niederlage kostet nur Packs. Die vier Ziffern liegen vor dem Gipfel, ohne sie kein Finale.
-       Packs: Siege zusammen 22, Niederlagen −17. Werte ändern, dann node tests/balance.js (rechnet 50 000 Tage durch). */
+       Packs (29.09.): Siege zusammen 20 (1, 2, 2, 3, 3, 4, 5), Niederlagen −19. Werte ändern, dann node tests/balance.js (rechnet 50 000 Tage durch). */
     quests: [
       { id: "logbuch", nr: 1, typ: "kern", name: "Rikes Tagebuch", ort: "Zug nach München", station: "zug",
         farbe: "#4a8fe8", emblem: "z-water",
         text: "Rike hat sieben Fragen über dich beantwortet. Schreib, was sie gesagt hat, dann hörst du ihre Antwort.",
         qm: "Bestanden ab 5 von 7 Treffern, du urteilst, ob sinngemäß. Dennis tippt seine Antworten im Menü, danach spielt Rikes Sprachnachricht. Seine Antworten stehen unten im Admin. Das Ergebnis trägt er danach selbst ein.",
-        win:  { packs: 2, ziffer: 1, items: ["kreisel"] },
+        win:  { packs: 1, ziffer: 1, items: ["kreisel"] },
         lose: { packs: 0 },
         einsetzbar: [], logbuch: true },
 
@@ -159,8 +168,8 @@
       { id: "wirbel", nr: 14, typ: "kern", name: "Wirbel der Götter", ort: "Wiese am Anstieg", station: "wiese",
         farbe: "#ec8f2e", emblem: "z-spirit",
         text: "Zwei Kreisel, eine Arena. Wer sich länger dreht, gewinnt.",
-        qm: "Beyblade gegen den besten Blader des Bundes, bestanden bei 2 von 3. Mit Götterkreisel übt Dennis vorher und wählt zuerst. Füllt auch den Showdown auf.",
-        win:  { packs: 2, items: ["karten_gepanzert"] },
+        qm: "Beyblade gegen den besten Blader des Bundes, bestanden bei 2 von 3. Mit Götterkreisel übt Dennis vorher und wählt zuerst. Füllt auch den Showdown auf. Der Sieg bringt auch die Stopfnadel für Rikes Rache.",
+        win:  { packs: 2, items: ["karten_gepanzert", "nadel_stopf"] },
         lose: { packs: -2 },
         fluch: "Dein Gegner muss den Kreisel mit der schwachen Hand starten.",
         einsetzbar: ["kreisel", "spruchrolle", "schild"], duell: true, revanche: true },
@@ -169,7 +178,7 @@
         farbe: "#a468e6", emblem: "z-shadow",
         text: "Ein kleiner Gleiter, ein Parcours, eine Uhr. Fahr schneller als die Zeit.",
         qm: "RC-Auto auf Zeit, ein Versuch, auf festem Boden (auf Gras bleibt das kleine Auto hängen). Zeitgrenze so, dass du es beim Testen nur jedes zweite Mal schaffst.",
-        win:  { packs: 3, ziffer: 2, items: ["pistole_klein"] },
+        win:  { packs: 2, ziffer: 2, items: ["pistole_klein"] },
         lose: { packs: -2 },
         fluch: "3 Sekunden mehr auf der Uhr.",
         einsetzbar: ["spruchrolle"], revanche: true },
@@ -187,7 +196,7 @@
         farbe: "#e2472f", emblem: "e-flame",
         text: "Fünf Flammen, ein Tank, deine stärkste Wasserwaffe. Lösch sie, bevor dir das Wasser ausgeht.",
         qm: "5 Teelichter aus 4 m, ein Tank. Bestanden nur, wenn alle 5 aus sind. Es zählt die stärkste Wasserwaffe, die Dennis hat: Spritze, kleine Pistole oder große Pistole.",
-        win:  { packs: 4, ziffer: 3, items: ["stich"] },
+        win:  { packs: 3, ziffer: 3, items: ["stich"] },
         lose: { packs: -2 },
         fluch: { stufen: ["spritze", "pistole_klein", "pistole_gross"], sonst: "Du darfst 1 m näher ran." },
         einsetzbar: ["spritze", "pistole_klein", "pistole_gross", "spruchrolle"], revanche: true },
@@ -195,8 +204,8 @@
       { id: "deku", nr: 12, typ: "kern", name: "Klingen des Deku-Baums", ort: "Erstes Waldstück", station: "wald",
         farbe: "#48b454", emblem: "z-forest",
         text: "Wirf deine Klingen in den alten Baum. Nur was stecken bleibt, zählt.",
-        qm: "4 Mini-Schwerter aus 4 m auf einen Baum, bestanden, wenn 2 stecken. Stich gibt ein Schwert mehr.",
-        win:  { packs: 4, ziffer: 4 },
+        qm: "4 Mini-Schwerter aus 4 m auf einen Baum, bestanden, wenn 2 stecken. Stich gibt ein Schwert mehr. Der Sieg bringt die dicke Nadel für Rikes Rache (Ziffer 4 liegt seit 29.09. bei Rikes Rache).",
+        win:  { packs: 3, items: ["nadel_dick"] },
         lose: { packs: -2 },
         fluch: "Ein Schwert mehr.",
         einsetzbar: ["stich", "spruchrolle"], revanche: true },
@@ -209,6 +218,16 @@
         lose: { packs: -2 },
         fluch: "Nur die halbe Strecke: 50 statt 100 Schritte.",
         einsetzbar: ["spruchrolle"] },
+
+      // Neu am 29.09.: Rike hat im Tagebuch verraten, dass Dennis keine Nadel einfädeln kann. Trägt Ziffer 4.
+      { id: "rache", nr: 16, typ: "kern", name: "Rikes Rache", ort: "Aussichtspunkt", station: "aussicht",
+        farbe: "#d8405e", emblem: "i-nadel",
+        text: "Rike hat verraten, was du überhaupt nicht kannst. Fädle ein, bevor die Zeit abläuft.",
+        qm: "Faden durchs Nadelöhr auf Zeit, das genaue Spiel legst du fest. Vorschlag: fünf Nadeln an fünf Stellen rund um den Aussichtspunkt, eine Uhr für alle, 20 Sekunden je Treffer im Tagebuch (mindestens 60). Es zählt die dickste Nadel, die Dennis hat: ohne Nadel-Item feine Nadeln, sonst Stopfnadeln oder dicke Nadeln. Anlecken und Zwirbeln erlaubt, keine Einfädelhilfe.",
+        win:  { packs: 4, ziffer: 4 },
+        lose: { packs: -2 },
+        fluch: "30 Sekunden mehr auf der Uhr.",
+        einsetzbar: ["nadel_stopf", "nadel_dick", "spruchrolle"], revanche: true },
 
       { id: "bund", nr: 5, typ: "kern", name: "Prüfung des Bundes", ort: "Gipfel Neureuth", station: "gipfel",
         farbe: "#f2c94c", emblem: "z-triforce",
@@ -263,7 +282,7 @@
         titel: "DIE LETZTEN PRÜFUNGEN",
         absaetze: [
           "Es ist eine Zeit großer Gefühle. Der tapfere Held DENNIS hat das Herz von RIKE gewonnen, und sie hat seines schon lange. Der Tag, an dem die beiden sich das Ja-Wort geben, rückt unaufhaltsam näher.",
-          "Doch ein uraltes Gesetz der Junggesellen verlangt, dass kein Held vor den Altar tritt, ehe er sich in den Bergen bewiesen hat. Die finsteren Ritter BENE und FABIO haben dafür neun Prüfungen ersonnen, und sie kennen keine Gnade.",
+          "Doch ein uraltes Gesetz der Junggesellen verlangt, dass kein Held vor den Altar tritt, ehe er sich in den Bergen bewiesen hat. Die finsteren Ritter BENE und FABIO haben dafür zehn Prüfungen ersonnen, und sie kennen keine Gnade.",
           "Bewaffnet mit einer Wasserspritze, dem Mut eines Piraten und einer Fee, die Rike ihm zur Seite schickte, zog Dennis vom Tegernsee hinauf zum Gipfel der Neureuth, um sich als würdig zu erweisen …"
         ],
         // Letzter Absatz, je nachdem, wie die Prüfung des Bundes ausgeht
@@ -272,8 +291,9 @@
       }
     },
 
-    // Schnellbuchungen im Admin-Menü (Packs, Grund)
+    // Schnellbuchungen im Admin-Menü (Packs, Grund). offen: Dennis hat ein Pack geöffnet (29.09., zählt wie sein Siegel „Pack öffnen“)
     schnellbuchungen: [
+      { packs: -1, grund: "Pack geöffnet", offen: true },
       { packs: 1,  grund: "Bonus vom Quest Master" },
       { packs: -1, grund: "Strafe vom Quest Master" },
       { packs: 0,  grund: "Fluch geschenkt", item: "spruchrolle", menge: 1 }

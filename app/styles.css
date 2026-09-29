@@ -83,6 +83,9 @@ svg { display: block; }
 .pack-row svg { width: calc(var(--hud-h) * .36); height: calc(var(--hud-h) * .49); filter: drop-shadow(1px 1px 0 rgba(0,0,0,.8)); }
 .pack-row.two svg { width: calc(var(--hud-h) * .27); height: calc(var(--hud-h) * .37); }
 .pack-row .gain { animation: packGain 900ms steps(6, end) 2; }
+/* Geöffnete Packs (29.09.): blass hinter den geschlossenen */
+.ic-card.offen { opacity: .5; filter: saturate(.3) brightness(1.15); }
+.pack-row .ic-card.offen { filter: saturate(.3) brightness(1.15) drop-shadow(1px 1px 0 rgba(0,0,0,.8)); }
 @keyframes packGain { 50% { transform: translateY(-3px) scale(1.25); filter: brightness(1.6) drop-shadow(0 0 4px var(--gold-hi)); } }
 .hud-num { font: 900 calc(var(--hud-h) * .56)/1 Georgia, serif; color: var(--cream); text-shadow: 2px 2px 0 #000; white-space: nowrap; }
 .hud-num small { font-size: .55em; color: var(--cream-dim); margin-left: 1px; }

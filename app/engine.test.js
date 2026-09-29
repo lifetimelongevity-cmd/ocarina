@@ -19,9 +19,14 @@ config.quests.forEach(q => {
 config.items.forEach(it => assert.ok(it.name && it.kurz && it.symbol && it.text && it.tarn && it.tarn.name, it.id + ": Texte und Tarnung"));
 config.items.forEach(it => (it.ersetzt || []).forEach(id => assert.ok(itemIds.includes(id) && id !== it.id, it.id + ": ersetzt unbekanntes Item " + id)));
 config.quests.filter(q => q.glanz).forEach(q => assert.ok(q.win && q.glanz.bedingung && q.typ !== "lauf" && !q.showdown, q.id + ": Glanzsieg braucht Sieg und Bedingung"));
-assert.deepStrictEqual(config.quests.map(q => q.nr).sort((a, b) => a - b), [1, 2, 3, 4, 5, 7, 9, 12, 14, 15]);
-assert.deepStrictEqual(config.items.map(i => i.nr), ["I7", "I8", "I2", "I4", "I5", "I6", "F1", "F3", "F6"]);
-assert.strictEqual(reihe.filter(q => q.typ === "kern").length, 6, "sechs Medaillons");
+assert.deepStrictEqual(config.quests.map(q => q.nr).sort((a, b) => a - b), [1, 2, 3, 4, 5, 7, 9, 12, 14, 15, 16]);
+assert.deepStrictEqual(config.items.map(i => i.nr), ["I7", "I8", "I2", "I4", "I5", "I6", "I9", "I10", "F1", "F3", "F6"]);
+assert.strictEqual(reihe.filter(q => q.typ === "kern").length, 7, "sieben Medaillons (Rikes Rache seit 29.09.)");
+// Rikes Rache (29.09.): Hauptquest am Aussichtspunkt nach Hüter der Flamme, trägt Ziffer 4, die dickste Nadel zählt
+const rache = config.quests.find(q => q.id === "rache");
+assert.ok(rache && rache.typ === "kern" && rache.station === "aussicht" && rache.win.ziffer === 4 && rache.revanche);
+assert.strictEqual(reihe.map(q => q.id).indexOf("rache"), reihe.map(q => q.id).indexOf("feuerprobe") + 1);
+assert.deepStrictEqual(reihe.filter(q => q.win && q.win.packs).map(q => q.win.packs), [1, 2, 2, 3, 3, 4, 5], "Siege steigen mit dem Weg");
 assert.deepStrictEqual(reihe.filter(q => q.win && q.win.ziffer).map(q => q.win.ziffer).sort(), [1, 2, 3, 4], "jede Ziffer genau einmal");
 assert.strictEqual(config.logbuch.fragen.length, 7);
 // Jedes erspielbare Item wird irgendwo gewonnen und irgendwo eingesetzt
@@ -56,7 +61,7 @@ assert.strictEqual(s.items.spruchrolle, "nicht");
 assert.strictEqual(s.anzahl.spruchrolle, 0);
 assert.strictEqual(s.next, "logbuch");
 assert.deepStrictEqual(s.laufend, []);
-assert.strictEqual(s.zaehler.gesamt, 9);
+assert.strictEqual(s.zaehler.gesamt, 10);
 
 // Packs einer Quest laut Konfiguration, und Packs Schritt für Schritt zwischen 0 und max
 const P = (id, k) => (config.quests.find(q => q.id === id)[k] || {}).packs || 0;
@@ -75,7 +80,7 @@ assert.strictEqual(s.items.pistole_klein, "besitz");   // Podrennen gewonnen
 assert.strictEqual(s.items.pistole_gross, "nicht");    // nur mit Glanzsieg im Kartenwurf
 assert.strictEqual(s.next, "auge");
 assert.deepStrictEqual(s.erhalten, ["spritze", "kreisel", "spruchrolle", "pistole_klein"]);   // Die drei Zeichen bringen einen Fluch
-assert.deepStrictEqual(s.zaehler, { bestanden: 3, verloren: 2, erledigt: 5, gesamt: 9 });
+assert.deepStrictEqual(s.zaehler, { bestanden: 3, verloren: 2, erledigt: 5, gesamt: 10 });
 
 // 3. Ziffer kaufen über Buchung, Deckel unten bei 0
 s = derive(config, { quests: { logbuch: "verloren" }, buchungen: [{ id: "b1", packs: -1, grund: "Ziffer 1 gekauft", ziffer: 1 }] });
@@ -221,10 +226,10 @@ assert.strictEqual(s.packs, P("amulett", "win"));
 s = mit({ duelle: { "1": "niederlage" } }, { d_1: { ergebnis: "sieg", zeit: 1 }, d_2: { ergebnis: "sieg", zeit: 2 } });
 assert.deepStrictEqual(s.duelle, { "1": "niederlage", "2": "sieg" });
 // Ziffer am Kästchen gekauft: kostet Packs in zeitlicher Reihenfolge, zweimal dieselbe Ziffer zählt einmal
-s = mit({ quests: { logbuch: "bestanden", klingen: "bestanden" }, zeiten: { logbuch: 1, klingen: 2 }, buchungen: [{ id: "b", packs: 0, grund: "x", ziffer: 1 }] }, { z_3: { zeit: 5 }, z_1: { zeit: 6 } });
+s = mit({ quests: { logbuch: "bestanden", klingen: "bestanden", wirbel: "bestanden" }, zeiten: { logbuch: 1, klingen: 2, wirbel: 3 }, buchungen: [{ id: "b", packs: 0, grund: "x", ziffer: 1 }] }, { z_3: { zeit: 5 }, z_1: { zeit: 6 } });
 assert.deepStrictEqual(s.ziffern, [7, null, 2, null]);   // Die drei Zeichen geben seit 28.09. keine Ziffer
 assert.deepStrictEqual(s.gekauft, [true, false, true, false]);
-assert.strictEqual(s.packs, P("logbuch", "win") + P("klingen", "win") - config.ziffer_preis);
+assert.strictEqual(s.packs, P("logbuch", "win") + P("klingen", "win") + P("wirbel", "win") - config.ziffer_preis);
 // Das Dokument des Admins bleibt unverändert
 const adminDoc = { quests: { logbuch: "bestanden" } };
 mitEintraegen(config, adminDoc, { q_klingen: { status: "bestanden", zeit: 1 } });
@@ -232,12 +237,12 @@ assert.deepStrictEqual(adminDoc, { quests: { logbuch: "bestanden" } });
 
 // 18. Das Tor zum Gipfel: ohne alle vier Ziffern kein Finale. Fehlende holt Dennis für Packs, per Buße oder mit Rikes Segen.
 const bisGipfel = { logbuch: "bestanden", klingen: "bestanden", wirbel: "bestanden", podrennen: "verloren", kartenwurf: "bestanden",
-                    auge: "bestanden", deku: "verloren", feuerprobe: "bestanden" };
+                    auge: "bestanden", deku: "bestanden", feuerprobe: "bestanden", rache: "verloren" };   // Ziffer 4 liegt seit 29.09. bei Rikes Rache
 s = derive(config, { quests: bisGipfel });
 assert.strictEqual(s.next, "bund");
 assert.deepStrictEqual(s.tor, { quest: "bund", fehlend: [2, 4] });
 assert.deepStrictEqual([...jetztEinsetzbar(config, s)], []);                   // am Tor hilft nur Rikes Segen
-assert.strictEqual(derive(config, { quests: { ...bisGipfel, podrennen: "bestanden", deku: "bestanden" } }).tor, null);
+assert.strictEqual(derive(config, { quests: { ...bisGipfel, podrennen: "bestanden", rache: "bestanden" } }).tor, null);
 assert.strictEqual(derive(config, { quests: { logbuch: "verloren" } }).tor, null);   // das Tor gibt es nur am Gipfel
 const vorher = s.packs;
 s = mit({ quests: { ...bisGipfel, amulett: "bestanden" } }, { z_2: { weg: "busse", zeit: 1 }, z_4: { weg: "segen", zeit: 2 } });
@@ -332,5 +337,43 @@ assert.strictEqual(mitDoc.einsaetze[0].raub, 2);
 assert.strictEqual(mitDoc.einsaetze[0].fuer, undefined);
 assert.strictEqual(mitEintraegen(config, {}, { e_k: { item: "kreisel", quest: "wirbel", raub: 2, zeit: 5 } }).einsaetze[0].raub, undefined);
 assert.strictEqual(mit({ quests: dreiZ }, {}).packs, derive(config, { quests: dreiZ }).packs);
+
+// 21. Packs unterwegs öffnen (29.09.): Die Zahl sind die geschlossenen Packs (Rubine). Reicht es nicht, zahlt Dennis in Karten,
+// höchstens eine je geöffnetem Pack. Hat er nichts mehr, verpufft der Rest.
+const zuWiese = { logbuch: "bestanden", klingen: "bestanden", wirbel: "bestanden" };   // 1 + 0 + 2 = 3 Packs
+const zeitWiese = { logbuch: 1, klingen: 2, wirbel: 3 };
+s = mit({ quests: zuWiese, zeiten: zeitWiese }, { o_a: { zeit: 4 } });
+assert.strictEqual(s.packs, 2);
+assert.strictEqual(s.geoeffnet, 1);
+assert.strictEqual(s.karten, 0);
+// Zwei geöffnet, dann das Podrennen verloren (−2): 1 Pack, 1 Karte
+s = mit({ quests: { ...zuWiese, podrennen: "verloren" }, zeiten: { ...zeitWiese, podrennen: 7 } }, { o_a: { zeit: 4 }, o_b: { zeit: 5 } });
+assert.deepStrictEqual([s.packs, s.geoeffnet, s.karten, s.kappung.unten], [0, 2, 1, 0]);
+// Alles geöffnet: Niederlage zahlt er ganz in Karten, mehr Karten als geöffnete Packs gibt es nicht
+s = mit({ quests: { ...zuWiese, podrennen: "verloren", kartenwurf: "verloren" }, zeiten: { ...zeitWiese, podrennen: 7, kartenwurf: 8 } },
+  { o_a: { zeit: 4 }, o_b: { zeit: 5 }, o_c: { zeit: 6 } });
+assert.deepStrictEqual([s.packs, s.geoeffnet, s.karten, s.kappung.unten], [0, 3, 3, 1]);
+// Bei 0 gibt es nichts zu öffnen
+s = mit({}, { o_a: { zeit: 1 } });
+assert.deepStrictEqual([s.packs, s.geoeffnet, s.karten], [0, 0, 0]);
+// Früher geöffnet oder später: Wert am Ende gleich, nur die Form ändert sich (Packs gegen Karten)
+const wert = st => st.packs + st.geoeffnet - st.karten;
+const spaet = mit({ quests: { ...zuWiese, podrennen: "verloren" }, zeiten: { ...zeitWiese, podrennen: 7 } }, { o_a: { zeit: 9 } });
+const frueh = mit({ quests: { ...zuWiese, podrennen: "verloren" }, zeiten: { ...zeitWiese, podrennen: 7 } }, { o_a: { zeit: 4 }, o_b: { zeit: 5 }, o_c: { zeit: 6 } });
+assert.strictEqual(wert(spaet), wert(frueh));
+// Der Quest Master kann das Öffnen auch buchen (Schnellbuchung „Pack geöffnet“)
+assert.ok(config.schnellbuchungen.some(b => b.offen && b.packs === -1));
+s = derive(config, { quests: zuWiese, zeiten: zeitWiese, buchungen: [{ id: "x", packs: -1, grund: "Pack geöffnet", offen: true, zeit: 4 }] });
+assert.deepStrictEqual([s.packs, s.geoeffnet], [2, 1]);
+// Zahlkraft: geschlossene Packs plus je geöffnetem Pack eine Karte, die noch nicht abgegeben ist
+const { zahlkraft } = require("./engine.js");
+assert.strictEqual(zahlkraft(mit({ quests: zuWiese, zeiten: zeitWiese }, { o_a: { zeit: 4 }, o_b: { zeit: 5 } })), 3);
+// Am Tor: 2 Packs, notfalls in Karten
+s = mit({ quests: { ...bisGipfel }, zeiten: {} }, { o_a: { zeit: 1e15 }, o_b: { zeit: 1e15 + 1 }, o_c: { zeit: 1e15 + 2 }, o_d: { zeit: 1e15 + 3 }, o_e: { zeit: 1e15 + 4 }, z_2: { zeit: 1e15 + 5 } });
+assert.deepStrictEqual([s.packs, s.geoeffnet, s.karten, s.zifferWeg[1]], [0, 5, 2, "packs"]);
+// Der Schattendieb nimmt auch Karten, wenn keine geschlossenen Packs mehr da sind
+s = mit({ quests: zuWiese, zeiten: zeitWiese, buchungen: [{ id: "g", packs: 0, grund: "x", item: "spruchrolle", menge: 1, zeit: 3.5 }] },
+  { o_a: { zeit: 4 }, o_b: { zeit: 5 }, o_c: { zeit: 6 }, e_f: { item: "spruchrolle", quest: "podrennen", raub: 2, zeit: 7 } });
+assert.deepStrictEqual([s.packs, s.geoeffnet, s.karten], [0, 3, 2]);
 
 console.log("Alle Tests bestanden.");

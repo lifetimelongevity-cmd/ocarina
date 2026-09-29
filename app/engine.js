@@ -10,7 +10,8 @@
      einsaetze: [ { id, item, quest, zeit?, raub?, fuer? } ]   // Dennis hat ein Item oder eine Fähigkeit eingesetzt. Fluch: raub = Packs,
                                                       // die der Schattendieb stiehlt, fuer = Spiel, dessen Vorteil gilt
      duelle:    { "1": "sieg" | "niederlage", ... }    // Ergebnisse der Showdown-Duelle
-     buchungen: [ { id, packs, grund, zeit?, ziffer?, weg?, item?, menge? } ]   // ziffer am Tor geholt (weg: packs, busse, segen), item/menge = Fluch o. Ä.
+     buchungen: [ { id, packs, grund, zeit?, ziffer?, weg?, item?, menge?, offen? } ]   // ziffer am Tor geholt (weg: packs, busse, segen), item/menge = Fluch o. Ä.,
+                                                      // offen: Dennis hat ein Pack geöffnet (packs −1)
      items:     { [itemId]: "besitz" | "verloren" | "nicht" }      // manuelle Korrektur, schlägt die Regel
      zeiten:    { [questId]: Zeitstempel }             // wann die Quest entschieden wurde (für die Reihenfolge der Packs)
      stand:     Zeitstempel der letzten Änderung
@@ -18,8 +19,10 @@
    }
 
    Packs zählen Schritt für Schritt in der Reihenfolge, in der sie passiert sind (zeiten, buchung.zeit),
-   und bleiben dabei immer zwischen 0 und max: Wer bei 0 verliert, verliert nichts, was über den Deckel geht, verfällt.
-   Ohne Zeit (ältere Stände, Demo) gilt die Reihenfolge der Konfiguration, danach die Buchungen. */
+   und bleiben dabei immer zwischen 0 und max. Die Zahl sind Dennis' geschlossene Packs (Rubine, 29.09.): Öffnet er eins,
+   geht sie eins runter. Kostet etwas mehr, als er geschlossen hat, zahlt er den Rest in Karten: pro fehlendem Pack die beste
+   Karte aus einem seiner geöffneten Packs (höchstens eine je geöffnetem Pack). Hat er nichts mehr, verpufft der Rest.
+   Was über den Deckel geht, verfällt. Ohne Zeit (ältere Stände, Demo) gilt die Reihenfolge der Konfiguration, danach die Buchungen. */
 (function (root) {
   const STATUS = ["offen", "bestanden", "verloren"];
   const STATUS_LAUF = ["offen", "laeuft", "bestanden", "verloren", "beendet"];
@@ -123,7 +126,8 @@
     });
 
     doc.buchungen.forEach((b, i) => {
-      if (Number(b.packs)) schrittePacks.push({ t: Number(b.zeit) || 0, seq: config.quests.length + i, packs: Number(b.packs) });
+      if (b.offen) schrittePacks.push({ t: Number(b.zeit) || 0, seq: config.quests.length + i, packs: -1, offen: true });
+      else if (Number(b.packs)) schrittePacks.push({ t: Number(b.zeit) || 0, seq: config.quests.length + i, packs: Number(b.packs) });
       const z = Number(b.ziffer);
       if (z >= 1 && z <= config.code.length) {
         ziffern[z - 1] = config.code[z - 1];
@@ -169,10 +173,16 @@
 
     // Packs in zeitlicher Reihenfolge, nach jedem Schritt zwischen 0 und max
     let packs = Math.max(0, Math.min(max, config.waehrung.start || 0));
-    const kappung = { unten: 0, oben: 0 };      // was bei 0 nicht mehr abgezogen wurde, was über den Deckel verfallen ist
+    const kappung = { unten: 0, oben: 0 };      // was verpufft ist, weil Dennis nichts mehr hatte, was über den Deckel verfallen ist
+    let geoeffnet = 0, karten = 0;              // geöffnete Packs, Karten, mit denen er bezahlt hat
     schrittePacks.sort((a, b) => a.t - b.t || a.seq - b.seq).forEach(x => {
+      if (x.offen) { if (packs > 0) { packs--; geoeffnet++; } return; }   // bei 0 gibt es nichts zu öffnen
       const roh = packs + x.packs;
-      if (roh < 0) kappung.unten -= roh;
+      if (roh < 0) {
+        const k = Math.min(-roh, geoeffnet - karten);
+        karten += k;
+        kappung.unten += -roh - k;
+      }
       if (roh > max) kappung.oben += roh - max;
       packs = Math.max(0, Math.min(max, roh));
     });
@@ -185,7 +195,7 @@
     const tor = nextQuest && nextQuest.tor && fehlend.length ? { quest: nextQuest.id, fehlend } : null;
 
     return {
-      packs, max, kappung, items, anzahl, erhalten: erhalten.filter(id => items[id] !== "nicht"),
+      packs, max, kappung, geoeffnet, karten, items, anzahl, erhalten: erhalten.filter(id => items[id] !== "nicht"),
       ziffern, gekauft, zifferWeg, quests, glanz, treffer, schritte, eingesetzt, raube, duelle, tor,
       next: nextQuest ? nextQuest.id : null,
       laufend: config.quests.filter(q => q.typ === "lauf" && quests[q.id] !== "offen").map(q => q.id),
@@ -284,6 +294,7 @@
        s_<quest>_<schritt>   { zeit }                                      Schritt einer laufenden Quest (Amulett gefunden)
        z_<nr>                { weg?, zeit }                                fehlende Ziffer am Tor geholt: weg "packs" (Standard, kostet
                                                                              ziffer_preis), "busse" (Bußprüfung bestanden) oder "segen" (Rikes Segen)
+       o_<id>                { zeit }                                      Dennis hat ein Pack geöffnet (29.09.)
      Eingerechnete Einsätze und Käufe tragen von: "dennis" und ihren Schlüssel als id. */
   const ENTSCHIEDEN = ["bestanden", "verloren", "beendet"];
   function mitEintraegen(config, rawDoc, eintraege) {
@@ -323,10 +334,15 @@
         // Rikes Segen ist danach verbraucht (als Einsatz bei der Quest mit dem Tor)
         const segen = weg === "segen" && config.items.find(it => it.tor), torQ = config.quests.find(q => q.tor);
         if (segen && torQ) out.einsaetze.push({ id: k, item: segen.id, quest: torQ.id, zeit, von: "dennis" });
+      } else if (art === "o") {
+        out.buchungen.push({ id: k, packs: -1, grund: "Pack geöffnet", offen: true, zeit, von: "dennis" });
       }
     });
     return out;
   }
+
+  // Womit Dennis bezahlen kann: geschlossene Packs, dazu je geöffnetem Pack eine Karte, die er noch nicht abgegeben hat
+  const zahlkraft = state => state.packs + Math.max(0, (state.geoeffnet || 0) - (state.karten || 0));
 
   const zifferGrund = (nr, weg) => weg === "busse" ? `Ziffer ${nr} durch Bußprüfung` : weg === "segen" ? `Ziffer ${nr} durch Rikes Segen` : `Ziffer ${nr} gekauft`;
 
@@ -343,7 +359,7 @@
     return teile.length ? teile.join(", ") : "nichts";
   }
 
-  const api = { derive, emptyDoc, normalize, mitEintraegen, effektText, zifferGrund, showdownDuelle, einsetzbar, fluchVorteil, diebWurf, abgeloest, aktuelleQuests, jetztEinsetzbar, STATUS, STATUS_LAUF };
+  const api = { derive, emptyDoc, normalize, mitEintraegen, effektText, zifferGrund, zahlkraft, showdownDuelle, einsetzbar, fluchVorteil, diebWurf, abgeloest, aktuelleQuests, jetztEinsetzbar, STATUS, STATUS_LAUF };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.QuestEngine = api;
 })(typeof window !== "undefined" ? window : globalThis);

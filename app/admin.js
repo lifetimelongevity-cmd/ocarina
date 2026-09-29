@@ -195,7 +195,7 @@
       b.type = "button";
       b.className = "btn";
       b.textContent = sb.packs ? `${sb.packs > 0 ? "+" : "−"}${Math.abs(sb.packs)} ${sb.grund}` : sb.grund;
-      b.addEventListener("click", () => commit(d => d.buchungen.push(buchung({ packs: sb.packs, grund: sb.grund, ...(sb.item ? { item: sb.item, menge: sb.menge } : {}) })), "Gebucht: " + sb.grund));
+      b.addEventListener("click", () => commit(d => d.buchungen.push(buchung({ packs: sb.packs, grund: sb.grund, ...(sb.item ? { item: sb.item, menge: sb.menge } : {}), ...(sb.offen ? { offen: true } : {}) })), "Gebucht: " + sb.grund));
       quick.appendChild(b);
     });
 
@@ -305,10 +305,15 @@
 
   /* ---------- Darstellung ---------- */
   function render() {
+    // Die Zahl sind Dennis' geschlossene Packs (29.09.). Dahinter, wie viele er schon geöffnet hat.
     $("#packs").textContent = state.packs;
+    $("#packsMax").textContent = "/ " + C.waehrung.max + (state.geoeffnet ? ` · ${state.geoeffnet} offen` : "");
     const k = state.kappung;
-    $("#kappung").hidden = !(k.unten || k.oben);
-    $("#kappung").textContent = [k.unten ? `Nicht abgezogen, weil Dennis bei 0 war: ${k.unten}` : "", k.oben ? `Verfallen, weil alle Packs schon seine waren: ${k.oben}` : ""].filter(Boolean).join(" · ");
+    $("#kappung").hidden = !(k.unten || k.oben || state.karten);
+    $("#kappung").textContent = [
+      state.karten ? `Karten an den Bund: ${state.karten} (jeweils seine beste aus einem geöffneten Pack, weil geschlossene fehlten)` : "",
+      k.unten ? `Verpufft, weil Dennis nichts mehr hatte: ${k.unten}` : "",
+      k.oben ? `Verfallen, weil alle Packs schon seine waren: ${k.oben}` : ""].filter(Boolean).join(" · ");
     $("#done").textContent = state.zaehler.erledigt;
     $("#code").innerHTML = C.code.map((v, i) => `<i class="${state.ziffern[i] != null ? "known" : ""}" title="Ziffer ${i + 1}">${v}</i>`).join("");
     $("#inv").innerHTML = C.items.filter(it => state.items[it.id] !== "nicht").map(it =>
@@ -494,6 +499,7 @@
     if (art === "d") return `Duell ${rest}: ${e.ergebnis === "sieg" ? "Sieg" : "Niederlage"}`;
     if (art === "s") { const j = rest.indexOf("_"), q = questById(rest.slice(0, j)), sx = q && (q.schritte || []).find(x => x.id === rest.slice(j + 1)); return `${q ? q.name : rest}: ${sx ? sx.name : rest}`; }
     if (art === "z") return E.zifferGrund(rest, e.weg) + (e.weg === "busse" || e.weg === "segen" ? "" : ` (−${C.ziffer_preis})`);
+    if (art === "o") return "Pack geöffnet (−1, gib ihm eins)";
     return k;
   }
   // Gilt der Eintrag, oder hast du selbst schon anders gebucht?

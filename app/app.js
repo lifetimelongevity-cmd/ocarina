@@ -45,9 +45,10 @@
     // Kurz vor dem Ende: alles gespielt bis auf den Bund, am Tor fehlt Ziffer 3, danach zwei Revanchen, Amulett gefunden
     bund: {
       quests: { logbuch: "bestanden", klingen: "verloren", wirbel: "bestanden", podrennen: "bestanden", kartenwurf: "bestanden",
-                auge: "verloren", deku: "bestanden", feuerprobe: "bestanden", amulett: "laeuft" },
+                auge: "verloren", deku: "bestanden", feuerprobe: "bestanden", rache: "bestanden", amulett: "laeuft" },
       schritte: { amulett: { gefunden: true } },
-      einsaetze: [{ id: "e1", item: "spruchrolle", quest: "auge" }]
+      einsaetze: [{ id: "e1", item: "spruchrolle", quest: "auge" }],
+      buchungen: [{ id: "o1", packs: -1, grund: "Pack geöffnet", offen: true }]
     },
     ende: {
       quests: Object.fromEntries(C.quests.map(q => [q.id, q.zaehler ? "beendet" : ["wirbel", "kartenwurf"].includes(q.id) ? "verloren" : "bestanden"])),
@@ -340,14 +341,16 @@
 
   let diebHalt = null;                          // Packs, die das HUD zeigt, solange der Schattendieb noch würfelt
   function renderHud() {
-    const s = state, packs = diebHalt ?? s.packs;
+    const s = state, packs = diebHalt ?? s.packs, offen = s.geoeffnet || 0;
+    // Vorn die geschlossenen Packs (Rubine), dahinter die geöffneten, der Rest liegt beim Bund
     document.querySelectorAll("#packRow .ic-card").forEach((c, i) => {
-      const leer = i >= packs;
+      const leer = i >= packs + offen;
       c.classList.toggle("empty", leer);
+      c.classList.toggle("offen", i >= packs && !leer);
       c.querySelector("use").setAttribute("href", leer ? "#i-card-empty" : "#i-card");
     });
     $("#packsVal").textContent = packs;
-    $("#hudPacks").setAttribute("aria-label", `${packs} von ${s.max} Packs gehören dir`);
+    $("#hudPacks").setAttribute("aria-label", `${packs} ${packsWort(packs)} geschlossen${offen ? `, ${offen} geöffnet` : ""}, von ${s.max}`);
     document.querySelectorAll("#tumblers .tumbler").forEach((t, i) => {
       const v = s.ziffern[i];
       t.textContent = v == null ? "?" : v;
@@ -472,7 +475,7 @@
     const knopf = (nr, weg, text, cls) => `<button type="button" class="qc-eintrag ${cls}" data-tor="${nr}" data-weg="${weg}">${text}</button>`;
     return `<div class="tor"><p class="fx-head">DAS TOR · ${C.code.length - tor.fehlend.length} VON ${C.code.length} ZIFFERN</p><ol>${tor.fehlend.map(nr =>
       `<li class="tor-z"><span class="mini-tumbler">?</span><span class="d-name">Ziffer ${nr}</span>`
-      + (state.packs >= preis ? knopf(nr, "packs", `${preis} PACKS`, "win") : "")
+      + (E.zahlkraft(state) >= preis ? knopf(nr, "packs", `${preis} PACKS`, "win") : "")
       + (hatSegen ? knopf(nr, "segen", "SEGEN", "segen") : "")
       + knopf(nr, "busse", "BUSSE", "lose") + `</li>`).join("")}</ol></div>`;
   }
@@ -959,13 +962,19 @@
     // Fluch gesprochen (29.09.): Der Moment zeigt erst den Vorteil, dann würfelt der Schattendieb. Die Packs nennt erst er.
     const fluchE = !fertig.length && !gestartet.length && !treffer.length && !schritte.length && !neueB.some(b => b.ziffer) && neueE.length
       && itemById(neueE[neueE.length - 1].item).dieb ? neueE[neueE.length - 1] : null;
+    // Nur ein Pack geöffnet (29.09.): eigener kleiner Moment
+    const nurOffen = !fertig.length && !gestartet.length && !treffer.length && !schritte.length && !neueE.length && !neueD.length
+      && neueB.length && neueB.every(b => b.offen);
     if (!vorwaerts && Object.values(weg).some(x => x.length)) return zurueckgenommen(prev, next, weg);
     if (!vorwaerts && !handItems) return false;
 
     // Zeilen: Packs, Ziffern, Items (mit Enthüllung beim ersten Fund)
     const lines = [];
     const dPacks = next.packs - prev.packs;
-    if (dPacks && !fluchE) lines.push(`<li class="${dPacks > 0 ? "plus" : "minus"}"><span class="ri">${cardSvg()}</span>${dPacks > 0 ? "+" : "−"}${Math.abs(dPacks)} ${packsWort(dPacks)}</li>`);
+    if (dPacks && !fluchE && !nurOffen) lines.push(`<li class="${dPacks > 0 ? "plus" : "minus"}"><span class="ri">${cardSvg()}</span>${dPacks > 0 ? "+" : "−"}${Math.abs(dPacks)} ${packsWort(dPacks)}</li>`);
+    // Reichten die geschlossenen Packs nicht, zahlt er in Karten (29.09.)
+    const dKarten = (next.karten || 0) - (prev.karten || 0);
+    if (dKarten > 0 && !fluchE) lines.push(`<li class="minus"><span class="ri">${cardSvg("offen")}</span><span>−${dKarten} ${dKarten === 1 ? "Karte" : "Karten"}: Mehr geschlossene Packs hattest du nicht. Der Bund nimmt sich ${dKarten === 1 ? "deine beste Karte" : `je deine beste aus ${dKarten} geöffneten Packs`}.</span></li>`);
     next.ziffern.forEach((v, i) => {
       if (v != null && prev.ziffern[i] == null) lines.push(`<li class="plus"><span class="ri"><span class="tumbler known" style="--hud-h:30px">${v}</span></span>Ziffer ${i + 1}: ${v}</li>`);
     });
@@ -986,7 +995,7 @@
     neueE.forEach(e => { if (!itemById(e.item).einmalig) lines.push(itemZeile(e.item, `${esc(itemById(e.item).name)} eingesetzt`, "plus")); });
     // Packs zählen nur zwischen 0 und max (engine.js): sagen, warum Dennis weniger verloren hat als gedacht.
     // Über max kommt er mit den Quests nicht (alle Siege zusammen sind genau max), nur mit einem Bonus des Quest Masters.
-    if (next.kappung.unten > prev.kappung.unten && !fluchE) lines.push(`<li><span class="ri">${cardSvg("empty")}</span>${prev.packs ? "Mehr Packs hattest du nicht." : "Du hattest keine Packs mehr, die du verlieren konntest."}</li>`);
+    if (next.kappung.unten > prev.kappung.unten && !fluchE) lines.push(`<li><span class="ri">${cardSvg("empty")}</span>${prev.packs || dKarten > 0 ? "Mehr hattest du nicht." : "Du hattest keine Packs mehr, die du verlieren konntest."}</li>`);
 
     // Neue Packs und Ziffern im HUD aufblinken lassen
     document.querySelectorAll("#packRow .ic-card").forEach((c, i) => c.classList.toggle("gain", i >= prev.packs && i < next.packs));
@@ -1016,6 +1025,10 @@
       klang = "side"; gross = true;
       head = `<span class="medal-stage won" style="--m:${q.farbe}">${medalHtml(q, "laeuft", false)}</span><p class="big">${esc(sx.name.toUpperCase())}</p><p class="sub">${esc(q.name)}</p>`;
       if (!lines.length) lines.push(`<li><span class="ri"></span>Jetzt zusammensetzen, bevor du am Gipfel stehst.</li>`);
+    } else if (nurOffen) {
+      klang = "plus";
+      head = `<span class="ri-big">${cardSvg("offen")}</span><p class="big">PACK GEÖFFNET</p><p class="sub">Viel Glück!</p>`;
+      lines.push(`<li><span class="ri">${cardSvg()}</span><span>Noch ${next.packs} geschlossen</span></li>`);
     } else if (neueB.some(b => b.ziffer)) {
       const b = neueB.filter(x => x.ziffer).pop(), weg = b.weg || "packs";
       klang = weg === "packs" ? "plus" : "zauber";
@@ -1028,7 +1041,7 @@
       klang = "zauber";
       head = `<span class="ri-big" style="color:${it.farbe}">${useSvg(it.symbol)}</span><p class="big">FLUCH GESPROCHEN</p><p class="sub">bei ${esc(questById(fluchE.quest).name)}</p>`;
       if (v) lines.unshift(`<li class="plus"><span class="ri">${useSvg("i-check")}</span><span>${v.duell ? `Duell ${v.duell}, ${esc(questById(v.quest).name)}: ` : ""}${esc(v.text)}</span></li>`);
-      lines.push(`<li class="dieb" data-raub="${raub}" data-weg="${Math.max(0, prev.packs - next.packs)}"><span class="ri dieb-ic">${useSvg("i-dieb")}</span>`
+      lines.push(`<li class="dieb" data-raub="${raub}" data-weg="${Math.max(0, prev.packs - next.packs)}" data-karten="${Math.max(0, (next.karten || 0) - (prev.karten || 0))}"><span class="ri dieb-ic">${useSvg("i-dieb")}</span>`
         + `<span class="dieb-txt">Doch jeder Fluch hat seinen Preis …</span><b class="dieb-zahl" aria-hidden="true"></b></li>`);
     } else if (neueE.length) {
       const e = neueE[neueE.length - 1], it = itemById(e.item);
@@ -1069,17 +1082,18 @@
   function diebAuftritt() {
     const li = $("#resultLines .dieb");
     if (!li) return;
-    const raub = +li.dataset.raub, weg = +li.dataset.weg, zahl = li.querySelector(".dieb-zahl"), txt = li.querySelector(".dieb-txt");
+    const raub = +li.dataset.raub, weg = +li.dataset.weg, karten = +li.dataset.karten || 0, zahl = li.querySelector(".dieb-zahl"), txt = li.querySelector(".dieb-txt");
     const name = ((C.items.find(i => i.dieb) || {}).dieb || {}).name || "Dieb";
     const ende = () => {
       if (diebHalt != null) { diebHalt = null; renderHud(); }
       if (!li.isConnected) return;
       zahl.textContent = raub ? `−${raub}` : "0";
-      li.classList.add("fertig", weg ? "minus" : "plus");
+      li.classList.add("fertig", weg || karten ? "minus" : "plus");
       txt.textContent = !raub ? `Glück gehabt! Der ${name} ist leer abgezogen.`
+        : weg < raub && karten ? `Der ${name} wollte ${raub} ${packsWort(raub)}, ${weg ? `du hattest nur ${weg}` : "du hattest keine geschlossenen"}. Dafür nimmt er ${karten === 1 ? "deine beste Karte" : `${karten} Karten`}.`
         : weg < raub ? `Der ${name} wollte ${raub} ${packsWort(raub)}, ${weg ? `du hattest nur ${weg}` : "doch du hattest keine"}.`
         : `Der ${name} hat dir ${raub} ${packsWort(raub)} gestohlen.`;
-      melody(weg ? "minus" : "plus");
+      melody(weg || karten ? "minus" : "plus");
     };
     if (STILL.matches) { li.classList.add("kommt"); ende(); return; }
     setTimeout(() => { if (li.isConnected) { li.classList.add("kommt"); tone("confirm"); } }, 900);
@@ -1117,11 +1131,15 @@
   }
 
   function explainPacks() {
-    const s = state;
+    const s = state, offen = s.geoeffnet || 0, bund = Math.max(0, s.max - s.packs - offen);
+    const oeffnen = s.packs > 0 ? `<button type="button" class="qc-eintrag win kauf" data-oeffnen>PACK ÖFFNEN</button>` : "";
     showOverlay({
-      head: `<span class="ri-big">${cardSvg()}</span><p class="big">${s.packs} / ${s.max} PACKS</p>`,
-      lines: `<li><span class="ri">${cardSvg()}</span>deins</li>
-              <li><span class="ri">${cardSvg("empty")}</span>beim Bund</li>`,
+      head: `<span class="ri-big">${cardSvg()}</span><p class="big">${s.packs} ${s.packs === 1 ? "PACK" : "PACKS"}</p><p class="sub">geschlossen</p>`,
+      lines: `<li><span class="ri">${cardSvg()}</span><span>${s.packs} geschlossen: Damit zahlst du, wenn du verlierst.</span>${oeffnen}</li>`
+        + (offen ? `<li><span class="ri">${cardSvg("offen")}</span><span>${offen} geöffnet</span></li>` : "")
+        + (s.karten ? `<li class="minus"><span class="ri">${cardSvg("offen")}</span><span>${s.karten} ${s.karten === 1 ? "Karte" : "Karten"} an den Bund</span></li>` : "")
+        + `<li><span class="ri">${cardSvg("empty")}</span><span>${bund} beim Bund</span></li>`
+        + `<li class="dim"><span class="ri"></span><span>Keine geschlossenen mehr? Dann zahlst du mit Karten: pro Pack deine beste aus einem geöffneten.</span></li>`,
       next: ""
     });
   }
@@ -1135,7 +1153,7 @@
       const offen = !q || !aufgedeckt(q.id) ? "im Nebel"
         : s.quests[q.id] === "verloren" ? "verloren, hol sie dir am Tor zum Gipfel" : `jetzt: ${wo}`;
       // Nach der letzten Quest tauscht Dennis fehlende Ziffern selbst gegen Packs
-      const kauf = v == null && !s.next ? (s.packs >= C.ziffer_preis
+      const kauf = v == null && !s.next ? (E.zahlkraft(s) >= C.ziffer_preis
         ? `<button type="button" class="qc-eintrag win kauf" data-kauf="${i + 1}">KAUFEN · ${C.ziffer_preis} ${packsWort(C.ziffer_preis).toUpperCase()}</button>` : `<small class="kauf-fehlt">zu wenig Packs</small>`) : "";
       return `<li class="${v == null ? "" : "plus"}"><span class="ri"><span class="tumbler${v == null ? "" : " known"}" style="--hud-h:30px">${v == null ? "?" : v}</span></span><span>${v == null ? (s.next ? offen : "fehlt") : s.gekauft[i] ? { busse: "durch Bußprüfung", segen: "durch Rikes Segen" }[s.zifferWeg[i]] || "gekauft" : wo}</span>${kauf}</li>`;
     }).join("");
@@ -1258,7 +1276,7 @@
         { bild: `<span class="pb-chest">${useSvg("i-chest")}${useSvg("i-lock", "pb-lock")}</span><span class="pb-tumblers">${C.code.map(() => `<span class="tumbler">?</span>`).join("")}</span>`,
           text: "Die vier Ziffern öffnen am Ende ein verschlossenes Kästchen. Was darin liegt, verrät dir niemand. Ohne alle vier lässt dich der Bund nicht auf den Gipfel." },
         { bild: `<span class="pb-split"><span class="pb-cards mine" style="--n:${Math.min(halb, 10)}">${karten(halb)}</span><small>deins</small></span><span class="pb-split"><span class="pb-cards" style="--n:${Math.min(max - halb, 10)}">${karten(max - halb, "empty")}</span><small>beim Bund</small></span>`,
-          text: `Verlierst du, holt sich der Bund Packs zurück. Was am Ende dir gehört, nimmst du mit.` }
+          text: `Verlierst du, holt sich der Bund Packs zurück. Unterwegs darfst du welche öffnen. Hast du dann keine geschlossenen mehr, zahlst du mit Karten.` }
       ];
     };
     let tafeln = [];
@@ -1295,7 +1313,7 @@
       tone("confirm");
       // Kurzer Rundgang durch das Menü, gesprochen von der Fee
       setTimeout(() => coach([
-        [$("#hudPacks"), "Deine Packs. Jede Karte, die leuchtet, gehört dir."],
+        [$("#hudPacks"), "Deine geschlossenen Packs. Tipp drauf, dann kannst du eins öffnen."],
         [$("#hudCode"), "Der Code des Kästchens. Hier rastet jede Ziffer ein."],
         [$(".shoulder-right"), "Mit Z und R oder Wischen blätterst du: Karte, Quests, Ausrüstung."],
         [$("#questCard"), "Hier steht, was jetzt dran ist und was auf dem Spiel steht. Dein Ergebnis trägst du hier selbst ein."]
@@ -1372,9 +1390,10 @@
   $("#hudPacks").addEventListener("click", explainPacks);
   $("#hudCode").addEventListener("click", explainCode);
   $("#overlay").addEventListener("click", e => {
-    const k = e.target.closest("[data-kauf]"), ab = e.target.closest("[data-abspann]");
+    const k = e.target.closest("[data-kauf]"), ab = e.target.closest("[data-abspann]"), o = e.target.closest("[data-oeffnen]");
     closeOverlay();
     if (k) schwurZiffer(+k.dataset.kauf);
+    if (o) schwurOeffnen();
     if (ab) abspann.start(true);
   });
 
@@ -1628,12 +1647,12 @@
   function schwurTor(nr, weg) {
     const preis = C.ziffer_preis, segen = torSegen();
     const gueltig = () => !!state.tor && state.tor.fehlend.includes(nr) && state.ziffern[nr - 1] == null
-      && (weg !== "packs" || state.packs >= preis) && (weg !== "segen" || (segen && state.items[segen.id] === "besitz"));
+      && (weg !== "packs" || E.zahlkraft(state) >= preis) && (weg !== "segen" || (segen && state.items[segen.id] === "besitz"));
     if (!gueltig()) return;
     const ziffer = `<span class="chip plus"><span class="mini-tumbler">?</span>Ziffer ${nr}</span>`;
     const o = {
       packs: { sub: `FÜR ${preis} ${packsWort(preis).toUpperCase()}`, ton: "win",
-        folgen: [`<span class="fx"><span class="chip minus">${cardSvg()}−${preis} ${packsWort(preis)}</span>${ziffer}</span>`] },
+        folgen: [`<span class="fx">${preisChips(preis)}${ziffer}</span>`] },
       segen: { sub: "RIKES SEGEN", ton: "magie",
         folgen: [`<span class="fx">${ziffer}</span>`, `<span class="fx">${esc(segen ? segen.einsatz : "")} Danach ist er verbraucht.</span>`] },
       busse: { sub: "BUSSPRÜFUNG", ton: "lose",
@@ -1646,13 +1665,32 @@
       ausfuehren: () => eintrag("z_" + nr, { weg })
     });
   }
+  // Was ein Preis kostet: erst geschlossene Packs, der Rest in Karten aus geöffneten Packs
+  function preisChips(preis) {
+    const p = Math.min(state.packs, preis), k = preis - p;
+    return (p ? `<span class="chip minus">${cardSvg()}−${p} ${packsWort(p)}</span>` : "")
+      + (k ? `<span class="chip minus">${cardSvg("offen")}−${k} ${k === 1 ? "Karte" : "Karten"}</span>` : "");
+  }
+  // Ein Pack öffnen (29.09.): Die Zahl oben sind seine geschlossenen Packs, wie Rubine. Der Bund gibt ihm das Pack.
+  function schwurOeffnen() {
+    if (!state || state.packs < 1) return;
+    const n = state.packs;
+    schwur.oeffnen({
+      art: "DEINE PACKS", icon: `<span class="sw-item">${cardSvg()}</span>`, titel: "Pack öffnen",
+      sub: `${n} geschlossen, danach ${n - 1}`.toUpperCase(), ton: "win",
+      folgen: [`<span class="fx"><span class="chip minus">${cardSvg()}−1 Pack</span><span class="chip plus">${cardSvg("offen")}zum Aufmachen</span></span>`,
+        `<span class="fx dim">Der Bund gibt es dir. Verlierst du später und hast keine geschlossenen Packs mehr, zahlst du mit Karten: pro Pack deine beste aus einem geöffneten.</span>`],
+      gueltig: () => !!state && state.packs >= 1,
+      ausfuehren: () => eintrag("o_" + uid(), {})
+    });
+  }
   function schwurZiffer(nr) {
-    if (state.next || state.ziffern[nr - 1] != null || state.packs < C.ziffer_preis) return;
+    if (state.next || state.ziffern[nr - 1] != null || E.zahlkraft(state) < C.ziffer_preis) return;
     schwur.oeffnen({
       art: "AM KÄSTCHEN", icon: `<span class="sw-item lock">${useSvg("i-lock")}</span>`, titel: `Ziffer ${nr} kaufen`,
       sub: `für ${C.ziffer_preis} ${packsWort(C.ziffer_preis)}`, ton: "win",
-      folgen: [`<span class="fx"><span class="chip minus">${cardSvg()}−${C.ziffer_preis} ${packsWort(C.ziffer_preis)}</span><span class="chip plus"><span class="mini-tumbler">?</span>Ziffer ${nr}</span></span>`],
-      gueltig: () => !state.next && state.ziffern[nr - 1] == null && state.packs >= C.ziffer_preis,
+      folgen: [`<span class="fx">${preisChips(C.ziffer_preis)}<span class="chip plus"><span class="mini-tumbler">?</span>Ziffer ${nr}</span></span>`],
+      gueltig: () => !state.next && state.ziffern[nr - 1] == null && E.zahlkraft(state) >= C.ziffer_preis,
       ausfuehren: () => eintrag("z_" + nr, {})
     });
   }
@@ -1682,7 +1720,7 @@
       $("#abSieg").innerHTML = `<span class="ab-triforce${won ? "" : " matt"}">${useSvg("z-triforce")}</span>
         <p class="ab-sieg-titel">${won ? "DIE LEGENDE IST VOLLBRACHT" : "DER BUND HAT GESIEGT"}</p>
         <p class="ab-sieg-sub">${won ? "Du hast die Prüfung des Bundes bestanden." : "Doch deine Legende ist geschrieben."}</p>
-        <p class="ab-sieg-packs">${cardSvg()}<span><b>${s.packs}</b> von ${s.max} ${packsWort(s.max)} gehören dir</span></p>${code()}`;
+        <p class="ab-sieg-packs">${cardSvg()}<span><b>${s.packs + (s.geoeffnet || 0)}</b> von ${s.max} ${packsWort(s.max)} gehören dir${s.geoeffnet ? `, ${s.geoeffnet} schon geöffnet` : ""}</span></p>${code()}`;
       $("#abVorlange").textContent = G.vorlange || "";
       $("#abCrawlText").innerHTML = `<p class="ab-episode">${esc(G.episode || "")}</p><p class="ab-ep-titel">${esc(G.titel || "")}</p>`
         + [...(G.absaetze || []), won ? G.sieg : G.niederlage].filter(Boolean).map(t => `<p>${esc(t)}</p>`).join("");
@@ -1704,7 +1742,9 @@
       const zahlen = zahl("Prüfungen bestanden", `${bestanden(typ("kern"))} von ${typ("kern").length}`)
         + zahl("Sidequests bestanden", `${bestanden(typ("side"))} von ${typ("side").length}`)
         + (duelle.length ? zahl("Duelle am Gipfel", `${siege} : ${duelle.length - siege}`) : "")
-        + zahl(C.waehrung.name, `${s.packs} von ${s.max}`);
+        + zahl(C.waehrung.name, `${s.packs + (s.geoeffnet || 0)} von ${s.max}`)
+        + (s.geoeffnet ? zahl("Unterwegs geöffnet", s.geoeffnet) : "")
+        + (s.karten ? zahl("Karten an den Bund", s.karten) : "");
       const block = (titel, inhalt) => inhalt ? `<div class="ab-block"><small>${esc(titel)}</small><ul>${inhalt}</ul></div>` : "";
       $("#abRoll").innerHTML = `<div class="ab-kopf"><b class="hy">The Legend of Dennis</b><small>A Link to Rike</small></div>`
         + rolle("Der Held", [A.held || "Dennis"]) + rolle("Die Fee", ["gesandt von Rike"]) + rolle("Quest Master", [A.questMaster]) + rolle("Der Bund", A.bund)
