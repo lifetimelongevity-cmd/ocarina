@@ -32,14 +32,14 @@ const zurAusruestung = async p => { await p.evaluate(() => document.querySelecto
   pruefe(fund.includes('ERSTES ITEM GEFUNDEN') && fund.includes('Heiliger Beutel des Helden entpuppt sich als') && fund.includes('Wasserspritze'), 'Ausrüstung: Der Beutel entpuppt sich als Wasserspritze');
   pruefe(fund.includes('Stärkere erspielst du dir'), 'Die Fee erklärt die Stufen');
   pruefe(await slot(p, 'spritze') === 'schatten' && await p.$eval('.slot[data-id="spritze"] .ic use', u => u.getAttribute('href')) === '#i-beutel', 'Vorher: im Feld der Schatten des Beutels');
-  pruefe((await p.$$('#slotsGear .slot')).length === 6 && !(await p.$('.slot[data-id="beutel"]')), 'Kein eigenes Feld für den Beutel');
+  pruefe((await p.$$('#slotsGear .slot')).length === 5 && !(await p.$('.slot[data-id="beutel"]')), 'Ein Feld je Stufen-Reihe (29.09.): fünf Felder, keins für den Beutel');
   await p.screenshot({ path: `${OUT}/glanz-1-beutel-wird-spritze.png` });
   await p.click('#overlay'); await warte(1800);
   while (await p.isVisible('#coach')) { await p.click('#coach'); await warte(200); }
   pruefe(await slot(p, 'spritze') === 'st-besitz', 'Spritze gehört Dennis');
-  pruefe(await slot(p, 'pistole_klein') === 'schatten' && await slot(p, 'pistole_gross') === 'schatten', 'Beide Pistolen sind Schatten');
-  await p.evaluate(() => document.querySelector('.slot[data-id="pistole_klein"]').click()); await warte(300);
-  pruefe((await p.textContent('#itemBox')).includes('Silberne Schuppe'), 'Kleine Pistole heißt noch Silberne Schuppe');
+  pruefe(!(await p.$('.slot[data-id="pistole_klein"]')) && !(await p.$('.slot[data-id="pistole_gross"]')), 'Die Pistolen haben kein eigenes Feld, sie kommen später ins Feld der Spritze');
+  await p.evaluate(() => document.querySelector('.slot[data-feld="nadel"]').click()); await warte(300);
+  pruefe(await slot(p, 'nadel_stopf') === 'schatten' && (await p.textContent('#itemBox')).includes('Eisendorn'), 'Feld der Nadel: Schatten, heißt noch Eisendorn');
   await p.evaluate(() => document.querySelector('.slot[data-id="spritze"]').click()); await warte(300);
   pruefe((await p.textContent('#itemBox')).includes('Dein Beutel hat sich als Spritze entpuppt'), 'Spritze: Dein Beutel hat sich als Spritze entpuppt');
   pruefe(await p.$eval('.slot[data-id="spritze"] .ic use', u => u.getAttribute('href')) === '#i-spritze', 'Danach: im Feld die Spritze');
@@ -60,6 +60,8 @@ await zu(dennis); await warte(600);
 await admin.click('#nextWin'); await warte(900);                                           // Podrennen
 const pod = await fenster(dennis);
 pruefe(pod.includes('Silberne Schuppe entpuppt sich als') && pod.includes('Kleine Wasserpistole'), 'Podrennen: Silberne Schuppe entpuppt sich als Kleine Wasserpistole');
+const wasserFeld = () => dennis.$eval('.slot[data-feld="wasser"]', e => e.dataset.id);
+pruefe(await wasserFeld() === 'pistole_klein', 'Im Feld der Spritze steckt jetzt die kleine Pistole');
 await zu(dennis); await warte(1500);
 
 // Kartenwurf: Zeile GLANZSIEG mit Bedingung und getarnter Belohnung
@@ -85,6 +87,7 @@ await zu(dennis); await warte(1500);
 const hier = async () => dennis.$$eval('#questCard [data-einsetzen]', els => els.map(e => e.dataset.einsetzen));
 pruefe((await dennis.textContent('#hudNextName')) === 'Auge des Jägers', 'Weiter zum Auge des Jägers');
 pruefe(JSON.stringify(await hier()) === '["pistole_gross","spruchrolle"]', 'Auge: von den Wasserwaffen leuchtet nur die Große Wasserpistole (dazu der Fluch)');
+pruefe(await wasserFeld() === 'pistole_gross', 'Im selben Feld jetzt die große Pistole');
 pruefe(await dennis.$eval('.q-row[data-id="kartenwurf"] .q-mark svg', e => e.classList.contains('glanz')), 'Quest-Liste: Stern beim Kartenwurf');
 await dennis.screenshot({ path: `${OUT}/glanz-7-auge.png` });
 
@@ -95,6 +98,7 @@ pruefe(weg.includes('ZURÜCKGENOMMEN') && weg.includes('Glanzsieg bei Kartenwurf
 await dennis.screenshot({ path: `${OUT}/glanz-8-zurueck.png` });
 await zu(dennis); await warte(400);
 pruefe(JSON.stringify(await hier()) === '["pistole_klein","spruchrolle"]', 'Danach leuchtet die kleine Pistole (dazu der Fluch)');
+pruefe(await wasserFeld() === 'pistole_klein', 'Das Feld springt zurück auf die kleine Pistole');
 pruefe((await admin.textContent('#dennisListe')).includes('gilt nicht'), 'Admin: Dennis’ Glanzsieg gilt nicht mehr');
 
 // Quest Master bucht den Glanzsieg selbst: Dennis sieht den Moment wieder

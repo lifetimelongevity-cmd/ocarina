@@ -34,7 +34,7 @@ pruefe((await p.textContent('#prologText')).includes('Ich bin die Fee. Rike hat 
 await p.click('#prolog'); await warte(1800);
 pruefe((await p.textContent('#prologBild')).includes('The Legend of Dennis') && (await p.textContent('#prologText')).startsWith('Willkommen in deiner eigenen Legende'), 'Tafel 2: Willkommen in The Legend of Dennis');
 await p.click('#prolog'); await warte(1800);
-pruefe((await p.$$('#prologBild .medal.covered')).length === 6 && (await p.textContent('#prologText')).includes('geprüft werden'), 'Tafel 3: die Reise, sechs Prüfungen im Nebel');
+pruefe((await p.$$('#prologBild .medal.covered')).length === 7 && (await p.textContent('#prologText')).includes('geprüft werden'), 'Tafel 3: die Reise, sieben Prüfungen im Nebel');
 for (let i = 0; i < 20 && await p.isVisible('#prolog'); i++) { await p.click('#prolog'); await warte(250); }
 await warte(500);
 pruefe(!(await p.isVisible('#prolog')), 'Prolog lässt sich durchblättern');
@@ -52,7 +52,7 @@ for (const url of ['?demo', '?demo=bund']) {
   pruefe(!(await p.isVisible('#prolog')), `${url}: später am Tag kein Prolog`);
   await p.click('.shoulder-right'); await warte(900);
   pruefe(await p.$('#overlay[hidden]') && await p.$('#coach[hidden]'), `${url}: Ausrüstung ohne Beutel-Fund und ohne Hinweise`);
-  pruefe(await p.$eval('.slot[data-id="spritze"]', e => !e.classList.contains('schatten')), `${url}: Der Beutel ist schon zur Spritze geworden`);
+  pruefe(await p.$eval('.slot[data-feld="wasser"]', e => !e.classList.contains('schatten')), `${url}: Der Beutel ist schon zur Spritze geworden`);
   await p.click('.shoulder-left'); await warte(500); await p.click('.shoulder-left'); await warte(900);
   pruefe(!(await p.isVisible('#coach')), `${url}: Karte ohne Hinweis`);
   await ctx.close();

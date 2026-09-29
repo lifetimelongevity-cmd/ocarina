@@ -47,7 +47,7 @@ await dennis.screenshot({ path: `${OUT}/selbst-2-moment.png` });
 await warte(400);
 pruefe((await admin.textContent('#dennisListe')).includes('Rikes Tagebuch: bestanden'), 'Admin sieht Dennis’ Eintrag live');
 pruefe((await admin.textContent('#nextTitle')).includes('Die drei Zeichen'), 'Admin: nächste Quest rückt weiter');
-pruefe((await admin.textContent('#packs')) === '2', 'Admin: Packs zählen mit');
+pruefe((await admin.textContent('#packs')) === '1', 'Admin: Packs zählen mit');
 await admin.screenshot({ path: `${OUT}/selbst-3-admin.png`, fullPage: true });
 await zu(dennis); await warte(1200);
 
@@ -83,7 +83,10 @@ await dennis.screenshot({ path: `${OUT}/selbst-5-nachgeholt.png` });
 await zu(dennis); await warte(1500);
 pruefe((await dennis.textContent('#hudNextName')) === 'Wirbel der Götter', 'Danach tritt die nächste Quest aus dem Nebel');
 
-// Fluch sprechen beim Wirbel der Götter: erst der Vorteil, dann würfelt der Schattendieb (hier fest auf 2)
+// Fluch sprechen beim Wirbel der Götter: erst der Vorteil, dann würfelt der Schattendieb (hier fest auf 2).
+// Vorher zwei Packs dazu, damit er wirklich zwei stehlen kann (das Tagebuch bringt seit 29.09. nur eins)
+await admin.fill('#customAmount', '2'); await admin.fill('#customReason', 'Test: Packs für den Dieb');
+await admin.click('#customForm button[type="submit"]'); await warte(900); await zu(dennis);
 const packsVor = Number(await dennis.textContent('#packsVal'));
 await dennis.evaluate(() => { const r = document.querySelector('.q-row[data-id="wirbel"]'); r && r.click(); }); await warte(300);
 pruefe(await dennis.isVisible('#questCard [data-einsetzen="spruchrolle"]'), 'Der Fluch leuchtet unter EINSETZBAR');

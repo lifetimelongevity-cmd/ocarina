@@ -33,6 +33,8 @@
        einmalig: ist nach dem Einsetzen verbraucht
        tor:      wird am Tor zum Gipfel eingesetzt statt bei einer Quest (Rikes Segen)
        ersetzt:  Items, die dieses ablöst (Stufen wie Zoras Schuppe): Wer es hat, setzt die schwächeren nicht mehr ein
+       feld:     Stufen teilen sich ein Feld in der Ausrüstung (29.09., Wunsch des Nutzers). Es zeigt die stärkste, die Dennis hat,
+                 sonst den Schatten der ersten, die er noch bekommen kann. Reihenfolge der Stufen = Reihenfolge hier
        einsatz:  was im Siegel-Fenster steht, wenn Dennis es einsetzt (sonst text)
        fund:     Startitem: Satz, wenn es sich beim ersten Besuch der Ausrüstung entpuppt
        tarnSymbol: Sprite, solange es getarnt ist (sonst der Schatten von symbol)
@@ -49,15 +51,15 @@
        Nadeln (29.09.): Stopfnadel (Sieg im Wirbel), dicke Nadel (Sieg am Deku-Baum). In Rikes Rache zählt die dickste. */
     items: [
       // Startitem: getarnt als Beutel (tarnSymbol), entpuppt sich als Spritze. Hieß bis 28.09. „Dennis' Eier“ (Beutel, I1).
-      { id: "spritze", nr: "I7", gruppe: "item", name: "Wasserspritze", kurz: "Spritze", farbe: "#a8e4f5", symbol: "i-spritze", tarnSymbol: "i-beutel",
+      { id: "spritze", nr: "I7", gruppe: "item", feld: "wasser", name: "Wasserspritze", kurz: "Spritze", farbe: "#a8e4f5", symbol: "i-spritze", tarnSymbol: "i-beutel",
         text: "Klein und schnell leer. Deine erste Wasserwaffe.",
-        fund: "Deine erste Wasserwaffe. Stärkere erspielst du dir, sie lösen die Spritze ab.",
+        fund: "Deine erste Wasserwaffe. Stärkere erspielst du dir, sie nehmen in diesem Feld ihren Platz ein.",
         tarn: { name: "Heiliger Beutel des Helden", kurz: "Beutel", text: "Seit jeher an deiner Seite. Was steckt wohl darin?" } },
-      { id: "pistole_klein", nr: "I8", gruppe: "item", name: "Kleine Wasserpistole", kurz: "Kleine Pistole", farbe: "#7fd0ee", symbol: "i-pistol-klein",
+      { id: "pistole_klein", nr: "I8", gruppe: "item", feld: "wasser", name: "Kleine Wasserpistole", kurz: "Kleine Pistole", farbe: "#7fd0ee", symbol: "i-pistol-klein",
         ersetzt: ["spritze"],
         text: "Mehr Wasser, mehr Reichweite. Sie löst die Spritze ab.",
         tarn: { name: "Silberne Schuppe", kurz: "Schuppe", text: "Kühl und glatt. Ein erster Hauch von Zoras Macht." } },
-      { id: "pistole_gross", nr: "I2", gruppe: "item", name: "Große Wasserpistole", kurz: "Große Pistole", farbe: "#4fb8e8", symbol: "i-pistol",
+      { id: "pistole_gross", nr: "I2", gruppe: "item", feld: "wasser", name: "Große Wasserpistole", kurz: "Große Pistole", farbe: "#4fb8e8", symbol: "i-pistol",
         ersetzt: ["spritze", "pistole_klein"],
         text: "Die Monsterpistole: elektrisch, mit Dauerfeuer und Licht. Keiner schießt so lange wie du.",
         tarn: { name: "Zoras Quellstab", kurz: "Quellstab", text: "Ein Relikt aus Zoras Reich. Wer es führt, hat den längsten Atem." } },
@@ -71,10 +73,10 @@
         text: "Eine Elbenklinge. Ein Schwert mehr heißt ein Versuch mehr.",
         tarn: { name: "Verrostete Klinge", kurz: "Klinge", text: "Alt und stumpf. Doch sie wartet auf ihren Moment." } },
       // Nadeln für Rikes Rache (29.09.): Ohne Nadel-Item fädelt Dennis feine Nadeln. Die dickste, die er hat, zählt.
-      { id: "nadel_stopf", nr: "I9", gruppe: "item", name: "Stopfnadel", kurz: "Stopfnadel", farbe: "#d6dde8", symbol: "i-nadel-stopf",
+      { id: "nadel_stopf", nr: "I9", gruppe: "item", feld: "nadel", name: "Stopfnadel", kurz: "Stopfnadel", farbe: "#d6dde8", symbol: "i-nadel-stopf",
         text: "Ein größeres Öhr als bei einer feinen Nadel. Da findet der Faden leichter hindurch.",
         tarn: { name: "Eisendorn", kurz: "Dorn", text: "Kräftiger als ein Splitter. Wer weiß, was er aufspießt." } },
-      { id: "nadel_dick", nr: "I10", gruppe: "item", name: "Dicke Nadel", kurz: "Dicke Nadel", farbe: "#eef2f8", symbol: "i-nadel-dick",
+      { id: "nadel_dick", nr: "I10", gruppe: "item", feld: "nadel", name: "Dicke Nadel", kurz: "Dicke Nadel", farbe: "#eef2f8", symbol: "i-nadel-dick",
         ersetzt: ["nadel_stopf"],
         text: "Das größte Öhr von allen. Sie löst die Stopfnadel ab.",
         tarn: { name: "Uralter Dorn", kurz: "Dorn", text: "Hart wie altes Holz, mit einem Loch, durch das Licht fällt." } },

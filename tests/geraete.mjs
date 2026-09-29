@@ -287,7 +287,8 @@ for (const g of GERAETE) {
   const rolle = await admin.$eval('#items li[data-id="spruchrolle"] small', e => e.textContent);
   log(`  Admin zeigt Spruchrolle: ${rolle}`);
   // Showdown: alles bis zum Gipfel, zwei verloren
-  for (const v of ['verloren', 'bestanden', 'bestanden', 'verloren', 'bestanden', 'bestanden']) { await admin.click(v === 'bestanden' ? '#nextWin' : '#nextLose'); await admin.waitForTimeout(150); }
+  // bis einschließlich Rikes Rache (seit 29.09.)
+  for (const v of ['verloren', 'bestanden', 'bestanden', 'verloren', 'bestanden', 'bestanden', 'bestanden']) { await admin.click(v === 'bestanden' ? '#nextWin' : '#nextLose'); await admin.waitForTimeout(150); }
   const duelle = await admin.$$eval('.duel-list .d-name', els => els.map(e => e.textContent.replace(/\s+/g, ' ').trim()));
   log(`  Showdown-Duelle im Admin: ${duelle.join(' | ')}`);
   await admin.click('.duel-list button[data-nr="1"][data-v="sieg"]'); await admin.waitForTimeout(200);

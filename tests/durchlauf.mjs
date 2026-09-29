@@ -70,6 +70,11 @@ await questOeffnen(dennis, 'feuerprobe');
 await siegel(dennis, '#questCard [data-ergebnis="bestanden"]', 'SIDEQUEST BESTANDEN', 'Hüter der Flamme');
 await questOeffnen(dennis, 'amulett');
 await siegel(dennis, '#questCard [data-ergebnis="bestanden"]', 'BESTANDEN', 'Amulett zusammengesetzt');
+// Rikes Rache (29.09.): nach Hüter der Flamme, die dicke Nadel vom Deku-Baum leuchtet, der Sieg bringt Ziffer 4
+await questOeffnen(dennis, 'rache');
+pruefe(await dennis.isVisible('#questCard [data-einsetzen="nadel_dick"]'), 'Rikes Rache: die dicke Nadel leuchtet');
+const rache = await siegel(dennis, '#questCard [data-ergebnis="bestanden"]', 'PRÜFUNG BESTANDEN', 'Rikes Rache');
+pruefe(rache.includes('Ziffer 4'), 'Rikes Rache bringt Ziffer 4');
 
 // Gipfel: alle vier Ziffern da, also kein Tor. Revanche Wirbel der Götter, dann zweimal aufgefüllt. Sieg, Niederlage, Sieg.
 await questOeffnen(dennis, 'bund');
@@ -87,16 +92,16 @@ await siegel(dennis, '#questCard [data-ergebnis="bestanden"]', 'PRÜFUNG BESTAND
 // Das Finale: Siegbildschirm, Geschichte, Abspann. Die Zahlen im Abspann stimmen mit dem Tag überein
 pruefe(await dennis.evaluate(() => document.getElementById('abspann').dataset.phase) === 'sieg', 'Finale: Siegbildschirm nach dem Bund');
 const abspann = await dennis.textContent('#abRoll');
-pruefe(abspann.includes('Kartenwurf · Glanzsieg') && abspann.includes('Große Wasserpistole') && abspann.includes('Prüfungen bestanden5 von 6'), 'Abspann: Glanzsieg, Beute und Zahlen des Tages');
+pruefe(abspann.includes('Kartenwurf · Glanzsieg') && abspann.includes('Große Wasserpistole') && abspann.includes('Prüfungen bestanden6 von 7'), 'Abspann: Glanzsieg, Beute und Zahlen des Tages');
 for (let i = 0; i < 4 && await dennis.isVisible('#abSkip'); i++) { await dennis.click('#abSkip'); await warte(400); }
 await dennis.click('[data-ab="zu"]'); await warte(400);
 
 // Hütte: Kästchen. Erwartung aus engine.js mit denselben Ergebnissen
 const erwartet = E.derive(C, {
   quests: { logbuch: 'bestanden', klingen: 'bestanden', wirbel: 'verloren', podrennen: 'bestanden', kartenwurf: 'bestanden', auge: 'bestanden',
-            deku: 'bestanden', feuerprobe: 'bestanden', bund: 'bestanden', amulett: 'bestanden' },
+            deku: 'bestanden', feuerprobe: 'bestanden', rache: 'bestanden', bund: 'bestanden', amulett: 'bestanden' },
   glanz: { kartenwurf: true }, schritte: { amulett: { gefunden: true } },
-  zeiten: { logbuch: 1, klingen: 2, wirbel: 3, podrennen: 4, kartenwurf: 5, auge: 6, deku: 7, feuerprobe: 8, amulett: 9, bund: 10 }
+  zeiten: { logbuch: 1, klingen: 2, wirbel: 3, podrennen: 4, kartenwurf: 5, auge: 6, deku: 7, feuerprobe: 8, amulett: 9, rache: 10, bund: 11 }
 });
 pruefe((await dennis.textContent('#hudNextName')) === 'Zum Kästchen', 'Am Ende: Zum Kästchen');
 pruefe(Number(await dennis.textContent('#packsVal')) === erwartet.packs, `Dennis: ${erwartet.packs} Packs wie engine.js`);
@@ -104,7 +109,7 @@ pruefe(Number(await admin.textContent('#packs')) === erwartet.packs, `Admin: ${e
 const code = await dennis.$$eval('#tumblers .tumbler', els => els.map(e => e.textContent).join(''));
 pruefe(code === C.code.join(''), 'Code vollständig: ' + code);
 const inv = await admin.textContent('#inv');
-pruefe(['Spritze', 'Kleine Pistole', 'Große Pistole', 'Kreisel', 'Stich', 'Schild', 'Segen'].every(x => inv.includes(x)) && !inv.includes('Nakama'), 'Admin-Inventar: alle drei Wasserwaffen, Kreisel, Stich, Schild, Rikes Segen, kein Nakama-Ruf');
+pruefe(['Spritze', 'Kleine Pistole', 'Große Pistole', 'Kreisel', 'Stich', 'Dicke Nadel', 'Schild', 'Segen'].every(x => inv.includes(x)) && !inv.includes('Nakama') && !inv.includes('Stopfnadel'), 'Admin-Inventar: alle drei Wasserwaffen, Kreisel, Stich, dicke Nadel, Schild, Rikes Segen, kein Nakama-Ruf, keine Stopfnadel (Wirbel verloren)');
 const liste = await admin.textContent('#dennisListe');
 pruefe(liste.includes('Kartenwurf: Glanzsieg') && !liste.includes('gilt nicht'), 'Admin: alle Einträge von Dennis gelten, Kartenwurf als Glanzsieg');
 await dennis.click('#hudNext'); await warte(400);
@@ -113,7 +118,7 @@ await zu(dennis);
 // Ausrüstung am Ende
 await dennis.evaluate(() => document.querySelector('.shoulder-right').click()); await warte(1000); await zu(dennis);
 const slots = await dennis.$$eval('.slot', els => els.map(e => `${e.dataset.id}:${e.classList.contains('schatten') ? 'schatten' : [...e.classList].find(c => c.startsWith('st-'))}`));
-pruefe(slots.every(x => !x.endsWith('schatten') || x.startsWith('karten_gepanzert')), 'Ausrüstung: alles erspielt außer den Gepanzerten Karten (Wirbel verloren)');
+pruefe(slots.every(x => !x.endsWith('schatten') || x.startsWith('karten_gepanzert') || x.startsWith('nadel_stopf')), 'Ausrüstung: alles erspielt außer Gepanzerten Karten und Stopfnadel (Wirbel verloren)');
 await dennis.screenshot({ path: `${OUT}/durchlauf-3-ausruestung.png` });
 await ctx.close();
 await b.close();

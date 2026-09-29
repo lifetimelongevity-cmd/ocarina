@@ -93,6 +93,14 @@
   const quelle = id => C.quests.find(q => [q.win, q.glanz].some(e => e && (e.items || []).includes(id)) || (q.zaehler && q.zaehler.proTreffer.items || []).includes(id));
   // Nicht erspielt, und die Quest, die es bringt, ist schon vorbei (verloren, oder ohne Treffer beendet)
   const entgangen = id => { const q = verborgen(id) && quelle(id); return !!q && !["offen", "laeuft"].includes(state.quests[q.id]); };
+  // Stufen in einem Feld (29.09.): Das Feld zeigt die stärkste Stufe, die Dennis hat. Hat er keine,
+  // den Schatten der ersten, die er noch bekommen kann (sonst der letzten).
+  const feldItems = feld => C.items.filter(x => x.feld === feld);
+  function feldZeigt(feld) {
+    const xs = feldItems(feld), hat = xs.filter(x => !verborgen(x.id) && state.items[x.id] !== "nicht");
+    return hat.length ? hat[hat.length - 1].id : (xs.find(x => !entgangen(x.id)) || xs[xs.length - 1]).id;
+  }
+  const slotId = id => { const x = itemById(id); return x && x.feld ? feldZeigt(x.feld) : id; };
   const useSvg = (id, cls = "") => `<svg class="${cls}" aria-hidden="true"><use href="#${id}"></use></svg>`;
   const cardSvg = (cls = "") => `<svg class="ic-card ${cls}" aria-hidden="true"><use href="#${cls.includes("empty") ? "i-card-empty" : "i-card"}"></use></svg>`;
   const packsWort = n => Math.abs(n) === 1 ? "Pack" : "Packs";
@@ -294,11 +302,12 @@
     // Noch nicht Erspieltes ist ein Schatten: Man erkennt die Form, der Name bleibt getarnt.
     const slot = (it, i) => {
       const rune = it.gruppe === "faehigkeit";
-      return `<button type="button" class="slot${rune ? " rune" : ""}" data-id="${it.id}" style="--i:${i};--c:${it.farbe}"><span class="well">`
+      return `<button type="button" class="slot${rune ? " rune" : ""}" data-id="${it.id}"${it.feld ? ` data-feld="${it.feld}"` : ""} style="--i:${i};--c:${it.farbe}"><span class="well">`
         + `${rune ? useSvg("i-rune", "rune-ring") : ""}${useSvg(it.symbol, "ic")}<b class="count"></b></span>`
         + `<span class="funken" aria-hidden="true"></span><span class="neu-tag" aria-hidden="true">NEU</span></button>`;
     };
-    const gear = C.items.filter(it => it.gruppe !== "faehigkeit");
+    // Stufen (Wasserwaffen, Nadeln) teilen sich ein Feld (29.09.): nur die erste Stufe bekommt einen Platz
+    const gear = C.items.filter(it => it.gruppe !== "faehigkeit" && (!it.feld || C.items.find(x => x.feld === it.feld) === it));
     $("#slotsGear").innerHTML = gear.map(slot).join("");
     $("#slotsGear").style.setProperty("--spalten", gear.length > 6 ? 4 : 3);
     $("#slotsSkill").innerHTML = C.items.filter(it => it.gruppe === "faehigkeit").map(slot).join("");
@@ -761,7 +770,9 @@
   function renderEquip() {
     const jetzt = E.jetztEinsetzbar(C, state);
     if (!sel[2]) sel[2] = [...jetzt][0] || state.erhalten[state.erhalten.length - 1] || START[0];
+    sel[2] = slotId(sel[2]);
     document.querySelectorAll(".slot").forEach(b => {
+      if (b.dataset.feld) { b.dataset.id = feldZeigt(b.dataset.feld); b.style.setProperty("--c", itemById(b.dataset.id).farbe); }
       const id = b.dataset.id, st = state.items[id], x = itemSicht(id), schatten = verborgen(id);
       b.className = `slot${b.classList.contains("rune") ? " rune" : ""} st-${schatten ? "nicht" : st}${schatten ? " schatten" : ""}${entgangen(id) ? " entgangen" : ""}`
         + `${!schatten && jetzt.has(id) ? " usable" : ""}${neuMarke.has(id) ? " neu" : ""}${fundLaeuft.has(id) ? " fund" : ""}${sel[2] === id ? " is-selected" : ""}`;
@@ -797,6 +808,8 @@
     } else if (E.abgeloest(C, state, id)) extra = `Abgelöst von: ${esc(itemById(E.abgeloest(C, state, id)).name)}.`;
     else if (q && state.quests[q.id] !== "offen") extra = `Erbeutet bei ${em(q.id)}${state.glanz[q.id] && (q.glanz.items || []).includes(id) ? " (Glanzsieg)" : ""}.`;
     else if (START.includes(id)) extra = "Dein Beutel hat sich als Spritze entpuppt.";
+    // Stufen in einem Feld: welche Stufe gerade drin ist
+    if (x.feld && !schatten) { const xs = feldItems(x.feld); extra = `Stufe ${xs.findIndex(y => y.id === id) + 1} von ${xs.length}.${extra ? " " + extra : ""}`; }
     if (!schatten && neuMarke.has(id)) tag = `<span class="tag won">NEU</span>` + tag;
     box.style.setProperty("--c", x.farbe);
     box.classList.toggle("schatten", schatten);
@@ -1053,8 +1066,9 @@
       head = `<span class="ri-big">${useSvg(sieg ? "i-check" : "i-x")}</span><p class="big${sieg ? "" : " lost"}">DUELL ${k} ${sieg ? "GEWONNEN" : "VERLOREN"}</p><p class="sub">Prüfung des Bundes</p>`;
     } else if (neueB.length) {
       const b = neueB[neueB.length - 1];
-      const titel = b.ziffer ? "ZIFFER GEKAUFT" : b.item ? "GESCHENK" : dPacks < 0 ? "PACKS WEG" : dPacks > 0 ? "PACKS DAZU" : "BUCHUNG";
-      head = `<span class="ri-big">${cardSvg()}</span><p class="big${dPacks < 0 && !b.ziffer ? " lost" : ""}">${titel}</p><p class="sub">${esc(b.grund || "Buchung vom Quest Master")}</p>`;
+      const weniger = dPacks < 0 || dKarten > 0;
+      const titel = b.ziffer ? "ZIFFER GEKAUFT" : b.item ? "GESCHENK" : weniger ? "PACKS WEG" : dPacks > 0 ? "PACKS DAZU" : "BUCHUNG";
+      head = `<span class="ri-big">${cardSvg()}</span><p class="big${weniger && !b.ziffer ? " lost" : ""}">${titel}</p><p class="sub">${esc(b.grund || "Buchung vom Quest Master")}</p>`;
       if (!lines.length) lines.push(`<li><span class="ri"></span>Du hattest keine Packs mehr, es bleibt bei 0.</li>`);
     } else {
       head = `<span class="ri-big">${useSvg("i-beutel")}</span><p class="big">DEIN BEUTEL</p><p class="sub">Der Quest Master hat etwas geändert.</p>`;

@@ -18,6 +18,13 @@ config.quests.forEach(q => {
 });
 config.items.forEach(it => assert.ok(it.name && it.kurz && it.symbol && it.text && it.tarn && it.tarn.name, it.id + ": Texte und Tarnung"));
 config.items.forEach(it => (it.ersetzt || []).forEach(id => assert.ok(itemIds.includes(id) && id !== it.id, it.id + ": ersetzt unbekanntes Item " + id)));
+// Stufen in einem Feld (29.09.): Jede spätere Stufe löst alle früheren ab
+[...new Set(config.items.filter(i => i.feld).map(i => i.feld))].forEach(f => {
+  const xs = config.items.filter(i => i.feld === f);
+  xs.forEach((x, k) => xs.slice(0, k).forEach(y => assert.ok((x.ersetzt || []).includes(y.id), `${x.id} muss ${y.id} ablösen (Feld ${f})`)));
+});
+assert.deepStrictEqual(config.items.filter(i => i.feld === "wasser").map(i => i.id), ["spritze", "pistole_klein", "pistole_gross"]);
+assert.deepStrictEqual(config.items.filter(i => i.feld === "nadel").map(i => i.id), ["nadel_stopf", "nadel_dick"]);
 config.quests.filter(q => q.glanz).forEach(q => assert.ok(q.win && q.glanz.bedingung && q.typ !== "lauf" && !q.showdown, q.id + ": Glanzsieg braucht Sieg und Bedingung"));
 assert.deepStrictEqual(config.quests.map(q => q.nr).sort((a, b) => a - b), [1, 2, 3, 4, 5, 7, 9, 12, 14, 15, 16]);
 assert.deepStrictEqual(config.items.map(i => i.nr), ["I7", "I8", "I2", "I4", "I5", "I6", "I9", "I10", "F1", "F3", "F6"]);

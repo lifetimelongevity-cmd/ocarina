@@ -23,7 +23,7 @@ Stand 25.09.2026, Namen und Aussichtspunkt geändert am 28.09. Sammelt, was der 
 | 13 | ~~Rast der Ahnen~~ | **Gestrichen** (25.09.). Die Hütte ist nur noch Abrechnung und Öffnen des Kästchens. | |
 | 14 | **Wirbel der Götter** (Beyblade) | Name steht (25.09.). Duell gegeneinander, nur zwei Kreisel. Eigenes Spiel, nicht der Showdown. | Gegen wen, Best of 3, wo im Ablauf |
 | 15 | **Rikes Amulett** (Knobelspiel, Brosche) | Zeitquest: Die Brosche ist versteckt, Dennis muss sie in einer Frist finden. Dann darf er den ganzen Tag über versuchen, sie zusammenzusetzen. Gelöst = Belohnung, eher Packs. | Versteck, Frist, Anzahl Packs |
-| 16 | **Rikes Rache** (Nadel einfädeln) | **Name und Symbol stehen (29.09.), noch nicht gebaut:** eigene Hauptquest am Aussichtspunkt, bringt Packs (Wunsch des Nutzers). Nadel-Parcours auf Zeit. Die Nadel ist ein Item (I9, I10). Details im Abschnitt „Vorschlag: Rikes Rache“ unten. | Ziffer 4 hierher?, Zeit |
+| 16 | **Rikes Rache** (Nadel einfädeln) | **Gebaut am 29.09.:** eigene Hauptquest am Aussichtspunkt, bringt Packs (Wunsch des Nutzers). Nadel-Parcours auf Zeit. Die Nadel ist ein Item (I9, I10). Details im Abschnitt „Vorschlag: Rikes Rache“ unten. | genaues Spiel, Zeit |
 
 ## Beobachtungen
 
@@ -45,8 +45,8 @@ Stand 25.09.2026, Namen und Aussichtspunkt geändert am 28.09. Sammelt, was der 
 | I6 | **Stich** (Schwert aus Herr der Ringe, war F2, 25.09.) | 12 | Ein Schwert mehr, also ein Versuch mehr |
 | I7 | **Wasserspritze** (28.09.) | 2 | Einziges Startitem: Der Heilige Beutel des Helden entpuppt sich beim ersten Besuch der Ausrüstung als Spritze, im selben Feld, und die Fee erklärt die Stufen |
 | I8 | **Kleine Wasserpistole** (28.09.) | 2 | Sieg im Podrennen, löst die Spritze ab |
-| I9 | **Stopfnadel** (Vorschlag 29.09.) | 16 | Mittleres Öhr, Sieg im Wirbel der Götter. Ohne Nadel-Item fädelt Dennis die feine Nadel |
-| I10 | **Dicke Nadel** (Vorschlag 29.09.) | 16 | Größtes Öhr, Sieg bei den Klingen des Deku-Baums, löst die Stopfnadel ab |
+| I9 | **Stopfnadel** (29.09.) | 16 | Mittleres Öhr, Sieg im Wirbel der Götter. Ohne Nadel-Item fädelt Dennis die feine Nadel |
+| I10 | **Dicke Nadel** (29.09.) | 16 | Größtes Öhr, Sieg bei den Klingen des Deku-Baums, löst die Stopfnadel ab |
 
 ## Fähigkeiten (Magie, kein physischer Gegenstand nötig)
 
@@ -105,33 +105,34 @@ Bei Rikes Tagebuch und Die drei Zeichen gibt es keinen. Texte in `config.js` (`f
 
 | # | Nr. | Quest | Art | Ort | Sieg | Niederlage | Bestanden, wenn … |
 |---|---|---|---|---|---|---|---|
-| 1 | 1 | Rikes Tagebuch | Hauptquest | Zug | +2, Ziffer 1, Kreisel (I5) | 0 | 5 von 7 Antworten treffen |
+| 1 | 1 | Rikes Tagebuch | Hauptquest | Zug | +1, Ziffer 1, Kreisel (I5) | 0 | 5 von 7 Antworten treffen |
 | 2 | 4 | Die drei Zeichen | Sidequest | Wiese | Fluch (F1) | −1 | er zwei Gegner nacheinander schlägt, jeweils Best of 3 |
-| 3 | 14 | Wirbel der Götter | Hauptquest | Wiese | +2, Gepanzerte Karten (I4) | −2 | 2 von 3 gegen den besten Blader |
-| 4 | 7 | Das Podrennen | Hauptquest | Wiese | +3, Ziffer 2, Kleine Wasserpistole (I8) | −2 | ein Versuch unter einer Zeit, die der Quest Master nur jedes zweite Mal schafft |
+| 3 | 14 | Wirbel der Götter | Hauptquest | Wiese | +2, Gepanzerte Karten (I4), Stopfnadel (I9) | −2 | 2 von 3 gegen den besten Blader |
+| 4 | 7 | Das Podrennen | Hauptquest | Wiese | +2, Ziffer 2, Kleine Wasserpistole (I8) | −2 | ein Versuch unter einer Zeit, die der Quest Master nur jedes zweite Mal schafft |
 | 5 | 9 | Kartenwurf | Sidequest | Wald | Fluch (F1), **Glanzsieg** (2 Karten Vorsprung): dazu Große Wasserpistole (I2) | −2 | mehr Karten im Ziel, Gleichstand zählt als verloren |
-| 6 | 2 | Auge des Jägers | Hauptquest | Wald | +4, Ziffer 3, Stich (I6) | −2 | alle 5 Flammen aus 4 m mit einem Tank |
-| 7 | 12 | Klingen des Deku-Baums | Hauptquest | Wald | +4, Ziffer 4 | −2 | 2 von 4 Schwertern aus 4 m stecken (Stich: ein Schwert mehr) |
+| 6 | 2 | Auge des Jägers | Hauptquest | Wald | +3, Ziffer 3, Stich (I6) | −2 | alle 5 Flammen aus 4 m mit einem Tank |
+| 7 | 12 | Klingen des Deku-Baums | Hauptquest | Wald | +3, Dicke Nadel (I10), Ziffer 4 seit 29.09. bei Rikes Rache | −2 | 2 von 4 Schwertern aus 4 m stecken (Stich: ein Schwert mehr) |
 | 8 | 3 | Hüter der Flamme | Sidequest | Aussicht | Schild (F3) | −2 | das Teelicht 100 Schritte bergauf brennt |
+| 9 | 16 | **Rikes Rache** | Hauptquest | Aussicht | +4, Ziffer 4 | −2 | Faden durchs Nadelöhr auf Zeit, genaues Spiel legt der Quest Master fest (Vorschlag unten), die dickste Nadel zählt |
 | Tor | | fehlende Ziffern | | Gipfel | je Ziffer 2 Packs, Rikes Segen oder Bußprüfung | | |
-| 9 | 5 | Prüfung des Bundes | Hauptquest | Gipfel | +5 | −4 | 2 von 3 Duellen |
+| 10 | 5 | Prüfung des Bundes | Hauptquest | Gipfel | +5 | −4 | 2 von 3 Duellen |
 | läuft | 15 | Rikes Amulett | Schritt „Gefunden“ | bis zum Gipfel | Rikes Segen (F6) | 0 | gefunden und zusammengesetzt |
 
-Einsetzbar: Kreisel bei Wirbel, Karten beim Kartenwurf, die stärkste Wasserwaffe beim Auge (Spritze, kleine oder große Pistole), Stich beim Deku-Baum. Fluch überall, wo er einen Vorteil hat (Tabelle oben), Schild bei den Duellen (Die drei Zeichen, Wirbel, Kartenwurf) und im Showdown, Rikes Segen nur am Tor.
+Einsetzbar: Kreisel bei Wirbel, die dickste Nadel bei Rikes Rache, Karten beim Kartenwurf, die stärkste Wasserwaffe beim Auge (Spritze, kleine oder große Pistole), Stich beim Deku-Baum. Fluch überall, wo er einen Vorteil hat (Tabelle oben), Schild bei den Duellen (Die drei Zeichen, Wirbel, Kartenwurf) und im Showdown, Rikes Segen nur am Tor.
 
-**Packs (29.09.):** Über den Tag gibt es 20 Packs (`waehrung.max`, die Leiste oben), der Bund hütet sie. Alle Siege zusammen sind genau 20 (Wirbel +2 und Bund +5, vorher +3 und +6, zusammen 22), alle Niederlagen −17. Gewinnt Dennis alles, gehören ihm alle 20, kein Sieg verpufft. Packs zählen in der Reihenfolge, in der gebucht wurde, und bleiben immer zwischen 0 und 20: Wer bei 0 verliert, verliert nichts, über 20 kommt er nur mit einem Bonus des Quest Masters. Nachrechnen mit `node tests/balance.js`: Gewinnt Dennis jedes Spiel mit 50 %, bleiben ihm im Schnitt 4 bis 5 Packs, am Tor fehlen ihm im Schnitt 2 Ziffern, in 45 % der Tage braucht er eine Bußprüfung, und etwa jeder dritte Tag endet ohne Packs. Mit 70 % sind es im Schnitt 9 Packs.
+**Packs (29.09.):** Über den Tag gibt es 20 Packs (`waehrung.max`, die Leiste oben), der Bund hütet sie. Alle Siege zusammen sind genau 20, seit Rikes Rache steigen sie gleichmäßig mit dem Weg: 1, 2, 2, 3, 3, 4, 5 (Tagebuch, Wirbel, Podrennen, Auge, Deku-Baum, Rikes Rache, Bund). Alle Niederlagen −19. Gewinnt Dennis alles, gehören ihm alle 20, kein Sieg verpufft. Packs zählen in der Reihenfolge, in der gebucht wurde, und bleiben immer zwischen 0 und 20. Über 20 kommt er nur mit einem Bonus des Quest Masters. Nachrechnen mit `node tests/balance.js` (29.09., mit Schattendieb): Gewinnt Dennis jedes Spiel mit 50 %, bleiben ihm im Schnitt 4 Packs, am Tor fehlen ihm im Schnitt 2 Ziffern, in 42 % der Tage braucht er eine Bußprüfung, und 39 % der Tage enden ohne Packs. Mit 70 % sind es im Schnitt gut 8 Packs.
 
 **Packs in echt (29.09.):** In der App fällt Dennis nie unter 0 (Niederlage bei 0 verpufft) und kommt nie über 20 (alle Siege zusammen 20, Bonus gedeckelt). Solange der Bund alle 20 Packs bis zur Hütte trägt und erst dort auszahlt, reichen sie also immer, und Dennis muss nie etwas zurückgeben. Öffnet er vorher eins, bucht der Quest Master −1 („Pack ausgezahlt“), sonst stimmt die Zahl nicht mehr. Nachteil: Ein ausgezahltes Pack kann er nicht mehr verlieren. Für die Zählung braucht es keine Reserve aus dem Kästchen. Sinnvoll sind höchstens ein bis zwei Packs extra: eins für die Wurfkarten im Kartenwurf (der braucht Karten aus schon geöffneten Packs, die 20 sind dann noch zu) und eins für Pannen.
 
-**Vorschlag: Packs unterwegs öffnen (29.09., noch nicht gebaut).** Wunsch des Nutzers: Dennis soll unterwegs Packs öffnen dürfen, aber einen Grund haben, ein paar zu behalten. Problem heute: Weil eine Niederlage bei 0 verpufft, schützt sofortiges Öffnen vor allen Verlusten (Rechnung 29.09., 50 % Siegchance: alles sofort öffnen bringt im Schnitt 10 Packs, alles zu lassen 3,9). Gefällt dem Nutzer: geschlossene Packs als Rubine, Öffnen per Siegel. **Keine Zweite Chance** (29.09., zu komplex). Zwei Regeln:
+**Packs unterwegs öffnen (entschieden und gebaut am 29.09.).** Wunsch des Nutzers: Dennis soll unterwegs Packs öffnen dürfen, aber einen Grund haben, ein paar zu behalten. Problem heute: Weil eine Niederlage bei 0 verpufft, schützt sofortiges Öffnen vor allen Verlusten (Rechnung 29.09., 50 % Siegchance: alles sofort öffnen bringt im Schnitt 10 Packs, alles zu lassen 3,9). Gefällt dem Nutzer: geschlossene Packs als Rubine, Öffnen per Siegel. **Keine Zweite Chance** (29.09., zu komplex). Zwei Regeln:
 1. **Die Zahl oben in der App sind seine geschlossenen Packs**, wie Rubine in Zelda. Öffnen darf er jederzeit: Siegel „Pack öffnen“ halten, die Zahl geht eins runter, der Bund gibt ihm das Pack.
 2. **Was etwas kostet, zahlt er mit Rubinen** (Niederlage, Ziffer am Tor). **Hat er keine mehr, zahlt er mit Karten:** pro fehlendem Pack die beste Karte aus seinen geöffneten Packs, der Bund sucht aus. Hat er gar nichts, verpufft die Niederlage, am Tor macht er die Bußprüfung.
 
-Rechnung (29.09., Siege 1, 2, 2, 3, 3, 4, 5, 50 % Siegchance, Packs und Karten zusammen als Wert): Alles sofort öffnen und alles zu lassen bringen beide im Schnitt 3,8, wie heute. Wer alles sofort öffnet, gibt dabei im Schnitt aber gut 6 seiner besten Karten ab. Das ist der Grund, ein paar Packs zu behalten. Das Kästchen bleibt unberührt. Beim Bauen: Siegel „Pack öffnen“ bei Dennis, Anzeige „an den Bund: N Karten“ (die Engine kennt schon `kappung.unten`), Zähler „geöffnet“ im Abspann.
+Rechnung (29.09., Siege 1, 2, 2, 3, 3, 4, 5, 50 % Siegchance, Packs und Karten zusammen als Wert): Alles sofort öffnen und alles zu lassen bringen beide im Schnitt 3,8, wie heute. Wer alles sofort öffnet, gibt dabei im Schnitt aber gut 6 seiner besten Karten ab. Das ist der Grund, ein paar Packs zu behalten. Das Kästchen bleibt unberührt. Gebaut: Dennis tippt oben auf seine Packs, PACK ÖFFNEN, Siegel halten, Moment PACK GEÖFFNET. Die Leiste zeigt vorn die geschlossenen, dahinter blass die geöffneten. Zahlt er in Karten, nennt der Moment die Zahl, der Admin zeigt „Karten an den Bund: N“ unter „Packs buchen“ und neben den Packs, wie viele offen sind. Der Quest Master kann das Öffnen auch buchen (Schnellbuchung „Pack geöffnet“). Am Tor zählt, was er zahlen kann (geschlossene Packs plus je geöffnetem Pack eine Karte). Im Abspann: unterwegs geöffnet, Karten an den Bund. `engine.js`: Buchung mit `offen`, Eintrag `o_<id>`, `state.geoeffnet`, `state.karten`, `zahlkraft()`. Test `tests/rubine.mjs`.
 
 **Kästchen (29.09.):** Im Kästchen, das nur der vierstellige Code öffnet, liegen 10 Packs als Überraschung. Die App erwähnt sie nirgends: Der Prolog sagt nur, dass die vier Ziffern am Ende ein verschlossenes Kästchen öffnen und niemand verrät, was darin liegt. Physisch gibt es also 20 Packs für den Tag und 10 im Kästchen.
 
-Sechs Hauptquests = sechs Medaillons (28.09.): Rikes Tagebuch (Wasser, blau), Wirbel der Götter (Geister, orange), Das Podrennen (Schatten, violett), Auge des Jägers (Feuer, rot, fünf Flammen), Klingen des Deku-Baums (Wald, grün) und Prüfung des Bundes (Triforce, gold). Dennis sieht die Quests in zwei Kammern: oben HAUPTQUESTS, unten SIDEQUESTS samt Prophezeiung und Rikes Amulett. Den Ort unter dem Quest-Titel gibt es nicht mehr, der steht auf der Karte. Items gehen bei Niederlagen nicht verloren. Einziges Startitem ist die Spritze: Beim ersten Besuch der Ausrüstung entpuppt sich der Heilige Beutel des Helden als Wasserspritze, im selben Feld (28.09., vorher Beutel und Spritze als zwei Felder). Einzige Ausnahme von der Regel ist der Glanzsieg im Kartenwurf, der zusätzlich ein Item bringt.
+Sieben Hauptquests = sieben Medaillons (28.09., Rikes Rache seit 29.09.): Rikes Tagebuch (Wasser, blau), Wirbel der Götter (Geister, orange), Das Podrennen (Schatten, violett), Auge des Jägers (Feuer, rot, fünf Flammen), Klingen des Deku-Baums (Wald, grün), Rikes Rache (Nadel mit Herzfaden, Karmin) und Prüfung des Bundes (Triforce, gold). Dennis sieht die Quests in zwei Kammern: oben HAUPTQUESTS, unten SIDEQUESTS samt Prophezeiung und Rikes Amulett. Den Ort unter dem Quest-Titel gibt es nicht mehr, der steht auf der Karte. Items gehen bei Niederlagen nicht verloren. Einziges Startitem ist die Spritze: Beim ersten Besuch der Ausrüstung entpuppt sich der Heilige Beutel des Helden als Wasserspritze, im selben Feld (28.09., vorher Beutel und Spritze als zwei Felder). Einzige Ausnahme von der Regel ist der Glanzsieg im Kartenwurf, der zusätzlich ein Item bringt.
 
 **Tarnnamen** (so heißt ein Item in der Vorschau einer Belohnung, bis Dennis es erspielt):
 
@@ -143,13 +144,13 @@ Sechs Hauptquests = sechs Medaillons (28.09.): Rikes Tagebuch (Wasser, blau), Wi
 | I4 | Gepanzerte Karten (+2 Karten) | Federn der Eule |
 | I5 | Götterkreisel (üben, erste Wahl) | Kern der Goronen |
 | I6 | Stich | Verrostete Klinge |
-| I9 | Stopfnadel (Vorschlag) | Eisendorn |
-| I10 | Dicke Nadel (Vorschlag) | Uralter Dorn |
+| I9 | Stopfnadel | Eisendorn |
+| I10 | Dicke Nadel | Uralter Dorn |
 | F1 | Fluch (mehrfach, einmalig) | Versiegeltes Pergament |
 | F3 | Schild des Bundes (einmalig) | Zerbrochenes Wappen |
 | F6 | Rikes Segen (einmalig, am Tor) | Versiegelter Brief |
 
-**Showdown:** Revanche möglich bei 2, 4, 7, 9, 12, 14 (Rikes Tagebuch und Hüter der Flamme kommen nicht wieder). Verlorene Spiele in Tagesreihenfolge, höchstens drei, dann mit Wirbel der Götter aufgefüllt. Der Quest Master tippt je Duell Sieg oder Niederlage, die App sagt, wann es reicht (2 von 3).
+**Showdown:** Revanche möglich bei 2, 4, 7, 9, 12, 14, 16 (Rikes Tagebuch und Hüter der Flamme kommen nicht wieder). Verlorene Spiele in Tagesreihenfolge, höchstens drei, dann mit Wirbel der Götter aufgefüllt. Der Quest Master tippt je Duell Sieg oder Niederlage, die App sagt, wann es reicht (2 von 3).
 
 **Log-Buch:** Umgedreht am 26.09.: Rike beantwortet 7 Fragen über Dennis, Dennis tippt in ein bis drei Worten, was sie gesagt hat. Fragen stehen fest (in `config.js` an Dennis gerichtet, so wie Rike sie bekommt in `app/assets/logbuch/LIESMICH.md`). Dateien `app/assets/logbuch/frage1.m4a` bis `frage7.m4a` fehlen noch, bis dahin spielt ein Platzhalter-Klang. Hinweise zum Format in `app/assets/logbuch/LIESMICH.md`.
 
@@ -192,11 +193,13 @@ Wie Zoras Schuppe in Ocarina of Time (erst Silber, dann Gold): Im Auge des Jäge
 
 **Glanzsieg:** ein dritter Ausgang neben bestanden und verloren, nur wo `glanz` in `config.js` steht. Er zählt als bestanden (gleiche Packs) und bringt zusätzlich, was unter `glanz` steht. Dennis sieht auf der Quest-Karte eine eigene Zeile GLANZSIEG mit Bedingung und getarnter Belohnung und trägt ihn selbst ein (Siegel halten). Der Quest Master sieht „Kartenwurf: Glanzsieg“, kann im Admin auf Bestanden zurückstufen (die Fee sagt Dennis, dass ein Sieg bleibt) oder den Glanzsieg selbst buchen. In der Quest-Liste steht dann ein Stern. Weitere Glanzsiege: in `config.js` bei einer Quest `glanz: { bedingung, items }` ergänzen.
 
+**Ein Feld (29.09., Wunsch des Nutzers):** Spritze, kleine und große Pistole teilen sich ein Feld in der Ausrüstung. Erst der Schatten (Heiliger Beutel des Helden), dann die Spritze, dann die kleine Pistole, zuletzt die große Automatik-Pistole. Das Feld zeigt immer die stärkste.
+
 Regel für alle Stufen gleich: ein Tank, gleicher Abstand. Vorher testen, wie viele der 5 Flammen jede Stufe schafft, dann die Grenze für bestanden setzen. Die Spritze sollte knapp scheitern, sonst ist das Upgrade wertlos. Physisch: Spritze und ganz kleine Wasserpistole sind schon da, die Monsterpistole ist gekauft.
 
-## Vorschlag: Rikes Rache (29.09., noch nicht gebaut)
+## Rikes Rache (entschieden und gebaut am 29.09.)
 
-Wunsch des Nutzers (29.09.): Rike hat im Tagebuch auf „Was kannst du laut Rike überhaupt nicht?“ geantwortet: Nadel einfädeln. Daraus wird ein Spiel: Faden durchs Nadelöhr, auf Zeit, mehrmals an verschiedenen Stellen. `app/config.js` ist noch unverändert.
+Wunsch des Nutzers (29.09.): Rike hat im Tagebuch auf „Was kannst du laut Rike überhaupt nicht?“ geantwortet: Nadel einfädeln. Daraus wird ein Spiel: Faden durchs Nadelöhr, auf Zeit, mehrmals an verschiedenen Stellen. Seit 29.09. in `app/config.js` (id `rache`). Offen ist nur das genaue Spiel, der Vorschlag unten steht im Admin als Notiz.
 
 **Entschieden (29.09.):** Name **Rikes Rache**. Symbol **A**, Nadel mit Herzfaden, Karmin `#d8405e` (Rikes Rosa, nur zorniger). Die Nadel ist ein **Item**, dünn bis dick, und macht das Spiel leichter oder schwerer. Rikes Rache ist eine **eigene Aufgabe** (keine laufende Quest) und **bringt Packs**. **Keine Fähigkeit** Roter Faden. Nicht „Rikes Revanche“, weil Revanche schon das Wiederholen verlorener Spiele im Showdown heißt.
 
@@ -214,7 +217,7 @@ Wunsch des Nutzers (29.09.): Rike hat im Tagebuch auf „Was kannst du laut Rike
 | Stopfnadel (I9) | mittel | Eisendorn | Sieg im Wirbel der Götter |
 | Dicke Nadel (I10), Woll- oder Sticknadel, stumpfe Spitze | groß | Uralter Dorn | Sieg bei den Klingen des Deku-Baums, löst die Stopfnadel ab |
 
-Im Beutel sind das zwei Felder wie bei den Wasserwaffen. Dann sind es acht Felder, die genau in vier mal zwei passen, und im Code ist nichts Neues nötig.
+**Ein Feld je Stufen-Reihe (Wunsch des Nutzers, 29.09.):** Die Nadeln teilen sich im Beutel ein Feld, genauso die drei Wasserwaffen. Das Feld zeigt die stärkste Stufe, die Dennis hat (in der Textbox „Stufe 2 von 3“), vorher den Schatten der ersten, die er noch bekommen kann. Der Beutel hat damit fünf Felder: Wasserwaffe, Karten, Kreisel, Stich, Nadel. In `config.js` gehören Stufen über `feld` zusammen (`wasser`, `nadel`), die spätere löst jeweils alle früheren ab (`ersetzt`, `engine.test.js` prüft das).
 
 **Belohnung (entschieden 29.09.):** Sieg **+4 Packs**, Niederlage −2, dazu die **Ziffer 4**: Sie wandert vom Deku-Baum hierher, und der Deku-Baum gibt dafür die dicke Nadel. So bringt jede Hauptquest Packs und eine Ziffer oder ein Item, und Rike hütet die letzte Ziffer des Kästchens. Einfachere Variante: nur Packs, wie der Bund, und der Deku-Baum behält Ziffer 4 und gibt die dicke Nadel zusätzlich.
 
@@ -241,6 +244,6 @@ Im Beutel sind das zwei Felder wie bei den Wasserwaffen. Dann sind es acht Felde
 
 **Material:** Nadelset mit feinen Nähnadeln, Stopfnadeln und dicken Woll- oder Sticknadeln, je Sorte mindestens fünf (Drogerie, etwa 2 bis 4 €), rotes Nähgarn oder Stickgarn, kleine Schere, fünf vorgeschnittene Fäden plus Ersatz, Stoppuhr am Handy. Vorher selbst testen, wie lange fünf Nadeln jeder Sorte dauern. Die feine sollte knapp scheitern, sonst ist die dicke nichts wert.
 
-**Umsetzung, sobald freigegeben:** Nur `config.js` und Sprites, wie bei jeder Prüfung: Quest `rache` (nr 16, typ kern, Station Aussicht, nach Hüter der Flamme, Medaillon `i-nadel`, revanche), Items `nadel_stopf` und `nadel_dick` (dick mit `ersetzt: ["nadel_stopf"]`), neue Packs laut Tabelle, gegebenenfalls Ziffer 4 vom Deku-Baum hierher. Anpassen: Prolog und Texte sprechen von sechs Prüfungen, dann sieben, `engine.test.js` (Summe 20, Zuordnung der Ziffern), danach `tests/balance.js`, `tests/durchlauf.mjs`, `tests/geraete.mjs` (acht Felder im Beutel).
+**Gebaut (29.09.):** Quest `rache` in `config.js` (nr 16, Station Aussicht, nach Hüter der Flamme, Medaillon `i-nadel`, Farbe `#d8405e`, revanche, Fluch: 30 Sekunden mehr), Items `nadel_stopf` und `nadel_dick` (dick mit `ersetzt: ["nadel_stopf"]`, beide in einem Feld `nadel`), Stopfnadel beim Sieg im Wirbel, dicke Nadel beim Sieg am Deku-Baum, Ziffer 4 hierher, Packs neu laut Tabelle. Prolog zeigt sieben Prüfungen im Nebel, die Geschichte im Abspann spricht von zehn Prüfungen. Tests: `engine.test.js`, `tests/durchlauf.mjs` (ganzer Tag mit Rikes Rache), `tests/rubine.mjs`.
 
-**Offen:** Zeit an das Tagebuch knüpfen oder fest.
+**Offen:** das genaue Spiel und die Zeit (an das Tagebuch knüpfen oder fest). Beides legt der Quest Master fest, in der App steht nur, dass Dennis einfädeln muss, bevor die Zeit abläuft.

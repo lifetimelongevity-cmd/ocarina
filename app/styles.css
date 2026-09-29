@@ -863,6 +863,7 @@ html.probe body::after { content: ""; position: fixed; inset: 0; z-index: 9999; 
 .sw-folgen { list-style: none; margin: 0; padding: 7px 0 0; border-top: 1px solid rgba(170,179,207,.28); display: grid; gap: 5px; }
 .sw-folgen li { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 10px; align-items: center; }
 .sw-folgen li > .fx:only-child { grid-column: 1 / -1; display: block; font: 600 var(--fs-body)/1.35 "Trebuchet MS", sans-serif; }
+.sw-folgen li > .fx:only-child .chip + .chip { margin-left: 10px; }
 .sw-folgen .fx.dim { color: #aab3cf; font-size: var(--fs-small); }
 .sw-folgen .fx-lbl { color: #aab3cf; font: 800 var(--fs-tiny)/1 "Courier New", monospace; letter-spacing: .06em; }
 .sw-folgen .fx-lbl.win { color: var(--gold); } .sw-folgen .fx-lbl.lose { color: #ff8a7e; }

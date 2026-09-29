@@ -14,7 +14,7 @@ Die konkrete Konfiguration liegt in `app/config.js`, die Logik in `app/engine.js
 |---|---|---|
 | 1 | Währung | **Packs**, direkt. Kein Berry, keine Umrechnung. Anzahl im Kästchen ist **noch offen** (10 oder mehr), steht als `waehrung.max` in der Konfiguration. Zähler von 0 bis `max`. |
 | 2 | Startstand | **0 Packs.** Dennis verdient alles. |
-| 3 | Untergrenze | Packs fallen nicht unter 0. Ein Verlust bei 0 verpufft (Empfehlung übernommen). |
+| 3 | Untergrenze | Packs fallen nicht unter 0. Ein Verlust bei 0 verpufft (Empfehlung übernommen). **Seit 29.09.:** Hat Dennis Packs geöffnet, zahlt er den Rest in Karten (Nr. 20), erst wenn er gar nichts hat, verpufft er. |
 | 4 | Physisch oder App | **Nur App.** Keine Münzen. Das Kästchen mit den Packs ist die einzige physische Währung und bleibt zu. |
 | 5 | Ziffern | **Feste Zuordnung**, eine Ziffer je Kernprüfung, Stelle im Code = Reihenfolge. |
 | 6 | Verlorene Ziffer | Bleibt unbekannt. Am Kästchen: **1 Pack pro Ziffer kaufen** (Korrektur-Buchung). Kein Raten in v0. |
@@ -30,6 +30,8 @@ Die konkrete Konfiguration liegt in `app/config.js`, die Logik in `app/engine.js
 | 16 | Sichtbarkeit für Dennis (23.09.) | **Nur Erledigtes und die nächste Quest.** Kommende Prüfungen verdeckt mit „?" (Anzahl bekannt), kommende Sidequests unsichtbar. Details in `06-design-plan.md` 3.1. |
 | 17 | Wasserwaffen in Stufen (28.09.) | **Spritze, kleine Pistole, große Pistole.** Die Spritze ist zweites Startitem und kommt beim ersten Öffnen des Beutels heraus. Die kleine Pistole bringt der Sieg im Podrennen, die große ein Glanzsieg im Kartenwurf. Die stärkere löst die schwächere ab (`ersetzt`). Ändert Nr. 10. |
 | 18 | Glanzsieg (28.09.) | **Dritter Ausgang, nur wo `glanz` in der Konfiguration steht** (derzeit Kartenwurf, 2 Karten Vorsprung). Zählt als bestanden und bringt zusätzlich, was unter `glanz` steht. Dennis trägt ihn selbst ein, der Quest Master kann ihn zurücknehmen (es bleibt ein Sieg). Ergänzt Nr. 7. |
+| 19 | Rikes Rache (29.09.) | **Siebte Hauptquest** am Aussichtspunkt nach Hüter der Flamme: Faden durchs Nadelöhr auf Zeit (Rike hat im Tagebuch verraten, dass Dennis das überhaupt nicht kann). Trägt Ziffer 4 (vorher Deku-Baum). Die Nadel ist ein Item in Stufen: Stopfnadel (Wirbel), dicke Nadel (Deku-Baum), es zählt die dickste. Siege neu 1, 2, 2, 3, 3, 4, 5. |
+| 20 | Packs unterwegs öffnen (29.09.) | **Die Zahl sind die geschlossenen Packs** (Rubine). Öffnen per Siegel oder Schnellbuchung. Was er nicht mit geschlossenen Packs zahlen kann, zahlt er in Karten (pro Pack die beste aus einem geöffneten). Ändert Nr. 3. |
 
 ### A1. Vier Begriffe, mehr nicht
 
