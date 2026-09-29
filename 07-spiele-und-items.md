@@ -109,6 +109,8 @@ Einsetzbar: Kreisel bei Wirbel, Karten beim Kartenwurf, die stärkste Wasserwaff
 
 **Packs (29.09.):** Über den Tag gibt es 20 Packs (`waehrung.max`, die Leiste oben), der Bund hütet sie. Alle Siege zusammen sind genau 20 (Wirbel +2 und Bund +5, vorher +3 und +6, zusammen 22), alle Niederlagen −17. Gewinnt Dennis alles, gehören ihm alle 20, kein Sieg verpufft. Packs zählen in der Reihenfolge, in der gebucht wurde, und bleiben immer zwischen 0 und 20: Wer bei 0 verliert, verliert nichts, über 20 kommt er nur mit einem Bonus des Quest Masters. Nachrechnen mit `node tests/balance.js`: Gewinnt Dennis jedes Spiel mit 50 %, bleiben ihm im Schnitt 4 bis 5 Packs, am Tor fehlen ihm im Schnitt 2 Ziffern, in 45 % der Tage braucht er eine Bußprüfung, und etwa jeder dritte Tag endet ohne Packs. Mit 70 % sind es im Schnitt 9 Packs.
 
+**Packs in echt (29.09.):** In der App fällt Dennis nie unter 0 (Niederlage bei 0 verpufft) und kommt nie über 20 (alle Siege zusammen 20, Bonus gedeckelt). Solange der Bund alle 20 Packs bis zur Hütte trägt und erst dort auszahlt, reichen sie also immer, und Dennis muss nie etwas zurückgeben. Öffnet er vorher eins, bucht der Quest Master −1 („Pack ausgezahlt“), sonst stimmt die Zahl nicht mehr. Nachteil: Ein ausgezahltes Pack kann er nicht mehr verlieren. Für die Zählung braucht es keine Reserve aus dem Kästchen. Sinnvoll sind höchstens ein bis zwei Packs extra: eins für die Wurfkarten im Kartenwurf (der braucht Karten aus schon geöffneten Packs, die 20 sind dann noch zu) und eins für Pannen.
+
 **Kästchen (29.09.):** Im Kästchen, das nur der vierstellige Code öffnet, liegen 10 Packs als Überraschung. Die App erwähnt sie nirgends: Der Prolog sagt nur, dass die vier Ziffern am Ende ein verschlossenes Kästchen öffnen und niemand verrät, was darin liegt. Physisch gibt es also 20 Packs für den Tag und 10 im Kästchen.
 
 Sechs Hauptquests = sechs Medaillons (28.09.): Rikes Tagebuch (Wasser, blau), Wirbel der Götter (Geister, orange), Das Podrennen (Schatten, violett), Auge des Jägers (Feuer, rot, fünf Flammen), Klingen des Deku-Baums (Wald, grün) und Prüfung des Bundes (Triforce, gold). Dennis sieht die Quests in zwei Kammern: oben HAUPTQUESTS, unten SIDEQUESTS samt Prophezeiung und Rikes Amulett. Den Ort unter dem Quest-Titel gibt es nicht mehr, der steht auf der Karte. Items gehen bei Niederlagen nicht verloren. Einziges Startitem ist die Spritze: Beim ersten Besuch der Ausrüstung entpuppt sich der Heilige Beutel des Helden als Wasserspritze, im selben Feld (28.09., vorher Beutel und Spritze als zwei Felder). Einzige Ausnahme von der Regel ist der Glanzsieg im Kartenwurf, der zusätzlich ein Item bringt.
@@ -197,7 +199,7 @@ Wunsch des Nutzers (29.09.): Rike hat im Tagebuch auf „Was kannst du laut Rike
 
 Im Beutel sind das zwei Felder wie bei den Wasserwaffen. Dann sind es acht Felder, die genau in vier mal zwei passen, und im Code ist nichts Neues nötig.
 
-**Belohnung:** Sieg **+4 Packs**, Niederlage −2. Dazu als Empfehlung die **Ziffer 4**: Sie wandert vom Deku-Baum hierher, und der Deku-Baum gibt dafür die dicke Nadel. So bringt jede Hauptquest Packs und eine Ziffer oder ein Item, und Rike hütet die letzte Ziffer des Kästchens. Einfachere Variante: nur Packs, wie der Bund, und der Deku-Baum behält Ziffer 4 und gibt die dicke Nadel zusätzlich.
+**Belohnung (entschieden 29.09.):** Sieg **+4 Packs**, Niederlage −2, dazu die **Ziffer 4**: Sie wandert vom Deku-Baum hierher, und der Deku-Baum gibt dafür die dicke Nadel. So bringt jede Hauptquest Packs und eine Ziffer oder ein Item, und Rike hütet die letzte Ziffer des Kästchens. Einfachere Variante: nur Packs, wie der Bund, und der Deku-Baum behält Ziffer 4 und gibt die dicke Nadel zusätzlich.
 
 **Packs neu verteilt:** Es bleiben 20 Packs über den Tag, alle Siege zusammen genau 20. Neu steigen sie gleichmäßig mit dem Weg:
 
@@ -224,4 +226,4 @@ Im Beutel sind das zwei Felder wie bei den Wasserwaffen. Dann sind es acht Felde
 
 **Umsetzung, sobald freigegeben:** Nur `config.js` und Sprites, wie bei jeder Prüfung: Quest `rache` (nr 16, typ kern, Station Aussicht, nach Hüter der Flamme, Medaillon `i-nadel`, revanche), Items `nadel_stopf` und `nadel_dick` (dick mit `ersetzt: ["nadel_stopf"]`), neue Packs laut Tabelle, gegebenenfalls Ziffer 4 vom Deku-Baum hierher. Anpassen: Prolog und Texte sprechen von sechs Prüfungen, dann sieben, `engine.test.js` (Summe 20, Zuordnung der Ziffern), danach `tests/balance.js`, `tests/durchlauf.mjs`, `tests/geraete.mjs` (acht Felder im Beutel).
 
-**Offen:** Ziffer 4 hierher oder nur Packs, Zeit an das Tagebuch knüpfen oder fest.
+**Offen:** Zeit an das Tagebuch knüpfen oder fest.
