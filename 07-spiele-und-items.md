@@ -23,7 +23,7 @@ Stand 25.09.2026, Namen und Aussichtspunkt geändert am 28.09. Sammelt, was der 
 | 13 | ~~Rast der Ahnen~~ | **Gestrichen** (25.09.). Die Hütte ist nur noch Abrechnung und Öffnen des Kästchens. | |
 | 14 | **Wirbel der Götter** (Beyblade) | Name steht (25.09.). Duell gegeneinander, nur zwei Kreisel. Eigenes Spiel, nicht der Showdown. | Gegen wen, Best of 3, wo im Ablauf |
 | 15 | **Rikes Amulett** (Knobelspiel, Brosche) | Zeitquest: Die Brosche ist versteckt, Dennis muss sie in einer Frist finden. Dann darf er den ganzen Tag über versuchen, sie zusammenzusetzen. Gelöst = Belohnung, eher Packs. | Versteck, Frist, Anzahl Packs |
-| 16 | **Rikes Rache** (Nadel einfädeln) | **Name und Symbol stehen (29.09.), noch nicht gebaut:** laufende Quest, an jeder Station ein Stich auf Zeit. Die Nadel ist ein Item in drei Stufen (I9 bis I11). Details im Abschnitt „Vorschlag: Rikes Rache“ unten. | Zeit, Belohnung, woher die Nadeln kommen |
+| 16 | **Rikes Rache** (Nadel einfädeln) | **Name und Symbol stehen (29.09.), noch nicht gebaut:** eigene Hauptquest am Aussichtspunkt, bringt Packs (Wunsch des Nutzers). Nadel-Parcours auf Zeit. Die Nadel ist ein Item (I9, I10). Details im Abschnitt „Vorschlag: Rikes Rache“ unten. | Ziffer 4 hierher?, Zeit |
 
 ## Beobachtungen
 
@@ -45,9 +45,8 @@ Stand 25.09.2026, Namen und Aussichtspunkt geändert am 28.09. Sammelt, was der 
 | I6 | **Stich** (Schwert aus Herr der Ringe, war F2, 25.09.) | 12 | Ein Schwert mehr, also ein Versuch mehr |
 | I7 | **Wasserspritze** (28.09.) | 2 | Einziges Startitem: Der Heilige Beutel des Helden entpuppt sich beim ersten Besuch der Ausrüstung als Spritze, im selben Feld, und die Fee erklärt die Stufen |
 | I8 | **Kleine Wasserpistole** (28.09.) | 2 | Sieg im Podrennen, löst die Spritze ab |
-| I9 | **Feine Nadel** (Vorschlag 29.09.) | 16 | Stufe 0, kleinstes Öhr. Kommt mit dem Start von Rikes Rache |
-| I10 | **Stopfnadel** (Vorschlag 29.09.) | 16 | Stufe 1, Sieg im Wirbel der Götter, löst die feine Nadel ab |
-| I11 | **Dicke Nadel** (Vorschlag 29.09.) | 16 | Stufe 2, größtes Öhr, Sieg bei den Klingen des Deku-Baums, löst beide ab |
+| I9 | **Stopfnadel** (Vorschlag 29.09.) | 16 | Mittleres Öhr, Sieg im Wirbel der Götter. Ohne Nadel-Item fädelt Dennis die feine Nadel |
+| I10 | **Dicke Nadel** (Vorschlag 29.09.) | 16 | Größtes Öhr, Sieg bei den Klingen des Deku-Baums, löst die Stopfnadel ab |
 
 ## Fähigkeiten (Magie, kein physischer Gegenstand nötig)
 
@@ -59,7 +58,7 @@ Stand 25.09.2026, Namen und Aussichtspunkt geändert am 28.09. Sammelt, was der 
 | F4 | ~~Brosche~~ | **Gestrichen** (25.09.) |
 | F5 | **Nakama-Ruf** (neu 28.09., Strohhut) | Einer aus dem Bund kämpft ein Duell für Dennis, sein Ergebnis zählt. Einmalig. Aus Die drei Zeichen (4) |
 | F6 | **Rikes Segen** (neu 28.09., Herz) | Schenkt am Tor zum Gipfel eine fehlende Ziffer. Einmalig. Aus Rikes Amulett (15) |
-| F7 | **Roter Faden** (Vorschlag 29.09., Armband) | Dennis wählt eines der drei Duelle im Showdown selbst. Einmalig. Aus Rikes Rache (16) |
+| F7 | ~~Roter Faden~~ | **Verworfen** (29.09.): Rikes Rache bringt Packs, keine Fähigkeit |
 
 ## Regel: Einsetzen pro Quest (25.09.)
 
@@ -124,9 +123,8 @@ Sechs Hauptquests = sechs Medaillons (28.09.): Rikes Tagebuch (Wasser, blau), Wi
 | I4 | Gepanzerte Karten (+2 Karten) | Federn der Eule |
 | I5 | Götterkreisel (üben, erste Wahl) | Kern der Goronen |
 | I6 | Stich | Verrostete Klinge |
-| I9 | Feine Nadel (Vorschlag, Stufe 0) | Silberner Splitter |
-| I10 | Stopfnadel (Vorschlag, Stufe 1) | Eisendorn |
-| I11 | Dicke Nadel (Vorschlag, Stufe 2) | Uralter Dorn |
+| I9 | Stopfnadel (Vorschlag) | Eisendorn |
+| I10 | Dicke Nadel (Vorschlag) | Uralter Dorn |
 | F1 | Fluch (mehrfach, einmalig) | Versiegeltes Pergament |
 | F3 | Schild des Bundes (einmalig) | Zerbrochenes Wappen |
 | F5 | Nakama-Ruf (einmalig) | Zerschlissener Hut |
@@ -181,48 +179,49 @@ Regel für alle Stufen gleich: ein Tank, gleicher Abstand. Vorher testen, wie vi
 
 Wunsch des Nutzers (29.09.): Rike hat im Tagebuch auf „Was kannst du laut Rike überhaupt nicht?“ geantwortet: Nadel einfädeln. Daraus wird ein Spiel: Faden durchs Nadelöhr, auf Zeit, mehrmals an verschiedenen Stellen. `app/config.js` ist noch unverändert.
 
-**Name: Rikes Rache** (entschieden 29.09.). Kurz, mit Stabreim, die Gruppe kann es rufen, und es passt zu Rikes Tagebuch, Rikes Amulett und Rikes Segen. Die Geschichte dazu: Rike hat verraten, was Dennis überhaupt nicht kann, jetzt nimmt sie Rache. Alternativen: „Der rote Faden“ (Doppelsinn, siehe unten), „Das Nadelöhr“. Nicht „Rikes Revanche“, weil Revanche schon das Wiederholen verlorener Spiele im Showdown heißt.
+**Entschieden (29.09.):** Name **Rikes Rache**. Symbol **A**, Nadel mit Herzfaden, Karmin `#d8405e` (Rikes Rosa, nur zorniger). Die Nadel ist ein **Item**, dünn bis dick, und macht das Spiel leichter oder schwerer. Rikes Rache ist eine **eigene Aufgabe** (keine laufende Quest) und **bringt Packs**. **Keine Fähigkeit** Roter Faden. Nicht „Rikes Revanche“, weil Revanche schon das Wiederholen verlorener Spiele im Showdown heißt.
 
-**Art und Platz:** eine laufende Quest wie die Prophezeiung, mit einem Zähler „Stiche“ (höchstens 5). Laufend, weil sie an mehreren Stellen stattfindet. So bleiben die feste Reihe der neun Quests, der Nebel und die Summe von 20 Packs unberührt. Bei Dennis steht sie in der Kammer der Sidequests unter Prophezeiung und Amulett.
+**Art und Platz:** siebte Hauptquest mit Medaillon, am **Aussichtspunkt** nach Hüter der Flamme. Dort steht bisher nur eine Sidequest, und eine ruhige Aufgabe mit Aussicht passt vor den Gipfel. In der Reihe liegt sie im Nebel wie jede Prüfung. Rikes Antwort im Zug ist am Freitag nur die Vorahnung, am Samstag holt sie ihn ein. Die Fee dazu: „Erinnerst du dich, was Rike über dich gesagt hat?“ Text auf der Quest-Karte: „Rike hat verraten, was du überhaupt nicht kannst. Fünf Nadeln, fünf Stellen, eine Uhr.“
 
-**Start (geändert 29.09., Wunsch des Nutzers: der Quest Master startet sie nicht selbst):** Sie startet von selbst, sobald das Tagebuch entschieden ist. Dennis sieht NEUE QUEST, die Fee sagt: „Rike hat verraten, was du überhaupt nicht kannst. Jetzt nimmt sie Rache.“ So bekommt Rikes erste Antwort einen zweiten Auftritt. Die Stiche trägt Dennis selbst ein (Siegel halten), der Quest Master nimmt bei Bedarf zurück (Vorschlag). Text auf der Quest-Karte: „Rike hat verraten, was du überhaupt nicht kannst. An jeder Station wartet eine Nadel: Fädle ein, bevor die Zeit abläuft.“
+**Das Spiel, ein Nadel-Parcours:** Fünf Nadeln stecken an fünf Stellen rund um den Aussichtspunkt (Baumrinde, Zaunpfosten, Bank, Rucksack, Mütze von einem aus dem Bund). Dennis läuft von Nadel zu Nadel und fädelt jede ein, die Uhr läuft für alle fünf zusammen. Bestanden, wenn alle fünf in der Zeit durch sind. Anlecken und Zwirbeln erlaubt, Einfädelhilfe verboten. Geschafft ist eine Nadel, wenn der Faden auf der anderen Seite des Öhrs herausschaut.
 
-**Fünf Stiche, einer pro Station.** Die Karte hat genau fünf Stationen bis zum Gipfel. Der Stich kommt jeweils am Ende der Station, nach ihren Quests. Schwerer wird es über einen Dreh je Station, leichter über die Nadel (Item, siehe unten):
+**Zeit, geknüpft an Rikes Tagebuch:** 20 Sekunden für jede Antwort, die Dennis im Tagebuch über Rike richtig hatte, mindestens 60 Sekunden (5 Treffer = 100 Sekunden für alle fünf). Je besser er sie kennt, desto gnädiger ist ihre Rache. Alternative: eine feste Zeit, die ihr beim Testen nur jedes zweite Mal schafft.
 
-| Stich | Station | Dreh |
-|---|---|---|
-| 1 | Zug (Freitag) | im fahrenden Zug. Sitzt Dennis allein im Zug, filmt er sich und schickt das Video an den Bund |
-| 2 | Wiese | einer aus dem Bund hält die Nadel, Dennis wählt, wem er vertraut |
-| 3 | Wald | direkt nach 15 Kniebeugen, mit zitternden Händen |
-| 4 | Aussicht | auf einem Bein, mit Blick ins Tal (mit Abstand zur Kante) |
-| 5 | Gipfel | vor dem Tor, der Bund zählt die letzten zehn Sekunden laut herunter |
+**Die Nadel als Item:** Ohne Nadel-Item stecken feine Nadeln mit winzigem Öhr. Hat Dennis eine dickere Nadel erspielt, steckt der Bund alle fünf Stellen mit dieser Sorte. Es zählt die dickste, wie bei den Wasserwaffen.
 
-**Die Nadel als Item (Wunsch des Nutzers, 29.09.):** Die Nadel ist ein Item in drei Stufen, wie die Wasserwaffen. Je dicker, desto größer das Öhr und desto leichter der Stich. Bei jedem Stich zählt die dickste Nadel, die Dennis hat, die dünneren sind abgelöst. Im Beutel ist das **ein Feld, das mitwächst** (wie der Beutel, der sich als Spritze entpuppt): Es zeigt immer die dickste Nadel. Vor dem Start von Rikes Rache sieht Dennis dort nur den Schatten.
-
-| Stufe | Nadel | Tarnname | Woher |
+| Nadel | Öhr | Tarnname | Woher |
 |---|---|---|---|
-| 0 | Feine Nadel, winziges Öhr (I9) | Silberner Splitter | kommt mit dem Start von Rikes Rache, Rike hat sie ausgesucht |
-| 1 | Stopfnadel, mittleres Öhr (I10) | Eisendorn | Sieg im Wirbel der Götter (Wiese), hilft ab Stich 2 |
-| 2 | Dicke Nadel (Woll- oder Sticknadel), großes Öhr, stumpfe Spitze (I11) | Uralter Dorn | Sieg bei den Klingen des Deku-Baums (Wald), hilft ab Stich 3 |
+| Feine Nadel | winzig | | ohne Item, Rikes Wahl |
+| Stopfnadel (I9) | mittel | Eisendorn | Sieg im Wirbel der Götter |
+| Dicke Nadel (I10), Woll- oder Sticknadel, stumpfe Spitze | groß | Uralter Dorn | Sieg bei den Klingen des Deku-Baums, löst die Stopfnadel ab |
 
-Warum Wirbel und Deku-Baum: Der Wirbel bringt bisher ein Item und keine Ziffer, der Deku-Baum nur die Ziffer. Mit der Nadel bringen alle Hauptquests außer dem Bund zwei Dinge, und jede Nadel kommt vor dem nächsten Stich. Wer beide verliert, fädelt den ganzen Tag mit der feinen Nadel: Das ist Rikes Rache. Alternative: Dennis kauft eine Stufe dicker für 1 Pack (Schnellbuchung des Quest Masters, das kann die App schon). Die Nadel, die Dennis in der App hat, bekommt er auch in echt in die Hand.
+Im Beutel sind das zwei Felder wie bei den Wasserwaffen. Dann sind es acht Felder, die genau in vier mal zwei passen, und im Code ist nichts Neues nötig.
 
-**Zeit, geknüpft an Rikes Tagebuch:** Pro Stich hat Dennis 10 Sekunden für jede Antwort, die er im Tagebuch über Rike richtig hatte, mindestens 20 Sekunden (5 Treffer = 50 Sekunden). Je besser er sie kennt, desto gnädiger ist ihre Rache. Die Zeit steht nach dem Tagebuch fest und bleibt den ganzen Tag gleich. Alternative ohne Kopplung: 60, 50, 40, 30, 20 Sekunden.
+**Belohnung:** Sieg **+4 Packs**, Niederlage −2. Dazu als Empfehlung die **Ziffer 4**: Sie wandert vom Deku-Baum hierher, und der Deku-Baum gibt dafür die dicke Nadel. So bringt jede Hauptquest Packs und eine Ziffer oder ein Item, und Rike hütet die letzte Ziffer des Kästchens. Einfachere Variante: nur Packs, wie der Bund, und der Deku-Baum behält Ziffer 4 und gibt die dicke Nadel zusätzlich.
 
-**Regeln:** Ein Versuch je Station. Faden etwa 30 cm, vorher abgeschnitten. Anlecken und Zwirbeln erlaubt, Einfädelhilfe verboten. Die Uhr läuft, sobald er Nadel und Faden in der Hand hat. Geschafft ist ein Stich, wenn der Faden auf der anderen Seite des Öhrs herausschaut.
+**Packs neu verteilt:** Es bleiben 20 Packs über den Tag, alle Siege zusammen genau 20. Neu steigen sie gleichmäßig mit dem Weg:
 
-**Belohnung:** Bestanden ab 3 von 5 Stichen, dann bringt sie die neue Fähigkeit **Roter Faden** (F7, einmalig): Im Showdown wählt Dennis eines der drei Duelle selbst, statt einer Revanche. Tarnname „Verhedderter Faden“ („Wirr und verknotet. Wer ihn entwirrt, hält das Ende in der Hand.“). Hat er nach dem fünften Stich weniger als 3, ist die Quest verloren und kostet 0 Packs wie das Amulett. Die Strafe ist, dass Rike recht hatte. Die übrigen Stiche nach dem dritten spielt er trotzdem, wegen des Armbands. Möglich wäre ein Glanzsieg bei 5 von 5 (zum Beispiel zusätzlich ein Fluch), gesetzt ist er nicht.
+| Quest | Sieg bisher | Sieg neu | Niederlage |
+|---|---|---|---|
+| Rikes Tagebuch | +2 | +1 | 0 |
+| Wirbel der Götter | +2 | +2 | −2 |
+| Das Podrennen | +3 | +2 | −2 |
+| Auge des Jägers | +4 | +3 | −2 |
+| Klingen des Deku-Baums | +4 | +3 | −2 |
+| **Rikes Rache** | | **+4** | **−2** |
+| Prüfung des Bundes | +5 | +5 | −4 |
+| **Summe** | 20 | **20** | −19 statt −17 |
 
-**Der rote Faden (Bezug zu Rike):** Nach einer Legende aus Japan und China verbindet ein unsichtbarer roter Faden zwei Menschen, die füreinander bestimmt sind. Er kann sich dehnen und verheddern, aber nie reißen. Darum ist der Faden rot, und jeder Faden, den Dennis durchbringt, wird ihm ums Handgelenk geknotet. Am Abend trägt er ein rotes Armband mit so vielen Knoten, wie er Stiche geschafft hat. Rike könnte das Gegenstück bekommen. Nebenbei heißt der Zähler „Stiche“, und vielleicht trägt Dennis dann schon das Schwert Stich.
+`tests/balance.js` mit diesen Werten (29.09., mit Ziffer 4 bei Rikes Rache): Bei 50 % Siegchance bleiben im Schnitt 4,2 Packs (heute 4,3), am Tor fehlen im Schnitt 2 Ziffern, 41 % der Tage brauchen eine Bußprüfung (heute 45 %), 38 % enden ohne Packs (gleich). Die Balance bleibt also fast gleich.
 
-**Symbol (entschieden 29.09.): A, Nadel mit Herzfaden.** Der Faden läuft durchs Öhr und wird unten zum Herz. Farbe Karmin `#d8405e`, Rikes Rosa, nur zorniger. Die Fähigkeit Roter Faden ist ein Faden als Armband, unten verknotet. Vorschau mit den echten Stilen der App in `entwuerfe/rikes-rache/symbole.png` (dort auch Entwurf B, das Öhr als Schlüsselloch, und Entwurf C, die Garnrolle), die Symbole zum Einbauen in `entwuerfe/rikes-rache/symbole.svg.html`. Die Nadeln sind silbern, der rote Faden steckt schon im Öhr, und das Öhr wird mit jeder Stufe größer.
+**Einsetzbar:** die dickste Nadel, Fluch (zum Beispiel muss einer aus dem Bund gleichzeitig einfädeln, oder eine Nadel fällt weg, das bestimmt der Quest Master). **Revanche im Showdown:** ja, als Einfädel-Duell gegen den Bund, wer zuerst durch ist. Die feinste Nadel taugt außerdem als Bußprüfung am Tor zum Gipfel (offener Punkt 5 in `CLAUDE.md`).
 
-**Momente in der App:** NEUE QUEST beim Start. Bei jedem Stich „EINGEFÄDELT“ mit „2 von 5 Stichen“ (statt PROPHEZEIUNG ERFÜLLT). Beim dritten Stich der Fund des Roten Fadens. Verloren: „RIKE HATTE RECHT“. Schön wären zwei kurze Sprachnachrichten von Rike, eine für den Sieg („Na gut, ich nehm's zurück.“) und eine für die Niederlage („Hab ich's nicht gesagt?“).
+**In echt (nicht in der App):** Der Faden ist rot. Nach einer Legende aus Japan und China verbindet ein unsichtbarer roter Faden zwei Menschen, die füreinander bestimmt sind. Die Fäden, die Dennis durchbringt, können ihm ums Handgelenk geknotet werden, als Armband.
 
-**Nebenbei:** Die feinste Nadel taugt auch als Bußprüfung am Tor zum Gipfel (offener Punkt 5 in `CLAUDE.md`).
+**Symbole:** Vorschau mit den echten Stilen der App in `entwuerfe/rikes-rache/symbole.png`, zum Einbauen in `entwuerfe/rikes-rache/symbole.svg.html`. Für das Medaillon `i-nadel` (A), für die Items `i-nadel-stopf` und `i-nadel-dick` (Nadeln silbern, der rote Faden im Öhr). `i-nadel-fein` und `i-faden` (Roter Faden) werden nicht mehr gebraucht.
 
-**Material:** Nadelset mit feinen Nähnadeln, Stopfnadeln und dicken Woll- oder Sticknadeln (Drogerie, etwa 2 bis 4 €), rotes Nähgarn oder Stickgarn, kleine Schere, pro Station ein vorgeschnittener Faden plus Ersatz, Stoppuhr am Handy. Vorher selbst testen, wie lange jede der drei Nadeln mit Dreh dauert. Die feine sollte knapp scheitern, sonst ist die dicke nichts wert.
+**Material:** Nadelset mit feinen Nähnadeln, Stopfnadeln und dicken Woll- oder Sticknadeln, je Sorte mindestens fünf (Drogerie, etwa 2 bis 4 €), rotes Nähgarn oder Stickgarn, kleine Schere, fünf vorgeschnittene Fäden plus Ersatz, Stoppuhr am Handy. Vorher selbst testen, wie lange fünf Nadeln jeder Sorte dauern. Die feine sollte knapp scheitern, sonst ist die dicke nichts wert.
 
-**Umsetzung, sobald freigegeben:** In `config.js` eine laufende Quest `rache` (nr 16, Zähler „Stiche“ mit max 5, Sieg: Roter Faden, Niederlage 0 Packs) und ein Item `roter_faden` (F7, Fähigkeit, einmalig), die Nadeln `nadel_fein`, `nadel_stopf` und `nadel_dick` (mit `ersetzt` wie die Wasserwaffen), die Stopfnadel beim Sieg im Wirbel, die dicke Nadel beim Sieg am Deku-Baum, fünf Sprites in `index.html`. Neu im Code: eine laufende Quest, die von selbst nach einer anderen startet (hier nach dem Tagebuch), Items beim Start einer laufenden Quest (die feine Nadel), Stiche als Einträge von Dennis, ein Feld für mehrere Stufen im Beutel, ein Zähler mit Ziel (bestanden bei 3, heute kann eine Zähler-Quest nur beendet werden), der Moment-Text je Quest statt fest PROPHEZEIUNG ERFÜLLT, die Duell-Wahl des Roten Fadens in `showdownDuelle()` und ein fünfter Runenkreis in der Ausrüstung (heute 2 mal 2, danach mit `tests/geraete.mjs` prüfen). Die Packs ändern sich nicht, `tests/balance.js` bleibt gleich.
+**Umsetzung, sobald freigegeben:** Nur `config.js` und Sprites, wie bei jeder Prüfung: Quest `rache` (nr 16, typ kern, Station Aussicht, nach Hüter der Flamme, Medaillon `i-nadel`, revanche), Items `nadel_stopf` und `nadel_dick` (dick mit `ersetzt: ["nadel_stopf"]`), neue Packs laut Tabelle, gegebenenfalls Ziffer 4 vom Deku-Baum hierher. Anpassen: Prolog und Texte sprechen von sechs Prüfungen, dann sieben, `engine.test.js` (Summe 20, Zuordnung der Ziffern), danach `tests/balance.js`, `tests/durchlauf.mjs`, `tests/geraete.mjs` (acht Felder im Beutel).
 
-**Offen:** Zeit an das Tagebuch knüpfen oder feste Zeiten, woher die dickeren Nadeln kommen (Wirbel und Deku-Baum oder für Packs), Belohnung Roter Faden, Stich 1 im Zug per Video oder erst bei der Ankunft in München, Armband und Gegenstück für Rike, Sprachnachrichten.
+**Offen:** Ziffer 4 hierher oder nur Packs, Zeit an das Tagebuch knüpfen oder fest.
