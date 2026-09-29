@@ -203,7 +203,7 @@
 
   /* ---------- Aufbau (einmal) ---------- */
   function build() {
-    // HUD: eine Karte pro Pack im Kästchen, ab 10 in zwei Reihen wie Herzen
+    // HUD: eine Karte pro Pack (20 über den Tag), ab 10 in zwei Reihen wie Herzen
     const row = $("#packRow"), max = C.waehrung.max;
     row.style.gridTemplateColumns = `repeat(${max > 10 ? Math.ceil(max / 2) : max}, auto)`;
     row.classList.toggle("two", max > 10);
@@ -592,7 +592,7 @@
     if (imNebel) zeilen.push(`<button type="button" class="sc-row nebel" data-quest="${NEBEL}"><span class="ic">${coveredMedal()}</span><span class="sc-name">${pruefungen(imNebel)} im Nebel</span></button>`);
     if (!qs.length) {
       const fehlt = state.ziffern.filter(v => v == null).length;
-      zeilen.push(`<button type="button" class="sc-row sc-chest" data-code><span class="ic">${useSvg("i-chest")}</span><span class="sc-name">Das Kästchen<small>${state.packs} von ${state.max} Packs gehören dir${fehlt ? ` · ${fehlt === 1 ? "eine Ziffer fehlt" : fehlt + " Ziffern fehlen"}` : ""}</small></span>`
+      zeilen.push(`<button type="button" class="sc-row sc-chest" data-code><span class="ic">${useSvg("i-chest")}</span><span class="sc-name">Das Kästchen<small>${fehlt ? `Verschlossen, noch ${fehlt === 1 ? "eine Ziffer" : fehlt + " Ziffern"}` : "Der Code ist komplett"}</small></span>`
         + `<span class="sc-code">${state.ziffern.map(v => `<span class="tumbler${v == null ? "" : " known"}">${v == null ? "?" : v}</span>`).join("")}</span></button>`);
     }
     // Die Tafel liegt auf der anderen Seite als die Station, damit sie die Station nicht verdeckt
@@ -935,9 +935,9 @@
     });
     // Nicht verbrauchende Einsätze (Kreisel, Pistole …) bekommen trotzdem eine Zeile
     neueE.forEach(e => { if (!itemById(e.item).einmalig) lines.push(itemZeile(e.item, `${esc(itemById(e.item).name)} eingesetzt`, "plus")); });
-    // Packs zählen nur zwischen 0 und max (engine.js): sagen, warum sich weniger bewegt hat als gedacht
+    // Packs zählen nur zwischen 0 und max (engine.js): sagen, warum Dennis weniger verloren hat als gedacht.
+    // Über max kommt er mit den Quests nicht (alle Siege zusammen sind genau max), nur mit einem Bonus des Quest Masters.
     if (next.kappung.unten > prev.kappung.unten) lines.push(`<li><span class="ri">${cardSvg("empty")}</span>${prev.packs ? "Mehr Packs hattest du nicht." : "Du hattest keine Packs mehr, die du verlieren konntest."}</li>`);
-    if (next.kappung.oben > prev.kappung.oben) lines.push(`<li class="plus"><span class="ri">${cardSvg()}</span>Alle Packs im Kästchen gehören schon dir.</li>`);
 
     // Neue Packs und Ziffern im HUD aufblinken lassen
     document.querySelectorAll("#packRow .ic-card").forEach((c, i) => c.classList.toggle("gain", i >= prev.packs && i < next.packs));
@@ -1109,7 +1109,7 @@
         [$("#slotsGear").parentElement, "Hier landet, was du dir erspielst. Die Schatten zeigen, was noch zu holen ist."],
         [$("#slotsSkill").parentElement, "Hier ruhen Flüche und Segen, sobald du sie dir verdient hast."],
         [$(".equip-body"), "Was leuchtet, kannst du bei der aktuellen Quest einsetzen: antippen, dann das Siegel halten."],
-        [$(".hud"), "Packs und Ziffern für dein Kästchen."]
+        [$(".hud"), "Deine Packs und die Ziffern für das Kästchen."]
       ]), STILL.matches ? 0 : 1100);
     };
     if (!x) return fertig();
@@ -1156,10 +1156,11 @@
         { bild: `<span class="pb-reise"><span class="pb-ort">${useSvg("i-train")}</span>${Array.from({ length: pruefungen }, (_, k) =>
             `<span class="medal covered" style="--k:${k + 1}"><b>?</b></span>`).join("")}<span class="pb-ort gipfel" style="--k:${pruefungen + 1}">${useSvg("i-mountain")}</span></span>`,
           text: "Das wird eine Reise, vom Zug bis auf den Gipfel. Und unterwegs wirst du geprüft werden." },
-        { bild: `<span class="pb-chest">${useSvg("i-chest")}${useSvg("i-lock", "pb-lock")}</span><span class="pb-cards${max > 10 ? " two" : ""}" style="--n:${max > 10 ? Math.ceil(max / 2) : max}">${karten(max)}</span>`,
-          text: `Der Bund hat ein Kästchen verschlossen. Darin liegen ${max} Packs.` },
-        { bild: `<span class="pb-gain">${cardSvg()}<b>+</b></span><span class="pb-tumblers">${C.code.map(() => `<span class="tumbler">?</span>`).join("")}</span>`,
-          text: "Hauptquests bringen dir Packs und die vier Ziffern, Sidequests Fähigkeiten. Ohne alle vier Ziffern lässt dich der Bund nicht auf den Gipfel." },
+        // Die 20 Packs hütet der Bund, das Kästchen am Ende bleibt ein Geheimnis (29.09.: darin liegt eine Überraschung)
+        { bild: `<span class="pb-cards${max > 10 ? " two" : ""}" style="--n:${max > 10 ? Math.ceil(max / 2) : max}">${karten(max)}</span>`,
+          text: `Der Bund hütet ${max} Packs. Hauptquests bringen dir Packs und Ziffern, Sidequests Fähigkeiten.` },
+        { bild: `<span class="pb-chest">${useSvg("i-chest")}${useSvg("i-lock", "pb-lock")}</span><span class="pb-tumblers">${C.code.map(() => `<span class="tumbler">?</span>`).join("")}</span>`,
+          text: "Die vier Ziffern öffnen am Ende ein verschlossenes Kästchen. Was darin liegt, verrät dir niemand. Ohne alle vier lässt dich der Bund nicht auf den Gipfel." },
         { bild: `<span class="pb-split"><span class="pb-cards mine" style="--n:${Math.min(halb, 10)}">${karten(halb)}</span><small>deins</small></span><span class="pb-split"><span class="pb-cards" style="--n:${Math.min(max - halb, 10)}">${karten(max - halb, "empty")}</span><small>beim Bund</small></span>`,
           text: `Verlierst du, holt sich der Bund Packs zurück. Was am Ende dir gehört, nimmst du mit.` }
       ];

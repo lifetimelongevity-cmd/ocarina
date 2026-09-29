@@ -32,7 +32,7 @@ function tag(p) {
 }
 
 const summe = k => [...vorGipfel, gipfel].reduce((a, id) => a + ((C.quests.find(q => q.id === id)[k] || {}).packs || 0), 0);
-console.log(`Kästchen ${C.waehrung.max} Packs, fehlende Ziffer am Tor ${C.ziffer_preis} Packs. Alle Siege zusammen ${summe("win")}, alle Niederlagen ${summe("lose")}.`);
+console.log(`${C.waehrung.max} Packs über den Tag, fehlende Ziffer am Tor ${C.ziffer_preis} Packs. Alle Siege zusammen ${summe("win")}, alle Niederlagen ${summe("lose")}.`);
 console.log("Chance je Quest | Packs am Ende: Ø   schlechtestes Zehntel  Mitte  bestes Zehntel | am Tor fehlt Ø  Bußprüfung nötig  ohne Packs");
 [0.3, 0.4, 0.5, 0.6, 0.7, 0.8].forEach(p => {
   const r = Array.from({ length: N }, () => tag(p));

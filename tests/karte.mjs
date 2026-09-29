@@ -94,7 +94,7 @@ await p.click('.sc-row[data-quest="podrennen"]'); await warte(800);
 pruefe(await aktiv(p) === '1' && (await p.textContent('#questCard .tb-title')).includes('Podrennen'), 'Zeile öffnet die Quest');
 await zurKarte(p);
 await p.click('.mark[data-station="huette"]'); await warte(300);
-pruefe((await p.textContent('#stationCard')).includes('Packs gehören dir'), 'Tafel Hütte: das Kästchen');
+pruefe((await p.textContent('#stationCard')).includes('Verschlossen, noch') && !(await p.textContent('#stationCard')).includes('Packs'), 'Tafel Hütte: das Kästchen, verschlossen, ohne Packs');
 await p.click('.mark[data-station="huette"]'); await warte(500);
 pruefe(await p.isVisible('#overlay') && (await p.textContent('#overlay')).includes('CODE'), 'Zweites Tippen auf die Hütte zeigt den Code');
 await p.click('#overlay'); await warte(300);

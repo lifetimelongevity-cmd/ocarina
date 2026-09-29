@@ -10,7 +10,8 @@
   const GAME_CONFIG = {
     version: "v1",
 
-    waehrung: { name: "Packs", max: 20, start: 0 },    // Packs im Kästchen, eher 20+ (26.09.). Siege ergeben zusammen 22
+    waehrung: { name: "Packs", max: 20, start: 0 },    // 20 Packs über den Tag (in der Leiste), alle Siege zusammen genau 20 (29.09.).
+                                                       // Die 10 Packs im Kästchen am Ende sind eine Überraschung, die App erwähnt sie nicht
 
     code: [7, 4, 2, 9],                                 // geheim, nur der Quest Master sieht alle vier
     ziffer_preis: 2,                                    // Packs für eine fehlende Ziffer am Tor zum Gipfel (oder Bußprüfung, oder Rikes Segen)
@@ -153,7 +154,7 @@
         farbe: "#ec8f2e", emblem: "z-spirit",
         text: "Zwei Kreisel, eine Arena. Wer sich länger dreht, gewinnt.",
         qm: "Beyblade gegen den besten Blader des Bundes, bestanden bei 2 von 3. Mit Götterkreisel übt Dennis vorher und wählt zuerst. Füllt auch den Showdown auf.",
-        win:  { packs: 3, items: ["karten_gepanzert"] },
+        win:  { packs: 2, items: ["karten_gepanzert"] },
         lose: { packs: -2 },
         einsetzbar: ["kreisel", "spruchrolle", "schild", "nakama"], duell: true, revanche: true },
 
@@ -201,7 +202,7 @@
         farbe: "#f2c94c", emblem: "z-triforce",
         text: "Drei Duelle gegen den Bund, zuerst deine Revanchen. Antreten darfst du nur mit allen vier Ziffern.",
         qm: "Erst das Tor: Fehlt eine Ziffer, holt Dennis sie für 2 Packs, mit Rikes Segen oder per Bußprüfung, die du bestimmst. Dann 3 Duelle, bestanden bei 2 Siegen: erst verlorene Spiele vom Tag, aufgefüllt mit Wirbel der Götter. Die App zeigt sie unten.",
-        win:  { packs: 6 },
+        win:  { packs: 5 },
         lose: { packs: -4 },
         einsetzbar: ["spruchrolle", "schild", "nakama"], tor: true,
         showdown: { duelle: 3, auffuellen: "wirbel" } },

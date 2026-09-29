@@ -28,7 +28,7 @@ Zusätze für Dennis' Seite: `?probe` (liest den Probelauf des Quest Masters, ro
 ## Karte (seit 26.09.)
 
 - **Weg:** gegangener Weg golden, der Rest gestrichelt. Nach jedem Ergebnis läuft Dennis zur nächsten Station, sobald er die Karte ansieht. Der Nebel treibt und zieht beim Weiterkommen ab.
-- **Station antippen:** Tafel mit Ort, Höhe, Kilometer ab Bahnhof und den Quests der Station (Nebel bleibt dicht, verdeckte Sidequests fehlen ganz). Eine Zeile antippen öffnet die Quest, zweites Tippen auf die Station ebenso. An der Hütte: das Kästchen mit Code und Packs.
+- **Station antippen:** Tafel mit Ort, Höhe, Kilometer ab Bahnhof und den Quests der Station (Nebel bleibt dicht, verdeckte Sidequests fehlen ganz). Eine Zeile antippen öffnet die Quest, zweites Tippen auf die Station ebenso. An der Hütte: das Kästchen mit dem Code („Verschlossen, noch N Ziffern“). Was darin liegt (10 Packs als Überraschung), verrät die App nicht.
 - **Kartusche oben links:** Höhe, „Noch 2,5 km · 351 Hm bis zum Gipfel“ und das Höhenprofil des echten Wegs.
 - **GPS:** Knopf in der Kartusche. Läuft nur, solange die Karte offen ist. Am Weg (bis 250 m daneben) zeigt ein Feenlicht die echte Stelle, weit weg steht die Luftlinie zum Bahnhof Tegernsee. Ohne Erlaubnis ein Hinweis auf die Einstellungen.
 - **Daten:** `config.karte.weg` (OpenStreetMap, Höhen EU-DEM) und je Station `gps`. Wo der Quest Master am Samstag wirklich aufbaut, kann er dort nachtragen.
@@ -92,7 +92,7 @@ python3 -m http.server 8000
 
 `http://localhost:8000/?demo` zeigt Dennis' Menü mit Demo-Knöpfen ohne Datenbank. Für Admin und Dennis zusammen in `config.js` `typ: "lokal"` setzen und beide Seiten in zwei Tabs desselben Browsers öffnen.
 
-Geräte-Test (iPhone 13 und 15 in Safari und vom Home-Bildschirm, Samsung mit gedrosselter CPU): `tests/geraete.mjs`, siehe Kopf der Datei. Dazu `tests/nebel.mjs` (verrät nichts, auch nicht in den Stationstafeln und der Ausrüstung), `tests/probe.mjs` (Probelauf, Rückgängig), `tests/karte.mjs` (Karte, GPS, Prolog), `tests/selbst.mjs` (Dennis trägt selbst ein, Zurücknehmen, verpasste Momente, Tor, Duelle), `tests/glanz.mjs` (Beutel wird Spritze, Wasserwaffen in Stufen, Glanzsieg eintragen, zurücknehmen, nachholen) und `tests/durchlauf.mjs` (der ganze Tag vom Tagebuch bis zum offenen Kästchen).
+Geräte-Test (iPhone 13 und 15 in Safari und vom Home-Bildschirm, Samsung mit gedrosselter CPU): `tests/geraete.mjs`, siehe Kopf der Datei. Dazu `tests/nebel.mjs` (verrät nichts, auch nicht in den Stationstafeln und der Ausrüstung), `tests/probe.mjs` (Probelauf, Rückgängig), `tests/karte.mjs` (Karte, GPS, Prolog), `tests/selbst.mjs` (Dennis trägt selbst ein, Zurücknehmen, verpasste Momente, Tor, Duelle), `tests/glanz.mjs` (Beutel wird Spritze, Wasserwaffen in Stufen, Glanzsieg eintragen, zurücknehmen, nachholen) und `tests/durchlauf.mjs` (der ganze Tag vom Tagebuch bis zum offenen Kästchen) und `tests/neustart.mjs` (Alles zurücksetzen, ein Fenster, das Handy vergisst alles).
 
 ## Firebase
 

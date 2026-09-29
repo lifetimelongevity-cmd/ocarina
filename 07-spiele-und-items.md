@@ -90,20 +90,22 @@ Stand 25.09.2026, Namen und Aussichtspunkt geändert am 28.09. Sammelt, was der 
 |---|---|---|---|---|---|---|---|
 | 1 | 1 | Rikes Tagebuch | Hauptquest | Zug | +2, Ziffer 1, Kreisel (I5) | 0 | 5 von 7 Antworten treffen |
 | 2 | 4 | Die drei Zeichen | Sidequest | Wiese | Nakama-Ruf (F5) | −1 | er zwei Gegner nacheinander schlägt, jeweils Best of 3 |
-| 3 | 14 | Wirbel der Götter | Hauptquest | Wiese | +3, Gepanzerte Karten (I4) | −2 | 2 von 3 gegen den besten Blader |
+| 3 | 14 | Wirbel der Götter | Hauptquest | Wiese | +2, Gepanzerte Karten (I4) | −2 | 2 von 3 gegen den besten Blader |
 | 4 | 7 | Das Podrennen | Hauptquest | Wiese | +3, Ziffer 2, Kleine Wasserpistole (I8) | −2 | ein Versuch unter einer Zeit, die der Quest Master nur jedes zweite Mal schafft |
 | 5 | 9 | Kartenwurf | Sidequest | Wald | Fluch (F1), **Glanzsieg** (2 Karten Vorsprung): dazu Große Wasserpistole (I2) | −2 | mehr Karten im Ziel, Gleichstand zählt als verloren |
 | 6 | 2 | Auge des Jägers | Hauptquest | Wald | +4, Ziffer 3, Stich (I6) | −2 | alle 5 Flammen aus 4 m mit einem Tank |
 | 7 | 12 | Klingen des Deku-Baums | Hauptquest | Wald | +4, Ziffer 4 | −2 | 2 von 4 Schwertern aus 4 m stecken (Stich: ein Schwert mehr) |
 | 8 | 3 | Hüter der Flamme | Sidequest | Aussicht | Schild (F3) | −2 | das Teelicht 100 Schritte bergauf brennt |
 | Tor | | fehlende Ziffern | | Gipfel | je Ziffer 2 Packs, Rikes Segen oder Bußprüfung | | |
-| 9 | 5 | Prüfung des Bundes | Hauptquest | Gipfel | +6 | −4 | 2 von 3 Duellen |
+| 9 | 5 | Prüfung des Bundes | Hauptquest | Gipfel | +5 | −4 | 2 von 3 Duellen |
 | läuft | 6 | Prophezeiung | Zähler (max. 3) | den ganzen Tag | je Treffer 1 Fluch | | |
 | läuft | 15 | Rikes Amulett | Schritt „Gefunden“ | bis zum Gipfel | Rikes Segen (F6) | 0 | gefunden und zusammengesetzt |
 
 Einsetzbar: Kreisel bei Wirbel, Karten beim Kartenwurf, die stärkste Wasserwaffe beim Auge (Spritze, kleine oder große Pistole), Stich beim Deku-Baum. Fluch fast überall, Schild und Nakama-Ruf bei den Duellen (Wirbel, Kartenwurf, Die drei Zeichen nur Schild) und im Showdown, Rikes Segen nur am Tor.
 
-**Packs (28.09.):** Das Kästchen hat 20 Packs (`waehrung.max`). Alle Siege zusammen 22, alle Niederlagen −17. Packs zählen in der Reihenfolge, in der gebucht wurde, und bleiben immer zwischen 0 und 20: Wer bei 0 verliert, verliert nichts, was über 20 geht, verfällt. Nachrechnen mit `node tests/balance.js`: Gewinnt Dennis jedes Spiel mit 50 %, bleiben ihm im Schnitt 5 Packs, am Tor fehlen ihm im Schnitt 2 Ziffern, in 43 % der Tage braucht er eine Bußprüfung, und etwa jeder dritte Tag endet ohne Packs. Mit 70 % sind es im Schnitt 10 Packs.
+**Packs (29.09.):** Über den Tag gibt es 20 Packs (`waehrung.max`, die Leiste oben), der Bund hütet sie. Alle Siege zusammen sind genau 20 (Wirbel +2 und Bund +5, vorher +3 und +6, zusammen 22), alle Niederlagen −17. Gewinnt Dennis alles, gehören ihm alle 20, kein Sieg verpufft. Packs zählen in der Reihenfolge, in der gebucht wurde, und bleiben immer zwischen 0 und 20: Wer bei 0 verliert, verliert nichts, über 20 kommt er nur mit einem Bonus des Quest Masters. Nachrechnen mit `node tests/balance.js`: Gewinnt Dennis jedes Spiel mit 50 %, bleiben ihm im Schnitt 4 bis 5 Packs, am Tor fehlen ihm im Schnitt 2 Ziffern, in 45 % der Tage braucht er eine Bußprüfung, und etwa jeder dritte Tag endet ohne Packs. Mit 70 % sind es im Schnitt 9 Packs.
+
+**Kästchen (29.09.):** Im Kästchen, das nur der vierstellige Code öffnet, liegen 10 Packs als Überraschung. Die App erwähnt sie nirgends: Der Prolog sagt nur, dass die vier Ziffern am Ende ein verschlossenes Kästchen öffnen und niemand verrät, was darin liegt. Physisch gibt es also 20 Packs für den Tag und 10 im Kästchen.
 
 Sechs Hauptquests = sechs Medaillons (28.09.): Rikes Tagebuch (Wasser, blau), Wirbel der Götter (Geister, orange), Das Podrennen (Schatten, violett), Auge des Jägers (Feuer, rot, fünf Flammen), Klingen des Deku-Baums (Wald, grün) und Prüfung des Bundes (Triforce, gold). Dennis sieht die Quests in zwei Kammern: oben HAUPTQUESTS, unten SIDEQUESTS samt Prophezeiung und Rikes Amulett. Den Ort unter dem Quest-Titel gibt es nicht mehr, der steht auf der Karte. Items gehen bei Niederlagen nicht verloren. Einziges Startitem ist die Spritze: Beim ersten Besuch der Ausrüstung entpuppt sich der Heilige Beutel des Helden als Wasserspritze, im selben Feld (28.09., vorher Beutel und Spritze als zwei Felder). Einzige Ausnahme von der Regel ist der Glanzsieg im Kartenwurf, der zusätzlich ein Item bringt.
 

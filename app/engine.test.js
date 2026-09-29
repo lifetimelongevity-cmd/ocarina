@@ -79,7 +79,9 @@ assert.strictEqual(s.packs, 0);
 assert.deepStrictEqual(s.ziffern, [7, null, null, null]);
 assert.deepStrictEqual(s.gekauft, [true, false, false, false]);
 
-// 4. Alles gewonnen: Deckel oben, keine nächste Quest
+// 4. Es gibt nur 20 Packs (29.09.): alle Siege zusammen genau max, also nie ein Sieg, der verpufft
+assert.strictEqual(config.quests.reduce((a, q) => a + ((q.win || {}).packs || 0), 0), config.waehrung.max, "Siege zusammen = max");
+// Alles gewonnen: Deckel oben, keine nächste Quest
 const alle = {}; reihe.forEach(q => { alle[q.id] = "bestanden"; });
 s = derive(config, { quests: alle });
 assert.strictEqual(s.packs, config.waehrung.max);
@@ -175,12 +177,11 @@ assert.strictEqual(s.packs, P("wirbel", "win"));
 assert.strictEqual(s.kappung.unten, -P("klingen", "lose"));
 assert.strictEqual(s.kappung.oben, 0);
 
-// 14. Deckel: Was über max geht, verfällt. Eine Strafe danach zählt sofort.
-s = derive(config, { quests: alle, zeiten: Object.fromEntries(reihe.map((q, i) => [q.id, i + 1])), buchungen: [{ id: "b", packs: -1, grund: "Strafe", zeit: 99 }] });
-const siege = reihe.reduce((n, q) => n + P(q.id, "win"), 0);
-assert.ok(siege > config.waehrung.max, "Test braucht mehr Siege als Platz im Kästchen");
+// 14. Deckel: Was über max geht, verfällt (mit den Quests allein nie, nur mit einem Bonus). Eine Strafe danach zählt sofort.
+s = derive(config, { quests: alle, zeiten: Object.fromEntries(reihe.map((q, i) => [q.id, i + 1])),
+  buchungen: [{ id: "bonus", packs: 3, grund: "Bonus", zeit: 50 }, { id: "b", packs: -1, grund: "Strafe", zeit: 99 }] });
 assert.strictEqual(s.packs, config.waehrung.max - 1);
-assert.strictEqual(s.kappung.oben, siege - config.waehrung.max);
+assert.strictEqual(s.kappung.oben, 3);
 
 // 15. Reihenfolge nach Zeit: dieselbe Strafe vor oder nach dem Sieg
 const strafe = zeit => derive(config, { quests: { logbuch: "bestanden" }, zeiten: { logbuch: 200 }, buchungen: [{ id: "b", packs: -1, grund: "Strafe", zeit }] }).packs;
