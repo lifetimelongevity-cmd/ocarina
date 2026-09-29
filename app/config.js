@@ -208,13 +208,6 @@
         showdown: { duelle: 3, auffuellen: "wirbel" } },
 
       /* Laufende Quests: sichtbar, sobald der Quest Master sie startet */
-      { id: "prophezeiung", nr: 6, typ: "lauf", name: "Prophezeiung", ort: "Den ganzen Tag",
-        farbe: "#8e7cf0", emblem: "i-eye",
-        text: "Sag voraus, was der Bund heute tun wird. Jede Vorhersage, die eintrifft, bringt dir einen Fluch gegen den Bund.",
-        qm: "Morgens 2 bis 3 Vorhersagen. Jede erfüllte buchst du mit +1 Treffer.",
-        zaehler: { name: "Treffer", max: 3, proTreffer: { items: ["spruchrolle"] } },
-        einsetzbar: [] },
-
       { id: "amulett", nr: 15, typ: "lauf", name: "Rikes Amulett", ort: "Den ganzen Tag",
         farbe: "#e56aa0", emblem: "i-amulet",
         text: "Rikes Brosche ist versteckt. Finde sie und setz sie zusammen, bevor du am Gipfel stehst.",

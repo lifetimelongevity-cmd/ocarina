@@ -171,10 +171,6 @@ for (const g of GERAETE) {
   alleProbleme += (await pruefen(page, g, 'ERGEBNIS')).length;
   await page.click('#overlay'); await page.waitForTimeout(1500);
   await shot(page, g, '5-nebel');
-  // Prophezeiung +1 → Spruchrolle mit Enthüllung
-  await page.click('[data-demo="treffer"]'); await page.waitForTimeout(1500);
-  await shot(page, g, '6-prophezeiung');
-  await page.click('#overlay'); await page.waitForTimeout(300);
   await ctx.close();
 
   // Log-Buch am Tagesanfang
@@ -274,19 +270,13 @@ for (const g of GERAETE) {
   log(`\n== Admin + Dennis: Log-Buch-Antworten im Admin: ${JSON.stringify(lb.slice(0, 3))}`);
   if (lb[0] !== 'Im Café am Gärtnerplatz' || lb[1] !== 'Meine Socken') { log('  PROBLEM: Antworten kommen nicht an'); alleProbleme++; }
   await admin.screenshot({ path: `${OUT}/admin-1-logbuch.png`, fullPage: true });
-  // Log-Buch bestanden, Prophezeiung starten, zwei Treffer
+  // Log-Buch bestanden, Fluch geschenkt
   await admin.click('#nextWin'); await dennis.waitForTimeout(600);
   const titel1 = await dennis.$eval('#resultHead .big', e => e.textContent).catch(() => '');
   log(`  Dennis sieht nach „Bestanden": ${titel1}`);
   await dennis.click('#overlay'); await dennis.waitForTimeout(800);
-  await admin.click('.lauf-q[data-id="prophezeiung"] [data-a="start"]'); await dennis.waitForTimeout(600);
-  log(`  Dennis sieht nach Start: ${await dennis.$eval('#resultHead .big', e => e.textContent).catch(() => '')}`);
-  await dennis.click('#overlay'); await dennis.waitForTimeout(300);
-  await admin.click('.lauf-q[data-id="prophezeiung"] [data-a="plus"]'); await dennis.waitForTimeout(700);
-  const zeilen = await dennis.$$eval('#resultLines li', els => els.map(e => e.textContent.replace(/\s+/g, ' ').trim()));
-  log(`  Treffer: ${await dennis.$eval('#resultHead .big', e => e.textContent)} · ${zeilen.join(' | ')}`);
-  await dennis.screenshot({ path: `${OUT}/dennis-treffer.png` });
-  await dennis.click('#overlay'); await dennis.waitForTimeout(300);
+  await admin.click('button.btn:has-text("Fluch geschenkt")'); await dennis.waitForTimeout(700);
+  await dennis.click('#overlay').catch(() => {}); await dennis.waitForTimeout(300);
   // Einsetzen: Spruchrolle bei Die drei Zeichen
   await admin.screenshot({ path: `${OUT}/admin-2-naechste.png`, fullPage: true });
   await admin.click('#nextUse .use-btn[data-item="spruchrolle"]'); await dennis.waitForTimeout(700);

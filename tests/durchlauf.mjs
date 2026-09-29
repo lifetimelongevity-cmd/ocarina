@@ -45,8 +45,7 @@ for (let i = 0; i < 7; i++) { await dennis.fill('#lbInput', 'Antwort ' + (i + 1)
 await dennis.click('#lbClose'); await warte(300);
 await siegel(dennis, '#questCard [data-ergebnis="bestanden"]', 'PRÜFUNG BESTANDEN', 'Rikes Tagebuch');
 
-// Samstagmorgen: Prophezeiung und Amulett starten
-await admin.click('#lauf .lauf-q[data-id="prophezeiung"] [data-a="start"]'); await warte(300);
+// Samstagmorgen: Amulett starten
 await admin.click('#lauf .lauf-q[data-id="amulett"] [data-a="start"]'); await warte(500);
 await zu(dennis);
 
@@ -55,9 +54,6 @@ await siegel(dennis, '#questCard [data-ergebnis="bestanden"]', 'SIDEQUEST BESTAN
 await siegel(dennis, '#questCard [data-ergebnis="verloren"]', 'PRÜFUNG VERLOREN', 'Wirbel der Götter');
 const pod = await siegel(dennis, '#questCard [data-ergebnis="bestanden"]', 'PRÜFUNG BESTANDEN', 'Podrennen');
 pruefe(pod.includes('Kleine Wasserpistole'), 'Podrennen bringt die Kleine Wasserpistole');
-// Prophezeiung: ein Treffer unterwegs
-await admin.click('#lauf .lauf-q[data-id="prophezeiung"] [data-a="plus"]'); await warte(500);
-await zu(dennis);
 
 // Wald: Kartenwurf mit Glanzsieg, dann Auge des Jägers mit der großen Pistole
 const glanz = await siegel(dennis, '#questCard [data-ergebnis="glanz"]', 'GLANZSIEG', 'Kartenwurf');
@@ -67,13 +63,11 @@ await siegel(dennis, '#questCard [data-einsetzen="pistole_gross"]', 'GROSSE WASS
 await siegel(dennis, '#questCard [data-ergebnis="bestanden"]', 'PRÜFUNG BESTANDEN', 'Auge des Jägers');
 await siegel(dennis, '#questCard [data-ergebnis="bestanden"]', 'PRÜFUNG BESTANDEN', 'Klingen des Deku-Baums');
 
-// Amulett gefunden, Aussicht, zweiter Treffer, Amulett zusammengesetzt
+// Amulett gefunden, Aussicht, Amulett zusammengesetzt
 await questOeffnen(dennis, 'amulett');
 await siegel(dennis, '#questCard [data-schritt="gefunden"]', 'GEFUNDEN', 'Amulett gefunden');
 await questOeffnen(dennis, 'feuerprobe');
 await siegel(dennis, '#questCard [data-ergebnis="bestanden"]', 'SIDEQUEST BESTANDEN', 'Hüter der Flamme');
-await admin.click('#lauf .lauf-q[data-id="prophezeiung"] [data-a="plus"]'); await warte(500);
-await zu(dennis);
 await questOeffnen(dennis, 'amulett');
 await siegel(dennis, '#questCard [data-ergebnis="bestanden"]', 'BESTANDEN', 'Amulett zusammengesetzt');
 
@@ -96,15 +90,13 @@ const abspann = await dennis.textContent('#abRoll');
 pruefe(abspann.includes('Kartenwurf · Glanzsieg') && abspann.includes('Große Wasserpistole') && abspann.includes('Prüfungen bestanden5 von 6'), 'Abspann: Glanzsieg, Beute und Zahlen des Tages');
 for (let i = 0; i < 4 && await dennis.isVisible('#abSkip'); i++) { await dennis.click('#abSkip'); await warte(400); }
 await dennis.click('[data-ab="zu"]'); await warte(400);
-await admin.click('#lauf .lauf-q[data-id="prophezeiung"] [data-a="beendet"]'); await warte(500);
-await zu(dennis);
 
 // Hütte: Kästchen. Erwartung aus engine.js mit denselben Ergebnissen
 const erwartet = E.derive(C, {
   quests: { logbuch: 'bestanden', klingen: 'bestanden', wirbel: 'verloren', podrennen: 'bestanden', kartenwurf: 'bestanden', auge: 'bestanden',
-            deku: 'bestanden', feuerprobe: 'bestanden', bund: 'bestanden', prophezeiung: 'beendet', amulett: 'bestanden' },
-  glanz: { kartenwurf: true }, zaehler: { prophezeiung: 2 }, schritte: { amulett: { gefunden: true } },
-  zeiten: { logbuch: 1, klingen: 2, wirbel: 3, podrennen: 4, kartenwurf: 5, auge: 6, deku: 7, feuerprobe: 8, amulett: 9, bund: 10, prophezeiung: 11 }
+            deku: 'bestanden', feuerprobe: 'bestanden', bund: 'bestanden', amulett: 'bestanden' },
+  glanz: { kartenwurf: true }, schritte: { amulett: { gefunden: true } },
+  zeiten: { logbuch: 1, klingen: 2, wirbel: 3, podrennen: 4, kartenwurf: 5, auge: 6, deku: 7, feuerprobe: 8, amulett: 9, bund: 10 }
 });
 pruefe((await dennis.textContent('#hudNextName')) === 'Zum Kästchen', 'Am Ende: Zum Kästchen');
 pruefe(Number(await dennis.textContent('#packsVal')) === erwartet.packs, `Dennis: ${erwartet.packs} Packs wie engine.js`);

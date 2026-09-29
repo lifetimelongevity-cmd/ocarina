@@ -19,7 +19,7 @@ config.quests.forEach(q => {
 config.items.forEach(it => assert.ok(it.name && it.kurz && it.symbol && it.text && it.tarn && it.tarn.name, it.id + ": Texte und Tarnung"));
 config.items.forEach(it => (it.ersetzt || []).forEach(id => assert.ok(itemIds.includes(id) && id !== it.id, it.id + ": ersetzt unbekanntes Item " + id)));
 config.quests.filter(q => q.glanz).forEach(q => assert.ok(q.win && q.glanz.bedingung && q.typ !== "lauf" && !q.showdown, q.id + ": Glanzsieg braucht Sieg und Bedingung"));
-assert.deepStrictEqual(config.quests.map(q => q.nr).sort((a, b) => a - b), [1, 2, 3, 4, 5, 6, 7, 9, 12, 14, 15]);
+assert.deepStrictEqual(config.quests.map(q => q.nr).sort((a, b) => a - b), [1, 2, 3, 4, 5, 7, 9, 12, 14, 15]);
 assert.deepStrictEqual(config.items.map(i => i.nr), ["I7", "I8", "I2", "I4", "I5", "I6", "F1", "F3", "F5", "F6"]);
 assert.strictEqual(reihe.filter(q => q.typ === "kern").length, 6, "sechs Medaillons");
 assert.deepStrictEqual(reihe.filter(q => q.win && q.win.ziffer).map(q => q.win.ziffer).sort(), [1, 2, 3, 4], "jede Ziffer genau einmal");
@@ -104,36 +104,24 @@ assert.strictEqual(s.packs, 2);
 assert.deepStrictEqual(s.duelle, { "1": "sieg" });
 assert.deepStrictEqual(normalize({ duelle: [null, "sieg", "niederlage"] }).duelle, { "1": "sieg", "2": "niederlage" });
 
-// 8. Prophezeiung: läuft neben der Reihe, jeder Treffer ist eine Spruchrolle
-s = derive(config, { quests: { prophezeiung: "laeuft" }, zaehler: { prophezeiung: 2 } });
-assert.deepStrictEqual(s.laufend, ["prophezeiung"]);
-assert.strictEqual(s.next, "logbuch");                   // die Reihe bleibt unberührt
-assert.strictEqual(s.anzahl.spruchrolle, 2);
-assert.strictEqual(s.items.spruchrolle, "besitz");
-assert.strictEqual(s.treffer.prophezeiung, 2);
-// Zähler zählt nur, solange die Quest gestartet ist, und nie über max
-assert.strictEqual(derive(config, { zaehler: { prophezeiung: 2 } }).anzahl.spruchrolle, 0);
-assert.strictEqual(derive(config, { quests: { prophezeiung: "laeuft" }, zaehler: { prophezeiung: 9 } }).anzahl.spruchrolle, 3);
-// Beendet: Rollen bleiben
-assert.strictEqual(derive(config, { quests: { prophezeiung: "beendet" }, zaehler: { prophezeiung: 1 } }).anzahl.spruchrolle, 1);
-// Laufende Quest verlangt einen eigenen Status, "laeuft" gilt in der Reihe nicht
+// 8. Laufende Quest verlangt einen eigenen Status, "laeuft" gilt in der Reihe nicht
 assert.strictEqual(derive(config, { quests: { klingen: "laeuft" } }).quests.klingen, "offen");
 
 // 9. Einsetzen: Spruchrolle zählt runter, Schild ist danach verbraucht, Kreisel bleibt
 s = derive(config, {
-  quests: { prophezeiung: "laeuft", logbuch: "bestanden", klingen: "bestanden", wirbel: "bestanden", podrennen: "bestanden",
+  quests: { logbuch: "bestanden", klingen: "bestanden", wirbel: "bestanden", podrennen: "bestanden",
             kartenwurf: "bestanden", auge: "bestanden", deku: "bestanden", feuerprobe: "bestanden" },
-  zaehler: { prophezeiung: 2 },
+  buchungen: [{ id: "g", packs: 0, grund: "x", item: "spruchrolle", menge: 1 }],
   einsaetze: [{ id: "e1", item: "spruchrolle", quest: "klingen" }, { id: "e2", item: "kreisel", quest: "wirbel" },
               { id: "e3", item: "schild", quest: "bund" }]
 });
-assert.strictEqual(s.anzahl.spruchrolle, 2);                 // zwei Treffer und der Kartenwurf, einer eingesetzt
+assert.strictEqual(s.anzahl.spruchrolle, 1);                 // einer geschenkt und der Kartenwurf, einer eingesetzt
 assert.strictEqual(s.items.spruchrolle, "besitz");
 assert.strictEqual(s.items.kreisel, "besitz");
 assert.strictEqual(s.items.schild, "verbraucht");
 assert.deepStrictEqual(s.eingesetzt, { klingen: ["spruchrolle"], wirbel: ["kreisel"], bund: ["schild"] });
 // Letzte Rolle eingesetzt: verbraucht, nicht „nie gehabt"
-s = derive(config, { quests: { prophezeiung: "laeuft" }, zaehler: { prophezeiung: 1 }, einsaetze: [{ id: "e1", item: "spruchrolle", quest: "logbuch" }] });
+s = derive(config, { buchungen: [{ id: "g", packs: 0, grund: "x", item: "spruchrolle", menge: 1 }], einsaetze: [{ id: "e1", item: "spruchrolle", quest: "logbuch" }] });
 assert.strictEqual(s.anzahl.spruchrolle, 0);
 assert.strictEqual(s.items.spruchrolle, "verbraucht");
 // Spruchrolle per Buchung geschenkt
@@ -148,7 +136,7 @@ assert.strictEqual(s.next, "auge");
 assert.deepStrictEqual([...jetztEinsetzbar(config, s)], ["pistole_klein", "spruchrolle"]);   // Kreisel und Karten helfen hier nicht, die Spritze ist abgelöst
 assert.strictEqual(abgeloest(config, s, "spritze"), "pistole_klein");
 assert.strictEqual(abgeloest(config, s, "pistole_klein"), null);
-s = derive(config, { quests: { amulett: "laeuft", prophezeiung: "laeuft", logbuch: "bestanden" }, zaehler: { prophezeiung: 1 } });
+s = derive(config, { quests: { amulett: "laeuft", logbuch: "bestanden" }, buchungen: [{ id: "g", packs: 0, grund: "x", item: "spruchrolle", menge: 1 }] });
 assert.deepStrictEqual([...jetztEinsetzbar(config, s)], ["spruchrolle"]);       // Amulett läuft, dort hilft die Rolle
 
 // 11. Showdown: erst Revanchen in Spielreihenfolge, dann Wirbel der Götter; Rikes Tagebuch und Hüter der Flamme kommen nicht wieder
@@ -216,8 +204,8 @@ s = mit({}, { q_gibtsnicht: { status: "bestanden" }, q_logbuch: { status: "viell
 assert.strictEqual(s.quests.logbuch, "offen");
 assert.deepStrictEqual(s.duelle, {});
 assert.deepStrictEqual(s.ziffern, [null, null, null, null]);
-// Einsatz: Spruchrolle aus der Prophezeiung wird verbraucht, der Einsatz steht bei der Quest
-s = mit({ quests: { prophezeiung: "laeuft" }, zaehler: { prophezeiung: 1 } }, { e_a: { item: "spruchrolle", quest: "logbuch", zeit: 5 } });
+// Einsatz: geschenkte Spruchrolle wird verbraucht, der Einsatz steht bei der Quest
+s = mit({ buchungen: [{ id: "g", packs: 0, grund: "x", item: "spruchrolle", menge: 1 }] }, { e_a: { item: "spruchrolle", quest: "logbuch", zeit: 5 } });
 assert.strictEqual(s.anzahl.spruchrolle, 0);
 assert.deepStrictEqual(s.eingesetzt.logbuch, ["spruchrolle"]);
 // Laufende Quest: Amulett gefunden und zusammengesetzt, obwohl der Admin nur „läuft" gesetzt hat

@@ -38,21 +38,20 @@
   const DEMO_DOCS = {
     start: { quests: {} },
     mitte: {
-      quests: { logbuch: "bestanden", klingen: "bestanden", wirbel: "verloren", podrennen: "bestanden", prophezeiung: "laeuft", amulett: "laeuft" },
-      zaehler: { prophezeiung: 1 },
+      quests: { logbuch: "bestanden", klingen: "bestanden", wirbel: "verloren", podrennen: "bestanden", amulett: "laeuft" },
       einsaetze: [{ id: "e1", item: "kreisel", quest: "wirbel" }],
       buchungen: [{ id: "b1", packs: -1, grund: "Strafe vom Quest Master" }]
     },
     // Kurz vor dem Ende: alles gespielt bis auf den Bund, am Tor fehlt Ziffer 3, danach zwei Revanchen, Amulett gefunden
     bund: {
       quests: { logbuch: "bestanden", klingen: "verloren", wirbel: "bestanden", podrennen: "bestanden", kartenwurf: "bestanden",
-                auge: "verloren", deku: "bestanden", feuerprobe: "bestanden", prophezeiung: "laeuft", amulett: "laeuft" },
-      zaehler: { prophezeiung: 2 }, schritte: { amulett: { gefunden: true } },
+                auge: "verloren", deku: "bestanden", feuerprobe: "bestanden", amulett: "laeuft" },
+      schritte: { amulett: { gefunden: true } },
       einsaetze: [{ id: "e1", item: "spruchrolle", quest: "auge" }]
     },
     ende: {
       quests: Object.fromEntries(C.quests.map(q => [q.id, q.zaehler ? "beendet" : ["wirbel", "kartenwurf"].includes(q.id) ? "verloren" : "bestanden"])),
-      zaehler: { prophezeiung: 2 }, schritte: { amulett: { gefunden: true } },
+      schritte: { amulett: { gefunden: true } },
       einsaetze: [{ id: "e1", item: "spruchrolle", quest: "auge" }]
     }
   };
@@ -431,7 +430,7 @@
 
   /* Was Dennis bei einer Quest selbst eintragen kann (er besiegelt, der Quest Master kann zurücknehmen):
      die nächste Quest (das Log-Buch erst, wenn alle Antworten besiegelt sind), am Gipfel erst die Duelle,
-     bei laufenden Quests mit Schritten den nächsten Schritt und dann das Ergebnis. Treffer der Prophezeiung bucht der Quest Master. */
+     bei laufenden Quests mit Schritten den nächsten Schritt und dann das Ergebnis. */
   const logbuchFertig = () => C.logbuch.fragen.every((_, i) => antworten[String(i + 1)]);
   function showdownStand() {
     const liste = E.showdownDuelle(C, state), noetig = Math.floor(liste.length / 2) + 1;
@@ -1943,9 +1942,6 @@
         if (neuester) return einStore.loeschen(neuester);
         const last = [...REIHE].reverse().find(q => d.quests[q.id]);
         if (last) delete d.quests[last.id];
-      } else if (a === "treffer") {
-        if (d.quests.prophezeiung !== "laeuft") d.quests.prophezeiung = "laeuft";
-        else d.zaehler.prophezeiung = Math.min(3, (d.zaehler.prophezeiung || 0) + 1);
       } else if (a === "amulett") {
         if (d.quests.amulett !== "laeuft") d.quests.amulett = "laeuft";
         else if (!(d.schritte.amulett || {}).gefunden) d.schritte.amulett = { gefunden: true };

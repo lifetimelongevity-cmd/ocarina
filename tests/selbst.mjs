@@ -63,9 +63,8 @@ await admin.click('#undo'); await warte(700);
 pruefe((await fenster(dennis)).includes('PRÜFUNG BESTANDEN'), 'Rückgängig: Eintrag ist wieder da, Dennis sieht den Moment');
 await zu(dennis); await warte(1200);
 
-// Einsetzen: ein Fluch aus der Prophezeiung, bei Die drei Zeichen
-await admin.click('#lauf .lauf-q[data-id="prophezeiung"] [data-a="start"]'); await warte(400);
-await admin.click('#lauf .lauf-q[data-id="prophezeiung"] [data-a="plus"]'); await warte(600);
+// Einsetzen: ein geschenkter Fluch, bei Die drei Zeichen
+await admin.click('button.btn:has-text("Fluch geschenkt")'); await warte(600);
 await zu(dennis); await warte(800);
 await dennis.evaluate(() => { const r = document.querySelector('.q-row[data-id="klingen"]'); r && r.click(); }); await warte(300);
 pruefe(await dennis.isVisible('#questCard [data-einsetzen="spruchrolle"]'), 'Der Fluch leuchtet unter EINSETZBAR');
