@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#1d070c">
+  <meta name="theme-color" content="#0c0e0a">
   <meta name="robots" content="noindex">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
@@ -17,105 +17,92 @@
 </head>
 <body>
   <header class="top">
-    <p class="probe-band" id="probeBand" hidden>PROBELAUF · das echte Spiel bleibt unberührt <a href="admin.html">Zum echten Spiel</a></p>
+    <p class="probe-band" id="probeBand" hidden>Probelauf <a href="admin.html">Zum echten Spiel</a></p>
     <div class="top-row">
       <div class="brand-box">
         <strong class="brand">Quest Master</strong>
         <span class="sync" id="sync">…</span>
       </div>
-      <button type="button" class="btn undo" id="undo" disabled><span>↶ Rückgängig</span><small id="undoWas"></small></button>
+      <button type="button" class="btn undo" id="undo" disabled><span>Rückgängig</span><small id="undoWas"></small></button>
     </div>
     <div class="top-row stats">
-      <div class="stat"><span class="lbl">Packs</span><b id="packs">0</b><small id="packsMax">/ 10</small></div>
-      <div class="stat"><span class="lbl">Code</span><span class="code" id="code"></span></div>
-      <div class="stat"><span class="lbl">Erledigt</span><b id="done">0</b><small id="total">/ 9</small></div>
+      <div class="stat"><b id="packs">0</b><small id="packsMax">/ 20</small><span class="lbl">Packs</span></div>
+      <div class="stat code" id="code" aria-label="Code des Kästchens"></div>
     </div>
-    <div class="top-row inv" id="inv" aria-label="Dennis besitzt"></div>
   </header>
 
   <main>
-    <section class="card probe-card" id="probeCard" aria-labelledby="probeTitle" hidden>
-      <h2 id="probeTitle">Probelauf: springen</h2>
-      <p class="hint">Setzt den Probe-Stand auf einen Zeitpunkt des Tages. Ein zweites Handy mit <b id="probeUrl">…/?probe</b> zeigt Dennis' Seite live dazu. Rückgängig geht auch hier.</p>
+    <section class="probe-card" id="probeCard" hidden>
+      <p class="hint">Dennis' Seite dazu: <b id="probeUrl">…/?probe</b></p>
       <div class="chips" id="szenarien"></div>
     </section>
 
-    <section class="card next" id="nextCard" aria-labelledby="nextTitle">
-      <p class="eyebrow" id="nextEyebrow">Nächste Quest</p>
+    <section class="jetzt" id="nextCard">
       <h1 id="nextTitle">…</h1>
-      <p class="meta" id="nextMeta"></p>
-      <p class="qm" id="nextQm"></p>
+      <p class="wo" id="nextMeta"></p>
       <p class="fx" id="nextFx"></p>
+      <p class="qm" id="nextQm"></p>
       <div class="use" id="nextUse"></div>
       <div class="duels" id="duels" hidden></div>
       <div class="lb" id="nextLogbuch" hidden></div>
-      <p class="hint notfall">Dennis trägt das Ergebnis selbst ein. Diese Knöpfe sind für den Notfall, zum Beispiel wenn sein Akku leer ist.</p>
-      <div class="big-actions">
+      <div class="notfall">
+        <span class="lbl">Notfall</span>
         <button type="button" class="btn win" id="nextWin">Bestanden</button>
-        <button type="button" class="btn win glanz" id="nextGlanz" hidden>Glanzsieg</button>
+        <button type="button" class="btn glanz" id="nextGlanz" hidden>Glanzsieg</button>
         <button type="button" class="btn lose" id="nextLose">Verloren</button>
       </div>
     </section>
 
-    <section class="card" aria-labelledby="dennisTitle">
-      <h2 id="dennisTitle">Dennis trägt selbst ein</h2>
-      <p class="hint">Ergebnisse, Einsätze, Duelle, Rikes Amulett und Ziffern am Kästchen besiegelt Dennis in seiner App. Du siehst es hier live. <b>Zurücknehmen</b>: Es ist wieder offen, und die Fee sagt es ihm. Rückgängig oben holt es zurück.</p>
-      <ul class="ledger" id="dennisListe"></ul>
+    <section aria-labelledby="verlaufTitle">
+      <h2 id="verlaufTitle">Verlauf</h2>
+      <p class="hint" id="kappung" hidden></p>
+      <ul class="verlauf" id="verlauf"></ul>
     </section>
 
-    <section class="card" aria-labelledby="laufTitle">
-      <h2 id="laufTitle">Läuft den ganzen Tag</h2>
+    <section aria-label="Laufende Quest">
       <div class="lauf" id="lauf"></div>
     </section>
 
-    <section class="card" aria-labelledby="questsTitle">
-      <h2 id="questsTitle">Alle Quests</h2>
+    <details>
+      <summary>Quests <span class="count"><span id="done">0</span><span id="total">/ 10</span></span></summary>
       <ol class="quests" id="quests"></ol>
-    </section>
+    </details>
 
-    <section class="card" aria-labelledby="packsTitle">
-      <h2 id="packsTitle">Packs buchen</h2>
+    <details>
+      <summary>Buchen</summary>
       <div class="chips" id="quick"></div>
       <div class="chips" id="buyDigits"></div>
-      <p class="hint" id="kappung" hidden></p>
       <form class="custom" id="customForm">
-        <label for="customAmount">Menge</label>
-        <input id="customAmount" type="number" inputmode="numeric" step="1" value="-1">
-        <label for="customReason">Grund</label>
-        <input id="customReason" type="text" placeholder="z. B. Hinweis gekauft" autocomplete="off">
+        <input id="customAmount" type="number" inputmode="numeric" step="1" value="-1" aria-label="Packs">
+        <input id="customReason" type="text" placeholder="Grund" aria-label="Grund" autocomplete="off">
         <button type="submit" class="btn">Buchen</button>
       </form>
-      <ul class="ledger" id="ledger"></ul>
-    </section>
+    </details>
 
-    <section class="card" aria-labelledby="useTitle">
-      <h2 id="useTitle">Eingesetzt</h2>
-      <p class="hint">Dennis setzt selbst ein, die Knöpfe unter der Quest sind für den Notfall. Spruchrolle und Schild sind danach weg. ✕ nimmt einen Einsatz zurück.</p>
-      <ul class="ledger" id="einsaetze"></ul>
-    </section>
-
-    <section class="card" aria-labelledby="lbTitle">
-      <h2 id="lbTitle">Rikes Tagebuch: Dennis' Antworten</h2>
-      <ol class="lb-list" id="lbList"></ol>
-    </section>
-
-    <section class="card" aria-labelledby="itemsTitle">
-      <h2 id="itemsTitle">Items und Fähigkeiten</h2>
-      <p class="hint">Normalerweise ergeben sie sich aus den Quests. Hier nur korrigieren, wenn etwas außerhalb der Regeln passiert ist.</p>
+    <details>
+      <summary>Ausrüstung</summary>
+      <div class="inv" id="inv" aria-label="Dennis besitzt"></div>
       <ul class="items" id="items"></ul>
-    </section>
+    </details>
 
-    <section class="card" aria-labelledby="gameTitle">
-      <h2 id="gameTitle">Spiel</h2>
+    <details>
+      <summary>Tagebuch</summary>
+      <ol class="lb-list" id="lbList"></ol>
+    </details>
+
+    <details>
+      <summary>Spiel</summary>
       <p class="hint" id="storageInfo"></p>
       <div class="chips">
-        <a class="btn ghost" id="dennisLink" href="./" target="_blank" rel="noopener">Dennis' Ansicht öffnen</a>
+        <a class="btn ghost" id="dennisLink" href="./" target="_blank" rel="noopener">Dennis' Ansicht</a>
         <a class="btn ghost" id="probeLink" href="admin.html?probe">Probelauf öffnen</a>
-        <a class="btn ghost" href="./?demo" target="_blank" rel="noopener">Demo ohne Datenbank</a>
-        <button type="button" class="btn danger" id="reset">Alles zurücksetzen</button>
-        <button type="button" class="btn danger" id="resetLb">Tagebuch-Antworten löschen</button>
+        <a class="btn ghost" href="./?demo" target="_blank" rel="noopener">Demo</a>
       </div>
-    </section>
+      <div class="chips">
+        <button type="button" class="btn danger" id="resetLb">Tagebuch leeren</button>
+        <button type="button" class="btn danger" id="reset">Alles zurücksetzen</button>
+      </div>
+    </details>
   </main>
 
   <div class="toast" id="toast" role="status"></div>

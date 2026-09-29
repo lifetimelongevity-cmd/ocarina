@@ -27,12 +27,14 @@ const warte = ms => new Promise(r => setTimeout(r, ms));
 
 // Echtes Spiel: leer, ohne Probe-Band
 const echt = await seite('admin.html', 390, 844);
+await echt.$$eval('details', ds => ds.forEach(d => { d.open = true; }));
 await echt.click('#reset'); await warte(200);
 pruefe(await echt.$eval('#probeBand', e => e.hidden), 'Echter Admin: kein Probe-Band');
 pruefe((await echt.textContent('#probeLink')).includes('Probelauf öffnen'), 'Echter Admin: Knopf „Probelauf öffnen"');
 
 // Probelauf: Admin und Dennis
 const admin = await seite('admin.html?probe', 390, 844);
+await admin.$$eval('details', ds => ds.forEach(d => { d.open = true; }));
 const dennis = await seite('?probe&direkt', 852, 393);
 pruefe(!(await admin.$eval('#probeBand', e => e.hidden)), 'Probe-Admin: rotes Band sichtbar');
 pruefe((await admin.$$('#szenarien button')).length === 6, 'Probe-Admin: sechs Sprungknöpfe');
@@ -70,6 +72,7 @@ pruefe(await admin.$eval('#undo', e => e.disabled), 'Verlauf leer: Knopf aus');
 // Verlauf überlebt ein Neuladen (iPhone lädt oft neu)
 await admin.click('#szenarien button:has-text("Mitte")'); await warte(300);
 await admin.reload(); await warte(500);
+await admin.$$eval('details', ds => ds.forEach(d => { d.open = true; }));
 pruefe((await admin.textContent('#undoWas')).includes('Probe: Mitte'), 'Verlauf überlebt Neuladen');
 await admin.click('#undo'); await warte(1200);
 
@@ -82,13 +85,14 @@ pruefe(!(await admin.$eval('#kappung', e => e.hidden)), 'Admin zeigt, was bei 0 
 // Zweites Admin-Gerät ändert dazwischen: Rückgängig fragt nach, statt still zu überschreiben
 await admin.click('#quick button:has-text("Bonus")'); await warte(300);
 const admin2 = await seite('admin.html?probe', 390, 844);
+await admin2.$$eval('details', ds => ds.forEach(d => { d.open = true; }));
 await admin2.click('#quick button:has-text("Strafe")'); await warte(500);
 await admin.click('#undo'); await warte(300);
 pruefe(dialoge.filter(m => m.includes('anderen Gerät')).length === 1, 'Rückgängig fragt nur nach, wenn ein anderes Gerät dazwischen geändert hat');
 
 // Echtes Spiel hat davon nichts
 await echt.reload(); await warte(400);
-pruefe((await echt.textContent('#packs')) === '0' && (await echt.$$('#ledger li:not(.empty)')).length === 0, 'Echtes Spiel: keine Buchung aus dem Probelauf');
+pruefe((await echt.textContent('#packs')) === '0' && (await echt.$$('#verlauf li[data-art="b"]')).length === 0, 'Echtes Spiel: keine Buchung aus dem Probelauf');
 pruefe((await echt.textContent('#undoWas')) === 'Alles zurückgesetzt', 'Echtes Spiel: eigener Verlauf (nur das eigene Zurücksetzen)');
 
 await b.close();

@@ -37,6 +37,7 @@ async function tagebuch(p, text) {
 }
 
 const admin = await seite('admin.html');
+await admin.$$eval('details', ds => ds.forEach(d => { d.open = true; }));
 admin.on('dialog', d => d.accept());
 // Dennis öffnet die App wie am Spieltag: Titelbild, PRESS START, Prolog überspringen
 let dennis = await seite('');
@@ -60,7 +61,7 @@ let f = await fenster(dennis);
 pruefe(f.length === 1 && f[0].includes('NEUER ANFANG'), 'Zurücksetzen: genau ein Fenster bei Dennis: ' + JSON.stringify(f));
 pruefe((await admin.textContent('#done')) === '0', 'Admin: alles offen');
 pruefe(!(await admin.textContent('#lbList')).includes('Antwort 1'), 'Admin: Tagebuch-Antworten gelöscht');
-pruefe(!(await admin.textContent('#dennisListe')).includes('Rikes Tagebuch'), 'Admin: Dennis’ Einträge gelöscht');
+pruefe(!(await admin.textContent('#verlauf')).includes('Rikes Tagebuch'), 'Admin: Dennis’ Einträge gelöscht');
 // Fenster zu: Die Seite lädt neu, Titelbild, danach Prolog
 await dennis.click('#overlay'); await warte(1500);
 pruefe(await dennis.isVisible('#introScreen'), 'Nach dem Fenster: Titelbild wie beim ersten Mal');

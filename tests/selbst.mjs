@@ -24,6 +24,7 @@ async function halten(p, ms = 1100) {
 }
 
 const admin = await seite('admin.html');
+await admin.$$eval('details', ds => ds.forEach(d => { d.open = true; }));
 const dennis = await seite('?direkt');
 await admin.click('#reset').catch(() => {});
 admin.on('dialog', d => d.accept());
@@ -45,14 +46,14 @@ await halten(dennis);
 pruefe((await fenster(dennis)).includes('PRÜFUNG BESTANDEN'), 'Halten: Moment „Prüfung bestanden“ sofort bei Dennis');
 await dennis.screenshot({ path: `${OUT}/selbst-2-moment.png` });
 await warte(400);
-pruefe((await admin.textContent('#dennisListe')).includes('Rikes Tagebuch: bestanden'), 'Admin sieht Dennis’ Eintrag live');
+pruefe((await admin.textContent('#verlauf')).includes('Rikes Tagebuch: bestanden'), 'Admin sieht Dennis’ Eintrag live');
 pruefe((await admin.textContent('#nextTitle')).includes('Die drei Zeichen'), 'Admin: nächste Quest rückt weiter');
 pruefe((await admin.textContent('#packs')) === '1', 'Admin: Packs zählen mit');
 await admin.screenshot({ path: `${OUT}/selbst-3-admin.png`, fullPage: true });
 await zu(dennis); await warte(1200);
 
 // Zurücknehmen: Die Fee sagt es Dennis, die Quest ist wieder offen
-await admin.click('#dennisListe .zurueck'); await warte(1400);   // Rücknahmen sammelt Dennis' Seite 0,7 s
+await admin.click('#verlauf li[data-von="dennis"] .zurueck'); await warte(1400);   // Rücknahmen sammelt Dennis' Seite 0,7 s
 const zurueck = await fenster(dennis);
 pruefe(zurueck.includes('ZURÜCKGENOMMEN') && zurueck.includes('Rikes Tagebuch') && zurueck.includes('Trag es neu ein'), 'Zurücknehmen: Fee meldet es Dennis');
 await dennis.screenshot({ path: `${OUT}/selbst-4-zurueck.png` });
@@ -115,11 +116,11 @@ pruefe(dieb.includes('Schattendieb') && dieb.includes('2 Packs gestohlen') && di
 await dennis.screenshot({ path: `${OUT}/selbst-5c-dieb.png` });
 pruefe(Number(await dennis.textContent('#packsVal')) === Math.max(0, packsVor - 2), `Packs: ${packsVor} → ${Math.max(0, packsVor - 2)}`);
 await warte(300);
-const einsAdmin = await admin.textContent('#einsaetze');
-pruefe(einsAdmin.includes('von Dennis') && einsAdmin.includes('schwachen Hand') && einsAdmin.includes('Schattendieb stiehlt 2'), 'Admin: Fluch mit Vorteil und Raub unter Eingesetzt');
+const einsAdmin = await admin.textContent('#verlauf li[data-art="e"][data-von="dennis"]');
+pruefe(einsAdmin.includes('schwachen Hand') && einsAdmin.includes('Schattendieb stiehlt 2'), 'Admin: Fluch mit Vorteil und Raub im Verlauf');
 await zu(dennis); await warte(600);
 // Zurücknehmen: die gestohlenen Packs sind zurück
-await admin.click('#einsaetze .del'); await warte(1400);
+await admin.click('#verlauf li[data-art="e"] .zurueck'); await warte(1400);
 pruefe((await fenster(dennis)).includes('gestohlen hat, ist zurück'), 'Rücknahme: Was der Dieb gestohlen hat, ist zurück');
 pruefe(Number(await dennis.textContent('#packsVal')) === packsVor, 'Packs wieder wie vorher');
 await zu(dennis);

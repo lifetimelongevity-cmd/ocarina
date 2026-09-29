@@ -69,6 +69,7 @@ const zu = async p => { for (let i = 0; i < 3; i++) { while (await p.isVisible('
   await ctx.route('**/config.js', async r => { const res = await r.fetch(); r.fulfill({ response: res, body: (await res.text()).replace('typ: "firebase"', 'typ: "lokal"') }); });
   const seite = async url => { const p = await ctx.newPage(); p.on('pageerror', e => fehler.push(url + ': ' + e.message)); await p.goto(BASE + url); await warte(500); return p; };
   const admin = await seite('admin.html?probe'); admin.on('dialog', d => d.accept());
+  await admin.$$eval('details', ds => ds.forEach(d => { d.open = true; }));
   const dennis = await seite('?probe&direkt');
   await admin.click('#szenarien button:has-text("Vor dem Bund")'); await warte(800);
   await zu(dennis);

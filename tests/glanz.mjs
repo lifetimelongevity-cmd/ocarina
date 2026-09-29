@@ -52,6 +52,7 @@ const ctx = await b.newContext({ viewport: { width: 852, height: 393 }, isMobile
 await ctx.route('**/config.js', async r => { const res = await r.fetch(); r.fulfill({ response: res, body: (await res.text()).replace('typ: "firebase"', 'typ: "lokal"') }); });
 const seite = async url => { const p = await ctx.newPage(); p.on('pageerror', e => fehler.push(url + ': ' + e.message)); await p.goto(BASE + url); await warte(500); return p; };
 const admin = await seite('admin.html');
+await admin.$$eval('details', ds => ds.forEach(d => { d.open = true; }));
 admin.on('dialog', d => d.accept());
 await admin.click('#reset'); await warte(300);
 const dennis = await seite('?direkt');
@@ -78,7 +79,7 @@ const moment = await fenster(dennis);
 pruefe(moment.includes('GLANZSIEG') && moment.includes('Zoras Quellstab entpuppt sich als') && moment.includes('Große Wasserpistole'), 'Moment: GLANZSIEG, Zoras Quellstab entpuppt sich als Große Wasserpistole');
 await dennis.screenshot({ path: `${OUT}/glanz-5-moment.png` });
 await warte(400);
-pruefe((await admin.textContent('#dennisListe')).includes('Kartenwurf: Glanzsieg'), 'Admin sieht „Kartenwurf: Glanzsieg“');
+pruefe((await admin.textContent('#verlauf')).includes('Kartenwurf: Glanzsieg'), 'Admin sieht „Kartenwurf: Glanzsieg“');
 pruefe(await admin.getAttribute('#quests li[data-id="kartenwurf"] [data-v="glanz"]', 'aria-pressed') === 'true', 'Admin: Glanzsieg ist gedrückt');
 await admin.screenshot({ path: `${OUT}/glanz-6-admin.png`, fullPage: true });
 await zu(dennis); await warte(1500);
@@ -100,7 +101,7 @@ await dennis.screenshot({ path: `${OUT}/glanz-8-zurueck.png` });
 await zu(dennis); await warte(400);
 pruefe(JSON.stringify(await hier()) === '["pistole_klein","spruchrolle"]', 'Danach leuchtet die kleine Pistole (dazu der Fluch)');
 pruefe(await wasserFeld() === 'pistole_klein', 'Das Feld springt zurück auf die kleine Pistole');
-pruefe((await admin.textContent('#dennisListe')).includes('gilt nicht'), 'Admin: Dennis’ Glanzsieg gilt nicht mehr');
+pruefe((await admin.textContent('#verlauf')).includes('gilt nicht'), 'Admin: Dennis’ Glanzsieg gilt nicht mehr');
 
 // Quest Master bucht den Glanzsieg selbst: Dennis sieht den Moment wieder
 await admin.click('#quests li[data-id="kartenwurf"] [data-v="glanz"]'); await warte(800);
