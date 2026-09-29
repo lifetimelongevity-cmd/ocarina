@@ -34,6 +34,7 @@ async function oeffnen() {
 }
 
 const admin = await seite('admin.html');
+await admin.$$eval('details', ds => ds.forEach(d => { d.open = true; }));
 admin.on('dialog', d => d.accept());
 await admin.click('#reset').catch(() => {});
 const dennis = await seite('?direkt');
@@ -58,7 +59,7 @@ pruefe((await dennis.textContent('#packsVal')) === '2', 'HUD zeigt 2 geschlossen
 pruefe(await dennis.$eval('#packRow', r => r.querySelectorAll('.ic-card.offen').length) === 1, 'HUD: ein geöffnetes Pack hinter den geschlossenen');
 await warte(500);
 pruefe((await admin.textContent('#packs')) === '2' && (await admin.textContent('#packsMax')).includes('1 offen'), 'Admin: 2 Packs, 1 offen');
-pruefe((await admin.textContent('#dennisListe')).includes('Pack geöffnet'), 'Admin sieht „Pack geöffnet“ live');
+pruefe((await admin.textContent('#verlauf')).includes('Pack geöffnet'), 'Admin sieht „Pack geöffnet“ live');
 
 // Die anderen beiden auch öffnen: danach kein Knopf mehr
 await oeffnen(); await zu(dennis);
@@ -83,7 +84,7 @@ pruefe(hinweis.includes('Karten an den Bund: 3') && hinweis.includes('Verpufft')
 await admin.screenshot({ path: `${OUT}/rubine-5-admin.png`, fullPage: true });
 
 // Zurücknehmen: ein Öffnen weg, dann zahlt er einen Pack mehr und eine Karte weniger
-await admin.click('#dennisListe .zurueck'); await warte(1500);
+await admin.click('#verlauf li[data-von="dennis"] .zurueck'); await warte(1500);
 pruefe((await fenster(dennis)).includes('ZURÜCKGENOMMEN'), 'Zurücknehmen des Öffnens: Fee meldet es');
 await zu(dennis);
 pruefe((await admin.textContent('#packsMax')).includes('2 offen') && (await admin.textContent('#kappung')).includes('Karten an den Bund: 2'), 'Nach dem Zurücknehmen: 2 offen, 2 Karten');

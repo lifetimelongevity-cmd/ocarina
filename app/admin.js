@@ -170,15 +170,14 @@
   /* ---------- Aufbau ---------- */
   function build() {
     $("#packsMax").textContent = "/ " + C.waehrung.max;
-    $("#total").textContent = "/ " + reihe.length;
+    $("#total").textContent = " / " + reihe.length;
 
     const list = $("#quests");
     reihe.forEach(q => {
       const li = document.createElement("li");
       li.dataset.id = q.id;
       li.innerHTML = `
-        <div class="q-head"><span class="q-nr">${q.nr}</span><span class="q-name">${esc(q.name)}</span><span class="badge ${q.typ}">${typWort(q)}</span><span class="badge jetzt" hidden>Jetzt</span></div>
-        <div class="q-fx">${esc(q.ort)} · ${fxHtml(q)}</div>
+        <div class="q-head"><span class="q-nr">${q.nr}</span><span class="q-name">${esc(q.name)}</span><span class="badge jetzt" hidden>Jetzt</span></div>
         <div class="seg${q.glanz ? " vier" : ""}" role="group" aria-label="Status ${esc(q.name)}">
           <button type="button" data-v="offen">Offen</button>
           <button type="button" data-v="bestanden">Bestanden</button>
@@ -245,8 +244,8 @@
 
     const s = C.speicher;
     $("#storageInfo").textContent = s.typ === "firebase" && s.databaseURL
-      ? `Speicher: Firebase, Spiel „${s.spielId}“. ${key ? "Schreibschlüssel ist gesetzt." : "Kein Schreibschlüssel gesetzt."}`
-      : "Speicher: nur dieses Gerät (Testmodus). Dennis' Ansicht sieht Änderungen nur im selben Browser.";
+      ? `Firebase, Spiel „${s.spielId}“, ${key ? "mit" : "ohne"} Schreibschlüssel.`
+      : "Nur dieses Gerät (Testmodus).";
   }
 
   /* ---------- Probelauf (admin.html?probe) ---------- */
@@ -348,33 +347,7 @@
       buy.appendChild(bu);
     });
 
-    const ledger = $("#ledger");
-    ledger.innerHTML = "";
-    if (!mdoc.buchungen.length) ledger.innerHTML = '<li class="empty">Noch keine Buchungen.</li>';
-    mdoc.buchungen.slice().reverse().forEach(b => {
-      const li = document.createElement("li");
-      const amt = Number(b.packs) || 0;
-      li.innerHTML = `<span class="amt ${amt >= 0 ? "plus" : "minus"}">${amt > 0 ? "+" : amt < 0 ? "−" : ""}${Math.abs(amt)}</span><span class="why"></span><button type="button" class="del" aria-label="Buchung löschen">✕</button>`;
-      li.querySelector(".why").textContent = (b.grund || "") + (b.item ? ` (${b.menge > 0 ? "+" : ""}${b.menge} ${itemById(b.item)?.name || b.item})` : "") + (b.von === "dennis" ? " · von Dennis" : "");
-      li.querySelector(".del").addEventListener("click", () => b.von === "dennis"
-        ? commit(() => {}, "Zurückgenommen: " + b.grund, { dennis: [b.id] })
-        : commit(d => { d.buchungen = d.buchungen.filter(x => x.id !== b.id); }, "Buchung gelöscht"));
-      ledger.appendChild(li);
-    });
-
-    const eins = $("#einsaetze");
-    eins.innerHTML = "";
-    if (!mdoc.einsaetze.length) eins.innerHTML = '<li class="empty">Noch nichts eingesetzt.</li>';
-    mdoc.einsaetze.slice().reverse().forEach(e => {
-      const li = document.createElement("li");
-      li.innerHTML = `<span class="why"></span><button type="button" class="del" aria-label="Einsatz rückgängig">✕</button>`;
-      const it = itemById(e.item);
-      li.querySelector(".why").textContent = `${it?.name || e.item} bei ${questById(e.quest)?.name || e.quest}${it && it.dieb ? fluchFolgen(e) : ""}${e.von === "dennis" ? " · von Dennis" : ""}`;
-      li.querySelector(".del").addEventListener("click", () => e.von === "dennis"
-        ? commit(() => {}, "Einsatz zurückgenommen", { dennis: [e.id] })
-        : commit(d => { d.einsaetze = d.einsaetze.filter(x => x.id !== e.id); }, "Einsatz rückgängig"));
-      eins.appendChild(li);
-    });
+    renderVerlauf();
 
     document.querySelectorAll("#items li").forEach(li => {
       const id = li.dataset.id, st = state.items[id];
@@ -390,9 +363,8 @@
   function renderNext() {
     const n = state.next ? questById(state.next) : null;
     $("#nextCard").classList.toggle("all-done", !n);
-    $("#nextEyebrow").textContent = n ? `Nächste Quest · Nr. ${n.nr} · ${typWort(n)}` : "Geschafft";
     $("#nextTitle").textContent = n ? n.name : "Alle Quests erledigt";
-    $("#nextMeta").textContent = n ? `${n.ort} · ${n.text}` : "Jetzt das Kästchen öffnen.";
+    $("#nextMeta").textContent = n ? `${typWort(n)} ${n.nr} · ${n.ort}` : "Jetzt das Kästchen öffnen.";
     $("#nextQm").textContent = n && n.qm ? n.qm : "";
     $("#nextFx").innerHTML = n ? fxHtml(n) : "";
     $("#nextGlanz").hidden = !(n && n.glanz);
@@ -407,13 +379,13 @@
       const siege = liste.filter(d => d.ergebnis === "sieg").length, nied = liste.filter(d => d.ergebnis === "niederlage").length;
       const noetig = Math.floor(liste.length / 2) + 1;
       const rat = siege >= noetig ? "Genug Siege: Bestanden buchen." : nied >= noetig ? "Zu viele Niederlagen: Verloren buchen." : `Stand ${siege} : ${nied}. Nötig: ${noetig} Siege.`;
-      const tor = state.tor ? `<p class="hint tor">Tor zum Gipfel: Es fehlt noch ${state.tor.fehlend.map(z => "Ziffer " + z).join(" und ")}. Dennis holt sie für ${C.ziffer_preis} Packs, mit Rikes Segen oder per Bußprüfung (du bestimmst sie). Du kannst sie unter „Packs buchen“ auch selbst buchen.</p>` : "";
-      duels.innerHTML = tor + `<p class="sub-h">Die ${liste.length} Duelle</p><ol class="duel-list">${liste.map(d => `
+      const tor = state.tor ? `<p class="hint tor">Tor zum Gipfel: Es fehlt noch ${state.tor.fehlend.map(z => "Ziffer " + z).join(" und ")}. Dennis holt sie für ${C.ziffer_preis} Packs, mit Rikes Segen oder per Buße. Selbst buchen unter „Buchen“.</p>` : "";
+      duels.innerHTML = tor + `<p class="sub-h">Duelle</p><ol class="duel-list">${liste.map(d => `
         <li><span class="d-name">${esc(questById(d.quest).name)} <small>${d.art === "revanche" ? "Revanche" : "aufgefüllt"}</small></span>
           <span class="seg two" role="group" aria-label="Duell ${d.nr}">
             <button type="button" data-nr="${d.nr}" data-v="sieg" aria-pressed="${d.ergebnis === "sieg"}">Sieg</button>
             <button type="button" data-nr="${d.nr}" data-v="niederlage" aria-pressed="${d.ergebnis === "niederlage"}">Niederlage</button>
-          </span></li>`).join("")}</ol><p class="hint">${rat} Schild: verlorenes Duell auf offen stellen und neu spielen.</p>`;
+          </span></li>`).join("")}</ol><p class="hint">${rat}</p>`;
       duels.querySelectorAll("button").forEach(b => b.addEventListener("click", () => {
         const nr = b.dataset.nr, v = b.dataset.v;
         const an = state.duelle[nr] === v;
@@ -422,7 +394,7 @@
     }
     const lb = $("#nextLogbuch");
     lb.hidden = !(n && n.logbuch);
-    if (n && n.logbuch) lb.innerHTML = `<p class="sub-h">Dennis' Antworten (live)</p>` + logbuchHtml();
+    if (n && n.logbuch) lb.innerHTML = `<p class="sub-h">Dennis' Antworten</p>` + logbuchHtml();
   }
 
   function renderLauf() {
@@ -443,8 +415,7 @@
         knoepfe += `<button type="button" class="btn ghost" data-a="offen">Nicht gestartet</button>`;
       }
       return `<div class="lauf-q" data-id="${q.id}">
-        <div class="q-head"><span class="q-nr">${q.nr}</span><span class="q-name">${esc(q.name)}</span><span class="badge st-${st}">${STATUS_WORT[st]}</span>${q.zaehler && st !== "offen" ? `<span class="badge">${state.treffer[q.id]} ${esc(q.zaehler.name)}</span>` : ""}</div>
-        <div class="q-fx">${fxHtml(q)}</div>
+        <div class="q-head"><span class="q-name">${esc(q.name)}</span><span class="badge st-${st}">${STATUS_WORT[st]}</span>${q.zaehler && st !== "offen" ? `<span class="badge">${state.treffer[q.id]} ${esc(q.zaehler.name)}</span>` : ""}</div>
         ${q.qm ? `<p class="qm">${esc(q.qm)}</p>` : ""}
         <div class="chips">${knoepfe}</div>
         ${st === "laeuft" ? `<div class="use">${useHtml(q.id)}</div>` : ""}
@@ -478,7 +449,7 @@
   function renderLogbuch() {
     $("#lbList").outerHTML = `<ol class="lb-list" id="lbList">${logbuchHtml().replace(/^<ol class="lb-list">|<\/ol>$/g, "")}</ol>`;
     const n = state.next ? questById(state.next) : null;
-    if (n && n.logbuch) $("#nextLogbuch").innerHTML = `<p class="sub-h">Dennis' Antworten (live)</p>` + logbuchHtml();
+    if (n && n.logbuch) $("#nextLogbuch").innerHTML = `<p class="sub-h">Dennis' Antworten</p>` + logbuchHtml();
   }
 
   store.onStatus(st => {
@@ -509,20 +480,48 @@
     if (art === "d") return !doc.duelle[rest] || doc.duelle[rest] === e.ergebnis;
     return true;
   }
-  function renderDennis() {
-    const liste = $("#dennisListe"), keys = Object.keys(eintraege).sort((a, b) => (eintraege[b].zeit || 0) - (eintraege[a].zeit || 0));
-    liste.innerHTML = keys.length ? "" : '<li class="empty">Noch nichts eingetragen.</li>';
-    keys.forEach(k => {
-      const e = eintraege[k], li = document.createElement("li");
-      const zeit = e.zeit ? new Date(e.zeit).toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" }) : "";
-      li.innerHTML = `<span class="amt zeit">${zeit}</span><span class="why"></span><button type="button" class="btn ghost zurueck">Zurücknehmen</button>`;
-      li.querySelector(".why").textContent = eintragText(k, e) + (eintragGilt(k, e) ? "" : " · gilt nicht, du hast anders gebucht");
-      li.querySelector(".zurueck").addEventListener("click", () => commit(() => {}, "Zurückgenommen: " + eintragText(k, e), { dennis: [k] }));
+  /* Ein Verlauf für alles, neuestes oben: Dennis' Einträge (Zurücknehmen, die Fee sagt es ihm) und deine eigenen
+     Buchungen, Einsätze und Ergebnisse (Löschen). data-art wie der Schlüssel der Einträge: q, e, d, s, z, o, b (Buchung). */
+  function renderVerlauf() {
+    const zeilen = [];
+    Object.entries(eintraege).forEach(([k, e]) => zeilen.push({
+      zeit: e.zeit || 0, art: k[0], von: "dennis", text: eintragText(k, e) + (eintragGilt(k, e) ? "" : " · gilt nicht, du hast anders gebucht"),
+      weg: () => commit(() => {}, "Zurückgenommen: " + eintragText(k, e), { dennis: [k] })
+    }));
+    doc.buchungen.filter(b => b.von !== "dennis").forEach(b => {
+      const n = Number(b.packs) || 0;
+      zeilen.push({
+        zeit: b.zeit || 0, art: "b", von: "qm", text: `${n > 0 ? "+" : n < 0 ? "−" : ""}${n ? Math.abs(n) + " " : ""}${b.grund || ""}${b.item ? ` (${b.menge > 0 ? "+" : ""}${b.menge} ${itemById(b.item)?.name || b.item})` : ""}`,
+        weg: () => commit(d => { d.buchungen = d.buchungen.filter(x => x.id !== b.id); }, "Buchung gelöscht")
+      });
+    });
+    doc.einsaetze.filter(e => e.von !== "dennis").forEach(e => {
+      const it = itemById(e.item);
+      zeilen.push({
+        zeit: e.zeit || 0, art: "e", von: "qm", text: `${it?.name || e.item} bei ${questById(e.quest)?.name || e.quest}${it && it.dieb ? fluchFolgen(e) : ""}`,
+        weg: () => commit(d => { d.einsaetze = d.einsaetze.filter(x => x.id !== e.id); }, "Einsatz gelöscht")
+      });
+    });
+    Object.entries(doc.quests).filter(([, st]) => ENTSCHIEDEN.includes(st)).forEach(([id, st]) => {
+      const q = questById(id);
+      if (!q) return;
+      zeilen.push({ zeit: doc.zeiten[id] || 0, art: "q", von: "qm", text: `${q.name}: ${doc.glanz[id] ? "Glanzsieg" : STATUS_WORT[st]}`, weg: () => setQuest(id, "offen") });
+    });
+    zeilen.sort((a, b) => b.zeit - a.zeit);
+    const liste = $("#verlauf");
+    liste.innerHTML = zeilen.length ? "" : '<li class="empty">Noch nichts passiert.</li>';
+    zeilen.forEach(z => {
+      const li = document.createElement("li");
+      li.dataset.art = z.art; li.dataset.von = z.von;
+      const zeit = z.zeit ? new Date(z.zeit).toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" }) : "";
+      li.innerHTML = `<time>${zeit}</time><span class="why"></span><button type="button" class="btn ghost zurueck">${z.von === "dennis" ? "Zurücknehmen" : "Löschen"}</button>`;
+      li.querySelector(".why").textContent = z.text;
+      li.querySelector(".zurueck").addEventListener("click", z.weg);
       liste.appendChild(li);
     });
   }
 
-  function neuRechnen() { mdoc = E.mitEintraegen(C, doc, eintraege); state = E.derive(C, mdoc); render(); renderDennis(); }
+  function neuRechnen() { mdoc = E.mitEintraegen(C, doc, eintraege); state = E.derive(C, mdoc); render(); }
   build();
   let einGelesen = false;
   einStore.subscribe(e => {

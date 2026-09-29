@@ -35,6 +35,7 @@ async function siegel(p, sel, erwartet, text) {
 }
 
 const admin = await seite('admin.html');
+await admin.$$eval('details', ds => ds.forEach(d => { d.open = true; }));
 admin.on('dialog', d => d.accept());
 await admin.click('#reset'); await warte(300);
 const dennis = await seite('?direkt');
@@ -110,7 +111,7 @@ const code = await dennis.$$eval('#tumblers .tumbler', els => els.map(e => e.tex
 pruefe(code === C.code.join(''), 'Code vollständig: ' + code);
 const inv = await admin.textContent('#inv');
 pruefe(['Spritze', 'Kleine Pistole', 'Große Pistole', 'Kreisel', 'Stich', 'Dicke Nadel', 'Schild', 'Segen'].every(x => inv.includes(x)) && !inv.includes('Nakama') && !inv.includes('Stopfnadel'), 'Admin-Inventar: alle drei Wasserwaffen, Kreisel, Stich, dicke Nadel, Schild, Rikes Segen, kein Nakama-Ruf, keine Stopfnadel (Wirbel verloren)');
-const liste = await admin.textContent('#dennisListe');
+const liste = await admin.textContent('#verlauf');
 pruefe(liste.includes('Kartenwurf: Glanzsieg') && !liste.includes('gilt nicht'), 'Admin: alle Einträge von Dennis gelten, Kartenwurf als Glanzsieg');
 await dennis.click('#hudNext'); await warte(400);
 await dennis.screenshot({ path: `${OUT}/durchlauf-2-kaestchen.png` });

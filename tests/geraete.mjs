@@ -258,6 +258,7 @@ for (const g of GERAETE) {
   admin.on('pageerror', e => fehler.push('admin: ' + e.message));
   await admin.setViewportSize({ width: 390, height: 844 });
   await admin.goto(BASE + 'admin.html');
+  await admin.$$eval('details', ds => ds.forEach(d => { d.open = true; }));
   admin.on('dialog', d => d.accept());
   await admin.click('#reset'); await admin.click('#resetLb'); await admin.waitForTimeout(300);
   // Dennis beantwortet zwei Fragen im Log-Buch
