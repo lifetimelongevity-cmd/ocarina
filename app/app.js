@@ -109,7 +109,7 @@
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 
   let state = null, lastDoc = null, syncInfo = { online: true }, antworten = {}, adminDoc = null, eintraege = {};
-  let page = START_PAGE, angle = START_PAGE * 120, flatTimer = null;
+  let page = START_PAGE, flatTimer = null, drehung = [];
   const sel = { 0: null, 1: null, 2: null };  // Auswahl je Seite: Station, Quest, Item
   let followNext = true;                        // Quest-Seite folgt der nächsten Quest, bis Dennis selbst etwas antippt
   let followHier = true;                        // Karte zeigt die Station der nächsten Quest, bis Dennis eine andere antippt
@@ -1335,11 +1335,10 @@
     });
   }
 
-  /* ---------- Navigation: drei Seiten, Drehung um 120° ---------- */
-  // Abstand jeder Seite zur Drehachse = Breite / (2 · tan 60°), in px gesetzt
-  const setApo = () => document.documentElement.style.setProperty("--apo", ($(".stage").clientWidth * 0.288675).toFixed(1) + "px");
-  new ResizeObserver(setApo).observe($(".stage"));
-  setApo();
+  /* ---------- Navigation: drei Seiten, Z und R drehen weiter ---------- */
+  // Seit 30.09. ohne 3D (ließ das Galaxy S24 hängen, Teile blieben schwarz): Die alte Seite gleitet hinaus, die neue von
+  // der anderen Seite herein, in Stufen wie vorher. Nur verschieben und abdunkeln, das rechnet die Grafik allein.
+  // Kein Stauchen: Bei fast null Breite malt Chrome Ebenen auf das Zehnfache aufgebläht.
   function setActiveFace() {
     document.querySelectorAll(".face").forEach(f => {
       const on = +f.dataset.page === page;
@@ -1352,23 +1351,29 @@
   function goTo(target, dir) {
     if (target === page) return;
     if (!dir) dir = (target - page + 3) % 3 === 1 ? 1 : -1;
-    const cube = $("#menuCube");
+    const face = n => document.querySelector(`.face[data-page="${n}"]`);
+    const alt = face(page), neu = face(target);
+    // Eine laufende Drehung (schnelles Tippen) sofort beenden, dann die neue starten
+    drehung.forEach(a => a.cancel()); drehung = [];
+    document.querySelectorAll(".face.geht").forEach(f => f.classList.remove("geht"));
     $("#game").classList.add("dreht");
-    cube.style.transition = "none";
-    cube.classList.remove("flat");
-    cube.style.transform = `translateZ(calc(-1 * var(--apo))) rotateY(${-angle}deg)`;
-    void cube.offsetWidth;
-    angle += dir * 120;
-    cube.style.transition = "";
-    cube.style.transform = `translateZ(calc(-1 * var(--apo))) rotateY(${-angle}deg)`;
     page = target;
     setActiveFace();
+    if (!STILL.matches && alt.animate) {
+      alt.classList.add("geht");
+      const art = { duration: 430, easing: "steps(9, end)", fill: "both" }, weit = dir * 115;
+      drehung = [
+        alt.animate([{ transform: "translateX(0)", opacity: 1 }, { transform: `translateX(${-weit}%)`, opacity: .3 }], art),
+        neu.animate([{ transform: `translateX(${weit}%)`, opacity: .3 }, { transform: "translateX(0)", opacity: 1 }], art)
+      ];
+    }
     if (coachZu) coachZu();                       // R im Rundgang angetippt: Hinweise zu, weiter geht es auf der neuen Seite
     if (page !== 0) schliesseStationstafel();
     tone("move");
     clearTimeout(flatTimer);
     flatTimer = setTimeout(() => {
-      cube.classList.add("flat");
+      drehung.forEach(a => a.cancel()); drehung = [];
+      alt.classList.remove("geht");
       $("#game").classList.remove("dreht");
       if (page === 1) { const row = document.querySelector(".q-row.is-selected"); if (row) scrollIntoList(row); }
       if (page === 2 && $("#overlay").hidden) { if (!onboarded()) onboarding(); else funde(); }
@@ -2300,18 +2305,13 @@
   })();
   introFx.start();
 
-  // Vorwärmen (28.09.): Solange der Startbildschirm alles verdeckt, die Karte einmal kurz im Raum aufbauen. Dann liegen
-  // Bilder, Symbole und Ebenen schon bereit, und das erste Drehen zur Karte hängt nicht. Unsichtbar, dauert zwei Bilder.
+  // Vorwärmen (28.09.): Solange der Startbildschirm alles verdeckt, alle Seiten einmal kurz zeigen. Dann liegen
+  // Bilder, Symbole und Ebenen schon bereit, und das erste Blättern zur Karte hängt nicht. Unsichtbar, dauert zwei Bilder.
   setTimeout(() => {
     if (intro.hidden) return;
     const cube = $("#menuCube");
-    cube.style.transition = "none";
-    cube.style.transform = `translateZ(calc(-1 * var(--apo))) rotateY(${-(angle - 120)}deg)`;
-    cube.classList.remove("flat");
-    requestAnimationFrame(() => requestAnimationFrame(() => {
-      if (!cube.classList.contains("flat") && !$("#game").classList.contains("dreht")) cube.classList.add("flat");
-      cube.style.transition = "";
-    }));
+    cube.classList.add("warm");
+    requestAnimationFrame(() => requestAnimationFrame(() => cube.classList.remove("warm")));
   }, 1200);
 
   const fsBtn = $("#fullscreenToggle");
