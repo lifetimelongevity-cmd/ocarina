@@ -249,6 +249,18 @@
         </div>
       </div>
     </div>
+    <!-- Die Fee meldet sich im Tagebuch (30.09.): Ist Rikes Antwort auf Frage 1 vorbei, fliegt sie herbei und macht daraus
+         eine Quest. Aussehen wie der Prolog (app.js, Abschnitt Fee im Tagebuch) -->
+    <section class="fee-ruf" id="feeRuf" hidden aria-label="Die Fee">
+      <div class="prolog-stage">
+        <img class="prolog-fee" src="assets/fee.png" alt="" draggable="false">
+        <div class="prolog-bild" id="frBild" aria-hidden="true"></div>
+      </div>
+      <div class="prolog-box textbox" id="frBox" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="frText">
+        <p class="prolog-text" id="frText"></p>
+        <span class="result-more" aria-hidden="true">▼</span>
+      </div>
+    </section>
 
     <!-- Siegel: Dennis besiegelt selbst (Ergebnis, Einsatz, Duell, Amulett, Ziffer). Gedrückt halten, bis der Ring zu ist (app.js, Abschnitt Siegel). -->
     <div class="schwur" id="schwur" hidden>

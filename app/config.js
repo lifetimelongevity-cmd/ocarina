@@ -268,10 +268,17 @@
     /* Log-Buch (Quest 1, für Dennis „Rikes Tagebuch“): Rike beantwortet sieben Fragen über Dennis per Sprachnachricht.
        Dennis tippt in ein bis drei Worten, was sie gesagt hat, besiegelt es, dann spielt ihre Antwort.
        Fragen festgelegt am 26.09. Wie Rike sie gestellt bekommt: app/assets/logbuch/LIESMICH.md.
-       Dateien: app/assets/logbuch/frage1.m4a bis frage7.m4a. Fehlt eine, spielt die App einen Platzhalter-Klang. */
+       Dateien: app/assets/logbuch/frage1.m4a bis frage7.m4a. Fehlt eine, spielt die App einen Platzhalter-Klang.
+       fee: Die Fee meldet sich, sobald Rikes Antwort vorbei ist (30.09., Wunsch des Nutzers): am Ende der Nachricht,
+            spätestens wenn Dennis weiterblättert oder das Tagebuch schließt. Sie fliegt herbei und macht aus der Antwort
+            eine Quest. Satz 1 spricht sie allein, bei Satz 2 erscheint das Medaillon der Quest (quest), bei Satz 3
+            verschwindet es im Nebel. Den Namen der Quest sagt sie nicht. Sie kommt einmal, gleich nach dem Besiegeln
+            (nach „Tagebuch leeren“ oder „Alles zurücksetzen“ wieder). */
     logbuch: {
       fragen: [
-        { frage: "Was kannst du laut Rike überhaupt nicht?",                                       audio: "assets/logbuch/frage1.m4a" },
+        // Rike: „Geduldssachen, so was wie einen Faden durchs Nadelöhr einfädeln.“ Daraus wird Rikes Rache.
+        { frage: "Was kannst du laut Rike überhaupt nicht?",                                       audio: "assets/logbuch/frage1.m4a",
+          fee: { quest: "rache", saetze: ["Interessant … Nicht mal einen Faden durchs Nadelöhr?", "Dann machen wir daraus doch direkt eine Quest!", "Sie wartet im Nebel auf dich."] } },
         { frage: "Womit bringst du Rike auf die Palme?",                                           audio: "assets/logbuch/frage2.m4a" },
         { frage: "Was ist laut Rike deine ulkigste Eigenart?",                                     audio: "assets/logbuch/frage3.m4a" },
         { frage: "Was hast du bei eurem ersten Treffen gesagt oder getan, das Rike nie vergisst?", audio: "assets/logbuch/frage4.m4a" },

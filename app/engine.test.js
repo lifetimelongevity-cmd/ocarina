@@ -40,6 +40,13 @@ assert.strictEqual(reihe.map(q => q.id).indexOf("rache"), reihe.map(q => q.id).i
 assert.deepStrictEqual(reihe.filter(q => q.win && q.win.packs).map(q => q.win.packs), [1, 2, 2, 3, 3, 4, 5], "Siege steigen mit dem Weg");
 assert.deepStrictEqual(reihe.filter(q => q.win && q.win.ziffer).map(q => q.win.ziffer).sort(), [1, 2, 3, 4], "jede Ziffer genau einmal");
 assert.strictEqual(config.logbuch.fragen.length, 7);
+// Die Fee im Tagebuch (30.09.): Sie macht aus einer Antwort eine Prüfung, die später kommt, und nennt sie nicht beim Namen
+config.logbuch.fragen.filter(f => f.fee).forEach(f => {
+  const q = config.quests.find(x => x.id === f.fee.quest);
+  assert.ok(f.fee.saetze.length && (!f.fee.quest || (q && q.typ === "kern" && reihe.indexOf(q) > 0)), "Fee im Tagebuch: Sätze und eine spätere Prüfung");
+  assert.ok(f.fee.saetze.every(t => !config.quests.some(x => t.includes(x.name))), "Fee im Tagebuch: keine Quest beim Namen");
+});
+assert.strictEqual(config.logbuch.fragen[0].fee.quest, "rache", "Rikes Antwort auf Frage 1 wird zu Rikes Rache");
 // Jedes erspielbare Item wird irgendwo gewonnen und irgendwo eingesetzt
 config.items.filter(i => !config.startitems.includes(i.id)).forEach(it => {
   const quelle = config.quests.some(q => [q.win, q.glanz].some(e => e && (e.items || []).includes(it.id)) || (q.zaehler && (q.zaehler.proTreffer.items || []).includes(it.id)));

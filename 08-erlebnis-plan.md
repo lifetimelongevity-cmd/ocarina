@@ -720,3 +720,18 @@ Frage vom 29.09.: Dennis macht die erste Aufgabe am Freitag im Zug, die anderen 
 - **Warum nicht GPS:** Es wäre genau genug gewesen (Stationen 500 m bis 2 km auseinander, Handy-GPS 5 bis 30 m, im Wald bis 60 m), aber die Stellen der Stationen sind geschätzt, GPS läuft nur bei offener App und nur mit Erlaubnis, und ein Tor, das manchmal nicht aufgeht, wäre am Berg ärgerlicher als ein Knopf.
 - **Geprüft:** `node app/engine.test.js`, `tests/freigabe.mjs` (neu), alle anderen Tests geben die Quests per Helfer frei.
 
+## 18. Die Fee im Tagebuch: Rikes Antwort wird zur Quest (umgesetzt am 30.09.)
+
+Wunsch des Nutzers: Rike sagt in ihrer Sprachnachricht zu Frage 1, dass Dennis Geduldssachen überhaupt nicht kann, so etwas wie einen Faden durchs Nadelöhr einfädeln. Hat Dennis das gehört, soll die Fee kommen: „Interessant, dann machen wir das doch direkt zur nächsten Quest.“ So spürt er schon im Zug, dass das Spiel auf Rike hört, und am Samstag holt ihn Rikes Rache ein.
+
+- **Wann:** Frage 1 ist besiegelt und Rikes Nachricht läuft bis zum Ende, gut eine halbe Sekunde später kommt die Fee. Tippt Dennis vorher WEITER oder ✕, kommt sie sofort (Rike verstummt), danach geht es weiter, wohin er wollte. Hört er Rike noch einmal, kommt sie nicht wieder. Wer Frage 1 neu beantwortet (Tagebuch leeren, Alles zurücksetzen), sieht sie wieder. Blockt das Handy die Wiedergabe („RIKE · TIPP AUF ▶“), wartet sie, bis er Rike wirklich gehört hat oder weiterblättert.
+- **Wie:** wie der Prolog, über dem Tagebuch, das dunkel durchscheint. Die Fee fliegt herein (Zauberklang), dann spricht sie in der Textbox, Buchstabe für Buchstabe, Tippen blättert. Tipps, während sie noch heranfliegt, zählen nicht (etwa ein zweiter Tipp auf WEITER).
+  1. „Interessant … Nicht mal einen Faden durchs Nadelöhr?“ Nur die Fee.
+  2. „Dann machen wir daraus doch direkt eine Quest!“ Das Medaillon von Rikes Rache (Nadel mit Herzfaden) dreht sich herein, Strahlen in Karmin, Fanfare wie bei jeder neuen Quest.
+  3. „Sie wartet im Nebel auf dich.“ Nebel zieht darüber, übrig bleibt das verdeckte Medaillon mit „?“, wie in der Quest-Liste.
+  Letzter Tipp: Sie fliegt davon. Am Laptop blättert Enter, Esc lässt sie gleich davonfliegen.
+- **„Direkt eine Quest“ statt „die nächste Quest“:** Als Nächstes kommt Die drei Zeichen an der Talstation. Rikes Rache bleibt an der Mittelstation, weil Dennis die Nadeln vorher im Wirbel und am Deku-Baum gewinnen kann. Darum wartet sie im Nebel. Den Namen sagt die Fee nicht (der Nebel verrät nichts).
+- **Technik:** Sätze und Quest in `config.js` (`logbuch.fragen[0].fee`, Satz 1 allein, bei Satz 2 das Medaillon, bei Satz 3 der Nebel). `feeRuf` und `feeKommt()` in `app.js`, `#feeRuf` in `index.html`, Stile wie der Prolog. Gemerkt wird nichts auf dem Handy: Die Fee hängt am frischen Besiegeln.
+- **Idee für später:** Wird Rikes Rache an der Mittelstation freigegeben, erinnert die Fee daran („Erinnerst du dich, was Rike im Zug über dich gesagt hat?“, Vorschlag aus `07-spiele-und-items.md`).
+- **Geprüft:** `node app/engine.test.js` (die Fee zeigt auf eine spätere Prüfung und nennt keinen Namen), neu `tests/fee.mjs` (alle Wege, Tastatur), `tests/geraete.mjs` mit Bild und Layout-Prüfung auf allen Geräten, angepasst `selbst.mjs`, `durchlauf.mjs`, `neustart.mjs`.
+

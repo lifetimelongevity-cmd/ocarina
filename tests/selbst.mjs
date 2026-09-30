@@ -41,7 +41,11 @@ await frei();
 // Log-Buch: Knöpfe zum Eintragen erst, wenn alle Antworten besiegelt sind
 pruefe(!(await dennis.$('[data-ergebnis]')), 'Log-Buch: kein Ergebnis-Knopf vor den Antworten');
 await dennis.click('[data-logbuch]'); await warte(300);
-for (let i = 0; i < 7; i++) { await dennis.fill('#lbInput', 'Antwort ' + (i + 1)); await dennis.click('#lbSeal'); await warte(250); await dennis.click('#lbNext'); await warte(150); }
+for (let i = 0; i < 7; i++) {
+  await dennis.fill('#lbInput', 'Antwort ' + (i + 1)); await dennis.click('#lbSeal'); await warte(250); await dennis.click('#lbNext'); await warte(150);
+  // Nach Frage 1 macht die Fee aus Rikes Antwort eine Quest (30.09.): durchtippen, bis sie davongeflogen ist
+  for (let k = 0; k < 30 && await dennis.isVisible('#feeRuf'); k++) { await dennis.click('#feeRuf', { timeout: 1500 }).catch(() => {}); await warte(200); }
+}
 await dennis.click('#lbClose'); await warte(300);
 pruefe(await dennis.isVisible('[data-ergebnis="bestanden"]') && await dennis.isVisible('[data-ergebnis="verloren"]'), 'Log-Buch: nach sieben Antworten BESTANDEN und VERLOREN');
 
