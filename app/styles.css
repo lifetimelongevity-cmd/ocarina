@@ -84,7 +84,7 @@ svg { display: block; }
 .hud button { border: 0; background: none; padding: 0; cursor: pointer; }
 .hud-packs { display: flex; align-items: center; gap: 8px; height: 100%; }
 .pack-row { display: grid; gap: 2px; }
-.pack-row svg { width: calc(var(--hud-h) * .36); height: calc(var(--hud-h) * .49); filter: drop-shadow(1px 1px 0 rgba(0,0,0,.8)); }
+.pack-row svg { overflow: visible; width: calc(var(--hud-h) * .36); height: calc(var(--hud-h) * .49); filter: drop-shadow(1px 1px 0 rgba(0,0,0,.8)); }
 .pack-row.two svg { width: calc(var(--hud-h) * .27); height: calc(var(--hud-h) * .37); }
 .pack-row .gain { animation: packGain 900ms steps(6, end) 2; }
 /* Geöffnete Packs (29.09.): blass hinter den geschlossenen */
