@@ -59,12 +59,14 @@
 
   function demoStore() {
     const subs = [];
-    let doc = E.normalize({ ...(DEMO_DOCS[params.get("demo")] || DEMO_DOCS.mitte), stand: Date.now() });
+    // In der Demo gilt die nächste Quest immer als freigegeben (im echten Spiel gibt sie der Quest Master frei)
+    const frei = d => { const k = REIHE.find(q => !["bestanden", "verloren"].includes((d.quests || {})[q.id])); return { ...d, frei: k ? { [k.id]: 1 } : {} }; };
+    let doc = E.normalize(frei({ ...(DEMO_DOCS[params.get("demo")] || DEMO_DOCS.mitte), stand: Date.now() }));
     return {
       get doc() { return doc; },
       subscribe(fn) { subs.push(fn); fn(doc, { initial: true }); },
       onStatus(fn) { fn({ online: true, demo: true }); },
-      save(next) { doc = E.normalize({ ...next, stand: Date.now() }); subs.forEach(fn => fn(doc, {})); }
+      save(next) { doc = E.normalize(frei({ ...next, stand: Date.now() })); subs.forEach(fn => fn(doc, {})); }
     };
   }
   const store = DEMO ? demoStore() : window.QuestStore.create(C);
@@ -348,7 +350,7 @@
 
   /* ---------- Weg auf der Karte ---------- */
   // Je Abschnitt zwischen zwei Stationen eine kubische Kurve (Catmull-Rom), in Koordinaten der Karten-SVG (1000 × 420).
-  // So lassen sich der gegangene Weg, das Laufen und der GPS-Punkt genau auf die Linie legen.
+  // So lassen sich der gegangene Weg und das Laufen genau auf die Linie legen.
   const PUNKTE = STATIONEN.map(s => [s.x * 10, s.y * 4.2]);
   const ABSCHNITTE = PUNKTE.slice(0, -1).map((p1, i) => {
     const p0 = PUNKTE[i - 1] || p1, p2 = PUNKTE[i + 1], p3 = PUNKTE[i + 2] || p2;
@@ -399,14 +401,26 @@
     });
     $("#hudCode").setAttribute("aria-label", "Code des Kästchens: " + s.ziffern.map(v => v == null ? "unbekannt" : v).join(", "));
     const n = s.next ? questById(s.next) : null;
-    $("#hudNext").classList.toggle("done", !n);
-    $("#hudNextName").textContent = !n ? "Zum Kästchen" : n.id === revealPending || blanko ? "?" : n.name;
+    $("#hudNext").classList.toggle("done", s.ende);
+    $("#hudNextName").textContent = s.ende ? "Zum Kästchen" : !n || blanko ? wegText().kurz : n.id === revealPending ? "?" : n.name;
+  }
+
+  /* Die nächste Quest ist noch nicht freigegeben (30.09.): Der Quest Master gibt sie von Hand frei, wenn Dennis an ihrer
+     Station ankommt. Bis dahin sagt das Menü nur, wohin es geht: kurz fürs HUD, als Satz für die Textbox im Nebel. */
+  function wegText() {
+    const k = state.kommt ? questById(state.kommt) : null;
+    if (!k) return { kurz: "Zum Kästchen", lang: "" };
+    const hier = STATIONEN[hierIndex()], ziel = STATIONEN.find(x => x.id === k.station);
+    if (!state.zaehler.erledigt) return { kurz: "Die Reise beginnt bald", lang: "Der Quest Master gibt das Zeichen. Dann beginnt deine erste Quest." };
+    if (ziel && ziel.id !== hier.id) return { kurz: `Weiter ${ziel.zu} ${ziel.name}`, lang: `Der Weg führt weiter ${ziel.zu} ${ziel.name}. Dort zeigt sich die nächste Quest.` };
+    return { kurz: "Gleich geht es weiter", lang: "Die nächste Quest zeigt sich gleich." };
   }
 
   function renderQuests() {
     const verdeckt = REIHE.filter(q => !aufgedeckt(q.id));
     const ungueltig = sel[1] === NEBEL ? !verdeckt.length : !sel[1] || !aufgedeckt(sel[1]);
-    if (followNext || ungueltig) sel[1] = !state.next ? REIHE[REIHE.length - 1].id : aufgedeckt(state.next) ? state.next : NEBEL;
+    // Ohne freigegebene Quest steht der Nebel vorn (am Ende des Tages die letzte Quest). Spielbeginn blanko: auch dann
+    if (followNext || ungueltig) sel[1] = state.next && aufgedeckt(state.next) ? state.next : state.ende ? REIHE[REIHE.length - 1].id : NEBEL;
     document.querySelectorAll(".q-row:not(.nebel)").forEach(b => {
       const q = questById(b.dataset.id), st = state.quests[q.id], isNext = q.id === state.next;
       b.parentElement.hidden = !aufgedeckt(q.id);
@@ -435,7 +449,7 @@
     if (id === NEBEL) {
       card.innerHTML = `
         <div class="qc-head">${coveredMedal()}<div><p class="tb-title">Im Nebel</p></div></div>
-        <p class="tb-text">${blanko ? "Bald geht es los …" : "Zeigt sich, wenn es dran ist."}</p>`;
+        <p class="tb-text">${esc(state.ende || (state.next && !blanko) ? "Zeigt sich, wenn es dran ist." : wegText().lang)}</p>`;
       return;
     }
     const q = questById(id), st = state.quests[id], isNext = id === state.next;
@@ -564,11 +578,12 @@
     if (r.top < l.top + 4 || r.bottom > l.bottom - 4) list.scrollTop += (r.top - l.top) - (l.height - r.height) / 2;
   }
 
-  /* ---------- KARTE: Weg, Dennis läuft, Stationstafel, Höhe und Strecke, GPS ---------- */
-  // Wo Dennis steht: Station der nächsten Quest, am Ende die Hütte. Die Karte zeigt die zuletzt erreichte Station,
-  // bis sie den Weg dorthin einmal gezeigt hat: Dennis läuft, sobald er die Karte ansieht.
+  /* ---------- KARTE: Weg, Dennis läuft, Stationstafel, Höhe und Strecke ---------- */
+  // Wo Dennis steht: Station der nächsten Quest, am Ende die Hütte. Ist die nächste Quest noch nicht freigegeben, steht er
+  // noch an der Station der zuletzt entschiedenen Quest (am Anfang im Zug) und wandert erst mit der Freigabe weiter.
+  // Die Karte zeigt die zuletzt erreichte Station, bis sie den Weg dorthin einmal gezeigt hat: Dennis läuft, sobald er die Karte ansieht.
   const STILL = matchMedia("(prefers-reduced-motion: reduce)");
-  const hierIndex = () => { const nq = state.next ? questById(state.next) : null; return STATIONEN.findIndex(x => x.id === (nq ? nq.station : ZIEL)); };
+  const hierIndex = () => hierIndexFuer(state);
   let kartenHier = null, laufFrame = null;
 
   function renderMap() {
@@ -581,7 +596,7 @@
       const kerne = REIHE.filter(q => q.station === id && q.typ === "kern");
       const sides = REIHE.filter(q => q.station === id && q.typ === "side");
       m.querySelector(".m-medal").innerHTML = id === ZIEL && !kerne.length
-        ? `<span class="m-chest${s.next ? "" : " open"}">${useSvg("i-chest")}</span>`
+        ? `<span class="m-chest${s.ende ? " open" : ""}">${useSvg("i-chest")}</span>`
         : kerne.map(k => aufgedeckt(k.id) ? medalHtml(k, s.quests[k.id], k.id === s.next) : coveredMedal()).join("");
       m.querySelector(".gems").innerHTML = sides.filter(q => aufgedeckt(q.id)).map(q => gemHtml(s.quests[q.id], q.id === s.next)).join("");
       m.classList.toggle("is-selected", id === sel[0]);
@@ -591,10 +606,9 @@
     // Gegangener Weg golden, Nebel über dem Weg ab der Mitte zur nächsten Station
     if (!laufFrame) setzeWeg(pfad(kartenHier));
     const weiter = STATIONEN[kartenHier + 1];
-    $("#mapFog").hidden = !(s.next && weiter);
-    if (s.next && weiter) $("#mapFog").style.left = ((STATIONEN[kartenHier].x + weiter.x) / 2) + "%";
+    $("#mapFog").hidden = !(!s.ende && weiter);
+    if (!s.ende && weiter) $("#mapFog").style.left = ((STATIONEN[kartenHier].x + weiter.x) / 2) + "%";
     renderLegende();
-    renderGpsPunkt();
     if (!$("#stationCard").hidden) renderStationstafel();
     if (page === 0) spieleLauf();
   }
@@ -606,7 +620,7 @@
     const hi = hierIndex(), von = kartenHier;
     if (laufFrame || von === null || hi <= von) return;
     if (page !== 0 || !$("#introScreen").hidden || !$("#overlay").hidden || !$("#prolog").hidden) return;
-    if (STILL.matches || hi - von > 3) { kartenHier = hi; renderMap(); return; }
+    if (STILL.matches || hi - von > 3) { kartenHier = hi; renderMap(); if (revealPending) showNextQuest(); return; }
     const walker = $("#mapWalker"), sheet = $("#mapSheet"), W = sheet.clientWidth, H = sheet.clientHeight;
     const abschnitte = hi - von, dauer = Math.min(2600, 1300 * abschnitte), t0 = performance.now();
     const ease = x => x < .5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2;
@@ -623,7 +637,8 @@
       walker.hidden = true; sheet.classList.remove("walking");
       renderMap();
       melody("plus");
-      kartenHinweis();
+      // Nach einer Freigabe: angekommen, jetzt tritt die Quest aus dem Nebel
+      if (revealPending) showNextQuest(); else kartenHinweis();
     };
     laufFrame = requestAnimationFrame(schritt);
   }
@@ -698,16 +713,13 @@
       + `<div class="sc-rows">${zeilen.join("")}</div>`;
   }
 
-  /* Kartusche: Höhe, Strecke bis zum Gipfel und das Höhenprofil des echten Wegs (weg.js, config.karte.weg) */
+  /* Kartusche: Höhe, Strecke bis zum Gipfel und das Höhenprofil des echten Wegs (weg.js, config.karte.weg).
+     GPS gab es bis 30.09. (Feenlicht am Weg), gestrichen: Die Station wechselt nur mit der Freigabe des Quest Masters. */
   const WEG = window.QuestWeg ? window.QuestWeg.aufbauen(C.karte) : null;
-  const GPS_KEY = "dq-gps" + (PROBE ? "-probe" : "");
-  const gps = { an: false, watch: null, lage: null, genau: null, hinweis: "" };
-  try { gps.an = localStorage.getItem(GPS_KEY) === "1"; } catch (_) {}
   let profilY = null;
 
   function buildLegende() {
     if (!WEG) { $("#mapLegend").hidden = true; return; }
-    if (!("geolocation" in navigator)) $("#gpsBtn").hidden = true;
     const hs = WEG.weg.map(p => p[2]), lo = Math.min(...hs) - 25, top = Math.max(WEG.ziel.hoehe, ...hs) + 12;
     const X = s => s / WEG.laenge * 200;
     profilY = h => 40 - (h - lo) / (top - lo) * 38;
@@ -717,7 +729,6 @@
     // Stationen als Rauten auf dem Profil, dazu der Punkt, wo Dennis gerade ist
     $("#mlProfil").insertAdjacentHTML("beforeend", STATIONEN.filter(st => WEG.station[st.id]).map(st =>
       `<i class="p-st" data-station="${st.id}" style="left:${X(WEG.station[st.id].s) / 2}%;top:${profilY(WEG.station[st.id].hoehe) / 40 * 100}%"></i>`).join("") + `<i class="p-du" id="mlDu"></i>`);
-    $("#gpsBtn").addEventListener("click", e => { e.stopPropagation(); gpsUmschalten(); });
   }
 
   function renderLegende() {
@@ -725,21 +736,11 @@
     let wert, wo, rest, s = null;
     const hi = kartenHier ?? hierIndex(), st = STATIONEN[hi], w = WEG.station[st.id];
     const bisGipfel = (s, h) => s >= WEG.ziel.s - 40 ? "Gipfel erreicht." : `Noch ${km(WEG.ziel.s - s)} · ${zahl(Math.max(0, WEG.ziel.hoehe - h))} Hm bis zum Gipfel`;
-    if (gps.an && gps.lage) {
-      const { abstand, luft } = gps.lage;
-      if (abstand <= 250) { s = gps.lage.s; const h = WEG.hoeheBei(s); wert = meter(h); wo = gps.genau > 60 ? `GPS ±${Math.round(gps.genau)} m` : "GPS"; rest = bisGipfel(s, h); }
-      else if (luft > 2000) { wert = km(luft); wo = "Luftlinie"; rest = `bis zum ${C.karte.start}`; }
-      else { wert = meter(abstand); wo = "neben dem Weg"; rest = "Die Karte zeigt dich nur am Weg."; }
-    } else if (w) { s = w.s; wert = meter(w.hoehe); wo = st.name; rest = bisGipfel(w.s, w.hoehe); }
+    if (w) { s = w.s; wert = meter(w.hoehe); wo = st.name; rest = bisGipfel(w.s, w.hoehe); }
     else { wert = km(WEG.ziel.s); wo = "am Samstag"; rest = `${zahl(WEG.ziel.hoehe - WEG.hoeheBei(0))} Hm vom ${C.karte.start} zum Gipfel`; }
-    if (gps.an && !gps.lage) rest = "GPS sucht dich …";
-    if (gps.hinweis) rest = gps.hinweis;
     $("#mlWert").textContent = wert;
     $("#mlWo").textContent = wo;
     $("#mlRest").textContent = rest;
-    const b = $("#gpsBtn");
-    b.setAttribute("aria-pressed", String(gps.an));
-    b.classList.toggle("sucht", gps.an && !gps.lage);
     document.querySelectorAll("#mlProfil .p-st").forEach(el => {
       const i = STATIONEN.findIndex(x => x.id === el.dataset.station);
       el.classList.toggle("done", i < hi);
@@ -747,61 +748,8 @@
     });
     const du = $("#mlDu");
     du.hidden = s == null;
-    du.classList.toggle("gps", !!(gps.an && gps.lage && gps.lage.abstand <= 250));
     if (s != null) { du.style.left = s / WEG.laenge * 100 + "%"; du.style.top = profilY(WEG.hoeheBei(s)) / 40 * 100 + "%"; }
   }
-
-  // GPS-Stelle am Weg (Meter ab Bahnhof) auf die gezeichnete Karte: zwischen zwei Stationen anteilig auf ihrem Abschnitt.
-  // Vom Bahnhof bis zur ersten Station liegt der Punkt auf der zweiten Hälfte des Abschnitts davor (Anreise).
-  function kartenPunkt(s) {
-    const mit = STATIONEN.map((st, i) => ({ i, s: WEG.station[st.id] && WEG.station[st.id].s })).filter(x => x.s != null);
-    const erste = mit[0];
-    if (s <= erste.s) return erste.i ? bez(ABSCHNITTE[erste.i - 1], .5 + .5 * Math.max(0, s) / erste.s) : PUNKTE[erste.i];
-    for (let k = 0; k < mit.length - 1; k++) {
-      const a = mit[k], b = mit[k + 1];
-      if (s > b.s) continue;
-      const x = a.i + (s - a.s) / (b.s - a.s) * (b.i - a.i), i = Math.min(Math.floor(x), ABSCHNITTE.length - 1);
-      return bez(ABSCHNITTE[i], x - i);
-    }
-    return PUNKTE[mit[mit.length - 1].i];
-  }
-  function renderGpsPunkt() {
-    const p = $("#mapGps"), l = gps.lage;
-    p.hidden = !(WEG && gps.an && l && l.abstand <= 250);
-    if (p.hidden) return;
-    const [x, y] = alsProzent(kartenPunkt(l.s));
-    p.style.left = x + "%"; p.style.top = y + "%";
-  }
-
-  // GPS läuft nur, solange die Karte offen ist (Akku). Die Wahl merkt sich das Handy.
-  function gpsStart() {
-    if (!WEG || !gps.an || gps.watch !== null || !("geolocation" in navigator)) return;
-    gps.watch = navigator.geolocation.watchPosition(pos => {
-      const { latitude: la, longitude: lo, accuracy } = pos.coords, p = WEG.projizieren(la, lo);
-      gps.lage = { s: p.s, abstand: p.abstand, luft: WEG.luftlinie(la, lo) };
-      gps.genau = accuracy; gps.hinweis = "";
-      renderLegende(); renderGpsPunkt();
-    }, err => {
-      if (err.code === 1) {
-        gpsStopp(); gps.an = false; gps.lage = null;
-        gps.hinweis = "Standort aus. In den Einstellungen erlauben.";
-        try { localStorage.setItem(GPS_KEY, "0"); } catch (_) {}
-      } else if (!gps.lage) gps.hinweis = "Kein GPS-Signal. Ich suche weiter …";
-      renderLegende(); renderGpsPunkt();
-    }, { enableHighAccuracy: true, maximumAge: 15000, timeout: 30000 });
-  }
-  function gpsStopp() {
-    if (gps.watch !== null) navigator.geolocation.clearWatch(gps.watch);
-    gps.watch = null;
-  }
-  function gpsUmschalten() {
-    gps.an = !gps.an; gps.hinweis = "";
-    try { localStorage.setItem(GPS_KEY, gps.an ? "1" : "0"); } catch (_) {}
-    if (gps.an) { tone("confirm"); gpsStart(); }
-    else { tone("move"); gpsStopp(); gps.lage = null; }
-    renderLegende(); renderGpsPunkt();
-  }
-  document.addEventListener("visibilitychange", () => { if (document.hidden) gpsStopp(); else if (page === 0) gpsStart(); });
 
   // Ausrüstung: Zustände, überall gleich (08-erlebnis-plan.md, 3.8, 3.12 und 16): Schatten = noch nicht erspielt,
   // Farbe mit Goldrand = deins, leuchtet = hilft beim Spiel, für das gerade gerüstet wird, Haken = liegt auf einer C-Taste
@@ -1073,7 +1021,8 @@
     const nurOffen = !fertig.length && !gestartet.length && !treffer.length && !schritte.length && !neueE.length && !neueD.length
       && neueB.length && neueB.every(b => b.offen);
     if (!vorwaerts && Object.values(weg).some(x => x.length)) return zurueckgenommen(prev, next, weg);
-    if (!vorwaerts && !handItems) return false;
+    // Nur freigegeben (30.09.): Der Quest Master schickt Dennis weiter, sonst hat sich nichts getan
+    if (!vorwaerts && !handItems) return next.next && !prev.next && prev.quests[next.next] === "offen" ? freigegeben(prev, next, prevDoc, doc, opt) : false;
 
     // Zeilen: Packs, Ziffern, Items (mit Enthüllung beim ersten Fund)
     const lines = [];
@@ -1194,7 +1143,7 @@
       // Nach dem Mitnehmen geht es zurück zu QUESTS: dort wird gespielt und eingetragen
       const danach = !opt.kette && (fertig.length || gestartet.length) ? showNextQuest
         : eMoment && zuQuests ? () => { zuQuests = false; if (page !== 1) goTo(1); } : null;
-      showOverlay({ head, lines: lines.join(""), next: next.next || !fertig.length ? "" : "Zum Kästchen", gross }, danach);
+      showOverlay({ head, lines: lines.join(""), next: !next.ende || !fertig.length ? "" : "Zum Kästchen", gross }, danach);
       renderHud(); renderQuests();
     };
     if (fluchE && !STILL.matches) {
@@ -1295,6 +1244,37 @@
     });
   }
 
+  /* Der Quest Master hat die nächste Quest freigegeben (30.09.): Liegt sie an einer anderen Station, sagt die Fee, wohin es
+     geht, danach wandert Dennis auf der Karte dorthin, und am Ziel tritt die Quest aus dem Nebel. An derselben Station
+     (oder im Zug ganz am Anfang) tritt sie gleich nach dem Fenster aus dem Nebel. */
+  function freigegeben(prev, next, prevDoc, doc, opt) {
+    // Spielbeginn blanko: Die erste Freigabe wartet, bis der Rundgang durch ist (ersteQuestZeigen bringt sie dann)
+    if (blanko) { renderHud(); renderQuests(); return false; }
+    // Ist noch ein Fenster offen (etwa das Ergebnis, das Dennis gerade besiegelt hat), kommt die Freigabe danach dran
+    if (!opt.kette && !$("#overlay").hidden) { schlange.push([prevDoc, doc]); return true; }
+    const q = questById(next.next), ziel = STATIONEN.find(x => x.id === q.station);
+    const vorher = STATIONEN[hierIndexFuer(prev)], wandern = !!ziel && !!vorher && ziel.id !== vorher.id;
+    revealPending = next.next;
+    const erste = !prev.zaehler.erledigt;
+    const titel = wandern ? `WEITER ${ziel.zu.toUpperCase()} ${esc(ziel.name)}` : erste ? "DIE REISE BEGINNT" : "ES GEHT WEITER";
+    const zeile = wandern ? `Der Weg führt weiter ${esc(ziel.zu)} ${esc(ziel.name)}${ziel.ort ? ` (${esc(ziel.ort)})` : ""}. Dort wartet die nächste Quest.`
+      : erste ? "Der Quest Master gibt das Zeichen. Deine erste Quest wartet." : "Die nächste Quest tritt aus dem Nebel.";
+    melody(wandern ? "plus" : "nebel");
+    showOverlay({
+      head: `<span class="ri-big fee"><img src="assets/fee.png" alt=""></span><p class="big">${titel}</p><p class="sub">vom Quest Master</p>`,
+      lines: `<li><span class="ri">${useSvg(wandern ? "i-mountain" : "z-triforce")}</span><span>${zeile}</span></li>`, next: ""
+    }, wandern ? () => { if (page === 0) spieleLauf(); else goTo(0); } : null);   // erst wandern, das Aufdecken folgt am Ziel (spieleLauf)
+    renderHud(); renderQuests();
+    return true;
+  }
+  // Wo Dennis in einem Stand steht (siehe hierIndex), auch für den Vergleich vor und nach einer Freigabe
+  function hierIndexFuer(s) {
+    let st = ZIEL;
+    if (s.next) st = questById(s.next).station;
+    else if (!s.ende) { const letzte = [...REIHE].reverse().find(q => s.quests[q.id] !== "offen"); st = letzte ? letzte.station : STATIONEN[0].id; }
+    return STATIONEN.findIndex(x => x.id === st);
+  }
+
   // Der Quest Master hat etwas zurückgenommen: Die Fee sagt es Dennis. Packs, Items und Nebel springen still mit zurück.
   function zurueckgenommen(prev, next, weg) {
     const zeilen = [];
@@ -1339,9 +1319,9 @@
       const offen = !q || !aufgedeckt(q.id) ? "im Nebel"
         : s.quests[q.id] === "verloren" ? "verloren, am Tor zu holen" : `jetzt: ${wo}`;
       // Nach der letzten Quest tauscht Dennis fehlende Ziffern selbst gegen Packs
-      const kauf = v == null && !s.next ? (E.zahlkraft(s) >= C.ziffer_preis
+      const kauf = v == null && s.ende ? (E.zahlkraft(s) >= C.ziffer_preis
         ? `<button type="button" class="qc-eintrag win kauf" data-kauf="${i + 1}">KAUFEN · ${C.ziffer_preis} ${packsWort(C.ziffer_preis).toUpperCase()}</button>` : `<small class="kauf-fehlt">zu wenig Packs</small>`) : "";
-      return `<li class="${v == null ? "" : "plus"}"><span class="ri"><span class="tumbler${v == null ? "" : " known"}" style="--hud-h:30px">${v == null ? "?" : v}</span></span><span>${v == null ? (s.next ? offen : "fehlt") : s.gekauft[i] ? { busse: "durch Bußprüfung", segen: "durch Rikes Segen" }[s.zifferWeg[i]] || "gekauft" : wo}</span>${kauf}</li>`;
+      return `<li class="${v == null ? "" : "plus"}"><span class="ri"><span class="tumbler${v == null ? "" : " known"}" style="--hud-h:30px">${v == null ? "?" : v}</span></span><span>${v == null ? (s.ende ? "fehlt" : offen) : s.gekauft[i] ? { busse: "durch Bußprüfung", segen: "durch Rikes Segen" }[s.zifferWeg[i]] || "gekauft" : wo}</span>${kauf}</li>`;
     }).join("");
     // Am Ende: den Abspann noch einmal ansehen (zum Beispiel abends in München)
     const nochmal = spielEnde() ? `<li><span class="ri">${useSvg("z-triforce")}</span><span>Deine Legende</span><button type="button" class="qc-eintrag win kauf" data-abspann>ABSPANN ▶</button></li>` : "";
@@ -1381,7 +1361,7 @@
     page = target;
     setActiveFace();
     if (coachZu) coachZu();                       // R im Rundgang angetippt: Hinweise zu, weiter geht es auf der neuen Seite
-    if (page !== 0) { gpsStopp(); schliesseStationstafel(); }
+    if (page !== 0) schliesseStationstafel();
     tone("move");
     clearTimeout(flatTimer);
     flatTimer = setTimeout(() => {
@@ -1389,7 +1369,7 @@
       $("#game").classList.remove("dreht");
       if (page === 1) { const row = document.querySelector(".q-row.is-selected"); if (row) scrollIntoList(row); }
       if (page === 2 && $("#overlay").hidden) { if (!onboarded()) onboarding(); else funde(); }
-      if (page === 0) { gpsStart(); spieleLauf(); if (!laufFrame) kartenHinweis(); }
+      if (page === 0) { spieleLauf(); if (!laufFrame) kartenHinweis(); }
       ersteQuestPruefen();
     }, 470);
   }
@@ -1433,22 +1413,24 @@
     const hier = document.querySelector(`.mark[data-station="${STATIONEN[kartenHier ?? hierIndex()].id}"]`);
     coach([
       [hier, "Hier stehst du. Tipp auf eine Station, dann siehst du, was dort wartet."],
-      ...(WEG ? [[$("#mapLegend"), "Höhe und Weg bis zum Gipfel. Mit GPS zeigt dir die Karte, wo du wirklich bist."]] : []),
-      [$(".shoulder-right"), "Mit R zurück zu deinen Quests. Dort wartet etwas auf dich!"]
+      ...(WEG ? [[$("#mapLegend"), "Höhe und Weg bis zum Gipfel. Der Quest Master schickt dich von Station zu Station."]] : []),
+      [$(".shoulder-right"), "Mit R zurück zu deinen Quests. Dort wartet bald etwas auf dich!"]
     ]);
   }
 
   /* ---------- Erste Quest: Spielbeginn blanko (30.09., Wunsch des Nutzers) ----------
-     Beim ersten PRESS START ist das Menü leer, auch die erste Quest liegt im Nebel. Erst wenn der Rundgang durch ist
-     (Quests, Ausrüstung, Karte, zurück zu Quests), taucht sie nach einer kurzen Pause auf: eigener Moment, dann tritt sie
-     aus dem Nebel. Prolog übersprungen: gleich danach. Bleibt Dennis irgendwo hängen: spätestens 90 s nach dem Prolog.
+     Beim ersten PRESS START ist das Menü leer, auch die erste Quest liegt im Nebel, selbst wenn der Quest Master sie schon
+     freigegeben hat (Freigabe, 30.09.). Erst wenn der Rundgang durch ist (Quests, Ausrüstung, Karte, zurück zu Quests),
+     taucht sie nach einer kurzen Pause auf: eigener Moment, dann tritt sie aus dem Nebel. Ist sie dann noch nicht
+     freigegeben, endet der leere Anfang still, und die Freigabe des Quest Masters bringt sie wie sonst auch.
+     Prolog übersprungen: gleich danach. Bleibt Dennis irgendwo hängen: spätestens 90 s nach dem Prolog.
      Einmal pro Handy (lädt er zwischendurch neu, kommt sie nach PRESS START). Entscheidet der Quest Master schon etwas, ist
      der Spuk vorbei. Mit ?direkt nie (Tests und Laptop). */
   const ERSTE_KEY = "dq-erste-quest-v1" + (PROBE ? "-probe" : "");
   let ersteSofort = false, ersteTimer = null, ersteNotfall = null;
-  const ersteOffen = () => !DEMO && !spaeter() && !obGemerkt(ERSTE_KEY) && obGemerkt(PROLOG_KEY) && !!state && !!state.next;
+  const ersteOffen = () => !DEMO && !spaeter() && !obGemerkt(ERSTE_KEY) && obGemerkt(PROLOG_KEY) && !!state && !state.ende;
   function blankoStart(sofort) {
-    if (spaeter() || !state || !state.next) return;
+    if (spaeter() || !state || state.ende) return;
     blanko = true; ersteSofort = sofort; followNext = true;
     render();
     if (sofort) ersteQuestPruefen();
@@ -1457,7 +1439,7 @@
     && $("#schwur").hidden && $("#logbuch").hidden && $("#fluchSzene").hidden;
   function ersteQuestPruefen() {
     if (!blanko || ersteTimer) return;
-    if (spaeter() || !state || !state.next) { blanko = false; render(); return; }
+    if (spaeter() || !state || state.ende) { blanko = false; render(); return; }
     if (!ersteSofort && !(beutelGezeigt && karteGesehen)) return;
     // Erst wenn Dennis 2 s ruhig auf QUESTS ist (nichts offen, keine Drehung), dann taucht sie auf
     let ruhig = 0;
@@ -1466,7 +1448,8 @@
       if (!blanko) return;
       ruhig = frei() && !$("#game").classList.contains("dreht") ? ruhig + 250 : 0;
       if (ruhig < (STILL.matches ? 500 : 2000)) return warten();
-      ersteQuestZeigen();
+      if (state.next) return ersteQuestZeigen();
+      blanko = false; obMerken(ERSTE_KEY); clearTimeout(ersteNotfall); render();   // noch nicht freigegeben: „Die Reise beginnt bald“
     }, 250); };
     warten();
   }
@@ -1619,6 +1602,8 @@
     const id = revealPending;
     if (!id) return;
     revealPending = null;
+    // Inzwischen zurückgenommen (die Quest ist nicht mehr dran): nichts aufdecken
+    if (id !== state.next) { renderHud(); renderQuests(); return; }
     const row = document.querySelector(`.q-row[data-id="${id}"]`), card = $("#questCard");
     if (row) { scrollIntoList(row); row.classList.remove("fogged"); row.classList.add("revealing"); }
     if (sel[1] === id) { card.classList.remove("fogged"); card.classList.add("revealing"); }
@@ -1628,7 +1613,7 @@
   }
 
   document.querySelectorAll("[data-nav]").forEach(b => b.addEventListener("click", e => { e.stopPropagation(); turn(b.dataset.nav === "next" ? 1 : -1); }));
-  $("#hudNext").addEventListener("click", () => { if (state && !state.next) { tone("confirm"); explainCode(); } else showNextQuest(); });   // am Ende: zum Kästchen
+  $("#hudNext").addEventListener("click", () => { if (state && state.ende) { tone("confirm"); explainCode(); } else showNextQuest(); });   // am Ende: zum Kästchen
   $("#hudPacks").addEventListener("click", explainPacks);
   $("#hudCode").addEventListener("click", explainCode);
   $("#overlay").addEventListener("click", e => {
@@ -1961,12 +1946,12 @@
     });
   }
   function schwurZiffer(nr) {
-    if (state.next || state.ziffern[nr - 1] != null || E.zahlkraft(state) < C.ziffer_preis) return;
+    if (!state.ende || state.ziffern[nr - 1] != null || E.zahlkraft(state) < C.ziffer_preis) return;
     schwur.oeffnen({
       art: "AM KÄSTCHEN", icon: `<span class="sw-item lock">${useSvg("i-lock")}</span>`, titel: `Ziffer ${nr} kaufen`,
       sub: `für ${C.ziffer_preis} ${packsWort(C.ziffer_preis)}`, ton: "win",
       folgen: [`<span class="fx">${preisChips(C.ziffer_preis)}<span class="chip plus"><span class="mini-tumbler">?</span>Ziffer ${nr}</span></span>`],
-      gueltig: () => !state.next && state.ziffern[nr - 1] == null && E.zahlkraft(state) >= C.ziffer_preis,
+      gueltig: () => state.ende && state.ziffern[nr - 1] == null && E.zahlkraft(state) >= C.ziffer_preis,
       ausfuehren: () => eintrag("z_" + nr, {})
     });
   }
@@ -1978,7 +1963,7 @@
   // Texte und Namen in config.js (abspann). Nimmt der Quest Master den Bund zurück, geht alles still zu.
   const ABSPANN_KEY = "dq-abspann-v1" + (PROBE ? "-probe" : "");
   const FINALE = REIHE[REIHE.length - 1];
-  const spielEnde = () => !!state && !state.next && ["bestanden", "verloren"].includes(state.quests[FINALE.id]);
+  const spielEnde = () => !!state && state.ende && ["bestanden", "verloren"].includes(state.quests[FINALE.id]);
   const abspann = (() => {
     const el = $("#abspann"), A = C.abspann || {}, G = A.geschichte || {};
     const DAUER = { sieg: 6500, vorlange: 4200, logo: 7500, crawl: 48000, credits: 45000 };
@@ -2326,8 +2311,8 @@
         const item = qid && E.mitnehmbar(C, s, qid)[0], dl = qid && questById(qid).showdown ? E.aktuellesDuell(C, s) : null;
         if (item) d.einsaetze.push({ id: uid(), item, quest: qid, zeit: Date.now(), ...(dl ? { duell: dl.nr } : {}), ...(itemById(item).dieb ? { raub: E.diebWurf(C) } : {}) });
       } else if (a === "glanz") {
-        if (state.next && questById(state.next).glanz) { d.quests[state.next] = "bestanden"; d.glanz = { ...d.glanz, [state.next]: true }; }
-      } else if (state.next) d.quests[state.next] = a;
+        if (state.kommt && questById(state.kommt).glanz) { d.quests[state.kommt] = "bestanden"; d.glanz = { ...d.glanz, [state.kommt]: true }; }
+      } else if (state.kommt) d.quests[state.kommt] = a;
       store.save(d);
     });
   }
@@ -2406,18 +2391,16 @@
     announce(prev, state, prevDoc, lastDoc); merkeGesehen();
   }
 
-  // Neuer Anfang: Das Handy vergisst alles vom alten Spiel: Prolog, Beutel, Hinweise, Funde, GPS, den zuletzt gesehenen
+  // Neuer Anfang: Das Handy vergisst alles vom alten Spiel: Prolog, Beutel, Hinweise, Funde, den zuletzt gesehenen
   // Stand und seine Kopien von Dennis' Einträgen und Tagebuch-Antworten (auch was ohne Netz noch nicht gesendet war).
   // Beim nächsten PRESS START läuft alles wie beim ersten Mal. Ist das Menü offen, sagt es die Fee in einem einzigen Fenster.
   // Bleibt: ob die App auf dem Home-Bildschirm liegt.
   function neuerAnfang(zeigen) {
     if (sammel) { clearTimeout(sammel.t); sammel = null; }
-    try { [OB_KEY, KARTE_KEY, FUND_KEY, GPS_KEY, ERSTE_KEY].forEach(k => localStorage.removeItem(k)); } catch (e) {}
+    try { [OB_KEY, KARTE_KEY, FUND_KEY, ERSTE_KEY, "dq-gps" + (PROBE ? "-probe" : "")].forEach(k => localStorage.removeItem(k)); } catch (e) {}
     abspann.schliessen(); abspann.vergessen();
     beutelGezeigt = false; karteGesehen = false; gesehen = null; neuMarke.clear();
     prolog.vergessen();
-    gpsStopp(); gps.an = false; gps.lage = null; gps.hinweis = "";
-    if (WEG) renderLegende();
     einStore.vergessen(); lbStore.vergessen();
     schlange = []; revealPending = null; fensterQuest = null;
     // Gesehen ist der leere Anfang: Was von Dennis' Einträgen noch nachkommt oder schon weg ist, meldet niemand mehr

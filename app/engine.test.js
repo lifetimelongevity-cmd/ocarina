@@ -1,10 +1,13 @@
 // Test der Logik v1: node app/engine.test.js
 const assert = require("assert");
 const config = require("./config.js");
-const { derive, emptyDoc, normalize, mitEintraegen, showdownDuelle, einsetzbar, abgeloest, jetztEinsetzbar, fluchVorteil, diebWurf,
+const { derive: derive0, emptyDoc, normalize, mitEintraegen, showdownDuelle, einsetzbar, abgeloest, jetztEinsetzbar, fluchVorteil, diebWurf,
   dabei, mitnehmbar, rettung, aktuellesDuell } = require("./engine.js");
 
 const reihe = config.quests.filter(q => q.typ !== "lauf");
+// Freigabe (30.09.): Für die Tests gilt jede Quest als freigegeben, außer wo die Freigabe selbst geprüft wird (derive0)
+const FREI = Object.fromEntries(reihe.map(q => [q.id, 1]));
+const derive = (c, d) => derive0(c, { frei: FREI, ...(d || {}) });
 const itemIds = config.items.map(i => i.id);
 const stationen = config.karte.stationen.map(s => s.id);
 
@@ -58,7 +61,7 @@ const torIndex = reihe.findIndex(q => q.tor);
 assert.ok(torIndex > 0 && reihe.slice(0, torIndex).filter(q => q.win && q.win.ziffer).length === config.code.length, "alle Ziffern vor dem Tor");
 
 // 1. Leeres Dokument: Startzustand
-let s = derive(config, emptyDoc());
+let s = derive0(config, emptyDoc());
 assert.strictEqual(s.packs, 0);
 assert.deepStrictEqual(s.ziffern, [null, null, null, null]);
 assert.strictEqual(s.items.beutel, undefined);          // kein eigenes Feld mehr: Der Beutel entpuppt sich als Spritze
@@ -67,9 +70,27 @@ assert.deepStrictEqual(config.startitems, ["spritze"]);
 assert.strictEqual(s.items.stich, "nicht");
 assert.strictEqual(s.items.spruchrolle, "nicht");
 assert.strictEqual(s.anzahl.spruchrolle, 0);
+// Freigabe (30.09.): Die erste offene Quest kommt, dran ist sie erst, wenn der Quest Master sie freigibt
+assert.strictEqual(s.next, null);
+assert.strictEqual(s.kommt, "logbuch");
+assert.strictEqual(s.ende, false);
+assert.deepStrictEqual(emptyDoc().frei, {});
+s = derive0(config, { frei: { logbuch: 1 } });
 assert.strictEqual(s.next, "logbuch");
+assert.strictEqual(s.kommt, "logbuch");
 assert.deepStrictEqual(s.laufend, []);
 assert.strictEqual(s.zaehler.gesamt, 10);
+// Eine Freigabe gilt nur für die Quest, die gerade kommt
+s = derive0(config, { frei: { klingen: 1 } });
+assert.strictEqual(s.next, null);
+s = derive0(config, { quests: { logbuch: "bestanden" }, frei: { logbuch: 1 } });
+assert.strictEqual(s.next, null);
+assert.strictEqual(s.kommt, "klingen");
+s = derive0(config, { quests: { logbuch: "bestanden" }, frei: { logbuch: 1, klingen: 2 } });
+assert.strictEqual(s.next, "klingen");
+// Zurückgenommen (wieder offen) bleibt freigegeben: Dennis trägt neu ein
+s = derive0(config, { quests: {}, frei: { logbuch: 1, klingen: 2 } });
+assert.strictEqual(s.next, "logbuch");
 
 // Packs einer Quest laut Konfiguration, und Packs Schritt für Schritt zwischen 0 und max
 const P = (id, k) => (config.quests.find(q => q.id === id)[k] || {}).packs || 0;
@@ -251,7 +272,7 @@ assert.ok(W.hoeheBei(0) < 800 && W.ziel.hoehe > 1200, "Höhen vom See zum Gipfel
 assert.ok(W.projizieren(48.1402, 11.5586).abstand > 40000, "München ist weit weg vom Weg");
 
 // 17. Dennis trägt selbst ein (Kanal „dennis"): Ergebnis, Einsatz, Duell, Amulett, Ziffer. Was der Admin entschieden hat, gilt vor.
-const mit = (doc, ein) => derive(config, mitEintraegen(config, doc, ein));
+const mit = (doc, ein) => derive(config, mitEintraegen(config, { frei: FREI, ...doc }, ein));
 s = mit({}, { q_logbuch: { status: "bestanden", zeit: 10 }, q_klingen: { status: "verloren", zeit: 20 } });
 assert.strictEqual(s.quests.logbuch, "bestanden");
 assert.strictEqual(s.quests.klingen, "verloren");

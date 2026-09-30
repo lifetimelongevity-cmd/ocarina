@@ -39,6 +39,14 @@ admin.on('dialog', d => d.accept());
 await admin.click('#reset').catch(() => {});
 const dennis = await seite('?direkt');
 await zu(dennis);
+// Freigabe (30.09.): Der Quest Master gibt jede Quest frei. Dennis sieht die Fee, wandert auf der Karte zur Station,
+// dann tritt die Quest aus dem Nebel. Wartet, bis er wieder auf der Quest-Seite steht.
+async function frei(p = dennis) {
+  if (await admin.isVisible('#freigeben')) { await admin.click('#freigeben'); await warte(800); }
+  await zu(p);
+  for (let i = 0; i < 24; i++) { if (await p.$('#overlay[hidden]') && !(await p.isVisible('#mapWalker')) && await p.evaluate(() => document.querySelector('.face.active').dataset.page) === '1') break; await warte(250); }
+  await warte(500); await zu(p);
+}
 
 // Drei Packs gewonnen, dann eins öffnen
 await buchen(3, 'Test: drei Packs');
@@ -102,6 +110,7 @@ await admin.click('#reset').catch(() => {}); await warte(800);
 const vorRache = ['logbuch', 'klingen', 'wirbel', 'podrennen', 'kartenwurf', 'auge', 'deku', 'feuerprobe'];
 for (const id of vorRache) { await admin.click(`#quests li[data-id="${id}"] .seg button[data-v="bestanden"]`).catch(() => fehler.push('Admin-Knopf fehlt: ' + id)); await warte(250); }
 await warte(800); await zu(dennis); await warte(600); await zu(dennis);
+await frei();
 pruefe((await admin.textContent('#nextTitle')).includes('Rikes Rache'), 'Nach Hüter der Flamme ist Rikes Rache dran');
 pruefe((await dennis.textContent('#hudNextName')).includes('Rikes Rache'), 'Dennis: nächste Quest Rikes Rache');
 await dennis.click('#hudNext'); await warte(600);

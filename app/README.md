@@ -15,8 +15,8 @@ Zusätze für Dennis' Seite: `?probe` (liest den Probelauf des Quest Masters, ro
 | Datei | Inhalt |
 |---|---|
 | `config.js` | Alles, was das Spiel kennt: Quests (Reihenfolge, Texte, Belohnungen, einsetzbar), Items und Fähigkeiten mit Tarnnamen, Kartenstationen, Log-Buch-Fragen, Code, Packs, Speicher. **Hier wird ergänzt.** |
-| `weg.js` | Der echte Weg (Bahnhof Tegernsee, Wanderweg 681a, Neureuth): Stelle am Weg aus GPS, Höhe an jeder Stelle, Strecke bis zum Gipfel. Reine Funktionen, getestet in `engine.test.js`. |
-| `engine.js` | Die Logik. Rechnet aus Konfiguration und gespeichertem Stand alles aus: Packs, Ziffern, Items, Anzahl Flüche, Tor zum Gipfel, nächste Quest, laufende Quests, Showdown-Duelle, was wo einsetzbar ist. |
+| `weg.js` | Der echte Weg (Bahnhof Tegernsee, Wanderweg 681a, Neureuth): Höhe an jeder Stelle, Strecke bis zum Gipfel, Stellen der Stationen am Weg. Reine Funktionen, getestet in `engine.test.js`. |
+| `engine.js` | Die Logik. Rechnet aus Konfiguration und gespeichertem Stand alles aus: Packs, Ziffern, Items, Anzahl Flüche, Tor zum Gipfel, nächste Quest (`kommt`: die erste offene, `next`: erst wenn du sie freigegeben hast, `ende`: alles erledigt), laufende Quests, Showdown-Duelle, was wo einsetzbar ist. |
 | `store.js` | Speicher. `lokal` (ein Browser, zum Testen) oder `firebase` (zwei Handys). Dazu die Kanäle, in die Dennis schreibt: Log-Buch-Antworten und seine Einträge. |
 | `app.js`, `styles.css`, `index.html` | Dennis' Menü. |
 | `admin.js`, `admin.css`, `admin.html` | Quest-Master-Menü. |
@@ -27,17 +27,17 @@ Zusätze für Dennis' Seite: `?probe` (liest den Probelauf des Quest Masters, ro
 
 ## Karte (seit 26.09.)
 
-- **Weg:** gegangener Weg golden, der Rest gestrichelt. Nach jedem Ergebnis läuft Dennis zur nächsten Station, sobald er die Karte ansieht. Der Nebel treibt und zieht beim Weiterkommen ab.
+- **Weg:** gegangener Weg golden, der Rest gestrichelt. Gibst du die nächste Quest frei (seit 30.09., siehe Ablauf am Spieltag), sagt die Fee, wohin es geht, und Dennis wandert auf der Karte zur Station, bis dahin steht er an der alten. Der Nebel treibt und zieht beim Weiterkommen ab.
 - **Station antippen:** Tafel mit Ort, Höhe, Kilometer ab Bahnhof und den Quests der Station (Nebel bleibt dicht, verdeckte Sidequests fehlen ganz). Eine Zeile antippen öffnet die Quest, zweites Tippen auf die Station ebenso. An der Hütte: das Kästchen mit dem Code („Verschlossen, noch N Ziffern“). Was darin liegt (10 Packs als Überraschung), verrät die App nicht.
 - **Kartusche oben links:** Höhe, „Noch 2,5 km · 351 Hm bis zum Gipfel“ und das Höhenprofil des echten Wegs.
-- **GPS:** Knopf in der Kartusche. Läuft nur, solange die Karte offen ist. Am Weg (bis 250 m daneben) zeigt ein Feenlicht die echte Stelle, weit weg steht die Luftlinie zum Bahnhof Tegernsee. Ohne Erlaubnis ein Hinweis auf die Einstellungen.
-- **Daten:** `config.karte.weg` (OpenStreetMap, Höhen EU-DEM) und je Station `gps`. Wo der Quest Master am Samstag wirklich aufbaut, kann er dort nachtragen.
-- Test im Browser: `tests/karte.mjs` (GPS gefälscht, Laufen, Tafeln, Prolog).
+- **Kein GPS** (seit 30.09., vorher Feenlicht am Weg per Knopf): Die Station wechselt nur, wenn du die nächste Quest freigibst. Das ist verlässlich, auch im Funkloch und mit der App in der Tasche.
+- **Daten:** `config.karte.weg` (OpenStreetMap, Höhen EU-DEM) und je Station `gps`, nur noch für Höhe und Kilometer in der Kartusche.
+- Test im Browser: `tests/karte.mjs` (Laufen, Tafeln, Prolog), `tests/freigabe.mjs` (Freigabe, Wandern, Nebel).
 
 ## Gespeicherter Stand
 
 ```
-/spiele/dennis-jga-2026            { quests, glanz, zaehler, schritte, einsaetze, duelle, buchungen, items, zeiten, stand }   schreibt nur der Admin
+/spiele/dennis-jga-2026            { quests, glanz, zaehler, schritte, einsaetze, duelle, buchungen, items, zeiten, stand, neustart, frei }   schreibt nur der Admin
 /spiele/dennis-jga-2026-logbuch    { "1": { antwort, zeit }, … }                                              schreibt Dennis (Log-Buch)
 /spiele/dennis-jga-2026-dennis     { q_klingen: { status, zeit }, q_kartenwurf: { status: "bestanden", glanz: true, zeit }, e_…: { item, quest, zeit }, d_2: { ergebnis, zeit },
                                      s_amulett_gefunden: { zeit }, z_3: { zeit } }                            schreibt Dennis, der Admin löscht
@@ -59,6 +59,7 @@ Dennis' Antworten und Einträge liegen bewusst neben dem Spiel, damit das Speich
 
 - **Vertippt:** Oben rechts **Rückgängig**. Darunter steht, was zurückgenommen wird. Nimmt jede Änderung zurück, auch Sprünge und „Alles zurücksetzen“, bis zu 40 Schritte, und merkt sich das auch nach dem Neuladen. Ist bei Dennis das Ergebnis-Fenster noch offen, geht es still zu.
 
+- **Freigeben** (seit 30.09., kein GPS): Dennis sieht die nächste Quest erst, wenn du sie freigibst. Oben unter „Jetzt“ steht die Quest, die kommt, mit dem großen Knopf **Nächste Quest freigeben**. Drück ihn, wenn ihr an der Station seid (am Freitag im Zug fürs Tagebuch, am Samstag an jeder Station, auch zwischen zwei Quests an derselben Station). Bei Dennis sagt die Fee „Weiter zur WIESE“, er wandert auf der Karte dorthin, dann tritt die Quest aus dem Nebel. Bis dahin steht in seinem HUD nur „Weiter zur WIESE“ (am Anfang „Die Reise beginnt bald“). Die Freigabe steht im Verlauf, **Löschen** holt sie still zurück, Rückgängig ebenso. Ist bei Dennis noch das Ergebnis-Fenster offen, kommt die Freigabe danach dran. Notfall-Knöpfe und Einsetzen wirken auch ohne Freigabe auf die Quest, die kommt.
 - **Dennis trägt selbst ein** (seit 27.09.): Auf seiner Quest-Karte stehen BESTANDEN und VERLOREN, er hält das Siegel gedrückt, bis sich der Ring schließt, dann läuft sofort der Moment. Genauso setzt er Items und Fähigkeiten ein (antippen, Siegel halten), trägt am Gipfel jedes Duell ein, meldet bei Rikes Amulett „Gefunden“ und „Zusammengesetzt“ und holt am Tor zum Gipfel fehlende Ziffern. Du siehst alles im Admin im **Verlauf** mit Uhrzeit, dazu eine kurze Meldung unten.
 - **Zurücknehmen:** Stimmt etwas nicht, tippst du bei seinem Eintrag auf **Zurücknehmen**. Die Quest ist wieder offen, Packs und Items springen zurück, und die Fee sagt es Dennis („Der Quest Master hat das Ergebnis von Kartenwurf zurückgenommen. Trag es neu ein.“). Rückgängig oben holt den Eintrag zurück. Auch „Offen“ bei einer Quest, ein zweiter Tipp auf ein gesetztes Duell und das Ausschalten von „Gefunden“ nehmen seinen Eintrag mit zurück.
 - **Ausrüsten (29.09.):** Vor einem Spiel tippt Dennis AUSRÜSTEN, legt in der Ausrüstung auf die C-Tasten, was er mitnimmt, und besiegelt es einmal. Bei dir steht dann zum Beispiel „Kleine Wasserpistole mitgenommen zu Auge des Jägers (gib es ihm)“: Gib ihm das echte Ding. Verliert er ein Duell und hat den Schild, bietet ihm das Siegel-Fenster den Schild an, dann steht bei dir „Schild des Bundes eingesetzt …: Duell wiederholen“.
@@ -76,7 +77,7 @@ Dennis' Antworten und Einträge liegen bewusst neben dem Spiel, damit das Speich
 - **Wasserwaffen:** Spritze (hat Dennis von Anfang an: Beim ersten Besuch der Ausrüstung entpuppt sich der Heilige Beutel des Helden als Spritze, im selben Feld), kleine Pistole (Podrennen), große Pistole (Glanzsieg im Kartenwurf). Im Auge des Jägers zählt die stärkste, nur sie leuchtet bei ihm.
 - **Verpasste Momente:** War Dennis' App zu oder ohne Netz, laufen die Momente nach PRESS START nacheinander ab. Die nächste Quest tritt erst danach aus dem Nebel. Was du in der Zeit zurückgenommen hast, kommt gesammelt in einem Fenster.
 - **Finale** (seit 29.09.): Ist die Prüfung des Bundes entschieden und Dennis schließt das Ergebnis-Fenster, kommt der Siegbildschirm, dann die Geschichte von Rike und Dennis als Laufschrift wie bei Star Wars (knapp eine Minute) und der Abspann (45 s), der bei THE END mit dem Code stehen bleibt. Das läuft einmal pro Handy von selbst, danach über das Code-Fenster (ABSPANN). Ton an, dann läuft die eigene Musik mit. Namen, Geschichte und „Fortsetzung folgt“ stehen in `config.js` unter `abspann`. Nimmst du den Bund zurück, geht das Finale bei Dennis still zu. Anschauen ohne Spiel: `docarina.vercel.app/?demo=ende&direkt`.
-- **Alles zurücksetzen** (unter „Spiel“, seit 28.09.): Alle Quests offen, Packs, Einsätze, Zähler, Dennis' Einträge und seine **Tagebuch-Antworten** sind weg. Dennis' Handy zeigt ein einziges Fenster („NEUER ANFANG“), lädt neu und fängt von vorn an: Titelbild, Prolog mit der Fee, Beutel, Hinweise auf der Karte. Es vergisst alles vom alten Spiel, auch GPS und seine Kopien von Einträgen und Antworten, nur ob die App auf dem Home-Bildschirm liegt, bleibt. Die App muss dafür nicht offen sein: Steht sie auf dem Titelbild oder ist sie zu, passiert das still beim nächsten Öffnen mit Netz. Erkannt wird das am Zeitstempel `neustart` im Spiel. Rückgängig holt alles zurück (auch die Antworten), ohne dass bei Dennis eine Kette von Fenstern aufgeht.
+- **Alles zurücksetzen** (unter „Spiel“, seit 28.09.): Alle Quests offen, Packs, Einsätze, Zähler, Dennis' Einträge und seine **Tagebuch-Antworten** sind weg. Dennis' Handy zeigt ein einziges Fenster („NEUER ANFANG“), lädt neu und fängt von vorn an: Titelbild, Prolog mit der Fee, Beutel, Hinweise auf der Karte. Es vergisst alles vom alten Spiel, auch seine Kopien von Einträgen und Antworten, nur ob die App auf dem Home-Bildschirm liegt, bleibt. Die App muss dafür nicht offen sein: Steht sie auf dem Titelbild oder ist sie zu, passiert das still beim nächsten Öffnen mit Netz. Erkannt wird das am Zeitstempel `neustart` im Spiel. Rückgängig holt alles zurück (auch die Antworten), ohne dass bei Dennis eine Kette von Fenstern aufgeht.
 - **Tagebuch leeren** (unter „Spiel“): leert nur das Tagebuch, Dennis kann neu antworten. Rückgängig holt die Antworten zurück.
 
 ## Auf den Startbildschirm (App installieren)

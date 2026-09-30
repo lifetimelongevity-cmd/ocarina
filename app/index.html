@@ -103,13 +103,11 @@
                 <div class="map-fog" id="mapFog" hidden></div>
                 <div class="map-marks" id="mapMarks"></div>
                 <span class="map-walker" id="mapWalker" hidden aria-hidden="true"></span>
-                <span class="map-gps" id="mapGps" hidden title="Hier bist du laut GPS"></span>
-                <!-- Kartusche: Höhe, Strecke bis zum Gipfel, Höhenprofil des echten Wegs, GPS -->
+                <!-- Kartusche: Höhe, Strecke bis zum Gipfel, Höhenprofil des echten Wegs -->
                 <div class="map-legend" id="mapLegend">
                   <div class="ml-top">
                     <svg class="ml-ico" aria-hidden="true"><use href="#i-mountain"></use></svg>
                     <p class="ml-now"><b id="mlWert">–</b> <span id="mlWo"></span></p>
-                    <button class="ml-gps" id="gpsBtn" type="button" aria-pressed="false" aria-label="GPS: zeig mir, wo ich am Weg bin"><svg aria-hidden="true"><use href="#i-gps"></use></svg><span>GPS</span></button>
                   </div>
                   <p class="ml-rest" id="mlRest"></p>
                   <div class="ml-profil" id="mlProfil" aria-hidden="true">
@@ -340,7 +338,6 @@
     <symbol id="i-check" viewBox="0 0 16 16"><path d="M2.6 8.6 6.3 12l7.1-8" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
     <symbol id="i-x" viewBox="0 0 16 16"><path d="m4 4 8 8m0-8-8 8" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"/></symbol>
     <symbol id="i-mountain" viewBox="0 0 32 32"><path fill="currentColor" d="M2 27 12.5 9l4.6 7.6 3.4-4.8L30 27Z"/><path fill="rgba(255,255,255,.55)" d="m12.5 9 3 5.1-1.7-.9-1.3 1.6-1.4-1.6-1.9 1Z"/></symbol>
-    <symbol id="i-gps" viewBox="0 0 32 32"><circle cx="16" cy="16" r="8.5" fill="none" stroke="currentColor" stroke-width="2.6"/><circle cx="16" cy="16" r="3.6" fill="currentColor"/><path d="M16 2v6M16 24v6M2 16h6M24 16h6" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></symbol>
     <symbol id="i-hut" viewBox="0 0 32 32"><path fill="currentColor" d="M3 15 16 4l13 11h-3v12H6V15Z"/><path d="M13.5 27v-7h5v7" fill="#2c2418"/></symbol>
     <symbol id="i-train" viewBox="0 0 32 32"><path fill="currentColor" d="M8 4h16a3 3 0 0 1 3 3v15a3 3 0 0 1-3 3l2.5 4h-3.2L21 25H11l-2.3 4H5.5L8 25a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3Z"/><path d="M8 8h16v7H8Z" fill="#cfe3e8"/><circle cx="10.5" cy="20" r="1.8" fill="#f2c94c"/><circle cx="21.5" cy="20" r="1.8" fill="#f2c94c"/></symbol>
     <!-- Neue Items und Fähigkeiten (07-spiele-und-items.md) -->

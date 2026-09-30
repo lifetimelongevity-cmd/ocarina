@@ -268,8 +268,12 @@ for (const g of GERAETE) {
   await admin.$$eval('details', ds => ds.forEach(d => { d.open = true; }));
   admin.on('dialog', d => d.accept());
   await admin.click('#reset'); await admin.click('#resetLb'); await admin.waitForTimeout(300);
+  await admin.click('#freigeben'); await admin.waitForTimeout(300);   // Tagebuch freigeben (30.09.)
   // Dennis beantwortet zwei Fragen im Log-Buch
-  await dennis.reload(); await dennis.waitForTimeout(300);
+  await dennis.reload(); await dennis.waitForTimeout(800);
+  // Die Freigabe kommt als Fenster der Fee (DIE REISE BEGINNT), danach tritt das Tagebuch aus dem Nebel
+  while (await dennis.$('#overlay:not([hidden])')) { await dennis.click('#overlay'); await dennis.waitForTimeout(400); }
+  await weiterTippen(dennis); await dennis.waitForTimeout(800);
   await dennis.click('[data-logbuch]');
   for (const a of ['Im Café am Gärtnerplatz', 'Meine Socken']) { await dennis.fill('#lbInput', a); await dennis.click('#lbSeal'); await dennis.waitForTimeout(400); await dennis.click('#lbNext'); await dennis.waitForTimeout(200); }
   await dennis.click('#lbClose');
@@ -297,6 +301,8 @@ for (const g of GERAETE) {
   // Showdown: alles bis zum Gipfel, zwei verloren
   // bis einschließlich Rikes Rache (seit 29.09.)
   for (const v of ['verloren', 'bestanden', 'bestanden', 'verloren', 'bestanden', 'bestanden', 'bestanden']) { await admin.click(v === 'bestanden' ? '#nextWin' : '#nextLose'); await admin.waitForTimeout(150); }
+  await admin.click('#freigeben'); await admin.waitForTimeout(300);   // Prüfung des Bundes freigeben
+  await dennis.waitForTimeout(600); await dennis.evaluate(() => document.querySelector('#overlay').click()); await dennis.waitForTimeout(4500);
   const duelle = await admin.$$eval('.duel-list .d-name', els => els.map(e => e.textContent.replace(/\s+/g, ' ').trim()));
   log(`  Showdown-Duelle im Admin: ${duelle.join(' | ')}`);
   await admin.click('.duel-list button[data-nr="1"][data-v="sieg"]'); await admin.waitForTimeout(200);

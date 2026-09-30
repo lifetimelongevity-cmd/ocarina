@@ -117,6 +117,12 @@
   }
   const buchung = b => ({ id: uid(), zeit: Date.now(), ...b });
 
+  // Freigabe (30.09.): Dennis sieht die nächste Quest erst, wenn du sie freigibst (wenn ihr an der Station seid).
+  // Auf seiner Karte wandert er dann dorthin, danach tritt die Quest aus dem Nebel. Löschen im Verlauf nimmt sie still zurück.
+  function freigeben(id) {
+    commit(d => { d.frei = { ...d.frei, [id]: Date.now() }; }, "Freigegeben: " + questById(id).name);
+  }
+
   // Fluch (29.09.): Auch als Notlösung würfelt der Schattendieb, und das Spiel mit dem Vorteil wird gemerkt
   // Im Showdown gilt ein Einsatz für das aktuelle Duell (29.09., Dennis rüstet sich je Duell aus)
   function einsetzen(item, quest) {
@@ -226,9 +232,11 @@
       items.appendChild(li);
     });
 
-    $("#nextWin").addEventListener("click", () => state.next && setQuest(state.next, "bestanden"));
-    $("#nextGlanz").addEventListener("click", () => state.next && questById(state.next).glanz && setQuest(state.next, "glanz"));
-    $("#nextLose").addEventListener("click", () => state.next && setQuest(state.next, "verloren"));
+    // Notfall gilt für die Quest, die kommt, auch wenn sie noch nicht freigegeben ist
+    $("#nextWin").addEventListener("click", () => state.kommt && setQuest(state.kommt, "bestanden"));
+    $("#nextGlanz").addEventListener("click", () => state.kommt && questById(state.kommt).glanz && setQuest(state.kommt, "glanz"));
+    $("#nextLose").addEventListener("click", () => state.kommt && setQuest(state.kommt, "verloren"));
+    $("#freigeben").addEventListener("click", () => state.kommt && !state.next && freigeben(state.kommt));
     // Alles zurücksetzen: neuer Zeitstempel in neustart, daran erkennt Dennis' Handy den neuen Anfang (ein Fenster, dann von vorn)
     $("#reset").addEventListener("click", () => {
       if (!confirm("Wirklich alles zurücksetzen? Alle Quests werden offen, Packs, Einsätze, Zähler und Dennis' Tagebuch-Antworten werden gelöscht. Sein Handy fängt von vorn an, mit der Fee. Rückgängig holt den Stand zurück.")) return;
@@ -268,6 +276,8 @@
       d.quests[q.id] = o.zufall ? wurf() : i % 3 === 2 ? "verloren" : "bestanden"; zeit(q.id);
       if (o.zufall && q.glanz && d.quests[q.id] === "bestanden" && Math.random() < .5) d.glanz[q.id] = true;
     });
+    // Gespielte Quests und die nächste gelten als freigegeben, damit der Sprung Dennis gleich die nächste zeigt
+    reihe.slice(0, n + 1).forEach(q => { d.frei[q.id] = t; });
     lauf.forEach(q => {
       const ende = o.ende || (o.zufall && Math.random() < .3);
       d.quests[q.id] = !ende ? "laeuft" : q.zaehler ? "beendet" : o.zufall ? wurf() : "bestanden";
@@ -325,7 +335,9 @@
     document.querySelectorAll("#quests li").forEach(li => {
       const g = !!state.glanz[li.dataset.id], v = g ? "glanz" : state.quests[li.dataset.id];
       li.querySelectorAll(".seg button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.v === v)));
-      li.querySelector(".badge.jetzt").hidden = li.dataset.id !== state.next;
+      const badge = li.querySelector(".badge.jetzt");
+      badge.hidden = li.dataset.id !== state.kommt;
+      badge.textContent = state.next ? "Jetzt" : "Kommt";
     });
 
     const buy = $("#buyDigits");
@@ -362,10 +374,17 @@
   }
 
   function renderNext() {
-    const n = state.next ? questById(state.next) : null;
+    // Die Quest, die kommt. Solange du sie nicht freigegeben hast, liegt sie bei Dennis im Nebel (state.next ist dann leer)
+    const n = state.kommt ? questById(state.kommt) : null, frei = !!state.next;
     $("#nextCard").classList.toggle("all-done", !n);
+    $("#nextCard").classList.toggle("nebel", !!n && !frei);
     $("#nextTitle").textContent = n ? n.name : "Alle Quests erledigt";
-    $("#nextMeta").textContent = n ? `${typWort(n)} ${n.nr} · ${n.ort}` : "Jetzt das Kästchen öffnen.";
+    $("#nextMeta").textContent = n ? `${typWort(n)} ${n.nr} · ${n.ort}${frei ? "" : " · bei Dennis noch im Nebel"}` : "Jetzt das Kästchen öffnen.";
+    $("#nextFrei").hidden = !n || frei;
+    if (n && !frei) {
+      const st = C.karte.stationen.find(x => x.id === n.station);
+      $("#freiHint").textContent = `Dennis sieht die Quest erst, wenn du sie freigibst. Auf seiner Karte wandert er dann ${st ? `${st.zu} ${st.name}` : "zur Station"}, danach tritt sie aus dem Nebel.`;
+    }
     $("#nextQm").textContent = n && n.qm ? n.qm : "";
     $("#nextFx").innerHTML = n ? fxHtml(n) : "";
     $("#nextGlanz").hidden = !(n && n.glanz);
@@ -449,7 +468,7 @@
   }
   function renderLogbuch() {
     $("#lbList").outerHTML = `<ol class="lb-list" id="lbList">${logbuchHtml().replace(/^<ol class="lb-list">|<\/ol>$/g, "")}</ol>`;
-    const n = state.next ? questById(state.next) : null;
+    const n = state.kommt ? questById(state.kommt) : null;
     if (n && n.logbuch) $("#nextLogbuch").innerHTML = `<p class="sub-h">Dennis' Antworten</p>` + logbuchHtml();
   }
 
@@ -509,6 +528,12 @@
       const q = questById(id);
       if (!q) return;
       zeilen.push({ zeit: doc.zeiten[id] || 0, art: "q", von: "qm", text: `${q.name}: ${doc.glanz[id] ? "Glanzsieg" : STATUS_WORT[st]}`, weg: () => setQuest(id, "offen") });
+    });
+    // Freigaben: nur die der Quest, die noch offen ist (Löschen holt sie bei Dennis still in den Nebel zurück)
+    Object.entries(doc.frei).forEach(([id, zeit]) => {
+      const q = questById(id);
+      if (!q || state.quests[id] !== "offen") return;
+      zeilen.push({ zeit: Number(zeit) || 0, art: "f", von: "qm", text: `Freigegeben: ${q.name}`, weg: () => commit(d => { d.frei = { ...d.frei }; delete d.frei[id]; }, "Freigabe gelöscht: " + q.name) });
     });
     zeilen.sort((a, b) => b.zeit - a.zeit);
     const liste = $("#verlauf");

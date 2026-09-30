@@ -324,13 +324,6 @@ svg { display: block; }
 @keyframes walkBob { 50% { translate: 0 -3px; } }
 .map-sheet.walking .mark .you { display: none; }
 
-/* GPS: ein Feenlicht dort, wo Dennis wirklich am Weg steht */
-.map-gps { position: absolute; z-index: 3; width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 50%; pointer-events: none;
-  background: radial-gradient(circle at 40% 35%, #fff, #8fe3ff 45%, #2aa6d8); box-shadow: 0 0 0 2px #0d3a4c, 0 0 12px 4px rgba(120,220,255,.75); transition: left .8s ease-out, top .8s ease-out; }
-.map-gps::after { content: ""; position: absolute; inset: -6px; border-radius: 50%; border: 2px solid rgba(120,220,255,.8); animation: gpsPing 1.8s ease-out infinite; }
-.map-gps[hidden] { display: none; }
-@keyframes gpsPing { from { transform: scale(.5); opacity: 1; } to { transform: scale(1.8); opacity: 0; } }
-
 /* Kartusche oben links: Höhe, Weg bis zum Gipfel, Höhenprofil des echten Wegs */
 .map-legend { position: absolute; z-index: 2; top: 6px; left: 6px; width: clamp(184px, 28%, 226px); padding: 4px 7px 5px; color: #2c2418;
   background: linear-gradient(#f3ead0, #e6d9a8); border: 2px solid #513e20; outline: 1px solid rgba(81,62,32,.35); outline-offset: -5px; box-shadow: 0 2px 5px rgba(60,40,10,.45); transition: opacity .2s; }
@@ -339,13 +332,6 @@ svg { display: block; }
 .ml-ico { width: 16px; height: 16px; flex: none; color: #513e20; }
 .ml-now { flex: 1; min-width: 0; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font: 800 var(--fs-tiny)/1.1 "Courier New", monospace; letter-spacing: .04em; color: #5a4a2c; }
 .ml-now b { font: 900 clamp(14px, 4.4vh, 17px)/1 Georgia, serif; letter-spacing: 0; color: #2c2418; font-variant-numeric: tabular-nums; }
-.ml-gps { display: inline-flex; align-items: center; gap: 4px; flex: none; min-height: 28px; padding: 0 6px; border: 2px solid #513e20; border-radius: 3px; background: #f8f1d8; color: #2c2418; cursor: pointer;
-  font: 900 var(--fs-tiny)/1 "Courier New", monospace; letter-spacing: .06em; }
-.ml-gps svg { width: 14px; height: 14px; }
-.ml-gps[aria-pressed="true"] { background: #16435a; border-color: #0b2633; color: #bff0ff; box-shadow: 0 0 8px rgba(120,220,255,.6); }
-.ml-gps.sucht svg { animation: gpsSucht 1s steps(2, end) infinite; }
-@keyframes gpsSucht { 50% { opacity: .35; } }
-.ml-gps[hidden] { display: none; }
 .ml-rest { margin: 2px 0 3px; font: 700 var(--fs-tiny)/1.25 "Trebuchet MS", sans-serif; color: #3d321e; }
 .ml-profil { position: relative; height: clamp(20px, 7vh, 30px); border-bottom: 1px solid rgba(81,62,32,.45); }
 .ml-profil svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
@@ -356,7 +342,6 @@ svg { display: block; }
 .p-st.done { background: var(--gold); }
 .p-st.hier { background: var(--cursor); }
 .p-du { width: 10px; height: 10px; border-radius: 50%; background: var(--cursor); border: 2px solid #2c2418; box-shadow: 0 0 0 2px rgba(250,242,110,.45); }
-.p-du.gps { background: #8fe3ff; box-shadow: 0 0 6px 2px rgba(120,220,255,.8); }
 .p-du[hidden] { display: none; }
 
 /* Stationstafel: oben links über der Kartusche, Zeilen öffnen die Quest */
@@ -386,10 +371,9 @@ svg { display: block; }
 .sc-code .tumbler { width: 17px; height: 22px; font-size: 14px; }
 
 /* Schwache Handys und weniger Bewegung: kein Treiben, kein Hüpfen, kein Pulsieren */
-html.schwach .map-fog, html.schwach .map-gps::after { animation: none; }
+html.schwach .map-fog { animation: none; }
 @media (prefers-reduced-motion: reduce) {
-  .map-fog, .map-walker, .map-gps::after, .ml-gps.sucht svg, .station-card { animation: none !important; }
-  .map-gps { transition: none; }
+  .map-fog, .map-walker, .station-card { animation: none !important; }
 }
 
 /* ---------- Seite AUSRÜSTUNG: links der Lederbeutel, Mitte Dennis im Bogenfenster, rechts Runenkreise ---------- */

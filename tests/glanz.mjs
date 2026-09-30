@@ -56,6 +56,14 @@ await admin.$$eval('details', ds => ds.forEach(d => { d.open = true; }));
 admin.on('dialog', d => d.accept());
 await admin.click('#reset'); await warte(300);
 const dennis = await seite('?direkt');
+// Freigabe (30.09.): Der Quest Master gibt jede Quest frei. Dennis sieht die Fee, wandert auf der Karte zur Station,
+// dann tritt die Quest aus dem Nebel. Wartet, bis er wieder auf der Quest-Seite steht.
+async function frei(p = dennis) {
+  if (await admin.isVisible('#freigeben')) { await admin.click('#freigeben'); await warte(800); }
+  await zu(p);
+  for (let i = 0; i < 24; i++) { if (await p.$('#overlay[hidden]') && !(await p.isVisible('#mapWalker')) && await p.evaluate(() => document.querySelector('.face.active').dataset.page) === '1') break; await warte(250); }
+  await warte(500); await zu(p);
+}
 for (let i = 0; i < 3; i++) { await admin.click('#nextWin'); await warte(250); }          // Log-Buch, Klingen, Wirbel
 await zu(dennis); await warte(600);
 await admin.click('#nextWin'); await warte(900);                                           // Podrennen
@@ -64,6 +72,7 @@ pruefe(pod.includes('Silberne Schuppe entpuppt sich als') && pod.includes('Klein
 const wasserFeld = () => dennis.$eval('.slot[data-feld="wasser"]', e => e.dataset.id);
 pruefe(await wasserFeld() === 'pistole_klein', 'Im Feld der Spritze steckt jetzt die kleine Pistole');
 await zu(dennis); await warte(1500);
+await frei();
 
 // Kartenwurf: Zeile GLANZSIEG mit Bedingung und getarnter Belohnung
 await dennis.evaluate(() => document.querySelector('.q-row[data-id="kartenwurf"]').click()); await warte(300);
@@ -83,6 +92,7 @@ pruefe((await admin.textContent('#verlauf')).includes('Kartenwurf: Glanzsieg'), 
 pruefe(await admin.getAttribute('#quests li[data-id="kartenwurf"] [data-v="glanz"]', 'aria-pressed') === 'true', 'Admin: Glanzsieg ist gedrückt');
 await admin.screenshot({ path: `${OUT}/glanz-6-admin.png`, fullPage: true });
 await zu(dennis); await warte(1500);
+await frei();
 
 // Auge des Jägers: nur die stärkste Wasserwaffe leuchtet
 // Was Dennis hier mitnehmen kann, steht als Symbol neben AUSRÜSTEN (29.09.)

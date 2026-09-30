@@ -41,7 +41,16 @@ async function siegel(p, sel, erwartet, text) {
   const f = await fenster(p);
   pruefe(f.includes(erwartet), `${text}: „${erwartet}“` + (f.includes(erwartet) ? "" : " (Fenster: " + f.slice(0, 120) + ")"));
   await zu(p); await warte(900);
+  await frei(p);                               // der Quest Master gibt die nächste Quest frei
   return f;
+}
+// Freigabe (30.09.): Der Quest Master gibt jede Quest frei. Dennis sieht die Fee, wandert auf der Karte zur Station,
+// dann tritt die Quest aus dem Nebel. Wartet, bis er wieder auf der Quest-Seite steht.
+async function frei(p = dennis) {
+  if (await admin.isVisible('#freigeben')) { await admin.click('#freigeben'); await warte(800); }
+  await zu(p);
+  for (let i = 0; i < 24; i++) { if (await p.$('#overlay[hidden]') && !(await p.isVisible('#mapWalker')) && await p.evaluate(() => document.querySelector('.face.active').dataset.page) === '1') break; await warte(250); }
+  await warte(500); await zu(p);
 }
 
 const admin = await seite('admin.html');
@@ -49,6 +58,7 @@ await admin.$$eval('details', ds => ds.forEach(d => { d.open = true; }));
 admin.on('dialog', d => d.accept());
 await admin.click('#reset'); await warte(300);
 const dennis = await seite('?direkt');
+await frei();
 
 // Freitag im Zug: Log-Buch
 await dennis.click('[data-logbuch]'); await warte(300);
