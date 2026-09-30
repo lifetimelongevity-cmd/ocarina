@@ -56,12 +56,43 @@
     };
   }
 
+  /* Live-Stream mit Wächter (30.09.): Auf dem Handy schläft die Verbindung manchmal still ein (gesperrt in der Tasche,
+     Wechsel zwischen WLAN und Mobilnetz). Sie gilt dann weiter als offen, es kommt aber nichts mehr, bis das System sie
+     nach Minuten verwirft. Firebase schickt alle 30 s ein Lebenszeichen (keep-alive): Bleibt es 40 s aus, neu verbinden.
+     Wird die App wieder sichtbar oder ist das Netz zurück, sofort neu verbinden. Die erste Meldung einer neuen
+     Verbindung bringt den ganzen Stand, darum geht dabei nichts verloren.
+     strom(url, { onEvent, onOpen, onDown }) → { offen() } */
+  function strom(url, h) {
+    let es = null, offen = false, letztes = 0;
+    function connect() {
+      try { es && es.close(); } catch (_) {}
+      es = null; offen = false; letztes = Date.now();
+      h.onDown && h.onDown();
+      if (typeof EventSource === "undefined") return;
+      es = new EventSource(url);
+      es.onopen = () => { offen = true; letztes = Date.now(); h.onOpen && h.onOpen(); };
+      es.onerror = () => { offen = false; h.onDown && h.onDown(); };
+      const lebt = () => { letztes = Date.now(); };
+      es.addEventListener("keep-alive", lebt);
+      es.addEventListener("put", ev => { lebt(); h.onEvent(ev); });
+      es.addEventListener("patch", ev => { lebt(); h.onEvent(ev); });
+    }
+    setInterval(() => { if (!document.hidden && Date.now() - letztes > 40000) connect(); }, 5000);
+    let zuletzt = 0;
+    const frisch = () => { if (Date.now() - zuletzt < 1500) return; zuletzt = Date.now(); connect(); };
+    document.addEventListener("visibilitychange", () => { if (!document.hidden) frisch(); });
+    window.addEventListener("pageshow", e => { if (e.persisted) frisch(); });
+    window.addEventListener("online", frisch);
+    connect();
+    return { offen: () => offen };
+  }
+
   function firebaseStore(cfg, opts) {
     const b = base(cfg);
     const url = cfg.speicher.databaseURL.replace(/\/+$/, "") + "/spiele/" + encodeURIComponent(cfg.speicher.spielId) + ".json";
     const auth = opts && opts.key ? "?auth=" + encodeURIComponent(opts.key) : "";
     const pendingKey = cacheKey(cfg) + ":pending";
-    let pending = null;
+    let pending = null, live = null;
     try { pending = JSON.parse(localStorage.getItem(pendingKey) || "null"); } catch (_) {}
     b.status({ online: false, pending: !!pending });
 
@@ -73,26 +104,16 @@
       b.set(next, { remote: true });
     }
 
-    // Lesen, Weg 1: Live-Stream (Server-Sent Events)
-    let es, streamOpen = false;
-    function connect() {
-      try { es && es.close(); } catch (_) {}
-      if (typeof EventSource === "undefined") return;
-      es = new EventSource(url);
-      es.onopen = () => { streamOpen = true; b.status({ online: true }); flush(); };
-      es.onerror = () => { streamOpen = false; };
-      const onEvent = ev => {
-        let msg; try { msg = JSON.parse(ev.data); } catch (_) { return; }
-        if (!msg || typeof msg.path !== "string") return;
-        if (pending) return;
-        let next;
-        if (msg.path === "/") next = ev.type === "patch" ? { ...b.doc, ...msg.data } : msg.data;
-        else next = setPath(JSON.parse(JSON.stringify(b.doc)), msg.path, msg.data, ev.type === "patch");
-        apply(next);
-      };
-      es.addEventListener("put", onEvent);
-      es.addEventListener("patch", onEvent);
-    }
+    // Lesen, Weg 1: Live-Stream (Server-Sent Events) mit Wächter
+    const onEvent = ev => {
+      let msg; try { msg = JSON.parse(ev.data); } catch (_) { return; }
+      if (!msg || typeof msg.path !== "string") return;
+      if (pending) return;
+      let next;
+      if (msg.path === "/") next = ev.type === "patch" ? { ...b.doc, ...msg.data } : msg.data;
+      else next = setPath(JSON.parse(JSON.stringify(b.doc)), msg.path, msg.data, ev.type === "patch");
+      apply(next);
+    };
 
     // Schreiben: ganzes Dokument, bei Fehler puffern
     let flushing = false;
@@ -121,18 +142,21 @@
 
     // Lesen, Weg 2: Abfrage alle 4 Sekunden, solange der Stream nicht steht (Mobilnetz, Proxys)
     async function poll() {
-      if (streamOpen) return;
+      if (live && live.offen()) return;
       try {
         const res = await fetch(url, { cache: "no-store" });
         if (!res.ok) throw new Error("HTTP " + res.status);
-        apply(await res.json());
+        const data = await res.json();
+        if (live && live.offen()) return;            // inzwischen steht der Stream, sein Stand ist frischer
+        apply(data);
         b.status({ online: true });
         flush();
       } catch (_) { b.status({ online: false }); }
     }
     setInterval(poll, 4000);
 
-    connect();
+    // Neu verbunden (Wächter, wieder sichtbar): gleich einmal direkt fragen, der Stream braucht einen Moment
+    live = strom(url, { onEvent, onOpen: () => { b.status({ online: true }); flush(); }, onDown: () => { if (live) poll(); } });
     poll();
     return {
       subscribe: b.subscribe, onStatus: b.onStatus,
@@ -228,26 +252,20 @@
     }
 
     if (firebase) {
-      let streamOpen = false;
-      if (typeof EventSource !== "undefined") {
-        const es = new EventSource(base + ".json");
-        es.onopen = () => { streamOpen = true; flush(); };
-        es.onerror = () => { streamOpen = false; };
-        const onEvent = ev => {
-          let msg; try { msg = JSON.parse(ev.data); } catch (_) { return; }
-          if (!msg || typeof msg.path !== "string") return;
-          let next;
-          if (msg.path === "/") next = ev.type === "patch" ? { ...remote, ...obj(msg.data) } : msg.data;
-          else next = setPath(JSON.parse(JSON.stringify(remote)), msg.path, msg.data, ev.type === "patch");
-          uebernehmen(next);
-        };
-        es.addEventListener("put", onEvent);
-        es.addEventListener("patch", onEvent);
-      }
-      const poll = async () => {
-        if (streamOpen) return;
-        try { const res = await fetch(base + ".json", { cache: "no-store" }); if (res.ok) { uebernehmen(await res.json()); flush(); } } catch (_) {}
+      const onEvent = ev => {
+        let msg; try { msg = JSON.parse(ev.data); } catch (_) { return; }
+        if (!msg || typeof msg.path !== "string") return;
+        let next;
+        if (msg.path === "/") next = ev.type === "patch" ? { ...remote, ...obj(msg.data) } : msg.data;
+        else next = setPath(JSON.parse(JSON.stringify(remote)), msg.path, msg.data, ev.type === "patch");
+        uebernehmen(next);
       };
+      let live = null;
+      const poll = async () => {
+        if (live && live.offen()) return;
+        try { const res = await fetch(base + ".json", { cache: "no-store" }); if (res.ok) { const data = await res.json(); if (!(live && live.offen())) uebernehmen(data); flush(); } } catch (_) {}
+      };
+      live = strom(base + ".json", { onEvent, onOpen: flush, onDown: () => { if (live) poll(); } });
       setInterval(poll, 5000); poll();
       setInterval(flush, 8000);
       window.addEventListener("online", flush);
