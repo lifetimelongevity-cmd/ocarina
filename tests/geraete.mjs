@@ -74,7 +74,7 @@ async function pruefen(page, g, name) {
       if (b.left < sa.l - 1 || b.right > W - sa.r + 1 || (b.bottom > H - sa.b + 1 && !el.classList.contains('sync'))) out.inset.push(`${el.className || el.tagName} [${Math.round(b.left)},${Math.round(b.right)},${Math.round(b.bottom)}]`);
       if (b.right > W + 1 || b.bottom > H + 1) out.ausserhalb.push(el.className);
     }
-    for (const el of document.querySelectorAll('.face.active *, .hud *, .result *, .lb-panel *, .prolog *, .fee-ruf *, .coach-bubble *, .sw-panel *')) {
+    for (const el of document.querySelectorAll('.face.active *, .hud *, .result *, .lb-panel *, .prolog *, .geist-ruf *, .coach-bubble *, .sw-panel *')) {
       if (!bereich(el) || !sichtbar(el)) continue;
       const s = getComputedStyle(el);
       const hatText = [...el.childNodes].some(n => n.nodeType === 3 && n.textContent.trim());
@@ -189,16 +189,16 @@ for (const g of GERAETE) {
   await page.click('#lbSeal'); await page.waitForTimeout(900);
   await shot(page, g, '8-logbuch-besiegelt');
   alleProbleme += (await pruefen(page, g, 'LOG-BUCH BESIEGELT')).length;
-  // Nach Rikes Antwort auf Frage 1 fliegt die Fee herbei und macht daraus eine Quest (30.09.): Bild mit dem Medaillon
-  await page.waitForSelector('#feeRuf:not([hidden])', { timeout: 8000 }).catch(() => {});
-  if (await page.isVisible('#feeRuf')) {
+  // Nach Rikes Antwort auf Frage 1 huscht der Schattendieb herein und macht daraus eine Quest (30.09.): Bild mit dem Medaillon
+  await page.waitForSelector('#geistRuf:not([hidden])', { timeout: 8000 }).catch(() => {});
+  if (await page.isVisible('#geistRuf')) {
     await page.waitForTimeout(1200);
-    for (let i = 0; i < 6 && !(await page.$('#frBild .fr-medaillon')); i++) { await page.click('#feeRuf', { timeout: 1500 }).catch(() => {}); await page.waitForTimeout(400); }
+    for (let i = 0; i < 6 && !(await page.$('#grBild .gr-medaillon')); i++) { await page.click('#geistRuf', { timeout: 1500 }).catch(() => {}); await page.waitForTimeout(400); }
     await page.waitForTimeout(1200);
-    await shot(page, g, '8b-fee-quest');
-    alleProbleme += (await pruefen(page, g, 'FEE IM TAGEBUCH')).length;
-    for (let i = 0; i < 30 && await page.isVisible('#feeRuf'); i++) { await page.click('#feeRuf', { timeout: 1500 }).catch(() => {}); await page.waitForTimeout(250); }
-  } else { log('  PROBLEM: Die Fee kommt nach Frage 1 nicht'); alleProbleme++; }
+    await shot(page, g, '8b-geist-quest');
+    alleProbleme += (await pruefen(page, g, 'SCHATTENDIEB IM TAGEBUCH')).length;
+    for (let i = 0; i < 30 && await page.isVisible('#geistRuf'); i++) { await page.click('#geistRuf', { timeout: 1500 }).catch(() => {}); await page.waitForTimeout(250); }
+  } else { log('  PROBLEM: Der Schattendieb kommt nach Frage 1 nicht'); alleProbleme++; }
   // Tastatur offen: sichtbarer Bereich nur etwa die Hälfte der Höhe, geprüft bei jeder weiteren Frage (lange Fragen brechen um)
   if (g.ios) {
     await page.click('#lbNext'); await page.waitForTimeout(200);
@@ -287,7 +287,7 @@ for (const g of GERAETE) {
   await dennis.click('[data-logbuch]');
   for (const a of ['Im Café am Gärtnerplatz', 'Meine Socken']) {
     await dennis.fill('#lbInput', a); await dennis.click('#lbSeal'); await dennis.waitForTimeout(400); await dennis.click('#lbNext'); await dennis.waitForTimeout(200);
-    for (let i = 0; i < 30 && await dennis.isVisible('#feeRuf'); i++) { await dennis.click('#feeRuf', { timeout: 1500 }).catch(() => {}); await dennis.waitForTimeout(200); }   // die Fee nach Frage 1
+    for (let i = 0; i < 30 && await dennis.isVisible('#geistRuf'); i++) { await dennis.click('#geistRuf', { timeout: 1500 }).catch(() => {}); await dennis.waitForTimeout(200); }   // der Schattendieb nach Frage 1
   }
   await dennis.click('#lbClose');
   await admin.waitForTimeout(500);

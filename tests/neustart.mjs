@@ -37,11 +37,11 @@ async function ersteQuest(p) {
   pruefe(t.includes('DEINE ERSTE QUEST'), 'Nach dem Prolog taucht die erste Quest auf');
   await zu(p); await warte(800);
 }
-// Die Fee im Tagebuch (30.09.): Nach Frage 1 kommt sie, tippen, bis sie davongeflogen ist (verschwindet sie gerade, zählt der Tipp nicht)
-const feeWeg = async p => { for (let i = 0; i < 30 && await p.isVisible('#feeRuf'); i++) { await p.click('#feeRuf', { timeout: 1500 }).catch(() => {}); await warte(200); } };
+// Der Schattendieb im Tagebuch (30.09.): Nach Frage 1 kommt er, tippen, bis er geflohen ist (verschwindet er gerade, zählt der Tipp nicht)
+const geistWeg = async p => { for (let i = 0; i < 30 && await p.isVisible('#geistRuf'); i++) { await p.click('#geistRuf', { timeout: 1500 }).catch(() => {}); await warte(200); } };
 async function tagebuch(p, text) {
   await p.click('[data-logbuch]'); await warte(300);
-  for (let i = 0; i < 7; i++) { await p.fill('#lbInput', text + (i + 1)); await p.click('#lbSeal'); await warte(200); await p.click('#lbNext'); await warte(120); await feeWeg(p); }
+  for (let i = 0; i < 7; i++) { await p.fill('#lbInput', text + (i + 1)); await p.click('#lbSeal'); await warte(200); await p.click('#lbNext'); await warte(120); await geistWeg(p); }
   await p.click('#lbClose'); await warte(300);
 }
 

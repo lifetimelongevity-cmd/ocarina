@@ -43,8 +43,8 @@ pruefe(!(await dennis.$('[data-ergebnis]')), 'Log-Buch: kein Ergebnis-Knopf vor 
 await dennis.click('[data-logbuch]'); await warte(300);
 for (let i = 0; i < 7; i++) {
   await dennis.fill('#lbInput', 'Antwort ' + (i + 1)); await dennis.click('#lbSeal'); await warte(250); await dennis.click('#lbNext'); await warte(150);
-  // Nach Frage 1 macht die Fee aus Rikes Antwort eine Quest (30.09.): durchtippen, bis sie davongeflogen ist
-  for (let k = 0; k < 30 && await dennis.isVisible('#feeRuf'); k++) { await dennis.click('#feeRuf', { timeout: 1500 }).catch(() => {}); await warte(200); }
+  // Nach Frage 1 macht der Schattendieb aus Rikes Antwort eine Quest (30.09.): durchtippen, bis er geflohen ist
+  for (let k = 0; k < 30 && await dennis.isVisible('#geistRuf'); k++) { await dennis.click('#geistRuf', { timeout: 1500 }).catch(() => {}); await warte(200); }
 }
 await dennis.click('#lbClose'); await warte(300);
 pruefe(await dennis.isVisible('[data-ergebnis="bestanden"]') && await dennis.isVisible('[data-ergebnis="verloren"]'), 'Log-Buch: nach sieben Antworten BESTANDEN und VERLOREN');
@@ -114,7 +114,7 @@ pruefe((await dennis.getAttribute('.c-taste.l', 'data-id')) === 'spruchrolle', '
 await dennis.tap('[data-mitnehmen]'); await warte(400);
 const siegelText = await dennis.textContent('#swFolgen');
 pruefe(siegelText.includes('DABEI') && siegelText.includes('FLUCH') && siegelText.includes('schwachen Hand') && siegelText.includes('seinen Preis'), 'Siegel-Fenster: dabei, Vorteil beim Wirbel und die Warnung');
-pruefe(!siegelText.includes('Schattendieb'), 'Siegel-Fenster verrät den Dieb nicht');
+pruefe(!siegelText.includes('Buu Huu'), 'Siegel-Fenster verrät den Dieb nicht');
 await dennis.evaluate(() => { Math.random = () => 0.7; });
 await halten(dennis);
 pruefe(await dennis.isVisible('#fluchSzene') && (await dennis.textContent('#fluchSzene')).includes('DER FLUCH GREIFT') && (await dennis.textContent('#fluchSzene')).includes('schwachen Hand'), 'Szene: Der Fluch greift, mit Vorteil');
@@ -127,12 +127,12 @@ await warte(3200);
 const gesprochen = await fenster(dennis);
 pruefe(!(await dennis.isVisible('#fluchSzene')) && gesprochen.includes('FLUCH GESPROCHEN') && gesprochen.includes('schwachen Hand'), 'Danach das Fenster: Fluch gesprochen mit Vorteil');
 const dieb = await dennis.textContent('#resultLines .dieb');
-pruefe(dieb.includes('Schattendieb') && dieb.includes('2 Packs gestohlen') && dieb.includes('−2'), 'Der Schattendieb stiehlt 2 Packs');
+pruefe(dieb.includes('Buu Huu') && dieb.includes('2 Packs gestohlen') && dieb.includes('−2'), 'Buu Huu stiehlt 2 Packs');
 await dennis.screenshot({ path: `${OUT}/selbst-5c-dieb.png` });
 pruefe(Number(await dennis.textContent('#packsVal')) === Math.max(0, packsVor - 2), `Packs: ${packsVor} → ${Math.max(0, packsVor - 2)}`);
 await warte(300);
 const einsAdmin = await admin.textContent('#verlauf li[data-art="e"][data-von="dennis"]');
-pruefe(einsAdmin.includes('schwachen Hand') && einsAdmin.includes('Schattendieb stiehlt 2'), 'Admin: Fluch mit Vorteil und Raub im Verlauf');
+pruefe(einsAdmin.includes('schwachen Hand') && einsAdmin.includes('Buu Huu stiehlt 2'), 'Admin: Fluch mit Vorteil und Raub im Verlauf');
 await zu(dennis); await warte(600);
 // Zurücknehmen: die gestohlenen Packs sind zurück
 await admin.click('#verlauf li[data-art="e"] .zurueck'); await warte(1400);

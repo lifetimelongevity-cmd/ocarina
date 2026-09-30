@@ -146,7 +146,9 @@
     siegel:   [[262, .08], [392, .3]],
     fund:     [[659, .07], [880, .07], [1175, .07], [1760, .32]],
     // Platzhalter, solange Rikes Sprachnachricht fehlt: die ersten Töne eines Liebesthemas (eigene Tonfolge)
-    stimme:   [[659, .3], [784, .3], [880, .45], [784, .3], [659, .6]]
+    stimme:   [[659, .3], [784, .3], [880, .45], [784, .3], [659, .6]],
+    // Der Schattendieb des Bundes kichert (Tagebuch, 30.09.)
+    kichern:  [[932, .06], [831, .06], [932, .06], [831, .06], [698, .08], [587, .26]]
   };
   function melody(name) {
     try {
@@ -1641,8 +1643,8 @@
   // Tastatur (Laptop): Z/R Seite, Pfeile Auswahl, Enter/Esc schließt das Fenster
   window.addEventListener("keydown", e => {
     const k = e.key.toLowerCase();
-    // Die Fee im Tagebuch: Enter blättert, Esc lässt sie gleich davonfliegen
-    if (feeRuf.offen()) { if (["enter", " ", "a"].includes(k)) { e.preventDefault(); feeRuf.weiter(); } else if (k === "escape") feeRuf.ende(); return; }
+    // Der Schattendieb im Tagebuch: Enter blättert, Esc lässt ihn gleich fliehen
+    if (geistRuf.offen()) { if (["enter", " ", "a"].includes(k)) { e.preventDefault(); geistRuf.weiter(); } else if (k === "escape") geistRuf.ende(); return; }
     if (!$("#introScreen").hidden || !$("#logbuch").hidden) return;
     if (abspann.offen()) { if (["enter", " ", "escape"].includes(k)) { e.preventDefault(); if ($("#abspann").dataset.phase === "ende") abspann.schliessen(); else abspann.weiter(); } return; }
     if (!$("#schwur").hidden) { if (k === "escape") schwur.schliessen(); return; }
@@ -1660,13 +1662,13 @@
     if (page === 2) { const ids = [...document.querySelectorAll(".slot")].map(b => b.dataset.id); selectItem(ids[(ids.indexOf(sel[2]) + step + ids.length) % ids.length]); }
   });
 
-  /* ---------- Fee im Tagebuch: Rikes Antwort wird zur Quest (30.09., Wunsch des Nutzers) ----------
-     Rike hat auf Frage 1 verraten, dass Dennis keinen Faden durchs Nadelöhr bekommt. Ist ihre Antwort vorbei, fliegt die
-     Fee herbei und macht daraus eine Quest: Bei Satz 2 erscheint das Medaillon von Rikes Rache, bei Satz 3 verschwindet es
-     im Nebel. Den Namen sagt sie nicht. Sätze und Quest in config.js (logbuch.fragen[].fee), wann sie kommt, entscheidet
-     das Log-Buch (unten). Tippen blättert wie im Prolog, danach geht es im Tagebuch weiter. */
-  const feeRuf = (() => {
-    const el = $("#feeRuf"), text = $("#frText"), bild = $("#frBild");
+  /* ---------- Schattendieb im Tagebuch: Rikes Antwort wird zur Quest (30.09., Wunsch des Nutzers) ----------
+     Rike hat auf Frage 1 verraten, dass Dennis keinen Faden durchs Nadelöhr bekommt. Ist ihre Antwort vorbei, huscht der
+     Schattendieb des Bundes herein (das Gemeine macht der Bund, die Fee hilft nur) und macht daraus eine Quest: Bei Satz 2
+     erscheint das Medaillon von Rikes Rache, bei Satz 3 verschwindet es im Nebel. Den Namen sagt er nicht. Sätze und Quest in
+     config.js (logbuch.fragen[].geist), wann er kommt, entscheidet das Log-Buch (unten). Tippen blättert wie im Prolog. */
+  const geistRuf = (() => {
+    const el = $("#geistRuf"), text = $("#grText"), bild = $("#grBild");
     let saetze = [], quest = null, danach = null, i = -1, tippen = null, timer = null, bereit = false, geht = false;
     // Text erscheint Buchstabe für Buchstabe wie im Prolog. Erster Tipp zeigt alles, zweiter blättert.
     function schreibe(t) {
@@ -1677,9 +1679,9 @@
       tippen = setInterval(() => { n += 2; text.textContent = t.slice(0, n); if (n >= t.length) { clearInterval(tippen); tippen = null; } }, 28);
     }
     function zeige() {
-      const stufe = !quest || i === 0 ? "fee" : i === 1 ? "quest" : "nebel";
-      if (stufe === "quest" && el.dataset.bild === "fee") {
-        bild.innerHTML = `<span class="fr-medaillon" style="--m:${quest.farbe || "#c9c3a2"}"><span class="medal-stage won">${medalHtml(quest, "offen", false)}</span><span class="medal covered fr-nebel"><b>?</b></span></span>`;
+      const stufe = !quest || i === 0 ? "geist" : i === 1 ? "quest" : "nebel";
+      if (stufe === "quest" && el.dataset.bild === "geist") {
+        bild.innerHTML = `<span class="gr-medaillon" style="--m:${quest.farbe || "#c9c3a2"}"><span class="medal-stage won">${medalHtml(quest, "offen", false)}</span><span class="medal covered gr-nebel"><b>?</b></span></span>`;
         bild.style.animation = "none"; void bild.offsetWidth; bild.style.animation = "";
         melody("pruefung");
       } else if (stufe === "nebel" && el.dataset.bild === "quest") {
@@ -1695,7 +1697,7 @@
       if (++i >= saetze.length) return ende();
       zeige();
     }
-    // Sie fliegt davon, dann geht es im Tagebuch weiter
+    // Er flieht, dann geht es im Tagebuch weiter
     function ende() {
       if (el.hidden || geht) return;
       geht = true;
@@ -1712,11 +1714,11 @@
     function zeigen(fee, dann) {
       schliessen();
       saetze = fee.saetze || []; quest = fee.quest ? questById(fee.quest) : null; danach = dann || null; i = -1;
-      el.dataset.bild = "fee"; bild.innerHTML = ""; text.textContent = "";
+      el.dataset.bild = "geist"; bild.innerHTML = ""; text.textContent = "";
       el.hidden = false;
-      $("#frBox").focus({ preventScroll: true });
-      melody("zauber");
-      // Erst kommt sie angeflogen, dann spricht sie. Tipps davor zählen nicht (etwa ein zweiter Tipp auf WEITER).
+      $("#grBox").focus({ preventScroll: true });
+      melody("kichern");
+      // Erst huscht er herein, dann spricht er. Tipps davor zählen nicht (etwa ein zweiter Tipp auf WEITER).
       timer = setTimeout(() => { bereit = true; weiter(); }, STILL.matches ? 0 : 650);
     }
     el.addEventListener("click", weiter);
@@ -1727,7 +1729,7 @@
   const logbuch = (() => {
     const el = $("#logbuch"), fragen = C.logbuch.fragen;
     const quellen = {};             // nr → Blob-URL (vorab geladen) oder false (Datei fehlt noch)
-    let nr = 1, spieler = null, laeuft = false, wiedergabe = 0, feeFrage = 0, feeTimer = null;
+    let nr = 1, spieler = null, laeuft = false, wiedergabe = 0, geistFrage = 0, geistTimer = null;
 
     // Alle Dateien beim Start vorab laden, damit ein Funkloch im Zug nicht stört
     function vorladen() {
@@ -1768,12 +1770,12 @@
       stoppen();
       const url = quellen[nr], n = nr, w = wiedergabe;
       el.classList.add("playing"); laeuft = true;
-      // gehoert: Die Nachricht lief bis zum Ende, dann meldet sich kurz danach die Fee (falls sie zu der Antwort etwas sagt).
+      // gehoert: Die Nachricht lief bis zum Ende, dann meldet sich kurz danach der Schattendieb (falls er zu der Antwort etwas sagt).
       // Eine gestoppte oder neu gestartete Wiedergabe meldet nichts mehr.
       const ende = gehoert => {
         if (w !== wiedergabe) return;
         laeuft = false; el.classList.remove("playing");
-        if (gehoert) feeTimer = setTimeout(() => feeKommt(n), 600);
+        if (gehoert) geistTimer = setTimeout(() => geistKommt(n), 600);
       };
       if (url) {
         spieler = new Audio(url);
@@ -1786,18 +1788,18 @@
         setTimeout(() => ende(true), ms + 300);
       }
     }
-    // Stoppt Rikes Stimme. Hört Dennis noch einmal hin, wartet auch die Fee bis zum neuen Ende.
-    function stoppen() { wiedergabe++; clearTimeout(feeTimer); if (spieler) { spieler.pause(); spieler = null; } laeuft = false; el.classList.remove("playing"); }
+    // Stoppt Rikes Stimme. Hört Dennis noch einmal hin, wartet auch der Schattendieb bis zum neuen Ende.
+    function stoppen() { wiedergabe++; clearTimeout(geistTimer); if (spieler) { spieler.pause(); spieler = null; } laeuft = false; el.classList.remove("playing"); }
 
-    // Die Fee meldet sich nach Rikes Antwort (fee bei der Frage in config.js, 30.09.). Hat Dennis die Frage gerade besiegelt
-    // (feeFrage), kommt sie, wenn die Nachricht zu Ende ist, spätestens wenn er weiterblättert oder das Tagebuch schließt
+    // Der Schattendieb meldet sich nach Rikes Antwort (geist bei der Frage in config.js, 30.09.). Hat Dennis die Frage gerade
+    // besiegelt (geistFrage), kommt er, wenn die Nachricht zu Ende ist, spätestens wenn er weiterblättert oder das Tagebuch schließt
     // (das geht danach weiter). Also einmal, und nach Tagebuch leeren oder Alles zurücksetzen wieder.
-    function feeKommt(n, danach) {
-      clearTimeout(feeTimer);
-      if (feeFrage !== n || !beantwortet(n) || el.hidden) return danach && danach();
-      feeFrage = 0;
+    function geistKommt(n, danach) {
+      clearTimeout(geistTimer);
+      if (geistFrage !== n || !beantwortet(n) || el.hidden) return danach && danach();
+      geistFrage = 0;
       stoppen();
-      feeRuf.zeigen(fragen[n - 1].fee, danach);
+      geistRuf.zeigen(fragen[n - 1].geist, danach);
     }
 
     function oeffnen() {
@@ -1808,7 +1810,7 @@
       tone("confirm");
       passen();
     }
-    function schliessen() { stoppen(); feeRuf.schliessen(); feeFrage = 0; el.hidden = true; el.classList.remove("schreibt"); renderQuests(); }
+    function schliessen() { stoppen(); geistRuf.schliessen(); geistFrage = 0; el.hidden = true; el.classList.remove("schreibt"); renderQuests(); }
 
     // Tastatur auf dem Handy: das Fenster bleibt über der Tastatur
     function passen() {
@@ -1834,7 +1836,7 @@
       $("#lbInput").blur();
       antworten = { ...antworten, [String(nr)]: { antwort: text, zeit: Date.now() } };
       lbStore.besiegeln(nr, text);
-      feeFrage = fragen[nr - 1].fee ? nr : 0;
+      geistFrage = fragen[nr - 1].geist ? nr : 0;
       melody("siegel");
       zeigen();
       el.classList.add("sealing");
@@ -1842,8 +1844,8 @@
       spielen();                      // direkt in der Tipp-Geste starten, sonst blockt iOS die Wiedergabe
     });
     $("#lbPlay").addEventListener("click", () => (laeuft ? stoppen() : spielen()));
-    $("#lbNext").addEventListener("click", () => feeKommt(nr, () => { stoppen(); nr = ersteOffene() || fragen.length + 1; zeigen(); tone("move"); }));
-    $("#lbClose").addEventListener("click", () => feeKommt(nr, schliessen));
+    $("#lbNext").addEventListener("click", () => geistKommt(nr, () => { stoppen(); nr = ersteOffene() || fragen.length + 1; zeigen(); tone("move"); }));
+    $("#lbClose").addEventListener("click", () => geistKommt(nr, schliessen));
     return { oeffnen, schliessen, vorladen };
   })();
 

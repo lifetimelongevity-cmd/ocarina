@@ -15,9 +15,9 @@ Die Fragen stehen in `app/config.js` unter `logbuch.fragen` (gleiche Reihenfolge
 | `frage6.m4a` | Was soll Dennis in eurer Ehe nie ändern? |
 | `frage7.m4a` | Was schätzt du an Dennis am meisten? |
 
-Nach Frage 1 meldet sich bei Dennis die Fee und macht aus Rikes Antwort eine Quest (Rikes Rache, seit 30.09.).
-Sie geht davon aus, dass Rike dort die Nadel nennt („Geduldssachen, so was wie einen Faden durchs Nadelöhr einfädeln“).
-Sagt Rike etwas anderes, die Sätze der Fee in `app/config.js` anpassen (`logbuch.fragen`, erste Frage, `fee`).
+Nach Frage 1 meldet sich bei Dennis Buu Huu, der Geist des Bundes, und macht aus Rikes Antwort eine Quest (Rikes Rache, seit 30.09.).
+Er geht davon aus, dass Rike dort die Nadel nennt („Geduldssachen, so was wie einen Faden durchs Nadelöhr einfädeln“).
+Sagt Rike etwas anderes, seine Sätze in `app/config.js` anpassen (`logbuch.fragen`, erste Frage, `geist`).
 
 Dennis tippt in ein bis drei Worten, was Rike gesagt hat. Damit der Quest Master schnell prüfen kann,
 sagt Rike am Anfang jeder Nachricht ihre Antwort kurz („Meine Antwort: …“) und erzählt erst danach.

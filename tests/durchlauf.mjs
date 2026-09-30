@@ -64,8 +64,8 @@ await frei();
 await dennis.click('[data-logbuch]'); await warte(300);
 for (let i = 0; i < 7; i++) {
   await dennis.fill('#lbInput', 'Antwort ' + (i + 1)); await dennis.click('#lbSeal'); await warte(250); await dennis.click('#lbNext'); await warte(150);
-  // Nach Frage 1 macht die Fee aus Rikes Antwort eine Quest (30.09.): durchtippen, bis sie davongeflogen ist
-  for (let k = 0; k < 30 && await dennis.isVisible('#feeRuf'); k++) { await dennis.click('#feeRuf', { timeout: 1500 }).catch(() => {}); await warte(200); }
+  // Nach Frage 1 macht der Schattendieb aus Rikes Antwort eine Quest (30.09.): durchtippen, bis er geflohen ist
+  for (let k = 0; k < 30 && await dennis.isVisible('#geistRuf'); k++) { await dennis.click('#geistRuf', { timeout: 1500 }).catch(() => {}); await warte(200); }
 }
 await dennis.click('#lbClose'); await warte(300);
 await siegel(dennis, '#questCard [data-ergebnis="bestanden"]', 'PRÜFUNG BESTANDEN', 'Rikes Tagebuch');

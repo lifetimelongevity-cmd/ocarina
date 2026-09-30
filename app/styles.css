@@ -866,8 +866,8 @@ button.dabei-zeile { cursor: pointer; }
 .result-lines .warnung { display: block; font: italic 400 max(10px, calc(var(--fs-body) * .8))/1.25 Georgia, serif; color: #d9b8ff; margin-top: 2px; }
 .chip.geheim .mini-tumbler { color: #c9a4ff; }
 .result-lines li.dieb { color: #d8d2f0; }
-.result-lines li.dieb .dieb-ic { color: #cfc6ff; opacity: 0; transform: translateX(-14px) scale(.7); transition: opacity .5s, transform .5s cubic-bezier(.3, 1.6, .5, 1); }
-.result-lines li.dieb .dieb-ic svg { width: 24px; height: 24px; filter: drop-shadow(0 0 5px rgba(160, 130, 255, .7)); }
+.result-lines li.dieb .dieb-ic { color: #f2f8ff; opacity: 0; transform: translateX(-14px) scale(.7); transition: opacity .5s, transform .5s cubic-bezier(.3, 1.6, .5, 1); }
+.result-lines li.dieb .dieb-ic svg { width: 24px; height: 24px; filter: drop-shadow(0 0 5px rgba(170, 220, 255, .8)); }
 .result-lines li.dieb.kommt .dieb-ic { opacity: 1; transform: none; animation: diebSchweben 1.1s ease-in-out .5s infinite alternate; }
 .result-lines li.dieb .dieb-zahl { margin-left: auto; flex: none; min-width: 2.2em; text-align: center; font: 900 calc(var(--fs-body) * 1.35)/1 Georgia, serif; color: #fff;
   border: 1px solid rgba(201, 164, 255, .6); border-radius: 6px; padding: 3px 5px; background: rgba(60, 30, 90, .55); }
@@ -981,35 +981,41 @@ button.dabei-zeile { cursor: pointer; }
 @keyframes wave { to { height: 95%; } }
 .lb-who { color: #ffc2dc; font: 800 var(--fs-tiny)/1 "Courier New", monospace; letter-spacing: .08em; white-space: nowrap; }
 
-/* ---------- Die Fee meldet sich im Tagebuch (30.09.) ----------
-   Wie der Prolog, nur über dem Tagebuch, das dunkel durchscheint: Erst fliegt die Fee herbei, dann spricht sie.
-   Bei Satz 2 erscheint das Medaillon der neuen Quest mit Strahlen, bei Satz 3 legt sich Nebel darüber (wie in der Liste). */
-.fee-ruf { position: absolute; inset: 0; z-index: 54; display: grid; grid-template-rows: minmax(0, 1fr) auto; justify-items: center; gap: 8px; cursor: pointer;
+/* ---------- Buu Huu im Tagebuch (30.09.), vom Bund angeheuert, hieß zuerst Schattendieb ----------
+   Aufbau wie der Prolog, nur über dem Tagebuch und in den Farben des Fluchs: Er huscht von rechts herein, schwebt, grinst
+   und spricht. Bei Satz 2 erscheint das Medaillon der neuen Quest mit Strahlen, bei Satz 3 legt sich Nebel darüber
+   (wie in der Liste). Zum Schluss flieht er, wie nach einem Diebstahl. */
+.geist-ruf { position: absolute; inset: 0; z-index: 54; display: grid; grid-template-rows: minmax(0, 1fr) auto; justify-items: center; gap: 8px; cursor: pointer;
   padding: calc(var(--pad-t) + 10px) calc(var(--pad-r) + 12px) calc(var(--foot-h) + 10px) calc(var(--pad-l) + 12px);
-  background: radial-gradient(ellipse 55% 60% at 50% 36%, rgba(34,48,78,.93), rgba(4,6,12,.96) 75%); animation: prologIn 420ms ease-out both; }
-.fee-ruf[hidden] { display: none; }
-.fee-ruf .prolog-box { animation: bildIn 380ms ease-out 600ms both; }
-.fee-ruf:not([data-bild="fee"]) .prolog-fee { width: clamp(42px, 13vh, 62px); animation: feeHover 2.4s ease-in-out infinite; }
-/* Zum Schluss fliegt sie davon, wie sie gekommen ist */
-.fee-ruf.geht { animation: frWeg 450ms ease-in both; }
-.fee-ruf.geht .prolog-fee { animation: feeWeg 450ms ease-in both; }
-@keyframes frWeg { to { opacity: 0; } }
-@keyframes feeWeg { to { opacity: 0; transform: translate(40vw, -30vh) scale(.3) rotate(25deg); } }
-.fr-medaillon { --sz: clamp(52px, 16vh, 76px); position: relative; display: grid; place-items: center; }
-.fr-medaillon > * { grid-area: 1 / 1 / 2 / 2; }
-.fr-medaillon .medal-stage { width: calc(var(--sz) * 1.2); }
-.fr-medaillon .medal-stage > .medal { --sz: inherit; }
-.fr-nebel { opacity: 0; }
-.fr-medaillon.im-nebel .medal-stage { opacity: 0; transform: scale(.85); animation: frVerhuellt 900ms ease-in; }
-.fr-medaillon.im-nebel .fr-nebel { opacity: 1; animation: frNebelDa 900ms ease-out 250ms backwards; }
-.fr-medaillon::after { content: ""; position: absolute; inset: -45%; border-radius: 50%; pointer-events: none; opacity: 0;
+  background: radial-gradient(ellipse 55% 60% at 50% 36%, rgba(52,26,86,.93), rgba(8,4,16,.96) 75%); animation: prologIn 420ms ease-out both; }
+.geist-ruf[hidden] { display: none; }
+.geist-ruf .prolog-box { outline-color: #8f78c8; animation: bildIn 380ms ease-out 650ms both; }
+.gr-wer { margin: 0 0 4px; color: #c9a4ff; font: 800 var(--fs-tiny)/1 "Courier New", monospace; letter-spacing: .12em; }
+.gr-geist { display: grid; place-items: center; flex: none; color: #f2f8ff; animation: grKommt 800ms cubic-bezier(.2, .9, .3, 1) both; }
+.gr-geist svg { width: clamp(58px, 19vh, 88px); height: auto; aspect-ratio: 1; filter: drop-shadow(0 0 12px rgba(170,220,255,.9)) drop-shadow(0 0 28px rgba(120,60,200,.55));
+  animation: fsSchweben .6s ease-in-out 800ms infinite alternate; }
+.geist-ruf:not([data-bild="geist"]) .gr-geist svg { width: clamp(42px, 13vh, 62px); }
+@keyframes grKommt { from { opacity: 0; transform: translateX(45vw) scale(.5) skewX(-18deg); } 60% { opacity: 1; transform: translateX(-10px) skewX(6deg); } }
+/* Zum Schluss flieht er nach rechts, das Dunkel zieht mit */
+.geist-ruf.geht { animation: grWeg 450ms ease-in both; }
+.geist-ruf.geht .gr-geist { animation: grFlieht 450ms cubic-bezier(.55, 0, .8, .4) both; }
+@keyframes grWeg { to { opacity: 0; } }
+@keyframes grFlieht { to { opacity: 0; transform: translate(45vw, -12vh) scale(.6) skewX(-18deg); } }
+.gr-medaillon { --sz: clamp(52px, 16vh, 76px); position: relative; display: grid; place-items: center; }
+.gr-medaillon > * { grid-area: 1 / 1 / 2 / 2; }
+.gr-medaillon .medal-stage { width: calc(var(--sz) * 1.2); }
+.gr-medaillon .medal-stage > .medal { --sz: inherit; }
+.gr-nebel { opacity: 0; }
+.gr-medaillon.im-nebel .medal-stage { opacity: 0; transform: scale(.85); animation: grVerhuellt 900ms ease-in; }
+.gr-medaillon.im-nebel .gr-nebel { opacity: 1; animation: grNebelDa 900ms ease-out 250ms backwards; }
+.gr-medaillon::after { content: ""; position: absolute; inset: -45%; border-radius: 50%; pointer-events: none; opacity: 0;
   background: radial-gradient(circle, rgba(232,238,248,.8), rgba(196,206,226,.35) 42%, transparent 70%); }
-.fr-medaillon.im-nebel::after { animation: frNebelHauch 1.3s ease-out; }
-@keyframes frVerhuellt { from { opacity: 1; transform: none; } }
-@keyframes frNebelDa { from { opacity: 0; transform: scale(1.12); } }
-@keyframes frNebelHauch { 0% { opacity: 0; transform: scale(.4); } 35% { opacity: .9; } 100% { opacity: 0; transform: scale(1.3); } }
+.gr-medaillon.im-nebel::after { animation: grNebelHauch 1.3s ease-out; }
+@keyframes grVerhuellt { from { opacity: 1; transform: none; } }
+@keyframes grNebelDa { from { opacity: 0; transform: scale(1.12); } }
+@keyframes grNebelHauch { 0% { opacity: 0; transform: scale(.4); } 35% { opacity: .9; } 100% { opacity: 0; transform: scale(1.3); } }
 @media (prefers-reduced-motion: reduce) {
-  .fee-ruf, .fee-ruf .prolog-box, .fee-ruf .prolog-fee, .fr-medaillon *, .fr-medaillon::after { animation: none !important; }
+  .geist-ruf, .geist-ruf .prolog-box, .gr-geist, .gr-geist svg, .gr-medaillon *, .gr-medaillon::after { animation: none !important; }
 }
 
 /* ---------- Schwächere Handys: keine vollflächigen Überblendungen, weniger Dauerbewegung ---------- */
@@ -1115,8 +1121,8 @@ html.schwach .face { box-shadow: inset 0 0 0 4px rgba(220,222,171,.1), 4px 5px 0
   font: 700 var(--fs-body)/1.35 "Trebuchet MS", sans-serif; animation: fsText .5s ease-out .3s both; }
 .fs-text b { display: block; font: 900 calc(var(--fs-body) * 1.25)/1.2 Georgia, serif; letter-spacing: .06em; color: #fff; }
 .dieb-phase .fs-text { top: auto; bottom: 14%; }
-.fs-geist { position: absolute; left: 0; top: 0; color: #d9d2ff; transition: transform .8s cubic-bezier(.45, .05, .35, 1); will-change: transform; pointer-events: none; }
-.fs-geist svg { width: 54px; height: 54px; filter: drop-shadow(0 0 10px rgba(170, 140, 255, .9)); animation: fsSchweben .6s ease-in-out infinite alternate; }
+.fs-geist { position: absolute; left: 0; top: 0; color: #f2f8ff; transition: transform .8s cubic-bezier(.45, .05, .35, 1); will-change: transform; pointer-events: none; }
+.fs-geist svg { width: 54px; height: 54px; filter: drop-shadow(0 0 10px rgba(170, 220, 255, .9)); animation: fsSchweben .6s ease-in-out infinite alternate; }
 .fs-geist.sucht svg { animation: fsSuchen .35s ease-in-out 4 alternate; }
 .fs-geist.flieht { transition: transform 1.1s cubic-bezier(.55, 0, .8, .4); }
 .fs-karte { position: absolute; left: 0; top: 0; transition: transform .45s ease-out; pointer-events: none; }
