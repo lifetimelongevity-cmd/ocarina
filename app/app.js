@@ -683,7 +683,7 @@
     if (imNebel) zeilen.push(`<button type="button" class="sc-row nebel" data-quest="${NEBEL}"><span class="ic">${coveredMedal()}</span><span class="sc-name">${pruefungen(imNebel)} im Nebel</span></button>`);
     if (!qs.length) {
       const fehlt = state.ziffern.filter(v => v == null).length;
-      zeilen.push(`<button type="button" class="sc-row sc-chest" data-code><span class="ic">${useSvg("i-chest")}</span><span class="sc-name">Das Kästchen<small>${fehlt ? `Verschlossen, noch ${fehlt === 1 ? "eine Ziffer" : fehlt + " Ziffern"}` : "Der Code ist komplett"}</small></span>`
+      zeilen.push(`<button type="button" class="sc-row sc-chest" data-code><span class="ic">${useSvg("i-chest")}</span><span class="sc-name">Das Kästchen<small>${fehlt ? `Verschlossen, noch ${fehlt === 1 ? "eine Ziffer" : fehlt + " Ziffern"}` : "Code komplett"}</small></span>`
         + `<span class="sc-code">${state.ziffern.map(v => `<span class="tumbler${v == null ? "" : " known"}">${v == null ? "?" : v}</span>`).join("")}</span></button>`);
     }
     // Die Tafel liegt auf der anderen Seite als die Station, damit sie die Station nicht verdeckt
@@ -726,7 +726,7 @@
       const { abstand, luft } = gps.lage;
       if (abstand <= 250) { s = gps.lage.s; const h = WEG.hoeheBei(s); wert = meter(h); wo = gps.genau > 60 ? `GPS ±${Math.round(gps.genau)} m` : "GPS"; rest = bisGipfel(s, h); }
       else if (luft > 2000) { wert = km(luft); wo = "Luftlinie"; rest = `bis zum ${C.karte.start}`; }
-      else { wert = meter(abstand); wo = "neben dem Weg"; rest = "Am Weg zeigt dich die Karte."; }
+      else { wert = meter(abstand); wo = "neben dem Weg"; rest = "Die Karte zeigt dich nur am Weg."; }
     } else if (w) { s = w.s; wert = meter(w.hoehe); wo = st.name; rest = bisGipfel(w.s, w.hoehe); }
     else { wert = km(WEG.ziel.s); wo = "am Samstag"; rest = `${zahl(WEG.ziel.hoehe - WEG.hoeheBei(0))} Hm vom ${C.karte.start} zum Gipfel`; }
     if (gps.an && !gps.lage) rest = "GPS sucht dich …";
@@ -781,9 +781,9 @@
     }, err => {
       if (err.code === 1) {
         gpsStopp(); gps.an = false; gps.lage = null;
-        gps.hinweis = "Standort ist aus. Erlaube ihn in den Einstellungen.";
+        gps.hinweis = "Standort aus. In den Einstellungen erlauben.";
         try { localStorage.setItem(GPS_KEY, "0"); } catch (_) {}
-      } else if (!gps.lage) gps.hinweis = "Kein GPS-Signal. Ich suche weiter.";
+      } else if (!gps.lage) gps.hinweis = "Kein GPS-Signal. Ich suche weiter …";
       renderLegende(); renderGpsPunkt();
     }, { enableHighAccuracy: true, maximumAge: 15000, timeout: 30000 });
   }
@@ -858,7 +858,7 @@
     let tag = "", extra = "";
     if (schatten) {
       const wie = q && q.glanz && (q.glanz.items || []).includes(id) ? "mit einem Glanzsieg " : "";
-      if (q) extra = entgangen(id) ? `Entgangen bei ${em(q.id)}.` : aufgedeckt(q.id) ? `Zu erbeuten ${wie}bei ${em(q.id)}.` : "Wartet noch im Nebel.";
+      if (q) extra = entgangen(id) ? `Entgangen bei ${em(q.id)}.` : aufgedeckt(q.id) ? `Zu holen ${wie}bei ${em(q.id)}.` : "Wartet im Nebel.";
     } else if (st === "verloren") {
       tag = `<span class="tag lost">VERLOREN</span>`;
       const nahm = C.quests.find(k => (k.lose && k.lose.items || []).includes(id) && state.quests[k.id] === "verloren");
@@ -867,14 +867,14 @@
       tag = `<span class="tag open">VERBRAUCHT</span>`;
       const bei = Object.keys(state.eingesetzt).filter(k => state.eingesetzt[k].includes(id)).pop();
       if (bei) extra = `Eingesetzt bei ${em(bei)}.`;
-    } else if (cWahl.includes(id)) extra = v ? "Kommt mit." : `Kommt mit. Nochmal tippen legt es zurück.`;
+    } else if (cWahl.includes(id)) extra = v ? "Kommt mit." : "Kommt mit. Nochmal tippen: zurück.";
     else if (schon.includes(id)) extra = `Dabei bei ${em(spielVon(fq).spiel.id)}.`;
-    else if (mit.includes(id)) extra = v ? "Jeder Fluch hat seinen Preis." : "Hilft hier. Tippen nimmt es mit.";
+    else if (mit.includes(id)) extra = v ? "Jeder Fluch hat seinen Preis." : "Hilft hier. Antippen zum Mitnehmen.";
     else if (x.rettung) extra = "Meldet sich, wenn du ein Duell verlierst.";
     else if (x.tor) extra = "Meldet sich am Tor zum Gipfel.";
-    else if (E.abgeloest(C, state, id)) extra = `Abgelöst von: ${esc(itemById(E.abgeloest(C, state, id)).name)}.`;
+    else if (E.abgeloest(C, state, id)) extra = `Abgelöst von ${esc(itemById(E.abgeloest(C, state, id)).name)}.`;
     else if (q && state.quests[q.id] !== "offen") extra = `Erbeutet bei ${em(q.id)}${state.glanz[q.id] && (q.glanz.items || []).includes(id) ? " (Glanzsieg)" : ""}.`;
-    else if (START.includes(id)) extra = "Dein Beutel hat sich als Spritze entpuppt.";
+    else if (START.includes(id)) extra = "Steckte in deinem Beutel.";
     // Stufen in einem Feld: welche Stufe gerade drin ist
     if (x.feld && !schatten) { const xs = feldItems(x.feld); extra = `Stufe ${xs.findIndex(y => y.id === id) + 1} von ${xs.length}.${extra ? " " + extra : ""}`; }
     if (!schatten && neuMarke.has(id)) tag = `<span class="tag won">NEU</span>` + tag;
@@ -1078,7 +1078,7 @@
     if (dPacks && !fluchE && !nurOffen) lines.push(`<li class="${dPacks > 0 ? "plus" : "minus"}"><span class="ri">${cardSvg()}</span>${dPacks > 0 ? "+" : "−"}${Math.abs(dPacks)} ${packsWort(dPacks)}</li>`);
     // Reichten die geschlossenen Packs nicht, zahlt er in Karten (29.09.)
     const dKarten = (next.karten || 0) - (prev.karten || 0);
-    if (dKarten > 0 && !fluchE) lines.push(`<li class="minus"><span class="ri">${cardSvg("offen")}</span><span>−${dKarten} ${dKarten === 1 ? "Karte, deine beste" : "Karten, je deine beste"}. Geschlossene Packs hattest du keine mehr.</span></li>`);
+    if (dKarten > 0 && !fluchE) lines.push(`<li class="minus"><span class="ri">${cardSvg("offen")}</span><span>−${dKarten} ${dKarten === 1 ? "Karte, deine beste" : "Karten, je deine beste"}. Keine geschlossenen Packs mehr.</span></li>`);
     next.ziffern.forEach((v, i) => {
       if (v != null && prev.ziffern[i] == null) lines.push(`<li class="plus"><span class="ri"><span class="tumbler known" style="--hud-h:30px">${v}</span></span>Ziffer ${i + 1}: ${v}</li>`);
     });
@@ -1130,7 +1130,7 @@
       const q = schritte[0], sx = q.schritte.find(x => next.schritte[q.id][x.id] && !prev.schritte[q.id][x.id]);
       klang = "side"; gross = true;
       head = `<span class="medal-stage won" style="--m:${q.farbe}">${medalHtml(q, "laeuft", false)}</span><p class="big">${esc(sx.name.toUpperCase())}</p><p class="sub">${esc(q.name)}</p>`;
-      if (!lines.length) lines.push(`<li><span class="ri"></span>Jetzt zusammensetzen, bevor du am Gipfel stehst.</li>`);
+      if (!lines.length) lines.push(`<li><span class="ri"></span>Jetzt zusammensetzen. Bis zum Gipfel!</li>`);
     } else if (nurOffen) {
       klang = "plus";
       head = `<span class="ri-big">${cardSvg("offen")}</span><p class="big">PACK GEÖFFNET</p><p class="sub">Viel Glück!</p>`;
@@ -1151,7 +1151,7 @@
       klang = fluchE || !mitE.length ? "zauber" : "side";
       if (!mitE.length) {
         head = `<span class="ri-big" style="color:${x0.farbe}">${useSvg(x0.symbol)}</span><p class="big">${esc(x0.name.toUpperCase())}</p><p class="sub">${esc(spielName(e0))}</p>`;
-        lines.push(`<li><span class="ri"></span><span>Spiel noch einmal und trag dann das neue Ergebnis ein.</span></li>`);
+        lines.push(`<li><span class="ri"></span><span>Noch einmal spielen, dann neu eintragen.</span></li>`);
       } else if (fluchE && !andere.length) {
         const it = itemById(fluchE.item);
         head = `<span class="ri-big" style="color:${it.farbe}">${useSvg(it.symbol)}</span><p class="big">FLUCH GESPROCHEN</p><p class="sub">${esc(spielName(fluchE))}</p>`;
@@ -1176,7 +1176,7 @@
       const weniger = dPacks < 0 || dKarten > 0;
       const titel = b.ziffer ? "ZIFFER GEKAUFT" : b.item ? "GESCHENK" : weniger ? "PACKS WEG" : dPacks > 0 ? "PACKS DAZU" : "BUCHUNG";
       head = `<span class="ri-big">${cardSvg()}</span><p class="big${weniger && !b.ziffer ? " lost" : ""}">${titel}</p><p class="sub">${esc(b.grund || "Buchung vom Quest Master")}</p>`;
-      if (!lines.length) lines.push(`<li><span class="ri"></span>Du hattest keine Packs mehr, es bleibt bei 0.</li>`);
+      if (!lines.length) lines.push(`<li><span class="ri"></span>Keine Packs mehr, es bleibt bei 0.</li>`);
     } else {
       head = `<span class="ri-big">${useSvg("i-beutel")}</span><p class="big">DEIN BEUTEL</p><p class="sub">Der Quest Master hat etwas geändert.</p>`;
       if (!lines.length) return false;
@@ -1295,15 +1295,15 @@
   // Der Quest Master hat etwas zurückgenommen: Die Fee sagt es Dennis. Packs, Items und Nebel springen still mit zurück.
   function zurueckgenommen(prev, next, weg) {
     const zeilen = [];
-    weg.q.forEach(q => zeilen.push([questIcon(q, "offen", false), `Der Quest Master hat das Ergebnis von <b>${esc(q.name)}</b> zurückgenommen.`
+    weg.q.forEach(q => zeilen.push([questIcon(q, "offen", false), `Ergebnis von <b>${esc(q.name)}</b>.`
       + (q.id === next.next ? " Trag es neu ein." : next.quests[q.id] === "laeuft" ? " Die Quest läuft wieder." : "")]));
-    weg.g.forEach(q => zeilen.push([questIcon(q, "bestanden", false), `Der Quest Master hat den Glanzsieg bei <b>${esc(q.name)}</b> zurückgenommen. Es bleibt ein Sieg.`]));
+    weg.g.forEach(q => zeilen.push([questIcon(q, "bestanden", false), `Glanzsieg bei <b>${esc(q.name)}</b>. Es bleibt ein Sieg.`]));
     weg.d.forEach(k => zeilen.push([useSvg("z-triforce"), `Duell ${esc(k)} ist wieder offen. Trag es neu ein.`]));
     weg.s.forEach(q => q.schritte.filter(sx => prev.schritte[q.id][sx.id] && !next.schritte[q.id][sx.id])
-      .forEach(sx => zeilen.push([questIcon(q, "laeuft", false), `${esc(q.name)}: „${esc(sx.name)}“ ist zurückgenommen.`])));
-    weg.e.forEach(e => { const it = itemById(e.item); if (it) zeilen.push([`<span style="color:${it.farbe}">${useSvg(it.symbol)}</span>`, `Der Einsatz von <b>${esc(it.name)}</b> ist zurückgenommen.`
-      + (it.dieb && Number(e.raub) > 0 ? ` Was der ${esc(it.dieb.name)} gestohlen hat, ist zurück.` : "")]); });
-    weg.b.forEach(b => zeilen.push([cardSvg(), b.ziffer ? `Der Kauf von Ziffer ${esc(b.ziffer)} ist zurückgenommen.` : `Die Buchung „${esc(b.grund || "Buchung")}“ ist zurückgenommen.`]));
+      .forEach(sx => zeilen.push([questIcon(q, "laeuft", false), `${esc(q.name)}: „${esc(sx.name)}“.`])));
+    weg.e.forEach(e => { const it = itemById(e.item); if (it) zeilen.push([`<span style="color:${it.farbe}">${useSvg(it.symbol)}</span>`, `Einsatz von <b>${esc(it.name)}</b>.`
+      + (it.dieb && Number(e.raub) > 0 ? ` Was der ${esc(it.dieb.name)} stahl, ist zurück.` : "")]); });
+    weg.b.forEach(b => zeilen.push([cardSvg(), b.ziffer ? `Kauf von Ziffer ${esc(b.ziffer)}.` : `„${esc(b.grund || "Buchung")}“.`]));
     const mehr = zeilen.length > 4 ? zeilen.length - 3 : 0;
     const lines = zeilen.slice(0, mehr ? 3 : 4).map(([ic, t]) => `<li><span class="ri">${ic}</span><span>${t}</span></li>`).join("")
       + (mehr ? `<li><span class="ri"></span><span>und ${mehr} weitere Einträge</span></li>` : "");
@@ -1334,7 +1334,7 @@
       const q = REIHE.find(x => x.win && x.win.ziffer === i + 1);
       const wo = q ? esc(q.name) : "?";
       const offen = !q || !aufgedeckt(q.id) ? "im Nebel"
-        : s.quests[q.id] === "verloren" ? "verloren, hol sie dir am Tor zum Gipfel" : `jetzt: ${wo}`;
+        : s.quests[q.id] === "verloren" ? "verloren, am Tor zu holen" : `jetzt: ${wo}`;
       // Nach der letzten Quest tauscht Dennis fehlende Ziffern selbst gegen Packs
       const kauf = v == null && !s.next ? (E.zahlkraft(s) >= C.ziffer_preis
         ? `<button type="button" class="qc-eintrag win kauf" data-kauf="${i + 1}">KAUFEN · ${C.ziffer_preis} ${packsWort(C.ziffer_preis).toUpperCase()}</button>` : `<small class="kauf-fehlt">zu wenig Packs</small>`) : "";
@@ -1377,6 +1377,7 @@
     cube.style.transform = `translateZ(calc(-1 * var(--apo))) rotateY(${-angle}deg)`;
     page = target;
     setActiveFace();
+    if (coachZu) coachZu();                       // R im Rundgang angetippt: Hinweise zu, weiter geht es auf der neuen Seite
     if (page !== 0) { gpsStopp(); schliesseStationstafel(); }
     tone("move");
     clearTimeout(flatTimer);
@@ -1404,16 +1405,16 @@
       aufleuchten([id]);
       setTimeout(() => coach([
         [$("#slotsGear").parentElement, "Hier landet, was du dir erspielst. Schatten zeigen, was noch fehlt."],
-        [$(".equip-body"), "Vor jedem Spiel: Tippe, was du mitnimmst."],
-        [$(".hud"), "Deine Packs und die Ziffern für das Kästchen."]
+        [$(".equip-body"), "Vor jedem Spiel: Tipp an, was du mitnimmst."],
+        ...(karteGesehen || spaeter() ? [] : [[$(".shoulder-right"), "Tipp auf R. Weiter zur Karte!"]])
       ]), STILL.matches ? 0 : 1100);
     };
     if (!x) return fertig();
     melody("pruefung");
     showOverlay({
-      head: `<span class="medal-stage won" style="--m:${x.farbe}"><span class="medal">${useSvg(x.tarnSymbol || x.symbol)}</span></span><p class="big">ERSTES ITEM GEFUNDEN</p><p class="sub">${esc(x.tarn.name)}</p>`,
-      lines: `<li class="plus reveal"><span class="ri" style="color:${x.farbe}">${useSvg(x.symbol)}</span><span><small class="tarn">${esc(x.tarn.name)} entpuppt sich als</small>${esc(x.name)}</span></li>`
-        + (x.fund ? `<li><span class="ri"></span><span>${esc(x.fund)}</span></li>` : ""),
+      // 30.09. (Wunsch des Nutzers): nur Titel und ein Satz, ohne den Namen der Tarnung
+      head: `<span class="medal-stage won" style="--m:${x.farbe}"><span class="medal">${useSvg(x.tarnSymbol || x.symbol)}</span></span><p class="big">ERSTES ITEM GEFUNDEN</p>`,
+      lines: `<li class="plus reveal"><span class="ri" style="color:${x.farbe}">${useSvg(x.symbol)}</span><span>${esc(x.fund || x.name)}</span></li>`,
       next: "", gross: true
     }, fertig);
   }
@@ -1427,8 +1428,9 @@
     obMerken(KARTE_KEY);
     const hier = document.querySelector(`.mark[data-station="${STATIONEN[kartenHier ?? hierIndex()].id}"]`);
     coach([
-      [hier, "Hier stehst du. Tippe eine Station an, dann siehst du, was dort wartet."],
-      ...(WEG ? [[$("#mapLegend"), "Höhe und Weg bis zum Gipfel. Mit GPS zeigt dir die Karte, wo du wirklich bist."]] : [])
+      [hier, "Hier stehst du. Tipp auf eine Station, dann siehst du, was dort wartet."],
+      ...(WEG ? [[$("#mapLegend"), "Höhe und Weg bis zum Gipfel. Mit GPS zeigt dir die Karte, wo du wirklich bist."]] : []),
+      [$(".shoulder-right"), "Mit R zurück zu deinen Quests. Viel Glück!"]
     ]);
   }
 
@@ -1456,9 +1458,9 @@
         { bild: `<span class="pb-cards${max > 10 ? " two" : ""}" style="--n:${max > 10 ? Math.ceil(max / 2) : max}">${karten(max)}</span>`,
           text: `Der Bund hütet ${max} Packs. Hauptquests bringen dir Packs und Ziffern, Sidequests Fähigkeiten.` },
         { bild: `<span class="pb-chest">${useSvg("i-chest")}${useSvg("i-lock", "pb-lock")}</span><span class="pb-tumblers">${C.code.map(() => `<span class="tumbler">?</span>`).join("")}</span>`,
-          text: "Die vier Ziffern öffnen am Ende ein verschlossenes Kästchen. Was darin liegt, verrät dir niemand. Ohne alle vier lässt dich der Bund nicht auf den Gipfel." },
+          text: "Die vier Ziffern öffnen am Ende ein verschlossenes Kästchen. Was darin liegt, verrät dir niemand. Ohne alle vier kein Gipfel." },
         { bild: `<span class="pb-split"><span class="pb-cards mine" style="--n:${Math.min(halb, 10)}">${karten(halb)}</span><small>deins</small></span><span class="pb-split"><span class="pb-cards" style="--n:${Math.min(max - halb, 10)}">${karten(max - halb, "empty")}</span><small>beim Bund</small></span>`,
-          text: `Verlierst du, holt sich der Bund Packs zurück. Öffnen darfst du deine jederzeit.` }
+          text: `Verlierst du, holt sich der Bund Packs zurück. Deine darfst du jederzeit öffnen.` }
       ];
     };
     let tafeln = [];
@@ -1495,10 +1497,11 @@
       tone("confirm");
       // Kurzer Rundgang durch das Menü, gesprochen von der Fee
       setTimeout(() => coach([
-        [$("#hudPacks"), "Deine geschlossenen Packs. Tipp drauf, dann kannst du eins öffnen."],
+        [$("#hudPacks"), "Deine geschlossenen Packs. Tipp drauf, um eins zu öffnen."],
         [$("#hudCode"), "Der Code des Kästchens. Hier rastet jede Ziffer ein."],
-        [$(".shoulder-right"), "Mit Z und R oder Wischen blätterst du: Karte, Quests, Ausrüstung."],
-        [$("#questCard"), "Was jetzt dran ist und was auf dem Spiel steht. Hier trägst du dein Ergebnis ein."]
+        [$("#questCard"), "Was jetzt dran ist und was auf dem Spiel steht. Hier trägst du dein Ergebnis ein."],
+        // Zuletzt R (30.09.): Der Rundgang geht auf der nächsten Seite weiter, das muss Dennis wissen
+        [$(".shoulder-right"), "Blättern mit Z und R oder Wischen. Tipp jetzt auf R!"]
       ]), 250);
     }
     function start() {
@@ -1517,12 +1520,15 @@
     return { start, weiter, ende, pruefen, vergessen };
   })();
 
+  // Hinweise der Fee, einer nach dem anderen. Tippen irgendwo zeigt den nächsten. Zeigt ein Hinweis auf Z oder R,
+  // lässt sich die Taste selbst antippen: Das blättert weiter und schließt die Hinweise (goTo ruft coachZu).
+  let coachZu = null;
   function coach(schritte) {
     const bubble = $("#coach");
     let i = -1, ziel = null;
     const weiter = () => {
       if (ziel) ziel.classList.remove("coach-focus");
-      if (++i >= schritte.length) { bubble.hidden = true; bubble.onclick = null; return; }
+      if (++i >= schritte.length) { bubble.hidden = true; bubble.onclick = null; coachZu = null; return; }
       const [el, text] = schritte[i];
       ziel = el; el.classList.add("coach-focus");
       const b = bubble.querySelector(".coach-bubble");
@@ -1540,6 +1546,7 @@
       tone("move");
     };
     bubble.onclick = weiter;
+    coachZu = () => { i = schritte.length; weiter(); };
     weiter();
   }
 
@@ -1679,7 +1686,7 @@
       tone("confirm");
       passen();
     }
-    function schliessen() { stoppen(); el.hidden = true; renderQuests(); }
+    function schliessen() { stoppen(); el.hidden = true; el.classList.remove("schreibt"); renderQuests(); }
 
     // Tastatur auf dem Handy: das Fenster bleibt über der Tastatur
     function passen() {
@@ -1692,7 +1699,12 @@
     window.visualViewport?.addEventListener("scroll", passen);
 
     $("#lbInput").addEventListener("input", () => { $("#lbSeal").disabled = !$("#lbInput").value.trim(); });
-    $("#lbInput").addEventListener("keydown", e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); $("#lbForm").requestSubmit(); } });
+    // Schreibmodus (30.09.): Solange die Tastatur offen ist, bleibt nur ein schmaler Streifen oben: Frage, Eingabe, Siegel.
+    // Quer auf dem iPhone bleiben über der Tastatur kaum 130 px, das volle Fenster wäre dort gequetscht.
+    // Beim Verlassen erst kurz warten, sonst springt BESIEGELN weg, bevor der Tipp darauf ankommt.
+    let schreibTimer = null;
+    $("#lbInput").addEventListener("focus", () => { clearTimeout(schreibTimer); el.classList.add("schreibt"); passen(); });
+    $("#lbInput").addEventListener("blur", () => { clearTimeout(schreibTimer); schreibTimer = setTimeout(() => el.classList.remove("schreibt"), 250); });
     $("#lbForm").addEventListener("submit", e => {
       e.preventDefault();
       const text = $("#lbInput").value.trim();
@@ -1867,7 +1879,7 @@
       segen: { sub: "RIKES SEGEN", ton: "magie",
         folgen: [`<span class="fx">${ziffer}</span>`, `<span class="fx">${esc(segen ? segen.einsatz : "")} Danach ist er verbraucht.</span>`] },
       busse: { sub: "BUSSPRÜFUNG", ton: "lose",
-        folgen: [`<span class="fx">${ziffer}</span>`, `<span class="fx">Der Bund stellt dir eine Bußprüfung. Besiegle erst, wenn du sie bestanden hast.</span>`] }
+        folgen: [`<span class="fx">${ziffer}</span>`, `<span class="fx">Der Bund stellt dir eine Bußprüfung. Erst besiegeln, wenn sie bestanden ist.</span>`] }
     }[weg];
     if (!o) return;
     schwur.oeffnen({
@@ -2362,7 +2374,7 @@
     melody("zauber");
     showOverlay({
       head: `<span class="ri-big fee"><img src="assets/fee.png" alt=""></span><p class="big">NEUER ANFANG</p><p class="sub">vom Quest Master</p>`,
-      lines: `<li><span class="ri"></span><span>Der Quest Master hat alles zurückgesetzt. Die Reise beginnt von vorn.</span></li>`,
+      lines: `<li><span class="ri"></span><span>Alles zurückgesetzt. Die Reise beginnt von vorn.</span></li>`,
       next: ""
     }, () => { if (!DEMO) location.reload(); });
     renderHud(); renderQuests();

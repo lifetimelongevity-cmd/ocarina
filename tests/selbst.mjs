@@ -121,7 +121,7 @@ pruefe(einsAdmin.includes('schwachen Hand') && einsAdmin.includes('Schattendieb 
 await zu(dennis); await warte(600);
 // Zurücknehmen: die gestohlenen Packs sind zurück
 await admin.click('#verlauf li[data-art="e"] .zurueck'); await warte(1400);
-pruefe((await fenster(dennis)).includes('gestohlen hat, ist zurück'), 'Rücknahme: Was der Dieb gestohlen hat, ist zurück');
+pruefe((await fenster(dennis)).includes('stahl, ist zurück'), 'Rücknahme: Was der Dieb gestohlen hat, ist zurück');
 pruefe(Number(await dennis.textContent('#packsVal')) === packsVor, 'Packs wieder wie vorher');
 await zu(dennis);
 await ctx.close();

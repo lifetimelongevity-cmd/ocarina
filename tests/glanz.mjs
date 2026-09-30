@@ -29,8 +29,8 @@ const zurAusruestung = async p => { await p.evaluate(() => document.querySelecto
   await zu(p);
   await zurAusruestung(p);
   const fund = await fenster(p);
-  pruefe(fund.includes('ERSTES ITEM GEFUNDEN') && fund.includes('Heiliger Beutel des Helden entpuppt sich als') && fund.includes('Wasserspritze'), 'Ausrüstung: Der Beutel entpuppt sich als Wasserspritze');
-  pruefe(fund.includes('Stärkere landen im selben Feld'), 'Die Fee erklärt die Stufen');
+  pruefe(fund.includes('ERSTES ITEM GEFUNDEN') && fund.includes('Dein Beutel entpuppt sich als Wasserspritze'), 'Ausrüstung: Der Beutel entpuppt sich als Wasserspritze');
+  pruefe(!fund.includes('Heiliger Beutel') && !fund.includes('Stärkere landen'), 'Erster Fund (30.09.): nur Titel und ein Satz');
   pruefe(await slot(p, 'spritze') === 'schatten' && await p.$eval('.slot[data-id="spritze"] .ic use', u => u.getAttribute('href')) === '#i-beutel', 'Vorher: im Feld der Schatten des Beutels');
   pruefe((await p.$$('#slotsGear .slot')).length === 5 && !(await p.$('.slot[data-id="beutel"]')), 'Ein Feld je Stufen-Reihe (29.09.): fünf Felder, keins für den Beutel');
   await p.screenshot({ path: `${OUT}/glanz-1-beutel-wird-spritze.png` });
@@ -41,7 +41,7 @@ const zurAusruestung = async p => { await p.evaluate(() => document.querySelecto
   await p.evaluate(() => document.querySelector('.slot[data-feld="nadel"]').click()); await warte(300);
   pruefe(await slot(p, 'nadel_stopf') === 'schatten' && (await p.textContent('#itemBox')).includes('Eisendorn'), 'Feld der Nadel: Schatten, heißt noch Eisendorn');
   await p.evaluate(() => document.querySelector('.slot[data-id="spritze"]').click()); await warte(300);
-  pruefe((await p.textContent('#itemBox')).includes('Dein Beutel hat sich als Spritze entpuppt'), 'Spritze: Dein Beutel hat sich als Spritze entpuppt');
+  pruefe((await p.textContent('#itemBox')).includes('Steckte in deinem Beutel'), 'Spritze: Steckte in deinem Beutel');
   pruefe(await p.$eval('.slot[data-id="spritze"] .ic use', u => u.getAttribute('href')) === '#i-spritze', 'Danach: im Feld die Spritze');
   await p.screenshot({ path: `${OUT}/glanz-2-ausruestung-start.png` });
   await ctx.close();
