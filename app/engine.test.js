@@ -1,7 +1,8 @@
 // Test der Logik v1: node app/engine.test.js
 const assert = require("assert");
 const config = require("./config.js");
-const { derive: derive0, emptyDoc, normalize, mitEintraegen, showdownDuelle, einsetzbar, abgeloest, jetztEinsetzbar, fluchVorteil, diebWurf } = require("./engine.js");
+const { derive: derive0, emptyDoc, normalize, mitEintraegen, showdownDuelle, einsetzbar, abgeloest, jetztEinsetzbar, fluchVorteil, diebWurf,
+  dabei, mitnehmbar, rettung, aktuellesDuell } = require("./engine.js");
 
 const reihe = config.quests.filter(q => q.typ !== "lauf");
 // Freigabe (30.09.): Für die Tests gilt jede Quest als freigegeben, außer wo die Freigabe selbst geprüft wird (derive0)
@@ -185,9 +186,52 @@ s = derive(config, {});
 assert.deepStrictEqual(showdownDuelle(config, s).map(d => d.quest), ["wirbel", "wirbel", "wirbel"]);
 s = derive(config, { quests: { klingen: "verloren", wirbel: "verloren", podrennen: "verloren", kartenwurf: "verloren" } });
 assert.deepStrictEqual(showdownDuelle(config, s).map(d => d.quest), ["klingen", "wirbel", "podrennen"]);
-// Im Showdown hilft auch, was bei den Spielen der Duelle hilft
+// Im Showdown hilft auch, was beim Spiel des aktuellen Duells hilft (29.09.: ausgerüstet wird je Duell)
 s = derive(config, { quests: { auge: "verloren" } });
-assert.deepStrictEqual(einsetzbar(config, s, "bund"), ["spritze", "pistole_klein", "pistole_gross", "kreisel", "spruchrolle", "schild"]);
+assert.deepStrictEqual(einsetzbar(config, s, "bund"), ["spritze", "pistole_klein", "pistole_gross", "spruchrolle", "schild"]);
+s = derive(config, { quests: { auge: "verloren" }, duelle: { "1": "sieg" } });
+assert.strictEqual(aktuellesDuell(config, s).quest, "wirbel");
+assert.deepStrictEqual(einsetzbar(config, s, "bund"), ["kreisel", "spruchrolle", "schild"]);
+
+// 11b. Ausrüsten beim Spiel (29.09.): mitnehmen, was hilft und Dennis hat, nur einmal je Spiel. Der Schild meldet sich
+// selbst bei einer Niederlage im Duell, Rikes Segen am Tor, darum nimmt Dennis sie nicht mit.
+const bisAuge = { logbuch: "bestanden", klingen: "bestanden", wirbel: "bestanden", podrennen: "bestanden", kartenwurf: "bestanden" };
+s = derive(config, { quests: bisAuge });
+assert.deepStrictEqual(mitnehmbar(config, s, "auge"), ["pistole_klein", "spruchrolle"]);
+assert.deepStrictEqual(dabei(config, s, "auge"), []);
+s = derive(config, { quests: bisAuge, einsaetze: [{ id: "e1", item: "pistole_klein", quest: "auge" }] });
+assert.deepStrictEqual(dabei(config, s, "auge"), ["pistole_klein"]);
+assert.deepStrictEqual(mitnehmbar(config, s, "auge"), ["spruchrolle"]);            // die Pistole ist schon dabei
+assert.strictEqual(s.items.pistole_klein, "besitz");                                  // und bleibt im Beutel
+s = derive(config, { quests: bisAuge, einsaetze: [{ id: "e1", item: "spruchrolle", quest: "auge", raub: 0 }], buchungen: [{ id: "g", packs: 0, grund: "x", item: "spruchrolle", menge: 1 }] });
+assert.strictEqual(s.anzahl.spruchrolle, 2);
+assert.deepStrictEqual(mitnehmbar(config, s, "auge"), ["pistole_klein"]);           // ein Fluch je Spiel, auch wenn noch einer da ist
+// Schild: nie mitnehmbar, aber Rettung bei Duellen, wenn Dennis ihn hat
+s = derive(config, { quests: { auge: "verloren" }, items: { schild: "besitz" } });
+assert.ok(!mitnehmbar(config, s, "bund").includes("schild"));
+assert.strictEqual(rettung(config, s, "bund"), "schild");
+assert.strictEqual(rettung(config, s, "auge"), null);                                 // Auge des Jägers ist kein Duell
+assert.strictEqual(rettung(config, derive(config, { quests: { auge: "verloren" } }), "bund"), null);   // ohne Schild keine Rettung
+// Showdown: dabei gilt je Duell. Duell 1 ausgerüstet, nach dem Sieg ist für Duell 2 wieder alles frei
+const showdownDoc = { quests: { ...bisAuge, auge: "verloren", deku: "bestanden", feuerprobe: "bestanden", rache: "bestanden" },
+  einsaetze: [{ id: "e1", item: "pistole_klein", quest: "bund", duell: 1 }], buchungen: [{ id: "z3", packs: 0, grund: "x", ziffer: 3, weg: "busse" }],
+  items: { spruchrolle: "besitz" } };
+s = derive(config, showdownDoc);
+assert.strictEqual(s.next, "bund");
+assert.strictEqual(s.tor, null);
+assert.deepStrictEqual(mitnehmbar(config, s, "bund"), ["spruchrolle"]);             // Duell 1 ist die Revanche im Auge des Jägers
+assert.deepStrictEqual(dabei(config, s, "bund"), ["pistole_klein"]);
+assert.ok(!mitnehmbar(config, s, "bund").includes("pistole_klein"));
+s = derive(config, { ...showdownDoc, duelle: { "1": "sieg" } });
+assert.deepStrictEqual(dabei(config, s, "bund"), []);
+assert.deepStrictEqual(mitnehmbar(config, s, "bund"), ["kreisel", "spruchrolle"]);   // Duell 2 ist Wirbel der Götter
+// Am Tor gibt es nichts mitzunehmen
+s = derive(config, { quests: { ...bisAuge, auge: "verloren", deku: "bestanden", feuerprobe: "bestanden", rache: "bestanden" } });
+assert.ok(s.tor);
+assert.deepStrictEqual(mitnehmbar(config, s, "bund"), []);
+// Dennis' Eintrag mit Duell: die Nummer kommt an, nur im Showdown
+s = derive(config, mitEintraegen(config, { quests: showdownDoc.quests }, { e_a: { item: "kreisel", quest: "bund", duell: 2, zeit: 1 }, e_b: { item: "kreisel", quest: "wirbel", duell: 2, zeit: 2 } }));
+assert.deepStrictEqual(s.einsaetze.map(e => [e.quest, e.duell]), [["bund", 2], ["wirbel", null]]);
 
 // 12. Amulett: Schritt „gefunden" zählt nur, solange die Quest gestartet ist
 s = derive(config, { quests: { amulett: "laeuft" }, schritte: { amulett: { gefunden: true } } });
@@ -269,7 +313,7 @@ const bisGipfel = { logbuch: "bestanden", klingen: "bestanden", wirbel: "bestand
 s = derive(config, { quests: bisGipfel });
 assert.strictEqual(s.next, "bund");
 assert.deepStrictEqual(s.tor, { quest: "bund", fehlend: [2, 4] });
-assert.deepStrictEqual([...jetztEinsetzbar(config, s)], []);                   // am Tor hilft nur Rikes Segen
+assert.deepStrictEqual([...jetztEinsetzbar(config, s)], []);                   // am Tor gibt es nichts mitzunehmen, Rikes Segen meldet sich dort selbst
 assert.strictEqual(derive(config, { quests: { ...bisGipfel, podrennen: "bestanden", rache: "bestanden" } }).tor, null);
 assert.strictEqual(derive(config, { quests: { logbuch: "verloren" } }).tor, null);   // das Tor gibt es nur am Gipfel
 const vorher = s.packs;
@@ -329,8 +373,8 @@ assert.strictEqual(fluchVorteil(config, s, "podrennen").text, "3 Sekunden mehr a
 assert.strictEqual(fluchVorteil(config, s, "logbuch"), null);
 assert.strictEqual(fluchVorteil(config, s, "klingen"), null);
 // Auge des Jägers: die stärkste Waffe wird eine Stufe stärker, mit der großen darf er näher ran
-assert.ok(fluchVorteil(config, s, "auge").text.includes("Kleine Wasserpistole"));
-assert.ok(fluchVorteil(config, derive(config, { quests: { ...bisKarten } }), "auge").text.includes("Große Wasserpistole"));
+assert.ok(fluchVorteil(config, s, "auge").text.includes("Kleine Pistole"));
+assert.ok(fluchVorteil(config, derive(config, { quests: { ...bisKarten } }), "auge").text.includes("Große Pistole"));
 assert.strictEqual(fluchVorteil(config, derive(config, { quests: bisKarten, glanz: { kartenwurf: true } }), "auge").text, "Du darfst 1 m näher ran.");
 // Showdown: es gilt der Vorteil des Spiels im ersten offenen Duell
 s = derive(config, { quests: { podrennen: "verloren" }, duelle: {} });

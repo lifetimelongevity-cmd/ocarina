@@ -78,7 +78,7 @@ await frei();                                   // Die drei Zeichen freigeben
 await dennis.evaluate(() => { const r = document.querySelector('.q-row[data-id="klingen"]'); r && r.click(); }); await warte(300);
 const vorschau = await dennis.textContent('#questCard');
 pruefe(vorschau.includes('Geheimnis') && !vorschau.includes('Fluch') && !vorschau.includes('Pergament'), 'Die drei Zeichen: Belohnung heißt nur „Geheimnis“');
-pruefe(!(await dennis.$('#questCard [data-einsetzen="spruchrolle"]')), 'Bei Die drei Zeichen gibt es keinen Fluch zum Sprechen');
+pruefe(!(await dennis.$('#questCard [data-ausruesten]')), 'Bei Die drei Zeichen gibt es nichts mitzunehmen (der Schild meldet sich erst bei einer Niederlage)');
 
 // Verpasste Momente: Dennis lädt neu, der Admin bucht, während der Startbildschirm offen ist
 await dennis.goto(BASE); await warte(600);
@@ -101,10 +101,15 @@ await admin.fill('#customAmount', '2'); await admin.fill('#customReason', 'Test:
 await admin.click('#customForm button[type="submit"]'); await warte(900); await zu(dennis);
 const packsVor = Number(await dennis.textContent('#packsVal'));
 await dennis.evaluate(() => { const r = document.querySelector('.q-row[data-id="wirbel"]'); r && r.click(); }); await warte(300);
-pruefe(await dennis.isVisible('#questCard [data-einsetzen="spruchrolle"]'), 'Der Fluch leuchtet unter EINSETZBAR');
-await dennis.tap('#questCard [data-einsetzen="spruchrolle"]'); await warte(400);
+// Ausrüsten beim Spiel (29.09.): AUSRÜSTEN auf der Quest-Karte, in der Ausrüstung den Fluch auf eine C-Taste, ein Siegel
+pruefe(await dennis.isVisible('#questCard [data-ausruesten="wirbel"]'), 'Wirbel: AUSRÜSTEN auf der Quest-Karte');
+await dennis.tap('#questCard [data-ausruesten="wirbel"]'); await warte(1200);
+pruefe((await dennis.textContent('#ruestFuer')).includes('WIRBEL DER GÖTTER') && await dennis.isVisible('.slot.usable[data-id="spruchrolle"]'), 'Ausrüstung für den Wirbel: der Fluch leuchtet');
+await dennis.tap('.slot[data-id="spruchrolle"]'); await warte(300);
+pruefe((await dennis.getAttribute('.c-taste.l', 'data-id')) === 'spruchrolle', 'Tippen legt den Fluch auf die erste C-Taste');
+await dennis.tap('[data-mitnehmen]'); await warte(400);
 const siegelText = await dennis.textContent('#swFolgen');
-pruefe(siegelText.includes('VORTEIL') && siegelText.includes('schwachen Hand') && siegelText.includes('seinen Preis'), 'Siegel-Fenster: Vorteil beim Wirbel und die Warnung');
+pruefe(siegelText.includes('DABEI') && siegelText.includes('FLUCH') && siegelText.includes('schwachen Hand') && siegelText.includes('seinen Preis'), 'Siegel-Fenster: dabei, Vorteil beim Wirbel und die Warnung');
 pruefe(!siegelText.includes('Schattendieb'), 'Siegel-Fenster verrät den Dieb nicht');
 await dennis.evaluate(() => { Math.random = () => 0.7; });
 await halten(dennis);

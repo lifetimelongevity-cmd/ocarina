@@ -36,21 +36,25 @@
   background: #050605;
   color: var(--cream);
 }
-@supports (height: 1dvh) {
+/* 29.09.: Größen hängen an der kleinsten Bildschirmhöhe (svh). Die ändert sich nicht, wenn Safari seine Leisten ein- oder
+   ausblendet, darum springt keine Schrift mehr (vorher dvh). */
+@supports (height: 1svh) {
   :root {
-    --fs-body: clamp(12px, 3.5dvh, 13.5px);
-    --fs-small: clamp(10.5px, 3dvh, 11.5px);
-    --fs-tiny: clamp(10px, 2.8dvh, 11px);
-    --fs-h: clamp(14px, 4.3dvh, 17px);
-    --fs-title: clamp(13px, 4.2dvh, 17px);
-    --hud-h: clamp(28px, 8.4dvh, 34px);
-    --slot: clamp(40px, 13dvh, 54px);
-    --row: clamp(30px, 8.8dvh, 35px);
+    --fs-body: clamp(12px, 3.5svh, 13.5px);
+    --fs-small: clamp(10.5px, 3svh, 11.5px);
+    --fs-tiny: clamp(10px, 2.8svh, 11px);
+    --fs-h: clamp(14px, 4.3svh, 17px);
+    --fs-title: clamp(13px, 4.2svh, 17px);
+    --hud-h: clamp(28px, 8.4svh, 34px);
+    --slot: clamp(40px, 13svh, 54px);
+    --row: clamp(30px, 8.8svh, 35px);
   }
 }
 
 * { box-sizing: border-box; }
 html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; overscroll-behavior: none; background: #020302; }
+/* iOS vergrößert im Querformat sonst manche Texte von selbst, je nach Länge: gleiche Schrift überall */
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 button { font: inherit; color: inherit; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
 svg { display: block; }
 .svg-sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
@@ -251,15 +255,12 @@ svg { display: block; }
 .quest-card .tb-title { font-size: clamp(14px, 4.7vh, 19px); }
 .quest-card .fx-rows { margin-top: auto; padding-top: 5px; border-top: 1px solid rgba(170,179,207,.28); }
 @media (max-height: 360px) {
-  .quest-card .fx-head.einsatz { display: none; }
   .quest-card .fx-row { margin-top: 4px; }
   .quest-card .fx-rows:has(.glanz) { padding-top: 3px; }
   .quest-card .fx-rows:has(.glanz) .fx-row { margin-top: 2px; }
-  .quest-card .helps { margin-top: 5px; padding-bottom: 3px; }
+  .quest-card .ruesten, .quest-card .dabei-zeile { margin-top: 5px; }
   .quest-card .qc-head { margin-bottom: 5px; }
 }
-.helps { margin-top: 8px; padding-bottom: 6px; }
-.helps-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
 .well.mini { width: clamp(22px, 7vh, 32px); height: clamp(22px, 7vh, 32px); background: rgba(0,0,0,.4); }
 .well.mini.st-nicht { color: #0b0e18; }
 .well.mini.st-nicht svg { filter: drop-shadow(1px 1px 0 rgba(255,255,255,.14)); }
@@ -380,7 +381,7 @@ html.schwach .map-fog { animation: none; }
    leuchtet = jetzt einsetzbar, grau = verbraucht oder verloren. Neu Gefundenes tritt mit Funken aus dem Schatten. */
 .equip-body { --eslot: clamp(36px, 11.8vh, 52px); --rslot: calc(var(--eslot) * 1.12);
   display: grid; grid-template-columns: minmax(0, 1fr) clamp(130px, 25%, 214px) minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; gap: 7px 10px; min-height: 0; padding-top: 6px; }
-@supports (height: 1dvh) { .equip-body { --eslot: clamp(36px, 11.8dvh, 52px); } }
+@supports (height: 1svh) { .equip-body { --eslot: clamp(36px, 11.8svh, 52px); } }
 .equip-group { position: relative; align-self: center; justify-self: center; display: grid; justify-items: center; min-height: 0;
   padding: clamp(12px, 3.6vh, 16px) clamp(9px, 1.4vw, 14px) clamp(8px, 2.4vh, 11px); border-radius: 11px; }
 .equip-group .plakette { position: absolute; z-index: 2; top: 0; left: 50%; transform: translate(-50%, -52%); margin: 0; padding: 3px 9px 2px; border-radius: 3px; white-space: nowrap;
@@ -766,15 +767,23 @@ html.probe body::after { content: ""; position: fixed; inset: 0; z-index: 9999; 
 .qc-eintrag.glanz { color: #1c1604; background: linear-gradient(#fff6c4, #f2c94c 45%, #c8921a); box-shadow: inset 1px 1px 0 rgba(255,255,255,.7), 1px 2px 0 #000, 0 0 10px rgba(255,226,122,.55); }
 .q-row .q-mark svg.glanz { width: 17px; height: 17px; filter: drop-shadow(0 0 3px rgba(255,226,122,.8)); }
 .result-head .big.glanz { color: #fff1a8; text-shadow: 2px 2px 0 #3a2a05, 0 0 14px rgba(255,226,122,.8); }
-/* Einsetzbar: die Symbole sind Knöpfe */
-/* EINSETZBAR in einer Zeile mit den Symbolen, damit die Knöpfe zum Eintragen auch auf kleinen Handys Platz haben */
-.quest-card .helps { display: flex; align-items: center; gap: 4px 10px; margin-top: 6px; padding-bottom: 4px; }
-.quest-card .helps .fx-head { margin: 0; }
-.quest-card .helps-row { margin-top: 0; }
-.helps .well.mini { width: clamp(28px, 8vh, 31px); height: clamp(28px, 8vh, 31px); padding: 0; border: 0; border-radius: 4px; cursor: pointer; }
+/* Ausrüsten beim Spiel (29.09.): AUSRÜSTEN mit den Symbolen dessen, was hilft, danach DABEI mit Namen */
+.quest-card .ruesten { display: flex; align-items: center; gap: 9px; margin-top: 7px; }
+.quest-card .ruesten .qc-action { margin-top: 0; animation: ruestenPuls 1.8s ease-in-out infinite; }
+@keyframes ruestenPuls { 50% { box-shadow: inset 2px 2px 0 rgba(255,255,255,.4), 2px 3px 0 #000, 0 0 14px rgba(255,226,122,.7); } }
+.ruest-minis, .dabei-zeile .noch { display: flex; align-items: center; gap: 5px; }
+.ruest-minis .well.mini, .dabei-zeile .well.mini { width: clamp(22px, 7vh, 27px); height: clamp(22px, 7vh, 27px); border-radius: 4px; }
+.dabei-zeile { display: flex; align-items: center; gap: 4px 9px; width: 100%; min-height: 28px; margin: 7px 0 0; padding: 0; border: 0; background: none; text-align: left; color: #f4f0dc; }
+button.dabei-zeile { cursor: pointer; }
+.dabei-zeile .fx-lbl { flex: none; color: #aab3cf; font: 800 var(--fs-tiny)/1 "Courier New", monospace; letter-spacing: .06em; }
+.dabei-zeile .fx { min-width: 0; }
+.dabei-zeile .chip svg { width: 1.45em; height: 1.45em; }
+.dabei-zeile .noch { margin-left: auto; flex: none; color: var(--gold); font: 900 var(--fs-body)/1 Georgia, serif; }
 .quest-card .fx-row:has(.qc-eintrag) { margin-top: 4px; }
 .quest-card .qc-eintrag { min-height: 28px; }
-.helps .well.mini:active { transform: scale(.94); }
+/* Eine Farbe pro Schritt: Solange AUSRÜSTEN dran ist, sind die Knöpfe zum Eintragen nur umrandet */
+.quest-card.vor-dem-spiel .qc-eintrag { color: var(--gold); background: rgba(0,0,0,.28); border: 1.5px solid rgba(242,201,76,.7); box-shadow: none; }
+.quest-card.vor-dem-spiel .qc-eintrag.lose { color: #ff9b90; border-color: rgba(255,138,126,.62); }
 /* Duell-Tafel am Gipfel */
 .duelle { margin-top: 6px; }
 .duelle ol { list-style: none; margin: 3px 0 0; padding: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 3px; }
@@ -800,9 +809,52 @@ html.probe body::after { content: ""; position: fixed; inset: 0; z-index: 9999; 
 .duell .d-st.won { color: var(--gold); } .duell .d-st.lost { color: #ff6b5e; }
 .duell.jetzt { background: rgba(250,242,110,.09); box-shadow: inset 0 0 0 1.5px var(--cursor); }
 .duell.spaeter { opacity: .55; }
-/* Item-Box mit Knopf EINSETZEN */
-.item-box.mit-knopf { grid-template-columns: auto minmax(0, 1fr) auto; }
-.item-box .ib-einsetzen { grid-column: 3; grid-row: 1 / span 2; align-self: center; margin: 0; }
+/* Item-Box: rechts immer Platz für MITNEHMEN, damit der Text nicht springt, wenn der Knopf kommt oder geht */
+.item-box { grid-template-columns: auto minmax(0, 1fr) auto; }
+.item-box .ib-mitnehmen { grid-column: 3; grid-row: 1 / span 2; align-self: center; margin: 0; }
+.item-box .ib-mitnehmen[hidden] { display: inline-flex; visibility: hidden; }
+
+/* Ausrüsten beim Spiel (29.09.): Plakette „FÜR …“ über dem Bogenfenster, drei C-Tasten unter Dennis wie am N64-Controller.
+   Leer zeigt die Taste ihren Pfeil, belegt das Ding und den Pfeil am Rand. Gewählt pulsiert, besiegelt steht fest. */
+.equip-body { position: relative; }
+.ruest-fuer { position: absolute; z-index: 6; left: 50%; top: 2px; transform: translateX(-50%); margin: 0; padding: 3px 9px 2px; border-radius: 3px;
+  white-space: nowrap; pointer-events: none; color: #1c1604; background: var(--cursor); font: 900 var(--fs-tiny)/1.15 "Courier New", monospace; letter-spacing: .06em;
+  box-shadow: 0 0 0 1px #1c1604, 0 2px 5px rgba(0,0,0,.6); }
+.character-window.ruesten::after { height: 36%; }
+.c-tasten { position: absolute; z-index: 4; left: 50%; bottom: clamp(4px, 1.6vh, 8px); transform: translateX(-50%); display: flex; gap: clamp(6px, 1.8vh, 10px); }
+.c-tasten[hidden] { display: none; }
+.c-taste { --cz: clamp(28px, 9.4vh, 38px); position: relative; display: grid; place-items: center; width: var(--cz); height: var(--cz); flex: none; padding: 0; border: 0; border-radius: 50%; cursor: pointer;
+  background: radial-gradient(circle at 40% 32%, #3a300c, #0c0a04 72%); box-shadow: 0 0 0 2.5px var(--gold), 0 3px 6px rgba(0,0,0,.8); }
+.c-taste svg { width: 68%; height: 68%; color: var(--c, var(--gold)); filter: drop-shadow(1px 1px 0 #000); }
+.c-taste:focus-visible { outline: 2px solid #fff; outline-offset: 4px; }
+.c-taste.leer { cursor: default; background: radial-gradient(circle at 40% 32%, rgba(242,201,76,.2), rgba(12,10,4,.85) 70%); box-shadow: 0 0 0 2px rgba(242,201,76,.5), 0 3px 6px rgba(0,0,0,.8); }
+.c-taste.leer svg { display: none; }
+.c-taste .pfeil { position: absolute; width: 0; height: 0; border: 0 solid transparent; }
+.c-taste.leer .pfeil { position: static; opacity: .75; }
+.c-taste.l .pfeil { border-width: 5px 6px 5px 0; border-right-color: var(--gold); }
+.c-taste.r .pfeil { border-width: 5px 0 5px 6px; border-left-color: var(--gold); }
+.c-taste.d .pfeil { border-width: 6px 5px 0 5px; border-top-color: var(--gold); }
+.c-taste.leer.l .pfeil { border-width: 7px 9px 7px 0; }
+.c-taste.leer.r .pfeil { border-width: 7px 0 7px 9px; }
+.c-taste.leer.d .pfeil { border-width: 9px 7px 0 7px; }
+.c-taste:not(.leer).l .pfeil { left: -9px; top: 50%; margin-top: -5px; }
+.c-taste:not(.leer).r .pfeil { right: -9px; top: 50%; margin-top: -5px; }
+.c-taste:not(.leer).d .pfeil { bottom: -9px; left: 50%; margin-left: -5px; }
+.c-taste:not(.leer):not(.fest)::after { content: ""; position: absolute; inset: -5px; border-radius: 50%; border: 2px solid color-mix(in srgb, var(--c, var(--gold)), #fff 35%); pointer-events: none; animation: usablePulse 1.6s ease-in-out infinite; }
+.c-taste.fest { box-shadow: 0 0 0 2.5px var(--gold), 0 0 12px rgba(242,201,76,.55), 0 3px 6px rgba(0,0,0,.8); }
+.c-taste.neu svg { animation: cHop .42s cubic-bezier(.3, 1.6, .5, 1) both; }
+@keyframes cHop { from { opacity: .2; transform: translateY(-60%) scale(.3); } }
+/* Feld mit Haken: liegt auf einer C-Taste oder ist schon dabei */
+.slot .haken { display: none; position: absolute; z-index: 6; right: -6px; top: -6px; width: 18px; height: 18px; place-items: center; border-radius: 50%; color: #1c1604; background: var(--gold); box-shadow: 0 0 0 1.5px #1c1604; }
+.slot .haken svg { width: 11px; height: 11px; }
+.slot.dabei .haken { display: grid; }
+.slot.dabei .ic { opacity: .32; }
+.slot.dabei .well { box-shadow: inset 0 3px 7px rgba(0,0,0,.55), 0 0 0 1.5px rgba(242,201,76,.55); }
+.slot.rune.dabei .haken { right: -4px; top: -4px; }
+.sw-folgen .fx-lbl.magie { color: #c9a4ff; }
+@media (prefers-reduced-motion: reduce) {
+  .quest-card .ruesten .qc-action, .c-taste::after, .c-taste.neu svg { animation: none !important; }
+}
 /* Code-Fenster am Ende: fehlende Ziffer kaufen */
 .result-lines li .kauf, .result-lines li .kauf-fehlt { margin-left: auto; flex: none; }
 .kauf-fehlt { color: #aab3cf; font: 700 var(--fs-tiny)/1 "Courier New", monospace; }
@@ -846,14 +898,18 @@ html.probe body::after { content: ""; position: fixed; inset: 0; z-index: 9999; 
 .sw-sub { margin: 3px 0 0; color: var(--ton); font: 900 clamp(13px, 4vh, 16px)/1 Georgia, serif; letter-spacing: .08em; }
 .sw-folgen { list-style: none; margin: 0; padding: 7px 0 0; border-top: 1px solid rgba(170,179,207,.28); display: grid; gap: 5px; }
 .sw-folgen li { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 10px; align-items: center; }
-.sw-folgen li > .fx:only-child { grid-column: 1 / -1; display: block; font: 600 var(--fs-body)/1.35 "Trebuchet MS", sans-serif; }
+.sw-folgen .fx { font: 600 var(--fs-body)/1.35 "Trebuchet MS", sans-serif; }
+.sw-folgen li > .fx:only-child { grid-column: 1 / -1; display: block; }
 .sw-folgen li > .fx:only-child .chip + .chip { margin-left: 10px; }
 .sw-folgen .fx.dim { color: #aab3cf; font-size: var(--fs-small); }
 .sw-folgen .fx-lbl { color: #aab3cf; font: 800 var(--fs-tiny)/1 "Courier New", monospace; letter-spacing: .06em; }
 .sw-folgen .fx-lbl.win { color: var(--gold); } .sw-folgen .fx-lbl.lose { color: #ff8a7e; }
-.sw-wahl { display: flex; flex-wrap: wrap; gap: 8px; }
+.sw-wahl { grid-column: 2; grid-row: 1; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px 8px; }
 .sw-wahl:empty { display: none; }
-.sw-w { min-height: 34px; padding: 0 12px; border: 1.5px solid #58607a; border-radius: 4px; background: rgba(0,0,0,.35); cursor: pointer; font: 700 var(--fs-small)/1 "Trebuchet MS", sans-serif; }
+.sw-wahl:not(:empty) ~ .sw-hinweis { display: none; }
+.sw-unten .sw-hinweis { grid-column: 2; grid-row: 1; }
+.sw-w { display: inline-flex; align-items: center; gap: 6px; min-height: 34px; padding: 0 10px; border: 1.5px solid #58607a; border-radius: 4px; background: rgba(0,0,0,.35); cursor: pointer; font: 700 var(--fs-small)/1 "Trebuchet MS", sans-serif; }
+.sw-w svg { width: 1.3em; height: 1.3em; }
 .sw-w.an { border-color: var(--ton); background: color-mix(in srgb, var(--ton), transparent 80%); color: #fff; }
 .sw-unten { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 12px; }
 .sw-zurueck { min-height: 36px; padding: 0 12px; border: 1px solid #58607a; border-radius: 4px; background: rgba(0,0,0,.35); cursor: pointer; color: #cfd5e8; font: 800 var(--fs-small)/1 "Courier New", monospace; letter-spacing: .08em; }
@@ -1032,3 +1088,29 @@ html.schwach .face { box-shadow: inset 0 0 0 4px rgba(220,222,171,.1), 4px 5px 0
 @keyframes fsText { from { opacity: 0; transform: translate(-50%, 8px); } }
 @keyframes fsSchweben { to { transform: translateY(-5px); } }
 @keyframes fsSuchen { from { transform: translateX(-8px) rotate(-8deg); } to { transform: translateX(8px) rotate(8deg); } }
+
+/* ---------- Feste Fenstergrößen (29.09., Wunsch des Nutzers) ----------
+   Jedes Fenster hat immer dieselbe Größe, egal ob ein oder vier Zeilen darin stehen: nichts springt. Die Höhe reicht für den
+   längsten Inhalt auf dem kleinsten Handy (iPhone 13 in Safari, gemessen), die Schrift ist überall dieselbe (--fs-body).
+   Wird es doch einmal länger, scrollt der Inhalt im Fenster, das Fenster selbst bleibt gleich. */
+.result { display: flex; flex-direction: column; height: clamp(200px, 59svh, 236px); max-height: 100%; }
+.result-lines { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; align-content: start; scrollbar-width: none; }
+.result-next { flex: none; }
+.sw-panel { display: flex; flex-direction: column; height: clamp(214px, 64svh, 244px); max-height: 100%; overflow: hidden; }
+.sw-panel > * { flex: none; }
+.sw-folgen { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; align-content: start; scrollbar-width: none; }
+.station-card { height: clamp(160px, 49svh, 172px); }
+/* Textbox der Ausrüstung: Name und zwei Zeilen, immer gleich hoch */
+.item-box { height: calc(var(--fs-h) * 1.1 + var(--fs-body) * 2.7 + 22px); min-height: 0; align-content: center; }
+.item-box .tb-text { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; }
+/* Hinweise der Fee: drei Zeilen, immer gleich groß */
+.coach-bubble { display: flex; align-items: center; width: 250px; height: calc(var(--fs-body) * 1.3 * 3 + 28px); }
+/* Prolog: drei Zeilen, auch während der Text Buchstabe für Buchstabe erscheint */
+.prolog-text { min-height: 0; height: 4.05em; overflow: hidden; }
+/* Tagebuch: Fragen mit einer oder zwei Zeilen nehmen gleich viel Platz */
+.lb-frage { min-height: 2.6em; }
+@supports not (height: 1svh) {
+  .result { height: clamp(200px, 59vh, 236px); }
+  .sw-panel { height: clamp(214px, 64vh, 244px); }
+  .station-card { height: clamp(160px, 49vh, 172px); }
+}

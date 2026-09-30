@@ -153,7 +153,13 @@
                 <img src="assets/avatar-okarina.webp" alt="Dennis spielt Okarina" width="560" height="1218" decoding="async">
                 <span class="motes" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
                 <span class="notes" aria-hidden="true"><i>♪</i><i>♫</i><i>♪</i></span>
+                <div class="c-tasten" id="cTasten" hidden role="group" aria-label="Was du mitnimmst">
+                  <button type="button" class="c-taste l" data-c="0"><svg aria-hidden="true"><use href="#i-card"></use></svg><i class="pfeil"></i></button>
+                  <button type="button" class="c-taste d" data-c="1"><svg aria-hidden="true"><use href="#i-card"></use></svg><i class="pfeil"></i></button>
+                  <button type="button" class="c-taste r" data-c="2"><svg aria-hidden="true"><use href="#i-card"></use></svg><i class="pfeil"></i></button>
+                </div>
               </div>
+              <p class="plakette ruest-fuer" id="ruestFuer" hidden></p>
               <div class="equip-group magic">
                 <p class="lbl plakette">FÄHIGKEITEN</p>
                 <div class="slots" id="slotsSkill"></div>
@@ -173,7 +179,7 @@
         <button type="button" data-demo="bestanden">Nächste bestanden</button>
         <button type="button" data-demo="verloren">Nächste verloren</button>
         <button type="button" data-demo="zurueck">Zurück</button>
-        <button type="button" data-demo="einsetzen">Einsetzen</button>
+        <button type="button" data-demo="einsetzen">Mitnehmen</button>
         <button type="button" data-demo="amulett">Amulett</button>
       </span>
       <span class="sync" id="sync"></span>
@@ -236,9 +242,9 @@
         <p class="sw-art" id="swArt"></p>
         <div class="sw-kopf" id="swKopf"></div>
         <ul class="sw-folgen" id="swFolgen"></ul>
-        <div class="sw-wahl" id="swWahl"></div>
         <div class="sw-unten">
           <button type="button" class="sw-zurueck" id="swZurueck">ZURÜCK</button>
+          <div class="sw-wahl" id="swWahl"></div>
           <p class="sw-hinweis">Siegel gedrückt halten</p>
           <button type="button" class="sw-siegel" id="swSiegel" aria-label="Siegel gedrückt halten zum Besiegeln">
             <svg class="sw-ring" viewBox="0 0 100 100" aria-hidden="true"><circle class="sw-ring-bg" cx="50" cy="50" r="44"/><circle class="sw-ring-voll" cx="50" cy="50" r="44" pathLength="100"/></svg>

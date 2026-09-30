@@ -543,7 +543,7 @@ Auf Wunsch des Nutzers: „am Anfang noch einen Ticken mehr Onboarding“ und me
 - **Karte (3.7, Richtung B):** gegangener Weg golden, Dennis läuft zur neuen Station, sobald er die Karte ansieht (Rückgängig springt ohne Laufen), der Nebel treibt.
 - **Stationstafel:** Tippen auf eine Station zeigt Ort, Höhe, Kilometer ab Bahnhof, die Quests mit Status und im Nebel nur „1 Prüfung im Nebel“. Zeile oder zweites Tippen öffnet die Quest. An der Hütte das Kästchen mit Code, Packs und fehlenden Ziffern. Die Tafel liegt immer auf der anderen Seite als die Station.
 - **Kartusche:** Höhe, Strecke und Höhenmeter bis zum Gipfel, Höhenprofil des echten Wegs mit den Stationen.
-- **GPS:** freiwillig per Knopf, nur solange die Karte offen ist. Feenlicht auf dem Weg, weit weg die Luftlinie, ohne Erlaubnis ein Hinweis. Seit 30.09. gestrichen, siehe Abschnitt 16.
+- **GPS:** freiwillig per Knopf, nur solange die Karte offen ist. Feenlicht auf dem Weg, weit weg die Luftlinie, ohne Erlaubnis ein Hinweis. Seit 30.09. gestrichen, siehe Abschnitt 17.
 - **Getestet:** `tests/karte.mjs`, `tests/nebel.mjs` prüft auch alle Stationstafeln, `tests/geraete.mjs` mit Prolog, Rundgang und Tafeln auf allen sechs Geräten.
 
 ---
@@ -595,7 +595,120 @@ Wünsche vom 28.09.: In der App alles etwas kleiner, weil es an manchen Stellen 
 - **Wieder neu:** Der Prolog merkt sich unter einem neuen Namen, dass er gesehen wurde. Wer die alten vier Tafeln schon auf seinem Handy gesehen hat, bekommt am Anfang des Spiels die neuen sechs.
 - **Geprüft:** `node app/engine.test.js`, `tests/karte.mjs` (neu: sechs Tafeln, Fee, Willkommen, Reise), `tests/geraete.mjs` (0 Probleme auf allen sechs Geräten), `tests/nebel.mjs`, `tests/selbst.mjs`, `tests/probe.mjs`. Die Stilprobe zeigt die neuen Tafeln ebenfalls.
 
-## 16. Freigabe von Hand, kein GPS (umgesetzt am 30.09.)
+---
+
+## 16. Eine Aufgabe von vorn bis hinten: Ausrüsten beim Spiel, ruhigere Texte (umgesetzt am 29.09.)
+
+Wunsch vom 29.09.: Den Ablauf einer Aufgabe aus Dennis' Sicht prüfen. Items und Fähigkeiten werden heute auf der Quest-Karte eingesetzt, dadurch braucht es die Ausrüstung kaum. Dennis soll **beim** Spiel (nicht vorher) auf die Ausrüstung gehen: „Das kann ich einsetzen, das habe ich. Klick, klick.“ Dazu überall den Text beruhigen, Informationen vereinfachen und weglassen, was es nicht braucht (impeccable clarify).
+
+Bilder in `entwuerfe/ablauf-aufgabe/` (nicht veröffentlicht): `heute-…` ist die App wie jetzt, `neu-…` ist die echte App im Demo-Stand, in der nur die Inhalte für die Vorschau ausgetauscht sind. Die App selbst ist unverändert.
+
+### 16.1 Durchgespielt: Auge des Jägers, wie es heute ist
+
+| Schritt | Was Dennis sieht | Was hakt |
+|---|---|---|
+| 1 | Der Kartenwurf ist besiegelt, der Moment läuft, das Menü dreht zu QUESTS, Auge des Jägers tritt aus dem Nebel. | nichts, das sitzt |
+| 2 | Quest-Karte (`heute-1-quest`): Titel, zwei Sätze, EINSETZBAR mit zwei Symbolen ohne Namen, SIEG mit BESTANDEN, NIEDERLAGE mit VERLOREN. | „Was ist das blaue Ding?“ Tippen erklärt nicht, sondern öffnet sofort ein Siegel. Drei laute Knöpfe, bevor das Spiel begonnen hat. |
+| 3 | Ausrüstung (`heute-3-ausruestung`): dieselben zwei leuchten, die Textbox hat drei Sätze und EINSETZEN. | Zweiter Weg zum selben Ziel. Die Seite ist nur noch ein Lexikon. |
+| 4 | Pistole einsetzen (`heute-2-einsetzen` zeigt das Fenster beim Fluch): „ITEM EINSETZEN … Bleibt in deinem Beutel.“, dann der Moment „KLEINE WASSERPISTOLE, eingesetzt bei Auge des Jägers“. | Ritual ohne Entscheidung: Die Pistole hilft immer, verbraucht wird nichts. Zwei Dinge heißen zwei Siegel und zwei Momente. |
+| 5 | Fluch sprechen: Siegel mit VORTEIL, „Jeder Fluch hat seinen Preis. Welchen, erfährst du, wenn er gesprochen ist.“ und „Du hast 2, danach 1.“, dann die Fluch-Szene. | Die einzige echte Entscheidung, gut so. Drei Sätze, wo einer reicht. |
+| 6 | Spiel, dann BESTANDEN, Siegel halten, Moment. | nichts, das sitzt |
+
+Dazu der **Schild**: Dennis setzt ihn heute vor dem Duell ein („Setz ihn vorher ein, dann spielst du das Duell noch einmal.“). Gewinnt er, ist der Schild trotzdem weg.
+
+### 16.2 Die Mechanik: Ausrüsten beim Spiel, wie mit den C-Tasten
+
+Wie in Ocarina of Time: Vor dem Kampf öffnet Link das Menü und legt, was er braucht, auf die C-Tasten. Genau das wird die Ausrüstung.
+
+- **Quest-Karte ohne Einsatz-Knöpfe** (`neu-1-quest-vor-dem-spiel`): Sie sagt, was dran ist und was auf dem Spiel steht. Hat Dennis etwas, das hier hilft, steht dort **AUSRÜSTEN**, daneben die Symbole dessen, was hilft. Tippen dreht zur Ausrüstung.
+- **Die Ausrüstung weiß, wofür** (`neu-2-ausruesten`): Plakette „FÜR AUGE DES JÄGERS“ über dem Bogenfenster, unter Dennis drei gelbe C-Tasten mit den Pfeilen vom N64-Controller. Was hier hilft, leuchtet. **Tippen legt es auf die nächste freie C-Taste** (Haken am Feld), nochmal Tippen legt es zurück. Nichts ist endgültig.
+- **Ein Siegel für alles** (`neu-3-ausruesten-beides`, `neu-4-siegel`): In der Textbox steht MITNEHMEN mit der Zahl. Das Siegel-Fenster zeigt DABEI und beim Fluch seinen Vorteil. Einmal halten besiegelt alles. Danach ein Moment AUSGERÜSTET („Der Bund gibt dir die Kleine Pistole.“), beim Fluch danach die Fluch-Szene mit dem Schattendieb wie heute. Das Menü dreht zurück zu QUESTS. In echt heißt MITNEHMEN: Der Bund gibt Dennis das Ding in die Hand (Pistole, Kreisel, Schwert, Nadel).
+- **Quest-Karte danach** (`neu-5-quest-nach-dem-ausruesten`): Zeile DABEI mit Namen, beim Fluch mit dem, was er hier bewirkt. Tippen auf DABEI führt wieder zur Ausrüstung, falls er noch etwas dazunehmen will.
+- **Eine Farbe pro Schritt:** Die Karte hebt immer nur den nächsten Schritt hervor. Vor dem Spiel ist AUSRÜSTEN golden, BESTANDEN und VERLOREN sind nur umrandet. Nach dem Mitnehmen umgekehrt. Hat Dennis nichts, was hier hilft, gibt es kein AUSRÜSTEN und alles bleibt wie heute. Gesperrt wird nichts, eintragen kann er jederzeit.
+- **Schild und Segen melden sich selbst** (`neu-6-schild`): Sie retten, sie bereiten nicht vor, darum liegen sie nicht auf den C-Tasten. Tippt Dennis bei einem Duell VERLOREN (auch im Showdown) und hat einen Schild, bietet das Siegel-Fenster „Schild einsetzen“ neben „Verloren eintragen“ an: „Statt zu verlieren, spielst du noch einmal. Danach ist er weg.“ Kein Schild geht mehr umsonst verloren. Rikes Segen bleibt, wo er heute schon ist: am Tor.
+- **Am Gipfel** rüstet Dennis für das aktuelle Duell („FÜR DUELL 2 · AUGE DES JÄGERS“). So sind es nie mehr als zwei Dinge, drei C-Tasten reichen immer.
+- **Rikes Amulett:** AUSRÜSTEN auf seiner Quest-Karte öffnet die Ausrüstung für das Amulett (Fluch: ein Tipp vom Quest Master). Die Plakette sagt immer, wofür.
+
+**Technik, kurz:** keine neuen Daten. MITNEHMEN schreibt je Ding einen Einsatz wie heute (`e_…`, beim Fluch mit `raub`), nur in einem Rutsch. Der Admin sieht alles wie bisher. `engine.js`: `einsetzbar()` am Gipfel nur für das aktuelle Duell, der Schild nicht mehr in `einsetzbar` der Quests, sondern im Siegel der Niederlage. `app.js`: Die Auswahl auf den C-Tasten lebt nur auf dem Handy, bis sie besiegelt ist. Moment AUSGERÜSTET für mehrere Einsätze. Tests: `selbst.mjs`, `glanz.mjs`, `durchlauf.mjs` und `rubine.mjs` setzen heute auf der Quest-Karte ein und ziehen um, neu `tests/ausruesten.mjs`.
+
+### 16.3 Ruhigere Texte
+
+Regeln (clarify):
+
+1. Jeder Gedanke nur einmal. Was ein Symbol, eine Zahl oder die Farbe schon sagt, sagt kein Satz.
+2. Die Quest-Karte sagt in einem Satz, was zu tun ist. Die genauen Regeln erklärt der Bund vor Ort.
+3. Ein Item sagt zuerst, was es bewirkt, in einem Satz. Stufe und Herkunft stehen darunter in der Textbox.
+4. In Dennis' Fenstern kein Satz über den Quest Master, außer wenn er etwas zurücknimmt.
+5. Gleiche Dinge, gleiche Wörter: Items und den Fluch **nimmt** Dennis **mit**, Schild und Segen **setzt** er **ein**. SIEG und NIEDERLAGE zeigen, was auf dem Spiel steht, BESTANDEN und VERLOREN, was passiert ist.
+
+**Quest-Texte** (`text` in `config.js`):
+
+| Quest | Heute | Neu |
+|---|---|---|
+| Rikes Tagebuch | Rike hat sieben Fragen über dich beantwortet. Schreib, was sie gesagt hat, dann hörst du ihre Antwort. | Sieben Fragen über dich: Errate, was Rike geantwortet hat. |
+| Die drei Zeichen | Schlag zwei aus dem Bund nacheinander im Schnick Schnack Schnuck. Wer zuerst zwei Runden gewinnt, siegt. | Schlag beide aus dem Bund im Schnick Schnack Schnuck, jeweils Best of 3. |
+| Wirbel der Götter | Zwei Kreisel, eine Arena. Wer sich länger dreht, gewinnt. | bleibt |
+| Das Podrennen | Ein kleiner Gleiter, ein Parcours, eine Uhr. Fahr schneller als die Zeit. | Fahr den Gleiter durch den Parcours, schneller als die Uhr. |
+| Kartenwurf | Ein Duell mit Karten aus deinen Packs. Wer mehr ins Ziel bringt, gewinnt. | Wirf Karten aus deinen Packs ins Ziel, mehr als dein Gegner. |
+| Auge des Jägers | Fünf Flammen, ein Tank, deine stärkste Wasserwaffe. Lösch sie, bevor dir das Wasser ausgeht. | Lösch fünf Flammen mit einem Tank. |
+| Klingen des Deku-Baums | Wirf deine Klingen in den alten Baum. Nur was stecken bleibt, zählt. | bleibt |
+| Hüter der Flamme | Trag ein brennendes Teelicht 100 Schritte bergauf, ohne dass es erlischt. Der Bund darf dich ablenken, aber nicht anpusten. | Trag ein Teelicht 100 Schritte bergauf, ohne dass es ausgeht. |
+| Rikes Rache | Rike hat verraten, was du überhaupt nicht kannst. Fädle ein, bevor die Zeit abläuft. | bleibt |
+| Prüfung des Bundes | Drei Duelle gegen den Bund, zuerst deine Revanchen. Antreten darfst du nur mit allen vier Ziffern. | Drei Duelle gegen den Bund. Zwei musst du gewinnen. (Revanchen und Tor zeigen ihre Tafeln selbst.) |
+| Rikes Amulett | Rikes Brosche ist versteckt. Finde sie und setz sie zusammen, bevor du am Gipfel stehst. | Finde Rikes versteckte Brosche und setz sie bis zum Gipfel zusammen. |
+
+**Items und Fähigkeiten** (`text`, `einsatz`, `fund` in `config.js`, die Tarntexte bleiben):
+
+| Was | Heute | Neu |
+|---|---|---|
+| Wasserspritze, Fund | Deine erste Wasserwaffe. Stärkere erspielst du dir, sie nehmen in diesem Feld ihren Platz ein. | Deine erste Wasserwaffe. Stärkere landen im selben Feld. |
+| Kleine Wasserpistole | Mehr Wasser, mehr Reichweite. Sie löst die Spritze ab. | Mehr Wasser, mehr Reichweite. („Stufe 2 von 3“ sagt den Rest) |
+| Große Wasserpistole | Die Monsterpistole: elektrisch, mit Dauerfeuer und Licht. Keiner schießt so lange wie du. | Die Monsterpistole: elektrisch, mit Dauerfeuer. |
+| Gepanzerte Karten | Zwei Karten mehr, in festen Hüllen. Sie fliegen weiter und stabiler. | Zwei Karten mehr, in festen Hüllen. |
+| Götterkreisel | Dein eigener Kreisel. Du darfst vorher üben und wählst zuerst. | Du übst vorher und wählst zuerst. |
+| Stich | Eine Elbenklinge. Ein Schwert mehr heißt ein Versuch mehr. | Eine Elbenklinge: ein Schwert mehr. |
+| Stopfnadel | Ein größeres Öhr als bei einer feinen Nadel. Da findet der Faden leichter hindurch. | Größeres Öhr, der Faden findet leichter durch. |
+| Dicke Nadel | Das größte Öhr von allen. Sie löst die Stopfnadel ab. | Das größte Öhr von allen. |
+| Fluch | Ein alter Fluch. Sprich ihn vor einem Spiel, und er verschafft dir dort einen Vorteil. Doch jeder Fluch hat seinen Preis. | Bringt dir bei einem Spiel einen Vorteil. Doch jeder Fluch hat seinen Preis. |
+| Fluch, im Siegel | Jeder Fluch hat seinen Preis. Welchen, erfährst du, wenn er gesprochen ist. Du hast 2, danach 1. | nur der Vorteil und „Doch jeder Fluch hat seinen Preis.“ |
+| Schild des Bundes | Wiederhole ein verlorenes Duell. Einmal. | Verlierst du ein Duell, spielst du es noch einmal. |
+| Rikes Segen | Rike wacht über dich. Am Tor zum Gipfel schenkt dir ihr Segen eine fehlende Ziffer. | Rike wacht über dich. Am Tor schenkt ihr Segen dir eine fehlende Ziffer. |
+
+**In der App** (`app.js`):
+
+| Wo | Heute | Neu |
+|---|---|---|
+| Siegel, Item | Bleibt in deinem Beutel. / Einmalig, danach verbraucht. / Du hast 1, danach 0. | entfällt, die Zahl steht am Symbol |
+| Siegel, Glanzsieg | Nur mit 2 Karten Vorsprung. Der Quest Master kann es zurücknehmen. | Nur mit 2 Karten Vorsprung. |
+| Siegel, Duell verloren | Du hast den Schild des Bundes. Setz ihn vorher ein, dann spielst du das Duell noch einmal. | Wahl „Schild einsetzen“ oder „Verloren eintragen“ (16.2) |
+| Siegel, Pack öffnen | Der Bund gibt es dir. Verlierst du später und hast keine geschlossenen Packs mehr, zahlst du mit Karten: pro Pack deine beste aus einem geöffneten. | Der Bund gibt es dir. |
+| Fenster Packs | fünf Zeilen, darunter „8 geschlossen: Damit zahlst du, wenn du verlierst.“ und „Keine geschlossenen mehr? Dann zahlst du mit Karten: pro Pack deine beste aus einem geöffneten.“ | „8 geschlossen“ mit PACK ÖFFNEN, „2 geöffnet“, „10 beim Bund“, eine Regel: „Ohne geschlossene Packs zahlst du mit deiner besten Karte.“ |
+| Moment, mit Karten gezahlt | −1 Karte: Mehr geschlossene Packs hattest du nicht. Der Bund nimmt sich deine beste Karte. | −1 Karte, deine beste. Geschlossene Packs hattest du keine mehr. |
+| Moment, nichts mehr zu verlieren | Du hattest keine Packs mehr, die du verlieren konntest. / Mehr hattest du nicht. | Mehr Packs hattest du nicht. |
+| Moment, Item eingesetzt | KLEINE WASSERPISTOLE, eingesetzt bei Auge des Jägers | AUSGERÜSTET, Auge des Jägers, eine Zeile je Ding |
+| Textbox Ausrüstung | Einsetzbar bei Kartenwurf und Rikes Amulett. | Leuchtet: „Hilft hier.“, auf der C-Taste: „Nimmst du mit. Nochmal tippen legt es zurück.“, beim Fluch der Vorteil für dieses Spiel |
+| Tagebuch fertig | Alle Antworten sind besiegelt. Trag jetzt auf der Quest-Karte ein, ob du bestanden hast. | Alle sieben besiegelt. Trag dein Ergebnis auf der Quest-Karte ein. |
+| Fee in der Ausrüstung | vier Hinweise, darunter „Was leuchtet, kannst du bei der aktuellen Quest einsetzen: antippen, dann das Siegel halten.“ | drei: „Hier landet, was du dir erspielst. Die Schatten zeigen, was noch zu holen ist.“, „Vor jedem Spiel: Tippe, was du mitnimmst.“, „Deine Packs und die Ziffern für das Kästchen.“ |
+| Prolog, Tafel 6 | Verlierst du, holt sich der Bund Packs zurück. Unterwegs darfst du welche öffnen. Hast du dann keine geschlossenen mehr, zahlst du mit Karten. | Verlierst du, holt sich der Bund Packs zurück. Öffnen darfst du deine jederzeit. (Das mit den Karten sagt der Moment, wenn es passiert.) |
+
+**Bewusst geblieben:** Tarnnamen und Tarntexte der Schatten (das Geheimnis ist der Spaß, und sie stehen nur da, wenn Dennis danach fragt), „Siegel gedrückt halten“, die Sätze des Schattendiebs, alle Texte von Rike, der Fee im Prolog und im Abspann, SIEG und NIEDERLAGE als einzige Stelle, die zeigt, was auf dem Spiel steht.
+
+### 16.4 Entschieden und gebaut (29.09.)
+
+Der Nutzer hat 16.2 und 16.3 so freigegeben: erst die Mechanik, dann die Texte. Dazu kam sein Wunsch: **Jedes Fenster ist immer gleich groß** (ein oder vier Zeilen, nichts springt), und die Schrift ist überall dieselbe.
+
+- **Quest-Karte:** AUSRÜSTEN mit den Symbolen dessen, was hier hilft (pulsiert golden), BESTANDEN und VERLOREN solange nur umrandet. Nach dem Mitnehmen die Zeile DABEI mit Namen, dann leuchten die Knöpfe zum Eintragen. DABEI antippen führt wieder zur Ausrüstung (ein kleines Plus zeigt, was noch dazukönnte). Bei erledigten Quests steht, was dabei war.
+- **Ausrüstung:** Plakette „FÜR AUGE DES JÄGERS“ über dem Bogenfenster (am Gipfel „FÜR DUELL 2 · AUGE DES JÄGERS“), drei gelbe C-Tasten unter Dennis. Was hilft, leuchtet. Tippen legt es auf die nächste freie C-Taste (das Ding hüpft hinein, das Feld bekommt einen Haken), nochmal Tippen auf Feld oder Taste legt es zurück. Besiegeltes steht fest (gold). Hilft nichts, gibt es weder Plakette noch C-Tasten. Die Textbox sagt, was es hier heißt: „Hilft hier. Tippen nimmt es mit.“, „Kommt mit. Nochmal tippen legt es zurück.“, „Dabei bei …“, beim Fluch „Hier: …“ und „Jeder Fluch hat seinen Preis.“ (gewählt: „Kommt mit.“), beim Schild „Meldet sich, wenn du ein Duell verlierst.“, beim Segen „Meldet sich am Tor zum Gipfel.“. Rechts ist immer Platz für MITNEHMEN · n.
+- **Ein Siegel:** AUSRÜSTEN FÜR, DABEI mit allen Dingen, beim Fluch der Vorteil und „Doch jeder Fluch hat seinen Preis.“. Geschrieben wird je Ding ein Einsatz wie bisher (`e_…`, am Gipfel mit `duell`), in einem Rutsch (`store.js` `setzenAlle`). Moment AUSGERÜSTET mit einer Zeile je Ding („Hol es dir beim Bund.“), mit Fluch erst die Szene mit dem Schattendieb, nur ein Fluch heißt weiter FLUCH GESPROCHEN. Danach dreht das Menü zu QUESTS.
+- **Schild:** Tippt Dennis bei einer Quest mit Duell VERLOREN oder im Showdown NIEDERLAGE und hat den Schild, bietet das Siegel-Fenster „Schild einsetzen“ (vorgewählt, violett, NOCHMAL SPIELEN) und „Verloren eintragen“ an, dort wo sonst „Siegel gedrückt halten“ steht. Moment SCHILD DES BUNDES: „Spiel noch einmal und trag dann das neue Ergebnis ein.“
+- **Admin:** „… mitgenommen zu … (gib es ihm)“, beim Schild „… eingesetzt …: Duell wiederholen“. Notlösung Einsetzen bucht am Gipfel für das aktuelle Duell.
+- **Logik (`engine.js`):** `einsetzbar()` am Gipfel nur für das aktuelle Duell, neu `aktuellesDuell()`, `dabei()`, `mitnehmbar()` (ohne Schild und Segen, am Tor nichts, ein Fluch je Spiel), `rettung()`. `jetztEinsetzbar()` heißt jetzt: was Dennis gerade mitnehmen kann. Der Schild trägt in `config.js` `rettung: true`.
+- **Gleich große Fenster:** Ergebnis-Fenster, Siegel-Fenster, Stationstafel, Hinweise der Fee (drei Zeilen, 250 px breit) und Prolog (drei Zeilen) haben feste Höhen, gemessen am längsten Inhalt auf dem iPhone 13 in Safari. Die Textbox der Ausrüstung hat immer Name und zwei Zeilen. Wird etwas doch länger, scrollt es im Fenster. Die Tagebuch-Frage nimmt immer zwei Zeilen Platz.
+- **Gleiche Schrift:** Alle Größen hängen an der kleinsten Bildschirmhöhe (`svh` statt `dvh`), damit Safari beim Ein- und Ausblenden seiner Leisten keine Schrift umspringen lässt, und iOS vergrößert Texte nicht mehr von selbst (`text-size-adjust`). Im Siegel-Fenster haben alle Zeilen dieselbe Schrift (vorher war die Zeile neben VORTEIL größer und dünner).
+- **Texte** wie in 16.3, dazu vier kürzere Hinweise der Fee, damit jeder in drei Zeilen passt („Was jetzt dran ist und was auf dem Spiel steht. Hier trägst du dein Ergebnis ein.“, „Hier landet, was du dir erspielst. Schatten zeigen, was noch fehlt.“, „Hier stehst du. Tippe eine Station an, dann siehst du, was dort wartet.“, „Höhe und Weg bis zum Gipfel. Mit GPS zeigt dir die Karte, wo du wirklich bist.“).
+- **Geprüft:** `node app/engine.test.js` (neu: Ausrüsten, Schild als Rettung, je Duell), neu `tests/ausruesten.mjs` (der ganze Ablauf, Schild, Gipfel, gleiche Größen), angepasst `selbst.mjs`, `glanz.mjs`, `durchlauf.mjs`, `rubine.mjs`, dazu alle übrigen Tests.
+
+## 17. Freigabe von Hand, kein GPS (umgesetzt am 30.09.)
 
 Frage vom 29.09.: Dennis macht die erste Aufgabe am Freitag im Zug, die anderen am Samstag, aber jede erst, wenn er an der nächsten Station angekommen ist. Reicht GPS dafür? Entscheidung des Nutzers: Nein, die App hakt ohnehin noch manchmal, GPS kommt komplett raus. Der Quest Master gibt jede Quest von Hand frei, Dennis wandert dann auf der Karte zur Station.
 
