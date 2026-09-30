@@ -17,6 +17,8 @@ const b = await chromium.launch();
 // Admin und Dennis im selben Browser, Speicher „lokal“: beide Seiten sehen sich über localStorage. Größe: iPhone 13 quer.
 const ctx = await b.newContext({ viewport: { width: 844, height: 390 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
 await ctx.route('**/config.js', async r => { const res = await r.fetch(); r.fulfill({ response: res, body: (await res.text()).replace('typ: "firebase"', 'typ: "lokal"') }); });
+// Rikes echte Nachrichten (seit 30.09.) ausblenden: Der Test rechnet mit dem kurzen Platzhalter, und Chromium spielt kein AAC
+await ctx.route('**/assets/logbuch/*.m4a', r => r.fulfill({ status: 404 }));
 const seite = async url => { const p = await ctx.newPage(); p.on('pageerror', e => fehler.push(url + ': ' + e.message)); await p.goto(BASE + url); await warte(500); return p; };
 const zu = async p => { while (await p.isVisible('#overlay')) { await p.click('#overlay'); await warte(300); } while (await p.isVisible('#coach')) { await p.click('#coach'); await warte(150); } };
 const geist = p => p.isVisible('#geistRuf');

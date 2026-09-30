@@ -276,7 +276,7 @@
             gleich nach dem Besiegeln (nach „Tagebuch leeren“ oder „Alles zurücksetzen“ wieder). */
     logbuch: {
       fragen: [
-        // Rike: „Geduldssachen, so was wie einen Faden durchs Nadelöhr einfädeln.“ Daraus wird Rikes Rache.
+        // Rike (30.09.): Filigrane Arbeiten mit Fingerspitzengefühl, „einen Faden in so einem Nadelöhr zu bekommen“. Daraus wird Rikes Rache.
         { frage: "Was kannst du laut Rike überhaupt nicht?",                                       audio: "assets/logbuch/frage1.m4a",
           geist: { quest: "rache", saetze: ["Buu huu! Ich bin’s, Buu Huu, direkt aus Mario Party.", "Die Jungs vom Bund haben mich angeheuert. Ich werde dein Albtraum sein!", "Hehehe … interessant. Nicht mal einen Faden durchs Nadelöhr?", "Dann macht der Bund daraus doch direkt eine Quest!", "Sie wartet im Nebel auf dich. Viel Spaß beim Einfädeln!"] } },
         { frage: "Womit bringst du Rike auf die Palme?",                                           audio: "assets/logbuch/frage2.m4a" },
