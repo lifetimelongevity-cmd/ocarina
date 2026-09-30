@@ -232,7 +232,10 @@
   // Sichtbarkeit für Dennis: erledigte Quests und die nächste. Was danach kommt, liegt im Nebel.
   // Verdeckte Prüfungen erscheinen als Medaillon mit „?" (ihre Zahl ist bekannt), verdeckte Sidequests gar nicht.
   // Laufende Quests tauchen auf, sobald der Quest Master sie startet.
-  const aufgedeckt = id => state.quests[id] !== "offen" || id === state.next;
+  // Spielbeginn blanko (30.09., Wunsch des Nutzers): Beim allerersten Start ist auch die erste Quest noch im Nebel.
+  // Sie taucht erst nach dem Rundgang auf, mit etwas Abstand (Abschnitt Erste Quest unten).
+  let blanko = false;
+  const aufgedeckt = id => state.quests[id] !== "offen" || (id === state.next && !blanko);
   const NEBEL = "nebel";
   const coveredMedal = () => `<span class="medal covered"><b>?</b></span>`;
   const verdeckteKern = () => REIHE.filter(q => q.typ === "kern" && !aufgedeckt(q.id)).length;
@@ -397,13 +400,13 @@
     $("#hudCode").setAttribute("aria-label", "Code des Kästchens: " + s.ziffern.map(v => v == null ? "unbekannt" : v).join(", "));
     const n = s.next ? questById(s.next) : null;
     $("#hudNext").classList.toggle("done", !n);
-    $("#hudNextName").textContent = !n ? "Zum Kästchen" : n.id === revealPending ? "?" : n.name;
+    $("#hudNextName").textContent = !n ? "Zum Kästchen" : n.id === revealPending || blanko ? "?" : n.name;
   }
 
   function renderQuests() {
     const verdeckt = REIHE.filter(q => !aufgedeckt(q.id));
     const ungueltig = sel[1] === NEBEL ? !verdeckt.length : !sel[1] || !aufgedeckt(sel[1]);
-    if (followNext || ungueltig) sel[1] = state.next || REIHE[REIHE.length - 1].id;
+    if (followNext || ungueltig) sel[1] = !state.next ? REIHE[REIHE.length - 1].id : aufgedeckt(state.next) ? state.next : NEBEL;
     document.querySelectorAll(".q-row:not(.nebel)").forEach(b => {
       const q = questById(b.dataset.id), st = state.quests[q.id], isNext = q.id === state.next;
       b.parentElement.hidden = !aufgedeckt(q.id);
@@ -432,7 +435,7 @@
     if (id === NEBEL) {
       card.innerHTML = `
         <div class="qc-head">${coveredMedal()}<div><p class="tb-title">Im Nebel</p></div></div>
-        <p class="tb-text">Zeigt sich, wenn es dran ist.</p>`;
+        <p class="tb-text">${blanko ? "Bald geht es los …" : "Zeigt sich, wenn es dran ist."}</p>`;
       return;
     }
     const q = questById(id), st = state.quests[id], isNext = id === state.next;
@@ -654,7 +657,7 @@
     selectStation(id, false);
     const qs = REIHE.filter(q => q.station === id);
     if (!qs.length) { tone("confirm"); return explainCode(); }
-    const q = qs.find(x => x.id === state.next) || qs.find(x => aufgedeckt(x.id));
+    const q = qs.find(x => x.id === state.next && aufgedeckt(x.id)) || qs.find(x => aufgedeckt(x.id));
     oeffneQuest(q ? q.id : NEBEL);
   }
   function oeffneQuest(qid) {
@@ -1387,6 +1390,7 @@
       if (page === 1) { const row = document.querySelector(".q-row.is-selected"); if (row) scrollIntoList(row); }
       if (page === 2 && $("#overlay").hidden) { if (!onboarded()) onboarding(); else funde(); }
       if (page === 0) { gpsStart(); spieleLauf(); if (!laufFrame) kartenHinweis(); }
+      ersteQuestPruefen();
     }, 470);
   }
 
@@ -1430,8 +1434,54 @@
     coach([
       [hier, "Hier stehst du. Tipp auf eine Station, dann siehst du, was dort wartet."],
       ...(WEG ? [[$("#mapLegend"), "Höhe und Weg bis zum Gipfel. Mit GPS zeigt dir die Karte, wo du wirklich bist."]] : []),
-      [$(".shoulder-right"), "Mit R zurück zu deinen Quests. Viel Glück!"]
+      [$(".shoulder-right"), "Mit R zurück zu deinen Quests. Dort wartet etwas auf dich!"]
     ]);
+  }
+
+  /* ---------- Erste Quest: Spielbeginn blanko (30.09., Wunsch des Nutzers) ----------
+     Beim ersten PRESS START ist das Menü leer, auch die erste Quest liegt im Nebel. Erst wenn der Rundgang durch ist
+     (Quests, Ausrüstung, Karte, zurück zu Quests), taucht sie nach einer kurzen Pause auf: eigener Moment, dann tritt sie
+     aus dem Nebel. Prolog übersprungen: gleich danach. Bleibt Dennis irgendwo hängen: spätestens 90 s nach dem Prolog.
+     Einmal pro Handy (lädt er zwischendurch neu, kommt sie nach PRESS START). Entscheidet der Quest Master schon etwas, ist
+     der Spuk vorbei. Mit ?direkt nie (Tests und Laptop). */
+  const ERSTE_KEY = "dq-erste-quest-v1" + (PROBE ? "-probe" : "");
+  let ersteSofort = false, ersteTimer = null, ersteNotfall = null;
+  const ersteOffen = () => !DEMO && !spaeter() && !obGemerkt(ERSTE_KEY) && obGemerkt(PROLOG_KEY) && !!state && !!state.next;
+  function blankoStart(sofort) {
+    if (spaeter() || !state || !state.next) return;
+    blanko = true; ersteSofort = sofort; followNext = true;
+    render();
+    if (sofort) ersteQuestPruefen();
+  }
+  const frei = () => page === 1 && intro.hidden && $("#overlay").hidden && $("#coach").hidden && $("#prolog").hidden
+    && $("#schwur").hidden && $("#logbuch").hidden && $("#fluchSzene").hidden;
+  function ersteQuestPruefen() {
+    if (!blanko || ersteTimer) return;
+    if (spaeter() || !state || !state.next) { blanko = false; render(); return; }
+    if (!ersteSofort && !(beutelGezeigt && karteGesehen)) return;
+    // Erst wenn Dennis 2 s ruhig auf QUESTS ist (nichts offen, keine Drehung), dann taucht sie auf
+    let ruhig = 0;
+    const warten = () => { ersteTimer = setTimeout(() => {
+      ersteTimer = null;
+      if (!blanko) return;
+      ruhig = frei() && !$("#game").classList.contains("dreht") ? ruhig + 250 : 0;
+      if (ruhig < (STILL.matches ? 500 : 2000)) return warten();
+      ersteQuestZeigen();
+    }, 250); };
+    warten();
+  }
+  function ersteQuestZeigen() {
+    blanko = false; clearTimeout(ersteNotfall);
+    obMerken(ERSTE_KEY);
+    const q = questById(state.next);
+    revealPending = q.id;
+    render();
+    melody("pruefung");
+    showOverlay({
+      head: `<span class="medal-stage won" style="--m:${q.farbe || "#c9c3a2"}">${questIcon(q, "offen", false)}</span><p class="big">DEINE ERSTE QUEST</p><p class="sub">${esc(q.name)}</p>`,
+      lines: `<li><span class="ri"></span><span>${esc(q.text)}</span></li>`,
+      next: "", gross: true
+    }, showNextQuest);
   }
 
   /* ---------- Prolog: einmal pro Handy nach dem ersten PRESS START (08-erlebnis-plan.md, 3.2) ---------- */
@@ -1493,13 +1543,16 @@
       gesehen = true;
       obMerken(PROLOG_KEY);
       if (uebersprungen === "still") return;
-      if (uebersprungen) return tone("move");
+      // Übersprungen: kein Rundgang, die erste Quest kommt gleich. Sonst nach dem Rundgang, spätestens nach 90 s.
+      if (uebersprungen) { ersteSofort = true; ersteQuestPruefen(); return tone("move"); }
+      clearTimeout(ersteNotfall);
+      ersteNotfall = setTimeout(() => { ersteSofort = true; ersteQuestPruefen(); }, 90000);
       tone("confirm");
       // Kurzer Rundgang durch das Menü, gesprochen von der Fee
       setTimeout(() => coach([
         [$("#hudPacks"), "Deine geschlossenen Packs. Tipp drauf, um eins zu öffnen."],
         [$("#hudCode"), "Der Code des Kästchens. Hier rastet jede Ziffer ein."],
-        [$("#questCard"), "Was jetzt dran ist und was auf dem Spiel steht. Hier trägst du dein Ergebnis ein."],
+        [$("#questCard"), "Hier erscheint, was dran ist und was auf dem Spiel steht. Und hier trägst du dein Ergebnis ein."],
         // Zuletzt R (30.09.): Der Rundgang geht auf der nächsten Seite weiter, das muss Dennis wissen
         [$(".shoulder-right"), "Blättern mit Z und R oder Wischen. Tipp jetzt auf R!"]
       ]), 250);
@@ -1528,7 +1581,7 @@
     let i = -1, ziel = null;
     const weiter = () => {
       if (ziel) ziel.classList.remove("coach-focus");
-      if (++i >= schritte.length) { bubble.hidden = true; bubble.onclick = null; coachZu = null; return; }
+      if (++i >= schritte.length) { bubble.hidden = true; bubble.onclick = null; coachZu = null; ersteQuestPruefen(); return; }
       const [el, text] = schritte[i];
       ziel = el; el.classList.add("coach-focus");
       const b = bubble.querySelector(".coach-bubble");
@@ -2073,7 +2126,8 @@
       const row = document.querySelector(".q-row.is-selected");
       if (row) scrollIntoList(row);
       // Beim ersten Mal erklärt Rikes Fee, worum es geht. Sonst laufen die Momente, die Dennis verpasst hat.
-      if (prolog.start()) merkeGesehen(); else nachholen();
+      if (prolog.start()) { merkeGesehen(); blankoStart(false); }
+      else { if (ersteOffen()) blankoStart(true); nachholen(); }
       setTimeout(abspannPruefen, 900);
     }, 500);
   }
@@ -2304,6 +2358,7 @@
     renderSync();
     fensterZuruecknehmen();
     prolog.pruefen();
+    if (blanko && spaeter()) ersteQuestPruefen();
     abspann.pruefen();
     setTimeout(abspannPruefen, 900);        // Spielende: Finale, sobald nichts anderes mehr offen ist
     if (!$("#schwur").hidden) schwur.pruefen();
@@ -2357,7 +2412,7 @@
   // Bleibt: ob die App auf dem Home-Bildschirm liegt.
   function neuerAnfang(zeigen) {
     if (sammel) { clearTimeout(sammel.t); sammel = null; }
-    try { [OB_KEY, KARTE_KEY, FUND_KEY, GPS_KEY].forEach(k => localStorage.removeItem(k)); } catch (e) {}
+    try { [OB_KEY, KARTE_KEY, FUND_KEY, GPS_KEY, ERSTE_KEY].forEach(k => localStorage.removeItem(k)); } catch (e) {}
     abspann.schliessen(); abspann.vergessen();
     beutelGezeigt = false; karteGesehen = false; gesehen = null; neuMarke.clear();
     prolog.vergessen();

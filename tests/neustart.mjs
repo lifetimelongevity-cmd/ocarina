@@ -30,6 +30,13 @@ async function halten(p, ms = 1100) {
   const k = await p.locator('#swSiegel').boundingBox();
   await p.mouse.move(k.x + k.width / 2, k.y + k.height / 2); await p.mouse.down(); await warte(ms); await p.mouse.up(); await warte(700);
 }
+// Spielbeginn blanko (30.09.): Nach dem Prolog taucht die erste Quest mit etwas Abstand auf, eigenes Fenster
+async function ersteQuest(p) {
+  await warte(2800);
+  const t = (await p.isVisible('#overlay')) ? (await p.textContent('#overlay')) : '';
+  pruefe(t.includes('DEINE ERSTE QUEST'), 'Nach dem Prolog taucht die erste Quest auf');
+  await zu(p); await warte(800);
+}
 async function tagebuch(p, text) {
   await p.click('[data-logbuch]'); await warte(300);
   for (let i = 0; i < 7; i++) { await p.fill('#lbInput', text + (i + 1)); await p.click('#lbSeal'); await warte(200); await p.click('#lbNext'); await warte(120); }
@@ -43,7 +50,7 @@ admin.on('dialog', d => d.accept());
 let dennis = await seite('');
 await dennis.click('#introScreen'); await warte(900);
 if (await dennis.isVisible('#prolog')) { await dennis.click('#prologSkip'); await warte(500); }
-await zu(dennis);
+await ersteQuest(dennis);
 
 // Ein halber Vormittag: Tagebuch beantwortet und besiegelt, zwei Quests vom Quest Master, ein Fluch gebucht
 await tagebuch(dennis, 'Antwort ');
@@ -70,7 +77,7 @@ pruefe(await dennis.isVisible('#prolog'), 'PRESS START: Der Prolog mit der Fee k
 await dennis.click('#prologSkip'); await warte(500);
 f = await fenster(dennis);
 pruefe(!f.some(t => t.includes('ZURÜCK')), 'Nach dem Neustart keine Meldungen über Zurückgenommenes: ' + JSON.stringify(f));
-await zu(dennis);
+await ersteQuest(dennis);
 // Tagebuch wieder beschreibbar
 await dennis.click('[data-logbuch]'); await warte(300);
 pruefe(await dennis.isVisible('#lbInput') && (await dennis.textContent('#lbStep')).startsWith('1 /'), 'Tagebuch: Frage 1 ist wieder offen und beschreibbar');
@@ -95,7 +102,7 @@ pruefe(await dennis.isVisible('#prolog'), 'Titelbild: PRESS START zeigt den Prol
 await dennis.click('#prologSkip'); await warte(800);
 f = await fenster(dennis);
 pruefe(!f.length, 'Titelbild: danach keine Meldungen: ' + JSON.stringify(f));
-await zu(dennis);
+await ersteQuest(dennis);
 
 // Nur das Tagebuch leeren (eigener Knopf), mit Rückgängig
 await tagebuch(dennis, 'Neu ');
@@ -145,7 +152,7 @@ pruefe((await admin.textContent('#lbList')).includes('Neu 7'), 'Tagebuch-Knopf: 
   pruefe(await p.isVisible('#prolog'), 'Firebase-Handy: nach dem Neuladen gleich PRESS START, der Prolog kommt');
   if (await p.isVisible('#prologSkip')) await p.click('#prologSkip');
   await warte(4000);
-  const f = await p.evaluate(() => window.__fenster);
+  const f = (await p.evaluate(() => window.__fenster)).filter(t => !t.includes('DEINE ERSTE QUEST'));
   pruefe(!f.length && (await p.$eval('.q-row[data-id="logbuch"]', e => e.classList.contains('st-offen'))), 'Firebase-Handy: nichts Altes taucht auf: ' + JSON.stringify(f));
   pruefe(!schreibt.length, 'Firebase-Handy schreibt nichts auf den Server: ' + schreibt.join(','));
   await ctx2.close();
