@@ -1664,8 +1664,8 @@
 
   /* ---------- Schattendieb im Tagebuch: Rikes Antwort wird zur Quest (30.09., Wunsch des Nutzers) ----------
      Rike hat auf Frage 1 verraten, dass Dennis keinen Faden durchs Nadelöhr bekommt. Ist ihre Antwort vorbei, huscht der
-     Schattendieb des Bundes herein (das Gemeine macht der Bund, die Fee hilft nur) und macht daraus eine Quest: Bei Satz 2
-     erscheint das Medaillon von Rikes Rache, bei Satz 3 verschwindet es im Nebel. Den Namen sagt er nicht. Sätze und Quest in
+     Schattendieb des Bundes herein (das Gemeine macht der Bund, die Fee hilft nur) und macht daraus eine Quest: Beim vorletzten
+     Satz erscheint das Medaillon von Rikes Rache, beim letzten verschwindet es im Nebel. Den Namen sagt er nicht. Sätze und Quest in
      config.js (logbuch.fragen[].geist), wann er kommt, entscheidet das Log-Buch (unten). Tippen blättert wie im Prolog. */
   const geistRuf = (() => {
     const el = $("#geistRuf"), text = $("#grText"), bild = $("#grBild");
@@ -1679,7 +1679,7 @@
       tippen = setInterval(() => { n += 2; text.textContent = t.slice(0, n); if (n >= t.length) { clearInterval(tippen); tippen = null; } }, 28);
     }
     function zeige() {
-      const stufe = !quest || i === 0 ? "geist" : i === 1 ? "quest" : "nebel";
+      const n = saetze.length, stufe = !quest || i < n - 2 ? "geist" : i === n - 2 ? "quest" : "nebel";
       if (stufe === "quest" && el.dataset.bild === "geist") {
         bild.innerHTML = `<span class="gr-medaillon" style="--m:${quest.farbe || "#c9c3a2"}"><span class="medal-stage won">${medalHtml(quest, "offen", false)}</span><span class="medal covered gr-nebel"><b>?</b></span></span>`;
         bild.style.animation = "none"; void bild.offsetWidth; bild.style.animation = "";

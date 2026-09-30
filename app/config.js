@@ -271,14 +271,14 @@
        Dateien: app/assets/logbuch/frage1.m4a bis frage7.m4a. Fehlt eine, spielt die App einen Platzhalter-Klang.
        geist: Der Schattendieb des Bundes meldet sich, sobald Rikes Antwort vorbei ist (30.09., Wunsch des Nutzers: das Gemeine
             macht der Bund, die Fee hilft nur): am Ende der Nachricht, spätestens wenn Dennis weiterblättert oder das Tagebuch
-            schließt. Er huscht herein und macht aus der Antwort eine Quest. Satz 1 spricht er allein, bei Satz 2 erscheint das
-            Medaillon der Quest (quest), bei Satz 3 verschwindet es im Nebel. Den Namen der Quest sagt er nicht. Er kommt einmal,
+            schließt. Er huscht herein, stellt sich vor (sein erster Auftritt) und macht aus der Antwort eine Quest. Beim vorletzten
+            Satz erscheint das Medaillon der Quest (quest), beim letzten verschwindet es im Nebel, davor spricht er allein. Den Namen der Quest sagt er nicht. Er kommt einmal,
             gleich nach dem Besiegeln (nach „Tagebuch leeren“ oder „Alles zurücksetzen“ wieder). */
     logbuch: {
       fragen: [
         // Rike: „Geduldssachen, so was wie einen Faden durchs Nadelöhr einfädeln.“ Daraus wird Rikes Rache.
         { frage: "Was kannst du laut Rike überhaupt nicht?",                                       audio: "assets/logbuch/frage1.m4a",
-          geist: { quest: "rache", saetze: ["Hehehe … interessant. Nicht mal einen Faden durchs Nadelöhr?", "Dann macht der Bund daraus doch direkt eine Quest!", "Sie wartet im Nebel auf dich. Viel Spaß beim Einfädeln!"] } },
+          geist: { quest: "rache", saetze: ["Buu huu! Ich bin’s, Buu Huu, direkt aus Mario Party.", "Die Jungs vom Bund haben mich angeheuert. Ich werde dein Albtraum sein!", "Hehehe … interessant. Nicht mal einen Faden durchs Nadelöhr?", "Dann macht der Bund daraus doch direkt eine Quest!", "Sie wartet im Nebel auf dich. Viel Spaß beim Einfädeln!"] } },
         { frage: "Womit bringst du Rike auf die Palme?",                                           audio: "assets/logbuch/frage2.m4a" },
         { frage: "Was ist laut Rike deine ulkigste Eigenart?",                                     audio: "assets/logbuch/frage3.m4a" },
         { frage: "Was hast du bei eurem ersten Treffen gesagt oder getan, das Rike nie vergisst?", audio: "assets/logbuch/frage4.m4a" },

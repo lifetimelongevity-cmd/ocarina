@@ -44,6 +44,15 @@ pruefe(!(await geist(dennis)), 'Während Rikes Nachricht: kein Buu Huu');
 pruefe(await kommt(dennis, 6000), 'Nach Rikes Antwort auf Frage 1 huscht Buu Huu herein');
 pruefe(!!(await dennis.$('#geistRuf use[href="#i-dieb"]')) && !(await dennis.$('#geistRuf img')) && (await dennis.textContent('#grBox')).includes('BUU HUU'), 'Es spricht Buu Huu im Dienst des Bundes, nicht die Fee');
 pruefe((await schritt(dennis)) === '1 / 7' && await dennis.isVisible('#lbNext'), 'Dahinter bleibt das Tagebuch bei Frage 1');
+// Erst stellt er sich vor (sein erster Auftritt, später klaut er beim Fluch die Packs)
+const v1 = await satz(dennis);
+pruefe(v1 === 'Buu huu! Ich bin’s, Buu Huu, direkt aus Mario Party.', 'Vorstellung 1: ' + v1);
+await dennis.click('#geistRuf'); await warte(200);
+const v2 = await satz(dennis);
+pruefe(v2 === 'Die Jungs vom Bund haben mich angeheuert. Ich werde dein Albtraum sein!', 'Vorstellung 2: ' + v2);
+pruefe(!(await dennis.$('#grBild .gr-medaillon')), 'Bei der Vorstellung noch kein Medaillon');
+await dennis.screenshot({ path: `${OUT}/geist-0-vorstellung.png` });
+await dennis.click('#geistRuf'); await warte(200);
 const s1 = await satz(dennis);
 pruefe(s1 === 'Hehehe … interessant. Nicht mal einen Faden durchs Nadelöhr?', 'Satz 1: ' + s1);
 pruefe(!(await dennis.$('#grBild .gr-medaillon')), 'Satz 1: noch kein Medaillon');
