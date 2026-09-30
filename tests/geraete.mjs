@@ -1,6 +1,6 @@
 // Aufruf: cd app && python3 -m http.server 8765 &   dann   node tests/geraete.mjs /tmp/shots
 // Braucht Playwright mit Chromium (global oder in einem node_modules neben dieser Datei).
-// Playwright-Prüfung für die echten Geräte: iPhone 13, iPhone 15 (Safari und Home-Bildschirm), älteres Samsung (Chrome)
+// Playwright-Prüfung für die echten Geräte: iPhone 13, iPhone 15 (Safari und Home-Bildschirm), älteres Samsung (Chrome), Galaxy S24 (Chrome, Samsung Internet, Home-Bildschirm)
 import { chromium } from 'playwright';
 import fs from 'fs';
 
@@ -17,10 +17,20 @@ const GERAETE = [
   { id: 'iphone15-home',   w: 852, h: 393, dpr: 3, sa: { l: 59, r: 59, b: 21, t: 0 }, ios: true, standalone: true },
   { id: 'samsung-chrome',  w: 915, h: 356, dpr: 2.625, sa: { l: 0, r: 0, b: 0, t: 0 }, cpu: 4 },
   { id: 'samsung-voll',    w: 915, h: 412, dpr: 2.625, sa: { l: 32, r: 0, b: 0, t: 0 }, cpu: 4 },
+  // Dennis' Handy: Galaxy S24 (SM-S921B, Exynos 2400), 780×360 CSS-Pixel. Chrome mit Adressleiste, Chrome mit Statusleiste
+  // (knappster Fall), Samsung Internet (Standard-Browser) und vom Startbildschirm mit Kameraloch links
+  { id: 's24-chrome',      w: 780, h: 304, dpr: 3, sa: { l: 0, r: 0, b: 0, t: 0 }, s24: true },
+  { id: 's24-knapp',       w: 780, h: 280, dpr: 3, sa: { l: 0, r: 0, b: 0, t: 0 }, s24: true },
+  { id: 's24-samsung',     w: 780, h: 300, dpr: 3, sa: { l: 0, r: 0, b: 0, t: 0 }, s24: true, sbrowser: true },
+  { id: 's24-voll',        w: 780, h: 360, dpr: 3, sa: { l: 30, r: 0, b: 0, t: 0 }, s24: true },
 ];
+// NUR=s24 node tests/geraete.mjs … prüft nur die Geräte, deren id so anfängt
 
 const UA_IOS = 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1';
 const UA_SAMSUNG = 'Mozilla/5.0 (Linux; Android 13; SM-A525F) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Mobile Safari/537.36';
+const UA_S24 = 'Mozilla/5.0 (Linux; Android 14; SM-S921B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Mobile Safari/537.36';
+const UA_S24_SB = 'Mozilla/5.0 (Linux; Android 14; SM-S921B) AppleWebKit/537.36 (KHTML, like Gecko) SamsungBrowser/28.0 Chrome/130.0.0.0 Mobile Safari/537.36';
+const ua = g => g.ios ? UA_IOS : g.sbrowser ? UA_S24_SB : g.s24 ? UA_S24 : UA_SAMSUNG;
 
 const fehler = [];
 const bericht = [];
@@ -28,7 +38,7 @@ const log = (...a) => { const s = a.join(' '); bericht.push(s); console.log(s); 
 
 async function neueSeite(browser, g, url, { lokal = false, schwach = false } = {}) {
   const ctx = await browser.newContext({ viewport: { width: g.w, height: g.h }, deviceScaleFactor: g.dpr, isMobile: true, hasTouch: true,
-    userAgent: g.ios ? UA_IOS : UA_SAMSUNG });
+    userAgent: ua(g) });
   if (lokal) await ctx.route('**/config.js', async r => { const res = await r.fetch(); r.fulfill({ response: res, body: (await res.text()).replace('typ: "firebase"', 'typ: "lokal"') }); });
   await ctx.route('**firebasedatabase.app**', r => r.abort());
   // Safe Areas nachstellen
@@ -114,7 +124,7 @@ const seite = async (page, n) => { await weiterTippen(page); for (let i = 0; i <
 
 const browser = await chromium.launch();
 let alleProbleme = 0;
-for (const g of GERAETE) {
+for (const g of GERAETE.filter(g => !process.env.NUR || g.id.startsWith(process.env.NUR))) {
   log(`\n== ${g.id} (${g.w}×${g.h}, Insets l${g.sa.l} r${g.sa.r} b${g.sa.b}${g.cpu ? ', CPU ÷' + g.cpu : ''})`);
   // Startbildschirm. Mitte des Tages mit ?onboarding: Prolog und Hinweise kommen sonst nur am Anfang des Spiels
   let { ctx, page } = await neueSeite(browser, g, '?demo&onboarding');
