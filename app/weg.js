@@ -1,5 +1,5 @@
 /* Dennis Quest · Weg
-   Rechnet mit dem echten Weg aus config.karte.weg ([Breite, Länge, Höhe], Bahnhof Tegernsee bis Berggasthof).
+   Rechnet mit dem echten Weg aus config.karte.weg ([Breite, Länge, Höhe], Parkplatz an der Talstation bis Blomberghaus).
    Reine Funktionen, kein DOM, kein Netz.
 
    const W = QuestWeg.aufbauen(config.karte)

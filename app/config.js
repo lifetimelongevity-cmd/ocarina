@@ -99,37 +99,48 @@
         tarn: { name: "Versiegelter Brief", kurz: "Brief", text: "Öffne ihn, wenn du ihn am meisten brauchst." } }
     ],
 
-    /* Karte
+    /* Karte (seit 30.09. der Blomberg bei Bad Tölz, vorher Tegernsee und Neureuth)
        stationen: Lage in Prozent der Kartenfläche, Reihenfolge = Weg. Von Station zu Station schickt der Quest Master
                   Dennis von Hand (Freigabe der nächsten Quest im Admin, 30.09.), kein GPS.
-                  zu: „zur“ oder „zum“, für „Weiter zur WIESE“.
-                  gps: Stelle am Weg [Breite, Länge], ungefähr. Nur für Höhe und Kilometer in der Kartusche.
+                  Die ids bleiben (wiese, wald, aussicht), auch wenn die Stationen jetzt anders heißen.
+                  zu: „zur“ oder „zum“, für „Weiter zur TALSTATION“.
+                  gps: Stelle am Weg [Breite, Länge]. Nur für Höhe und Kilometer in der Kartusche.
                   hoehe: nur, wenn das Schild etwas anderes sagt als das Höhenmodell.
-       weg:       der echte Weg vom Bahnhof Tegernsee über den Wanderweg 681a zum Gipfel und zum Berggasthof,
-                  [Breite, Länge, Höhe in m]. Quelle: © OpenStreetMap-Mitwirkende (ODbL), Höhen EU-DEM (opentopodata.org).
+       start, ab: wo der Weg am Samstag beginnt („vom Parkplatz Blombergbahn zum Gipfel“, „1,3 km ab Parkplatz“).
+                  Freitag fährt Dennis im Zug von Düsseldorf nach München, am Samstag geht es von München zum Blomberg.
+       weg:       der echte Weg: der klassische Wanderweg vom Parkplatz an der Talstation über den Entdeckerpfad und die
+                  Mittelstation hinauf, kurz zum Blombergkreuz und zurück zum Blomberghaus, [Breite, Länge, Höhe in m].
+                  Gut 4,4 km, knapp 570 Hm (bis zum Blomberghaus ohne Gipfel 3 km, laut der-blomberg.de 3,5 km und 460 Hm).
+                  Quelle: © OpenStreetMap-Mitwirkende (ODbL), Weg per BRouter, Höhen EU-DEM (opentopodata.org).
                   Für Höhe und Strecke auf der Karte. */
     karte: {
       stationen: [
-        { id: "zug",      name: "ZUG",      ort: "Freitag im Zug",   zu: "zum", x: 10, y: 79 },
-        { id: "wiese",    name: "WIESE",    ort: "Wiese am Anstieg", zu: "zur", x: 27, y: 66, gps: [47.71836, 11.75569] },
-        { id: "wald",     name: "WALD",     ort: "Erstes Waldstück", zu: "zum", x: 45, y: 55, gps: [47.72257, 11.75415] },
-        { id: "aussicht", name: "AUSSICHT", ort: "Aussichtspunkt",   zu: "zur", x: 62, y: 43, gps: [47.72736, 11.76612] },
-        { id: "gipfel",   name: "GIPFEL",   ort: "Gipfel Neureuth",  zu: "zum", x: 78, y: 28, gps: [47.72846, 11.77209], hoehe: 1261 },
-        { id: "huette",   name: "HÜTTE",    ort: "Berggasthaus",     zu: "zur", x: 91, y: 52, gps: [47.72858, 11.77199] }
+        { id: "zug",      name: "ZUG",           ort: "Zug Düsseldorf nach München", zu: "zum", x: 10, y: 79 },
+        { id: "wiese",    name: "TALSTATION",    ort: "Wiese an der Talstation",     zu: "zur", x: 27, y: 66, gps: [47.74776, 11.51595] },
+        { id: "wald",     name: "WALD",          ort: "Entdeckerpfad",               zu: "zum", x: 45, y: 55, gps: [47.74369, 11.51120] },
+        { id: "aussicht", name: "MITTELSTATION", ort: "Mittelstation der Blombergbahn", zu: "zur", x: 62, y: 43, gps: [47.74027, 11.51087] },
+        { id: "gipfel",   name: "GIPFEL",        ort: "Blombergkreuz",               zu: "zum", x: 78, y: 28, gps: [47.73360, 11.50726], hoehe: 1237 },
+        { id: "huette",   name: "HÜTTE",         ort: "Blomberghaus",                zu: "zur", x: 91, y: 52, gps: [47.73513, 11.49752], hoehe: 1203 }
       ],
-      start: "Bahnhof Tegernsee",
+      start: "Parkplatz Blombergbahn",
+      ab: "Parkplatz",
       weg: [
-        [47.71437, 11.75690, 763], [47.71772, 11.75551, 796], [47.71836, 11.75569, 815], [47.71903, 11.75531, 821], [47.72086, 11.75377, 852], [47.72158, 11.75364, 869],
-        [47.72190, 11.75427, 891], [47.72218, 11.75449, 906], [47.72248, 11.75434, 912], [47.72271, 11.75385, 907], [47.72269, 11.75411, 913], [47.72293, 11.75381, 913],
-        [47.72326, 11.75383, 925], [47.72329, 11.75396, 930], [47.72306, 11.75419, 929], [47.72310, 11.75444, 938], [47.72368, 11.75433, 956], [47.72351, 11.75454, 956],
-        [47.72363, 11.75456, 961], [47.72356, 11.75481, 966], [47.72413, 11.75459, 977], [47.72389, 11.75524, 988], [47.72388, 11.75574, 997], [47.72403, 11.75547, 996],
-        [47.72394, 11.75631, 1007], [47.72417, 11.75589, 1006], [47.72460, 11.75563, 1010], [47.72424, 11.75675, 1027], [47.72419, 11.75699, 1033], [47.72432, 11.75695, 1035],
-        [47.72416, 11.75736, 1043], [47.72466, 11.75709, 1048], [47.72434, 11.75784, 1063], [47.72482, 11.75767, 1068], [47.72460, 11.75810, 1076], [47.72486, 11.75797, 1077],
-        [47.72472, 11.75823, 1082], [47.72490, 11.75818, 1083], [47.72479, 11.75847, 1089], [47.72496, 11.75837, 1089], [47.72483, 11.75877, 1098], [47.72510, 11.75866, 1098],
-        [47.72468, 11.75950, 1119], [47.72478, 11.75957, 1123], [47.72480, 11.75996, 1136], [47.72469, 11.76014, 1140], [47.72536, 11.75969, 1134], [47.72521, 11.76013, 1147],
-        [47.72527, 11.76082, 1161], [47.72509, 11.76092, 1162], [47.72534, 11.76176, 1169], [47.72541, 11.76273, 1175], [47.72555, 11.76305, 1177], [47.72662, 11.76403, 1201],
-        [47.72683, 11.76460, 1204], [47.72708, 11.76488, 1204], [47.72727, 11.76605, 1204], [47.72764, 11.76723, 1205], [47.72777, 11.76855, 1216], [47.72812, 11.77032, 1238],
-        [47.72863, 11.77094, 1248], [47.72850, 11.77144, 1252], [47.72851, 11.77187, 1255], [47.72837, 11.77192, 1253], [47.72846, 11.77209, 1255], [47.72858, 11.77199, 1256]
+        [47.74776, 11.51595, 711], [47.74729, 11.51570, 717], [47.74715, 11.51554, 720], [47.74749, 11.51507, 718], [47.74547, 11.51360, 788], [47.74558, 11.51312, 789],
+        [47.74539, 11.51211, 800], [47.74518, 11.51184, 807], [47.74491, 11.51163, 814], [47.74482, 11.51139, 818], [47.74447, 11.51141, 826], [47.74430, 11.51130, 830],
+        [47.74369, 11.51120, 842], [47.74298, 11.51086, 861], [47.74275, 11.51051, 866], [47.74252, 11.50985, 870], [47.74235, 11.50957, 873], [47.74192, 11.50915, 883],
+        [47.74142, 11.50895, 896], [47.74112, 11.50830, 908], [47.74098, 11.50835, 912], [47.74074, 11.50902, 917], [47.74043, 11.50967, 926], [47.74033, 11.50998, 929],
+        [47.74027, 11.51087, 928], [47.74032, 11.51022, 929], [47.73970, 11.51033, 946], [47.73946, 11.51058, 951], [47.73913, 11.51057, 958], [47.73888, 11.51034, 963],
+        [47.73869, 11.50977, 967], [47.73869, 11.50916, 969], [47.73855, 11.50814, 988], [47.73859, 11.50771, 996], [47.73884, 11.50716, 999], [47.73883, 11.50698, 1002],
+        [47.73876, 11.50690, 1005], [47.73836, 11.50691, 1014], [47.73819, 11.50701, 1017], [47.73797, 11.50732, 1021], [47.73792, 11.50689, 1027], [47.73804, 11.50650, 1025],
+        [47.73764, 11.50657, 1038], [47.73738, 11.50652, 1049], [47.73700, 11.50624, 1067], [47.73674, 11.50626, 1083], [47.73608, 11.50546, 1119], [47.73600, 11.50550, 1125],
+        [47.73573, 11.50449, 1144], [47.73549, 11.50402, 1162], [47.73503, 11.50269, 1184], [47.73509, 11.50203, 1179], [47.73490, 11.50108, 1184], [47.73509, 11.50008, 1182],
+        [47.73504, 11.49974, 1184], [47.73494, 11.49984, 1184], [47.73429, 11.50000, 1183], [47.73414, 11.50014, 1183], [47.73399, 11.50034, 1184], [47.73356, 11.50131, 1193],
+        [47.73360, 11.50169, 1195], [47.73401, 11.50261, 1202], [47.73450, 11.50350, 1201], [47.73457, 11.50428, 1199], [47.73436, 11.50520, 1211], [47.73415, 11.50579, 1224],
+        [47.73393, 11.50622, 1232], [47.73375, 11.50630, 1233], [47.73374, 11.50685, 1235], [47.73355, 11.50707, 1235], [47.73360, 11.50726, 1235], [47.73355, 11.50707, 1235],
+        [47.73374, 11.50685, 1235], [47.73375, 11.50630, 1233], [47.73393, 11.50622, 1232], [47.73415, 11.50579, 1224], [47.73436, 11.50520, 1211], [47.73457, 11.50428, 1199],
+        [47.73450, 11.50350, 1201], [47.73401, 11.50261, 1202], [47.73360, 11.50169, 1195], [47.73356, 11.50131, 1193], [47.73399, 11.50034, 1184], [47.73414, 11.50014, 1183],
+        [47.73429, 11.50000, 1183], [47.73494, 11.49984, 1184], [47.73504, 11.49974, 1184], [47.73498, 11.49867, 1192], [47.73464, 11.49751, 1202], [47.73472, 11.49723, 1206],
+        [47.73508, 11.49717, 1205], [47.73513, 11.49752, 1203]
       ]
     },
 
@@ -153,7 +164,7 @@
        Jede Niederlage kostet nur Packs. Die vier Ziffern liegen vor dem Gipfel, ohne sie kein Finale.
        Packs (29.09.): Siege zusammen 20 (1, 2, 2, 3, 3, 4, 5), Niederlagen −19. Werte ändern, dann node tests/balance.js (rechnet 50 000 Tage durch). */
     quests: [
-      { id: "logbuch", nr: 1, typ: "kern", name: "Rikes Tagebuch", ort: "Zug nach München", station: "zug",
+      { id: "logbuch", nr: 1, typ: "kern", name: "Rikes Tagebuch", ort: "Zug Düsseldorf nach München", station: "zug",
         farbe: "#4a8fe8", emblem: "z-water",
         text: "Sieben Fragen über dich: Errate, was Rike geantwortet hat.",
         qm: "Bestanden ab 5 von 7 Treffern, du urteilst, ob sinngemäß. Dennis tippt seine Antworten im Menü, danach spielt Rikes Sprachnachricht. Seine Antworten stehen unten im Admin. Das Ergebnis trägt er danach selbst ein.",
@@ -162,14 +173,14 @@
         einsetzbar: [], logbuch: true },
 
       // Hieß bis 28.09. „Kreuzung der Klingen“ und war eine Prüfung (id bleibt, damit gespeicherte Stände passen)
-      { id: "klingen", nr: 4, typ: "side", name: "Die drei Zeichen", ort: "Wiese am Anstieg", station: "wiese",
+      { id: "klingen", nr: 4, typ: "side", name: "Die drei Zeichen", ort: "Wiese an der Talstation", station: "wiese",
         text: "Schlag beide aus dem Bund im Schnick Schnack Schnuck, jeweils Best of 3.",
         qm: "Bestanden, wenn Dennis zwei Gegner nacheinander schlägt, jeweils Best of 3. Er wählt die Gegner selbst.",
         win:  { items: ["spruchrolle"] },
         lose: { packs: -1 },
         einsetzbar: ["schild"], duell: true, revanche: true },
 
-      { id: "wirbel", nr: 14, typ: "kern", name: "Wirbel der Götter", ort: "Wiese am Anstieg", station: "wiese",
+      { id: "wirbel", nr: 14, typ: "kern", name: "Wirbel der Götter", ort: "Wiese an der Talstation", station: "wiese",
         farbe: "#ec8f2e", emblem: "z-spirit",
         text: "Zwei Kreisel, eine Arena. Wer sich länger dreht, gewinnt.",
         qm: "Beyblade gegen den besten Blader des Bundes, bestanden bei 2 von 3. Mit Götterkreisel übt Dennis vorher und wählt zuerst. Füllt auch den Showdown auf. Der Sieg bringt auch die Stopfnadel für Rikes Rache.",
@@ -178,7 +189,7 @@
         fluch: "Dein Gegner muss den Kreisel mit der schwachen Hand starten.",
         einsetzbar: ["kreisel", "spruchrolle", "schild"], duell: true, revanche: true },
 
-      { id: "podrennen", nr: 7, typ: "kern", name: "Das Podrennen", ort: "Wiese am Anstieg", station: "wiese",
+      { id: "podrennen", nr: 7, typ: "kern", name: "Das Podrennen", ort: "Wiese an der Talstation", station: "wiese",
         farbe: "#a468e6", emblem: "z-shadow",
         text: "Fahr den Gleiter durch den Parcours, schneller als die Uhr.",
         qm: "RC-Auto auf Zeit, ein Versuch, auf festem Boden (auf Gras bleibt das kleine Auto hängen). Zeitgrenze so, dass du es beim Testen nur jedes zweite Mal schaffst.",
@@ -187,7 +198,7 @@
         fluch: "3 Sekunden mehr auf der Uhr.",
         einsetzbar: ["spruchrolle"], revanche: true },
 
-      { id: "kartenwurf", nr: 9, typ: "side", name: "Kartenwurf", ort: "Erstes Waldstück", station: "wald",
+      { id: "kartenwurf", nr: 9, typ: "side", name: "Kartenwurf", ort: "Entdeckerpfad", station: "wald",
         text: "Wirf Karten aus deinen Packs ins Ziel, mehr als dein Gegner.",
         qm: "Duell mit Karten aus schon geöffneten Packs, fester Abstand, je 3 Karten. Gleichstand zählt als verloren. Gepanzerte Karten geben +2. Glanzsieg: mindestens 2 Karten mehr im Ziel als der Gegner, bringt die Große Wasserpistole.",
         win:  { items: ["spruchrolle"] },
@@ -196,7 +207,7 @@
         fluch: "5 Karten statt 3.",
         einsetzbar: ["karten_gepanzert", "spruchrolle", "schild"], duell: true, revanche: true },
 
-      { id: "auge", nr: 2, typ: "kern", name: "Auge des Jägers", ort: "Erstes Waldstück", station: "wald",
+      { id: "auge", nr: 2, typ: "kern", name: "Auge des Jägers", ort: "Entdeckerpfad", station: "wald",
         farbe: "#e2472f", emblem: "e-flame",
         text: "Lösch fünf Flammen mit einem Tank.",
         qm: "5 Teelichter aus 4 m, ein Tank. Bestanden nur, wenn alle 5 aus sind. Es zählt die stärkste Wasserwaffe, die Dennis hat: Spritze, kleine Pistole oder große Pistole.",
@@ -205,7 +216,7 @@
         fluch: { stufen: ["spritze", "pistole_klein", "pistole_gross"], sonst: "Du darfst 1 m näher ran." },
         einsetzbar: ["spritze", "pistole_klein", "pistole_gross", "spruchrolle"], revanche: true },
 
-      { id: "deku", nr: 12, typ: "kern", name: "Klingen des Deku-Baums", ort: "Erstes Waldstück", station: "wald",
+      { id: "deku", nr: 12, typ: "kern", name: "Klingen des Deku-Baums", ort: "Entdeckerpfad", station: "wald",
         farbe: "#48b454", emblem: "z-forest",
         text: "Wirf deine Klingen in den alten Baum. Nur was stecken bleibt, zählt.",
         qm: "4 Mini-Schwerter aus 4 m auf einen Baum, bestanden, wenn 2 stecken. Stich gibt ein Schwert mehr. Der Sieg bringt die dicke Nadel für Rikes Rache (Ziffer 4 liegt seit 29.09. bei Rikes Rache).",
@@ -215,7 +226,7 @@
         einsetzbar: ["stich", "spruchrolle"], revanche: true },
 
       // Ersetzt am 28.09. die Feuerprobe („Der Ruf“) und ist eine Sidequest, id bleibt
-      { id: "feuerprobe", nr: 3, typ: "side", name: "Hüter der Flamme", ort: "Aussichtspunkt", station: "aussicht",
+      { id: "feuerprobe", nr: 3, typ: "side", name: "Hüter der Flamme", ort: "Mittelstation", station: "aussicht",
         text: "Trag ein Teelicht 100 Schritte bergauf, ohne dass es ausgeht.",
         qm: "Offenes Teelicht ohne Glas, 100 Schritte bergauf. Erlischt es, verloren. Der Bund lenkt ab, pustet nicht, berührt nicht. Feuerzeug und Ersatzlicht mitnehmen.",
         win:  { items: ["schild"] },
@@ -224,16 +235,16 @@
         einsetzbar: ["spruchrolle"] },
 
       // Neu am 29.09.: Rike hat im Tagebuch verraten, dass Dennis keine Nadel einfädeln kann. Trägt Ziffer 4.
-      { id: "rache", nr: 16, typ: "kern", name: "Rikes Rache", ort: "Aussichtspunkt", station: "aussicht",
+      { id: "rache", nr: 16, typ: "kern", name: "Rikes Rache", ort: "Mittelstation", station: "aussicht",
         farbe: "#d8405e", emblem: "i-nadel",
         text: "Rike hat verraten, was du überhaupt nicht kannst. Fädle ein, bevor die Zeit abläuft.",
-        qm: "Faden durchs Nadelöhr auf Zeit, das genaue Spiel legst du fest. Vorschlag: fünf Nadeln an fünf Stellen rund um den Aussichtspunkt, eine Uhr für alle, 20 Sekunden je Treffer im Tagebuch (mindestens 60). Es zählt die dickste Nadel, die Dennis hat: ohne Nadel-Item feine Nadeln, sonst Stopfnadeln oder dicke Nadeln. Anlecken und Zwirbeln erlaubt, keine Einfädelhilfe.",
+        qm: "Faden durchs Nadelöhr auf Zeit, das genaue Spiel legst du fest. Vorschlag: fünf Nadeln an fünf Stellen rund um die Mittelstation, eine Uhr für alle, 20 Sekunden je Treffer im Tagebuch (mindestens 60). Es zählt die dickste Nadel, die Dennis hat: ohne Nadel-Item feine Nadeln, sonst Stopfnadeln oder dicke Nadeln. Anlecken und Zwirbeln erlaubt, keine Einfädelhilfe.",
         win:  { packs: 4, ziffer: 4 },
         lose: { packs: -2 },
         fluch: "30 Sekunden mehr auf der Uhr.",
         einsetzbar: ["nadel_stopf", "nadel_dick", "spruchrolle"], revanche: true },
 
-      { id: "bund", nr: 5, typ: "kern", name: "Prüfung des Bundes", ort: "Gipfel Neureuth", station: "gipfel",
+      { id: "bund", nr: 5, typ: "kern", name: "Prüfung des Bundes", ort: "Blombergkreuz", station: "gipfel",
         farbe: "#f2c94c", emblem: "z-triforce",
         text: "Drei Duelle gegen den Bund. Zwei musst du gewinnen.",
         qm: "Erst das Tor: Fehlt eine Ziffer, holt Dennis sie für 2 Packs, mit Rikes Segen oder per Bußprüfung, die du bestimmst. Dann 3 Duelle, bestanden bei 2 Siegen: erst verlorene Spiele vom Tag, aufgefüllt mit Wirbel der Götter. Die App zeigt sie unten.",
@@ -278,7 +289,7 @@
       questMaster: "Bene",
       bund: ["Bene", "Fabio"],
       dank: ["Rike"],
-      drehort: "Tegernsee und die Neureuth, 1261 m",
+      drehort: "Der Blomberg bei Bad Tölz, 1237 m",
       fortsetzung: "Episode II · Die Hochzeit",
       geschichte: {
         vorlange: "Vor langer Zeit, in einem Tal gar nicht so weit entfernt …",
@@ -287,7 +298,7 @@
         absaetze: [
           "Es ist eine Zeit großer Gefühle. Der tapfere Held DENNIS hat das Herz von RIKE gewonnen, und sie hat seines schon lange. Der Tag, an dem die beiden sich das Ja-Wort geben, rückt unaufhaltsam näher.",
           "Doch ein uraltes Gesetz der Junggesellen verlangt, dass kein Held vor den Altar tritt, ehe er sich in den Bergen bewiesen hat. Die finsteren Ritter BENE und FABIO haben dafür zehn Prüfungen ersonnen, und sie kennen keine Gnade.",
-          "Bewaffnet mit einer Wasserspritze, dem Mut eines Piraten und einer Fee, die Rike ihm zur Seite schickte, zog Dennis vom Tegernsee hinauf zum Gipfel der Neureuth, um sich als würdig zu erweisen …"
+          "Bewaffnet mit einer Wasserspritze, dem Mut eines Piraten und einer Fee, die Rike ihm zur Seite schickte, fuhr Dennis von Düsseldorf nach München und stieg hinauf zum Kreuz des Blombergs, um sich als würdig zu erweisen …"
         ],
         // Letzter Absatz, je nachdem, wie die Prüfung des Bundes ausgeht
         sieg: "Er hat den Bund bezwungen. Die vier Ziffern sind sein, das Kästchen wartet. Doch die größte Quest seines Lebens beginnt erst: an Rikes Seite.",

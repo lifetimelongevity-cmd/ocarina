@@ -88,7 +88,7 @@ await ctx.close();
 await zurKarte(p); await weg(p);
 await p.click('.mark[data-station="wiese"]'); await warte(300);
 const tafel = await p.textContent('#stationCard');
-pruefe(tafel.includes('Die drei Zeichen') && tafel.includes('815 m'), 'Tafel Wiese: Quests und Höhe');
+pruefe(tafel.includes('Die drei Zeichen') && tafel.includes('711 m · am Parkplatz'), 'Tafel Talstation: Quests, Höhe, am Parkplatz');
 pruefe(await p.$eval('#stationCard', e => e.classList.contains('rechts')), 'Tafel liegt gegenüber der Station');
 await p.click('.sc-row[data-quest="podrennen"]'); await warte(800);
 pruefe(await aktiv(p) === '1' && (await p.textContent('#questCard .tb-title')).includes('Podrennen'), 'Zeile öffnet die Quest');
@@ -102,12 +102,12 @@ await p.click('.sc-close'); await warte(200);
 pruefe(!(await p.$eval('#mapLegend', e => e.classList.contains('verdeckt'))), 'Tafel zu: Kartusche wieder sichtbar');
 
 // Höhe und Strecke: die Kartusche zeigt die Station, kein GPS-Knopf mehr
-pruefe((await legende(p)).startsWith('910 m | WALD'), 'Kartusche zeigt die Station: ' + await legende(p));
+pruefe((await legende(p)).startsWith('842 m | WALD'), 'Kartusche zeigt die Station: ' + await legende(p));
 pruefe(!(await p.$('#gpsBtn')) && !(await p.$('#mapGps')), 'Kein GPS mehr (30.09.)');
 await p.screenshot({ path: `${OUT}/karte-kartusche.png` });
 await ctx.close();
 
-// Dennis läuft: drei Siege im Wald, dann zur Aussicht
+// Dennis läuft: drei Siege im Wald, dann zur Mittelstation
 ({ ctx, p } = await seite('?demo&direkt'));
 await zurKarte(p); await weg(p);
 const vorher = await p.$eval('#mapDone', e => e.getAttribute('d').length);
@@ -117,7 +117,7 @@ await p.click('.shoulder-left'); await warte(1100);
 pruefe(await p.isVisible('#mapWalker'), 'Dennis läuft, sobald er die Karte ansieht');
 await p.screenshot({ path: `${OUT}/karte-lauf.png` });
 await warte(2300);
-pruefe(!(await p.isVisible('#mapWalker')) && (await legende(p)).includes('AUSSICHT'), 'Angekommen an der Aussicht');
+pruefe(!(await p.isVisible('#mapWalker')) && (await legende(p)).includes('MITTELSTATION'), 'Angekommen an der Mittelstation');
 pruefe((await p.$eval('#mapDone', e => e.getAttribute('d').length)) > vorher, 'Der goldene Weg ist länger geworden');
 // Rückgängig (Zurück): ohne Laufen zurück
 await p.click('[data-demo="zurueck"]'); await warte(500);

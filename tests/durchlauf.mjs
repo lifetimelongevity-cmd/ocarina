@@ -70,7 +70,7 @@ await siegel(dennis, '#questCard [data-ergebnis="bestanden"]', 'PRÜFUNG BESTAND
 await admin.click('#lauf .lauf-q[data-id="amulett"] [data-a="start"]'); await warte(500);
 await zu(dennis);
 
-// Wiese
+// Talstation
 await siegel(dennis, '#questCard [data-ergebnis="bestanden"]', 'SIDEQUEST BESTANDEN', 'Die drei Zeichen');
 await siegel(dennis, '#questCard [data-ergebnis="verloren"]', 'PRÜFUNG VERLOREN', 'Wirbel der Götter');
 const pod = await siegel(dennis, '#questCard [data-ergebnis="bestanden"]', 'PRÜFUNG BESTANDEN', 'Podrennen');

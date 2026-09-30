@@ -317,7 +317,7 @@
     $("#mapRoute").setAttribute("d", pfad(ABSCHNITTE.length));
     $("#mapMarks").innerHTML = STATIONEN.map(s =>
       `<button type="button" class="mark" data-station="${s.id}" style="left:${s.x}%;top:${s.y}%" aria-label="${esc(s.ort)}"><span class="m-medal"></span><span class="gems"></span><span class="m-label">${esc(s.name)}</span></button>`).join("")
-      + `<span class="map-lake-label">TEGERNSEE</span>`;
+      + `<span class="map-lake-label">ISAR</span>`;
     document.querySelectorAll(".mark").forEach(b => b.addEventListener("click", e => { e.stopPropagation(); tippeStation(b.dataset.station); }));
     $("#mapSheet").addEventListener("click", e => { if (!e.target.closest(".station-card, .map-legend")) schliesseStationstafel(); });
     $("#stationCard").addEventListener("click", e => {
@@ -688,7 +688,8 @@
     const id = sel[0], st = STATIONEN.find(x => x.id === id), idx = STATIONEN.indexOf(st), hi = hierIndex();
     const w = WEG && WEG.station[id];
     const lage = idx === hi ? `<span class="tag now">DU BIST HIER</span>` : idx < hi ? `<span class="tag won">GESCHAFFT</span>` : `<span class="tag open">NOCH VOR DIR</span>`;
-    const zahlen = w ? `${meter(w.hoehe)} · ${km(w.s)} ab Bahnhof` : "";
+    const ab = C.karte.ab || "Start";
+    const zahlen = w ? `${meter(w.hoehe)} · ${w.s < 50 ? "am " + ab : km(w.s) + " ab " + ab}` : "";
     const qs = REIHE.filter(q => q.station === id), sicht = qs.filter(q => aufgedeckt(q.id));
     const imNebel = qs.filter(q => q.typ === "kern" && !aufgedeckt(q.id)).length;
     const status = qid => qid === state.next ? `<span class="tag now">JETZT</span>`

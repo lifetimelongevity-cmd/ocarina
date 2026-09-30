@@ -56,12 +56,12 @@ pruefe((await hud(dennis)) === 'Rikes Tagebuch' && await dennis.isVisible('[data
 pruefe(!(await admin.isVisible('#freigeben')) && (await admin.textContent('#verlauf')).includes('Freigegeben: Rikes Tagebuch'), 'Admin: Knopf weg, Freigabe im Verlauf');
 pruefe((await admin.textContent('#quests li[data-id="logbuch"] .badge.jetzt')) === 'Jetzt', 'Admin-Quests: Marke „Jetzt“');
 
-// Tagebuch bestanden (Notfall im Admin): Die nächste Quest liegt an der Wiese, bleibt im Nebel
+// Tagebuch bestanden (Notfall im Admin): Die nächste Quest liegt an der Talstation, bleibt im Nebel
 await admin.click('#nextWin'); await warte(900);
 pruefe((await fenster(dennis)).includes('PRÜFUNG BESTANDEN'), 'Tagebuch bestanden: Moment bei Dennis');
 await zu(dennis); await warte(800);
-pruefe((await hud(dennis)) === 'Weiter zur WIESE', 'HUD: „Weiter zur WIESE“, statt: ' + await hud(dennis));
-pruefe((await dennis.textContent('#questCard')).includes('Der Weg führt weiter zur WIESE'), 'Quest-Karte im Nebel: Der Weg führt weiter zur WIESE');
+pruefe((await hud(dennis)) === 'Weiter zur TALSTATION', 'HUD: „Weiter zur TALSTATION“, statt: ' + await hud(dennis));
+pruefe((await dennis.textContent('#questCard')).includes('Der Weg führt weiter zur TALSTATION'), 'Quest-Karte im Nebel: Der Weg führt weiter zur TALSTATION');
 pruefe(!(await liste(dennis)).includes('Die drei Zeichen'), 'Die drei Zeichen liegen noch im Nebel');
 await dennis.click('.shoulder-left'); await warte(900); await zu(dennis);
 pruefe((await legende(dennis)).includes('am Samstag') && await dennis.$eval('.mark[data-station="zug"] .you', e => !!e), 'Karte: Dennis steht noch im Zug');
@@ -69,10 +69,10 @@ pruefe(!(await admin.textContent('#verlauf')).includes('Freigegeben: Rikes Tageb
 await dennis.screenshot({ path: `${OUT}/freigabe-4-karte-zug.png` });
 await dennis.click('.shoulder-right'); await warte(900);
 
-// Freigabe an der Wiese: Fee, dann wandert Dennis auf der Karte, am Ziel tritt die Quest aus dem Nebel
+// Freigabe an der Talstation: Fee, dann wandert Dennis auf der Karte, am Ziel tritt die Quest aus dem Nebel
 await admin.click('#freigeben'); await warte(900);
 const wiese = await fenster(dennis);
-pruefe(wiese.includes('WEITER ZUR WIESE') && wiese.includes('nächste Quest'), 'Freigabe: „WEITER ZUR WIESE“: ' + wiese.slice(0, 60));
+pruefe(wiese.includes('WEITER ZUR TALSTATION') && wiese.includes('nächste Quest'), 'Freigabe: „WEITER ZUR TALSTATION“: ' + wiese.slice(0, 60));
 await dennis.screenshot({ path: `${OUT}/freigabe-5-weiter-zur-wiese.png` });
 await dennis.click('#overlay'); await warte(1300);
 pruefe(await aktiv(dennis) === '0' && await dennis.isVisible('#mapWalker'), 'Nach dem Fenster: Karte, Dennis wandert');
@@ -82,17 +82,17 @@ pruefe(await aktiv(dennis) === '1' && (await hud(dennis)) === 'Die drei Zeichen'
 pruefe(await dennis.isVisible('#questCard [data-ergebnis="bestanden"]'), 'Dennis kann eintragen');
 await zu(dennis);
 await dennis.click('.shoulder-left'); await warte(900); await zu(dennis);
-pruefe((await legende(dennis)).includes('WIESE') && !(await dennis.isVisible('#mapWalker')), 'Karte: an der Wiese angekommen');
+pruefe((await legende(dennis)).includes('TALSTATION') && !(await dennis.isVisible('#mapWalker')), 'Karte: an der Talstation angekommen');
 await dennis.screenshot({ path: `${OUT}/freigabe-7-karte-wiese.png` });
 await dennis.click('.shoulder-right'); await warte(900);
 
 // Freigabe löschen: still zurück in den Nebel, Dennis steht wieder im Zug
 await admin.click('#verlauf li[data-art="f"] .zurueck'); await warte(1500);
-pruefe(!(await dennis.isVisible('#overlay')) && (await hud(dennis)) === 'Weiter zur WIESE', 'Freigabe gelöscht: still, HUD wieder „Weiter zur WIESE“');
+pruefe(!(await dennis.isVisible('#overlay')) && (await hud(dennis)) === 'Weiter zur TALSTATION', 'Freigabe gelöscht: still, HUD wieder „Weiter zur TALSTATION“');
 pruefe(await admin.isVisible('#freigeben'), 'Admin: Knopf wieder da');
 // Rückgängig: wieder freigegeben, mit Fenster
 await admin.click('#undo'); await warte(900);
-pruefe((await fenster(dennis)).includes('WEITER ZUR WIESE'), 'Rückgängig: Freigabe kommt wieder, mit Fenster');
+pruefe((await fenster(dennis)).includes('WEITER ZUR TALSTATION'), 'Rückgängig: Freigabe kommt wieder, mit Fenster');
 await dennis.click('#overlay'); await warte(5000);
 pruefe((await hud(dennis)) === 'Die drei Zeichen', 'Danach wieder dran');
 

@@ -267,8 +267,9 @@ const amWeg = config.karte.stationen.filter(st => st.gps);
 amWeg.forEach(st => assert.ok(W.projizieren(st.gps[0], st.gps[1]).abstand < 30, st.id + ": gps liegt nicht am Weg"));
 amWeg.slice(1).forEach((st, i) => assert.ok(W.station[st.id].s > W.station[amWeg[i].id].s, st.id + ": Reihenfolge am Weg"));
 assert.strictEqual(W.ziel.id, "gipfel");
-assert.ok(W.laenge > 3000 && W.laenge < 4500, "Weg etwa 3,5 km");
-assert.ok(W.hoeheBei(0) < 800 && W.ziel.hoehe > 1200, "Höhen vom See zum Gipfel");
+assert.ok(W.laenge > 4000 && W.laenge < 5000, "Weg gut 4,4 km");
+assert.ok(W.station.huette.s > W.station.gipfel.s && W.station.huette.hoehe < W.ziel.hoehe, "Vom Gipfel hinunter zum Blomberghaus");
+assert.ok(W.hoeheBei(0) < 800 && W.ziel.hoehe > 1200, "Höhen von der Talstation zum Gipfel");
 assert.ok(W.projizieren(48.1402, 11.5586).abstand > 40000, "München ist weit weg vom Weg");
 
 // 17. Dennis trägt selbst ein (Kanal „dennis"): Ergebnis, Einsatz, Duell, Amulett, Ziffer. Was der Admin entschieden hat, gilt vor.

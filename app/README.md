@@ -15,7 +15,7 @@ Zusätze für Dennis' Seite: `?probe` (liest den Probelauf des Quest Masters, ro
 | Datei | Inhalt |
 |---|---|
 | `config.js` | Alles, was das Spiel kennt: Quests (Reihenfolge, Texte, Belohnungen, einsetzbar), Items und Fähigkeiten mit Tarnnamen, Kartenstationen, Log-Buch-Fragen, Code, Packs, Speicher. **Hier wird ergänzt.** |
-| `weg.js` | Der echte Weg (Bahnhof Tegernsee, Wanderweg 681a, Neureuth): Höhe an jeder Stelle, Strecke bis zum Gipfel, Stellen der Stationen am Weg. Reine Funktionen, getestet in `engine.test.js`. |
+| `weg.js` | Der echte Weg (seit 30.09. der klassische Wanderweg am Blomberg bei Bad Tölz: Parkplatz an der Talstation, Entdeckerpfad, Mittelstation, Blombergkreuz 1237 m, Blomberghaus): Höhe an jeder Stelle, Strecke bis zum Gipfel, Stellen der Stationen am Weg. Reine Funktionen, getestet in `engine.test.js`. |
 | `engine.js` | Die Logik. Rechnet aus Konfiguration und gespeichertem Stand alles aus: Packs, Ziffern, Items, Anzahl Flüche, Tor zum Gipfel, nächste Quest (`kommt`: die erste offene, `next`: erst wenn du sie freigegeben hast, `ende`: alles erledigt), laufende Quests, Showdown-Duelle, was wo einsetzbar ist. |
 | `store.js` | Speicher. `lokal` (ein Browser, zum Testen) oder `firebase` (zwei Handys). Dazu die Kanäle, in die Dennis schreibt: Log-Buch-Antworten und seine Einträge. |
 | `app.js`, `styles.css`, `index.html` | Dennis' Menü. |
@@ -28,8 +28,8 @@ Zusätze für Dennis' Seite: `?probe` (liest den Probelauf des Quest Masters, ro
 ## Karte (seit 26.09.)
 
 - **Weg:** gegangener Weg golden, der Rest gestrichelt. Gibst du die nächste Quest frei (seit 30.09., siehe Ablauf am Spieltag), sagt die Fee, wohin es geht, und Dennis wandert auf der Karte zur Station, bis dahin steht er an der alten. Der Nebel treibt und zieht beim Weiterkommen ab.
-- **Station antippen:** Tafel mit Ort, Höhe, Kilometer ab Bahnhof und den Quests der Station (Nebel bleibt dicht, verdeckte Sidequests fehlen ganz). Eine Zeile antippen öffnet die Quest, zweites Tippen auf die Station ebenso. An der Hütte: das Kästchen mit dem Code („Verschlossen, noch N Ziffern“). Was darin liegt (10 Packs als Überraschung), verrät die App nicht.
-- **Kartusche oben links:** Höhe, „Noch 2,5 km · 351 Hm bis zum Gipfel“ und das Höhenprofil des echten Wegs.
+- **Station antippen:** Tafel mit Ort, Höhe, Kilometer ab Parkplatz und den Quests der Station (Nebel bleibt dicht, verdeckte Sidequests fehlen ganz). Eine Zeile antippen öffnet die Quest, zweites Tippen auf die Station ebenso. An der Hütte: das Kästchen mit dem Code („Verschlossen, noch N Ziffern“). Was darin liegt (10 Packs als Überraschung), verrät die App nicht.
+- **Kartusche oben links:** Höhe, „Noch 2,7 km · 395 Hm bis zum Gipfel“ und das Höhenprofil des echten Wegs.
 - **Kein GPS** (seit 30.09., vorher Feenlicht am Weg per Knopf): Die Station wechselt nur, wenn du die nächste Quest freigibst. Das ist verlässlich, auch im Funkloch und mit der App in der Tasche.
 - **Daten:** `config.karte.weg` (OpenStreetMap, Höhen EU-DEM) und je Station `gps`, nur noch für Höhe und Kilometer in der Kartusche.
 - Test im Browser: `tests/karte.mjs` (Laufen, Tafeln, Prolog), `tests/freigabe.mjs` (Freigabe, Wandern, Nebel).

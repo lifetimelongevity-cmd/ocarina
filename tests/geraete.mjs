@@ -139,7 +139,7 @@ for (const g of GERAETE) {
   await seite(page, 0); await shot(page, g, '2-karte');
   alleProbleme += (await pruefen(page, g, 'KARTE')).length;
   await weiterTippen(page);
-  // Stationstafel: Wiese (Tafel rechts) und Hütte mit dem Kästchen (Tafel links)
+  // Stationstafel: Talstation (Tafel rechts) und Hütte mit dem Kästchen (Tafel links)
   await page.click('.mark[data-station="wiese"]'); await page.waitForTimeout(300);
   await shot(page, g, '2b-tafel-wiese');
   alleProbleme += (await pruefen(page, g, 'STATIONSTAFEL')).length;
