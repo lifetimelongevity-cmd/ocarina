@@ -376,12 +376,12 @@ assert.strictEqual(fluchVorteil(config, s, "klingen"), null);
 // Auge des Jägers: die stärkste Waffe wird eine Stufe stärker, mit der großen darf er näher ran
 assert.ok(fluchVorteil(config, s, "auge").text.includes("Kleine Pistole"));
 assert.ok(fluchVorteil(config, derive(config, { quests: { ...bisKarten } }), "auge").text.includes("Große Pistole"));
-assert.strictEqual(fluchVorteil(config, derive(config, { quests: bisKarten, glanz: { kartenwurf: true } }), "auge").text, "Du darfst 1 m näher ran.");
+assert.strictEqual(fluchVorteil(config, derive(config, { quests: bisKarten, glanz: { kartenwurf: true } }), "auge").text, "1 m näher ran.");
 // Showdown: es gilt der Vorteil des Spiels im ersten offenen Duell
 s = derive(config, { quests: { podrennen: "verloren" }, duelle: {} });
 assert.deepStrictEqual(fluchVorteil(config, s, "bund"), { quest: "podrennen", text: "3 Sekunden mehr auf der Uhr.", duell: 1 });
 s = derive(config, { quests: { podrennen: "verloren" }, duelle: { "1": "sieg" } });
-assert.deepStrictEqual(fluchVorteil(config, s, "bund"), { quest: "wirbel", text: "Dein Gegner muss den Kreisel mit der schwachen Hand starten.", duell: 2 });
+assert.deepStrictEqual(fluchVorteil(config, s, "bund"), { quest: "wirbel", text: "Dein Gegner startet mit der schwachen Hand.", duell: 2 });
 // Raub: kostet Packs zum Zeitpunkt des Einsatzes, der Fluch ist danach verbraucht
 const dreiZ = { logbuch: "bestanden", klingen: "bestanden", wirbel: "bestanden", podrennen: "bestanden" };
 const vorRaub = derive(config, { quests: dreiZ, zeiten: { logbuch: 1, klingen: 2, wirbel: 3, podrennen: 4 } });

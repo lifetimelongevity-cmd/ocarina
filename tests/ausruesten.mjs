@@ -56,7 +56,7 @@ pruefe(await p.$$eval('.c-taste.leer', xs => xs.length) === 3 && !(await p.isVis
 await p.tap('.slot[data-id="pistole_klein"]'); await warte(200);
 await p.tap('.slot[data-id="spruchrolle"]'); await warte(300);
 hoeheBox.push(await hoehe(p, '#itemBox'));
-pruefe((await text(p, '#itemBox')).includes('Hier: Deine Wasserwaffe wird eine Stufe stärker'), 'Beim Fluch steht, was er hier bringt');
+pruefe((await text(p, '#itemBox')).includes('Hier: Wasserwaffe eine Stufe stärker'), 'Beim Fluch steht, was er hier bringt');
 await p.tap('.slot[data-id="kreisel"]'); await warte(300);
 hoeheBox.push(await hoehe(p, '#itemBox'));
 pruefe(!(await p.$eval('.slot[data-id="kreisel"]', e => e.classList.contains('dabei'))) && (await text(p, '[data-mitnehmen]')).includes('MITNEHMEN · 2'), 'Was hier nicht hilft, zeigt nur, was es ist');
@@ -122,7 +122,7 @@ pruefe((await text(g, '#swKopf')).includes('NIEDERLAGE') && await hoehe(g, '.sw-
 await g.tap('#swWahl [data-w="schild"]'); await warte(200);
 await halten(g);
 const schild = await fenster(g);
-pruefe(schild.includes('SCHILD DES BUNDES') && schild.includes('noch einmal'), 'Moment: Schild des Bundes, noch einmal spielen');
+pruefe(schild.includes('SCHILD DES BUNDES') && schild.includes('Noch einmal'), 'Moment: Schild des Bundes, noch einmal spielen');
 await zu(g); await warte(600);
 pruefe(await g.isVisible('.duell.jetzt [data-duell="1"]'), 'Duell 1 ist wieder offen');
 await g.tap('[data-duell="1"][data-v="niederlage"]'); await warte(400);

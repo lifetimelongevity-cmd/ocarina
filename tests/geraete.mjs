@@ -158,6 +158,13 @@ for (const g of GERAETE) {
   alleProbleme += (await pruefen(page, g, 'AUSRÜSTUNG')).length;
   // Dennis trägt selbst ein: Siegel-Fenster auf der Quest-Karte
   await seite(page, 1); await weiterTippen(page);
+  // Spielbeginn blanko (30.09.): Nach dem Rundgang taucht die erste Quest mit etwas Abstand auf
+  await page.waitForTimeout(2800);
+  if (await page.$('#overlay:not([hidden])')) {
+    await shot(page, g, '3d-erste-quest');
+    alleProbleme += (await pruefen(page, g, 'ERSTE QUEST')).length;
+    await page.click('#overlay'); await page.waitForTimeout(1400);
+  } else { log('  PROBLEM: Die erste Quest taucht nicht auf'); alleProbleme++; }
   if (await page.$('#questCard [data-ergebnis="bestanden"]')) {
     await page.tap('#questCard [data-ergebnis="bestanden"]'); await page.waitForTimeout(400);
     await shot(page, g, '3c-siegel');

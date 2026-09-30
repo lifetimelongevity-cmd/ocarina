@@ -257,7 +257,7 @@
     let i = -1;
     st.forEach((id, k) => { if (state.items[id] === "besitz") i = k; });
     const naechste = i < st.length - 1 ? itemCfg(config, st[i + 1]) : null;
-    return { quest: q.id, text: naechste ? `Deine Wasserwaffe wird eine Stufe stärker: ${naechste.kurz || naechste.name}.` : q.fluch.sonst || "" };
+    return { quest: q.id, text: naechste ? `Wasserwaffe eine Stufe stärker: ${naechste.kurz || naechste.name}.` : q.fluch.sonst || "" };
   }
 
   // Das Duell, um das es im Showdown gerade geht: das erste offene (null, wenn alle entschieden sind oder es keins gibt)
