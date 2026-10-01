@@ -64,9 +64,9 @@ async function frei(p = dennis) {
   for (let i = 0; i < 24; i++) { if (await p.$('#overlay[hidden]') && !(await p.isVisible('#mapWalker')) && await p.evaluate(() => document.querySelector('.face.active').dataset.page) === '1') break; await warte(250); }
   await warte(500); await zu(p);
 }
-for (let i = 0; i < 3; i++) { await admin.click('#nextWin'); await warte(250); }          // Log-Buch, Klingen, Wirbel
+for (let i = 0; i < 3; i++) { await admin.click('#nextWin'); await warte(250); }          // Log-Buch, Wirbel, Die drei Zeichen
 await zu(dennis); await warte(600);
-await admin.click('#nextWin'); await warte(900);                                           // Podrennen
+await admin.click('#nextWin'); await warte(900);                                           // Speed Flip (bis 01.10. Podrennen)
 const pod = await fenster(dennis);
 pruefe(pod.includes('Silberne Schuppe entpuppt sich als') && pod.includes('Kleine Wasserpistole'), 'Podrennen: Silberne Schuppe entpuppt sich als Kleine Wasserpistole');
 const wasserFeld = () => dennis.$eval('.slot[data-feld="wasser"]', e => e.dataset.id);

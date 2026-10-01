@@ -123,20 +123,24 @@
     commit(d => { d.frei = { ...d.frei, [id]: Date.now() }; }, "Freigegeben: " + questById(id).name);
   }
 
-  // Fluch (29.09.): Auch als Notlösung würfelt der Schattendieb, und das Spiel mit dem Vorteil wird gemerkt
-  // Im Showdown gilt ein Einsatz für das aktuelle Duell (29.09., Dennis rüstet sich je Duell aus)
+  // Fluch (29.09.): Auch als Notlösung dreht Buu Huu am Rad (01.10., ab dem zweiten Fluch mit ALLES), und das Spiel mit dem
+  // Vorteil wird gemerkt. Im Showdown gilt ein Einsatz für das aktuelle Duell (29.09., Dennis rüstet sich je Duell aus)
   function einsetzen(item, quest) {
     const it = itemById(item), d = questById(quest).showdown ? E.aktuellesDuell(C, state) : null, duell = d ? { duell: d.nr } : {};
     if (!it.dieb) return commit(d => d.einsaetze.push({ id: uid(), item, quest, zeit: Date.now(), ...duell }), `${it.name} eingesetzt (${questById(quest).name})`);
-    const v = E.fluchVorteil(C, state, quest), raub = E.diebWurf(C);
-    commit(d => d.einsaetze.push({ id: uid(), item, quest, zeit: Date.now(), raub, ...duell, ...(v ? { fuer: v.quest } : {}) }),
-      `${it.name} gesprochen (${questById(quest).name}), ${it.dieb.name} stiehlt ${raub}`);
+    const v = E.fluchVorteil(C, state, quest), quote = E.allesChance(C, state), w = E.diebWurf(C, Math.random, quote);
+    commit(d => d.einsaetze.push({ id: uid(), item, quest, zeit: Date.now(), raub: w.raub, ...(w.alles ? { alles: true } : {}), rad: +w.rad.toFixed(4), quote,
+      ...duell, ...(v ? { fuer: v.quest } : {}) }),
+      `${it.name} gesprochen (${questById(quest).name}), ${it.dieb.name}: ${w.alles ? "ALLES" : w.raub}`);
   }
-  // Vorteil und Raub eines gesprochenen Fluchs, als Text für Liste und Meldung
+  // Vorteil und Raub eines gesprochenen Fluchs, als Text für Liste und Meldung. Was Buu Huu wirklich bekam, rechnet engine.js
+  // (bei ALLES alle geschlossenen Packs, mindestens 3, fehlende Packs in Karten)
   function fluchFolgen(e) {
     const it = C.items.find(i => i.dieb), v = E.fluchVorteil(C, state, e.fuer || e.quest);
-    const raub = Math.max(0, Math.min(it.dieb.gewichte.length - 1, Math.trunc(Number(e.raub)) || 0));
-    return `${v ? ` · Vorteil${e.fuer && e.fuer !== e.quest ? ` (${questById(e.fuer)?.name})` : ""}: ${v.text}` : ""} · ${it.dieb.name} stiehlt ${raub}`;
+    const r = state.raube.find(x => x.id === e.id);
+    const raub = r ? (r.alles ? `ALLES (${r.packs} ${r.packs === 1 ? "Pack" : "Packs"}${r.karten ? `, ${r.karten} ${r.karten === 1 ? "Karte" : "Karten"}` : ""})`
+      : `stiehlt ${r.raub}${r.karten ? ` (davon ${r.karten} in Karten)` : ""}`) : e.alles ? "ALLES" : `stiehlt ${Math.trunc(Number(e.raub)) || 0}`;
+    return `${v ? ` · Vorteil${e.fuer && e.fuer !== e.quest ? ` (${questById(e.fuer)?.name})` : ""}: ${v.text}` : ""} · ${it.dieb.name} ${raub}`;
   }
   // Was ein Fluch hier bringt, als Zeile für dich
   const fluchZeile = qid => {
@@ -148,7 +152,8 @@
     if (q.zaehler) return `<span class="w">Pro ${esc(q.zaehler.name)}: ${esc(E.effektText(C, q.zaehler.proTreffer, true))}</span>`;
     return `<span class="w">Sieg: ${esc(E.effektText(C, q.win, true))}</span>`
       + (q.glanz ? ` · <span class="w">Glanzsieg (${esc(q.glanz.bedingung)}): dazu ${esc(E.effektText(C, q.glanz, true))}</span>` : "")
-      + ` · <span class="l">Niederlage: ${esc(E.effektText(C, q.lose, false))}</span>`;
+      + ` · <span class="l">Niederlage: ${esc(E.effektText(C, q.lose, false))}</span>`
+      + (q.geschenk ? ` · <span class="w">In jedem Fall: ${esc(E.effektText(C, q.geschenk, true))} (Buu Huu)</span>` : "");
   }
 
   const besitzText = id => {
@@ -321,7 +326,7 @@
     const k = state.kappung;
     $("#kappung").hidden = !(k.unten || k.oben || state.karten);
     $("#kappung").textContent = [
-      state.karten ? `Karten an den Bund: ${state.karten} (jeweils seine beste aus einem geöffneten Pack, weil geschlossene fehlten)` : "",
+      state.karten ? `Karten an den Bund: ${state.karten} (blind gezogen aus seinen glänzenden und seltenen, weil geschlossene fehlten)` : "",
       k.unten ? `Verpufft, weil Dennis nichts mehr hatte: ${k.unten}` : "",
       k.oben ? `Verfallen, weil alle Packs schon seine waren: ${k.oben}` : ""].filter(Boolean).join(" · ");
     $("#done").textContent = state.zaehler.erledigt;
@@ -485,8 +490,8 @@
   function eintragText(k, e) {
     const i = k.indexOf("_"), art = k.slice(0, i), rest = k.slice(i + 1);
     if (art === "q") return `${questById(rest)?.name || rest}: ${e.glanz && e.status === "bestanden" ? "Glanzsieg" : STATUS_WORT[e.status] || e.status}`;
-    if (art === "e" && itemById(e.item)?.dieb) return `Fluch gesprochen bei ${questById(e.quest)?.name || e.quest}${fluchFolgen(e)}`;
-    // Items nimmt Dennis vor dem Spiel mit (gib sie ihm), den Schild setzt er nach einer Niederlage ein (das Duell wird wiederholt)
+    if (art === "e" && itemById(e.item)?.dieb) return `Fluch gesprochen bei ${questById(e.quest)?.name || e.quest}${fluchFolgen({ ...e, id: k })}`;
+    // Items nimmt Dennis vor dem Spiel mit (gib sie ihm). rettung war der Schild (gestrichen am 01.10.)
     if (art === "e" && itemById(e.item)?.rettung) return `${itemById(e.item).name} eingesetzt bei ${questById(e.quest)?.name || e.quest}${e.duell ? `, Duell ${e.duell}` : ""}: Duell wiederholen`;
     if (art === "e") return `${itemById(e.item)?.name || e.item} mitgenommen zu ${questById(e.quest)?.name || e.quest}${e.duell ? `, Duell ${e.duell}` : ""} (gib es ihm)`;
     if (art === "d") return `Duell ${rest}: ${e.ergebnis === "sieg" ? "Sieg" : "Niederlage"}`;

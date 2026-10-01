@@ -60,7 +60,7 @@ pruefe((await fenster(dennis)).includes('PRÜFUNG BESTANDEN'), 'Halten: Moment �
 await dennis.screenshot({ path: `${OUT}/selbst-2-moment.png` });
 await warte(400);
 pruefe((await admin.textContent('#verlauf')).includes('Rikes Tagebuch: bestanden'), 'Admin sieht Dennis’ Eintrag live');
-pruefe((await admin.textContent('#nextTitle')).includes('Die drei Zeichen'), 'Admin: nächste Quest rückt weiter');
+pruefe((await admin.textContent('#nextTitle')).includes('Wirbel der Götter'), 'Admin: nächste Quest rückt weiter (seit 01.10. der Wirbel)');
 pruefe((await admin.textContent('#packs')) === '1', 'Admin: Packs zählen mit');
 await admin.screenshot({ path: `${OUT}/selbst-3-admin.png`, fullPage: true });
 await zu(dennis); await warte(1200);
@@ -76,67 +76,92 @@ pruefe(await dennis.isVisible('[data-ergebnis="bestanden"]'), 'Nach dem Zurückn
 await admin.click('#undo'); await warte(700);
 pruefe((await fenster(dennis)).includes('PRÜFUNG BESTANDEN'), 'Rückgängig: Eintrag ist wieder da, Dennis sieht den Moment');
 await zu(dennis); await warte(1200);
+await frei();                                   // Wirbel der Götter freigeben
+await admin.click('#nextWin'); await warte(900); await zu(dennis);   // Wirbel bestanden (bucht der Quest Master)
 await frei();                                   // Die drei Zeichen freigeben
 
-// Die drei Zeichen bringen einen Fluch, verraten ihn aber nicht
+// Die drei Zeichen (seit 01.10. die dritte Aufgabe) bringen Flüche, verraten sie aber nicht
 await dennis.evaluate(() => { const r = document.querySelector('.q-row[data-id="klingen"]'); r && r.click(); }); await warte(300);
 const vorschau = await dennis.textContent('#questCard');
 pruefe(vorschau.includes('Geheimnis') && !vorschau.includes('Fluch') && !vorschau.includes('Pergament'), 'Die drei Zeichen: Belohnung heißt nur „Geheimnis“');
-pruefe(!(await dennis.$('#questCard [data-ausruesten]')), 'Bei Die drei Zeichen gibt es nichts mitzunehmen (der Schild meldet sich erst bei einer Niederlage)');
+pruefe(vorschau.includes('beide geschlagen'), 'Die drei Zeichen: Glanzsieg, wenn beide geschlagen sind');
+pruefe(!(await dennis.$('#questCard [data-ausruesten]')), 'Bei Die drei Zeichen gibt es nichts mitzunehmen');
 
 // Verpasste Momente: Dennis lädt neu, der Admin bucht, während der Startbildschirm offen ist
 await dennis.goto(BASE); await warte(600);
 await admin.click('#nextWin'); await warte(600);
-await admin.click('#freigeben'); await warte(400);   // Wirbel der Götter freigeben, Dennis holt beides nach
+await admin.click('#freigeben'); await warte(400);   // Speed Flip freigeben, Dennis holt beides nach
 pruefe(!(await fenster(dennis)), 'Startbildschirm: noch kein Fenster');
 await dennis.click('#introScreen'); await warte(1200);
 pruefe(!(await dennis.isVisible('#prolog')), 'Später am Tag kein Prolog');
 const nachgeholt = await fenster(dennis);
 pruefe(nachgeholt.includes('BESTANDEN') && nachgeholt.includes('Die drei Zeichen'), 'Nach PRESS START: verpasster Moment läuft nach');
-pruefe(nachgeholt.includes('Du hast etwas gefunden') && nachgeholt.includes('Flüche haben es in sich'), 'Fund: „Du hast etwas gefunden … Flüche haben es in sich“');
+pruefe(nachgeholt.includes('Du hast etwas gefunden') && nachgeholt.includes('Flüche haben es in sich') && nachgeholt.includes('+2'), 'Fund: zwei Flüche, „Du hast etwas gefunden … Flüche haben es in sich“');
+pruefe(nachgeholt.includes('Einen davon schenkt dir Buu Huu'), 'Buu Huu hat mitgespielt und einen geschenkt');
 pruefe((await dennis.textContent('#hudNextName')) === '?', 'Die nächste Quest bleibt im Nebel, bis der Moment vorbei ist');
 await dennis.screenshot({ path: `${OUT}/selbst-5-nachgeholt.png` });
 await zu(dennis); await warte(1500);
-pruefe((await dennis.textContent('#hudNextName')) === 'Wirbel der Götter', 'Danach tritt die nächste Quest aus dem Nebel');
+pruefe((await dennis.textContent('#hudNextName')) === 'Speed Flip', 'Danach tritt die nächste Quest aus dem Nebel');
 
-// Fluch sprechen beim Wirbel der Götter: erst der Vorteil, dann würfelt der Schattendieb (hier fest auf 2).
-// Vorher zwei Packs dazu, damit er wirklich zwei stehlen kann (das Tagebuch bringt seit 29.09. nur eins)
+// Fluch sprechen bei Speed Flip: erst der Vorteil, dann dreht Buu Huu am Rad (hier fest auf 2, der erste Fluch kann kein ALLES).
+// Vorher zwei Packs dazu, damit er wirklich zwei stehlen kann
 await admin.fill('#customAmount', '2'); await admin.fill('#customReason', 'Test: Packs für den Dieb');
 await admin.click('#customForm button[type="submit"]'); await warte(900); await zu(dennis);
 const packsVor = Number(await dennis.textContent('#packsVal'));
-await dennis.evaluate(() => { const r = document.querySelector('.q-row[data-id="wirbel"]'); r && r.click(); }); await warte(300);
+await dennis.evaluate(() => { const r = document.querySelector('.q-row[data-id="podrennen"]'); r && r.click(); }); await warte(300);
 // Ausrüsten beim Spiel (29.09.): AUSRÜSTEN auf der Quest-Karte, in der Ausrüstung den Fluch auf eine C-Taste, ein Siegel
-pruefe(await dennis.isVisible('#questCard [data-ausruesten="wirbel"]'), 'Wirbel: AUSRÜSTEN auf der Quest-Karte');
-await dennis.tap('#questCard [data-ausruesten="wirbel"]'); await warte(1200);
-pruefe((await dennis.textContent('#ruestFuer')).includes('WIRBEL DER GÖTTER') && await dennis.isVisible('.slot.usable[data-id="spruchrolle"]'), 'Ausrüstung für den Wirbel: der Fluch leuchtet');
+pruefe(await dennis.isVisible('#questCard [data-ausruesten="podrennen"]'), 'Speed Flip: AUSRÜSTEN auf der Quest-Karte');
+await dennis.tap('#questCard [data-ausruesten="podrennen"]'); await warte(1200);
+pruefe((await dennis.textContent('#ruestFuer')).includes('SPEED FLIP') && await dennis.isVisible('.slot.usable[data-id="spruchrolle"]'), 'Ausrüstung für Speed Flip: der Fluch leuchtet');
 await dennis.tap('.slot[data-id="spruchrolle"]'); await warte(300);
 pruefe((await dennis.getAttribute('.c-taste.l', 'data-id')) === 'spruchrolle', 'Tippen legt den Fluch auf die erste C-Taste');
+const box = await dennis.textContent('#itemBox');
+pruefe(box.includes('Sabotage') && box.includes('0 bis 3 Packs.') && !box.includes('ALLES') && await dennis.$('#itemBox .rad-mini'), 'Textbox: Vorteil und das kleine Rad, beim ersten Fluch noch ohne ALLES');
 await dennis.tap('[data-mitnehmen]'); await warte(400);
 const siegelText = await dennis.textContent('#swFolgen');
-pruefe(siegelText.includes('DABEI') && siegelText.includes('FLUCH') && siegelText.includes('vorher üben') && siegelText.includes('seinen Preis'), 'Siegel-Fenster: dabei, Vorteil beim Wirbel und die Warnung');
-pruefe(!siegelText.includes('Buu Huu'), 'Siegel-Fenster verrät den Dieb nicht');
+pruefe(siegelText.includes('FLUCH') && siegelText.includes('Sabotage') && siegelText.includes('PREIS') && siegelText.includes('0 bis 3 Packs.'), 'Siegel-Fenster: Vorteil bei Speed Flip und Buu Huus Rad');
+pruefe(siegelText.includes('glänzenden und seltenen'), 'Siegel-Fenster: was passiert, wenn Packs fehlen');
+const passt = await dennis.evaluate(() => { const f = document.getElementById('swFolgen'); return f.scrollHeight <= f.clientHeight + 1; });
+pruefe(passt, 'Siegel-Fenster: alle Zeilen passen hinein, nichts zu scrollen');
 await dennis.evaluate(() => { Math.random = () => 0.7; });
-await halten(dennis);
-pruefe(await dennis.isVisible('#fluchSzene') && (await dennis.textContent('#fluchSzene')).includes('DER FLUCH GREIFT') && (await dennis.textContent('#fluchSzene')).includes('vorher üben'), 'Szene: Der Fluch greift, mit Vorteil');
-pruefe(Number(await dennis.textContent('#packsVal')) === packsVor, 'Solange der Dieb unterwegs ist, zeigt das HUD noch die alten Packs');
+await halten(dennis, 1100);
+const szene = async () => (await dennis.textContent('#fluchSzene')).replace(/\s+/g, ' ');
+pruefe(await dennis.isVisible('#fluchSzene') && (await szene()).includes('DER FLUCH GREIFT') && (await szene()).includes('Sabotage'), 'Szene: Der Fluch greift, mit Vorteil');
+pruefe(Number(await dennis.textContent('#packsVal')) === packsVor, 'Solange Buu Huu unterwegs ist, zeigt das HUD noch die alten Packs');
 await dennis.screenshot({ path: `${OUT}/selbst-5a-greift.png` });
-await warte(3300);
-await dennis.screenshot({ path: `${OUT}/selbst-5b-klaut.png` });
-pruefe(await dennis.$('#fluchSzene .fs-geist') !== null && Number(await dennis.textContent('#packsVal')) < packsVor, 'Der Geist holt die Packs einzeln aus der Leiste');
-await warte(3200);
+await warte(5200);
+pruefe(await dennis.evaluate(() => document.getElementById('fluchSzene').classList.contains('nacht')) && await dennis.$('#fluchSzene .fs-geist') !== null, 'Licht aus, Buu Huu kreist um die Packs');
+pruefe(await dennis.evaluate(() => document.getElementById('fluchSzene').classList.contains('rad-da')) && (await dennis.$$('#fsScheibe .rad-feld')).length === 4, 'Das Rad: vier Felder, beim ersten Fluch noch kein ALLES');
+await dennis.click('#fluchSzene'); await warte(300);
+pruefe(await dennis.isVisible('#fluchSzene'), 'Vor der Auflösung lässt sich die Szene nicht wegtippen');
+await dennis.screenshot({ path: `${OUT}/selbst-5b-rad.png` });
+for (let i = 0; i < 40 && await dennis.evaluate(() => document.getElementById('fsRad').dataset.steht == null); i++) await warte(200);
+const rad = await dennis.evaluate(() => ({ ...document.getElementById('fsRad').dataset }));
+pruefe(rad.steht != null && rad.steht === rad.ziel, `Das Rad bleibt auf dem gewürfelten Feld stehen (Feld ${rad.ziel})`);
+await warte(1600);
+pruefe((await dennis.textContent('#fsErgebnis')) === '−2', 'Auflösung: −2 in der Mitte des Rads');
+await dennis.screenshot({ path: `${OUT}/selbst-5c-klaut.png` });
+for (let i = 0; i < 40 && Number(await dennis.textContent('#packsVal')) === packsVor; i++) await warte(150);
+pruefe(Number(await dennis.textContent('#packsVal')) < packsVor, 'Buu Huu holt die Packs einzeln aus der Leiste');
+for (let i = 0; i < 40 && await dennis.isVisible('#fluchSzene'); i++) await warte(200);
 const gesprochen = await fenster(dennis);
-pruefe(!(await dennis.isVisible('#fluchSzene')) && gesprochen.includes('FLUCH GESPROCHEN') && gesprochen.includes('vorher üben'), 'Danach das Fenster: Fluch gesprochen mit Vorteil');
+pruefe(!(await dennis.isVisible('#fluchSzene')) && gesprochen.includes('FLUCH GESPROCHEN') && gesprochen.includes('Sabotage'), 'Danach das Fenster: Fluch gesprochen mit Vorteil');
 const dieb = await dennis.textContent('#resultLines .dieb');
 pruefe(dieb.includes('Buu Huu') && dieb.includes('2 Packs gestohlen') && dieb.includes('−2'), 'Buu Huu stiehlt 2 Packs');
-await dennis.screenshot({ path: `${OUT}/selbst-5c-dieb.png` });
+await dennis.screenshot({ path: `${OUT}/selbst-5d-dieb.png` });
 pruefe(Number(await dennis.textContent('#packsVal')) === Math.max(0, packsVor - 2), `Packs: ${packsVor} → ${Math.max(0, packsVor - 2)}`);
 await warte(300);
 const einsAdmin = await admin.textContent('#verlauf li[data-art="e"][data-von="dennis"]');
-pruefe(einsAdmin.includes('vorher üben') && einsAdmin.includes('Buu Huu stiehlt 2'), 'Admin: Fluch mit Vorteil und Raub im Verlauf');
+pruefe(einsAdmin.includes('Sabotage') && einsAdmin.includes('Buu Huu stiehlt 2'), 'Admin: Fluch mit Vorteil und Raub im Verlauf');
 await zu(dennis); await warte(600);
+// Der zweite Fluch kann ALLES: kleines Rad mit rotem Feld in der Textbox
+await dennis.evaluate(() => document.querySelector('.shoulder-right').click()); await warte(1300); await zu(dennis);
+await dennis.evaluate(() => { const b = document.querySelector('.slot[data-id="spruchrolle"]'); b && b.click(); }); await warte(300);
+pruefe((await dennis.textContent('#itemBox')).includes('oder ALLES!'), 'Nach dem ersten Fluch droht ALLES');
+await dennis.evaluate(() => document.querySelector('.shoulder-left').click()); await warte(1300); await zu(dennis);
 // Zurücknehmen: die gestohlenen Packs sind zurück
 await admin.click('#verlauf li[data-art="e"] .zurueck'); await warte(1400);
-pruefe((await fenster(dennis)).includes('stahl, ist zurück'), 'Rücknahme: Was der Dieb gestohlen hat, ist zurück');
+pruefe((await fenster(dennis)).includes('stahl, ist zurück'), 'Rücknahme: Was Buu Huu gestohlen hat, ist zurück');
 pruefe(Number(await dennis.textContent('#packsVal')) === packsVor, 'Packs wieder wie vorher');
 await zu(dennis);
 await ctx.close();

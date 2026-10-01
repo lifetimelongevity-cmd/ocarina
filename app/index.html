@@ -210,9 +210,17 @@
       <div class="ab-credits" id="abCredits"><div class="ab-roll" id="abRoll"></div></div>
       <button class="prolog-skip ab-skip" id="abSkip" type="button">ÜBERSPRINGEN</button>
     </section>
-    <!-- Fluch gesprochen (30.09.): Der Fluch greift, dann holt der Schattendieb die Packs aus der Leiste -->
+    <!-- Fluch gesprochen (01.10.): Der Fluch greift, das Licht geht aus, Buu Huu dreht am Rad und holt sich die Beute (app.js, fluchSzene) -->
     <div class="fluch-szene" id="fluchSzene" hidden aria-hidden="true">
+      <div class="fs-nacht"></div>
+      <span class="fs-licht"></span>
       <div class="fs-kern"><span class="fs-ring"></span><span class="fs-ring r2"></span><span class="fs-icon" id="fsIcon"></span></div>
+      <div class="fs-rad" id="fsRad">
+        <div class="fs-scheibe" id="fsScheibe"></div>
+        <span class="fs-nabe"></span>
+        <span class="fs-zeiger"><svg viewBox="0 0 20 24"><path d="M1.5 1.5h17L10 22.5Z"/></svg></span>
+        <b class="fs-ergebnis" id="fsErgebnis"></b>
+      </div>
       <p class="fs-text" id="fsText"></p>
     </div>
     <div class="overlay" id="overlay" hidden>

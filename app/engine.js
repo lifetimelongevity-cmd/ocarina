@@ -7,8 +7,10 @@
      glanz:     { [questId]: true }                   // Glanzsieg: bestanden und besonders deutlich (nur Quests mit glanz)
      zaehler:   { [questId]: Zahl }                   // Treffer einer Zähler-Quest (Prophezeiung)
      schritte:  { [questId]: { [schrittId]: true } }  // Zwischenschritte einer laufenden Quest (Amulett gefunden)
-     einsaetze: [ { id, item, quest, zeit?, raub?, fuer?, duell? } ]   // Dennis hat ein Item oder eine Fähigkeit eingesetzt (mitgenommen). Fluch:
-                                                      // raub = Packs, die der Schattendieb stiehlt, fuer = Spiel, dessen Vorteil gilt.
+     einsaetze: [ { id, item, quest, zeit?, raub?, alles?, rad?, quote?, fuer?, duell? } ]   // Dennis hat ein Item oder eine Fähigkeit
+                                                      // eingesetzt (mitgenommen). Fluch: raub = Packs, die Buu Huu stiehlt, alles = das Rad
+                                                      // blieb auf ALLES stehen (01.10.), rad = wo es stehen blieb (0 bis 1), quote = Chance
+                                                      // auf ALLES in % beim Drehen, fuer = Spiel, dessen Vorteil gilt.
                                                       // duell = Nummer des Duells im Showdown, für das er es mitgenommen hat
      duelle:    { "1": "sieg" | "niederlage", ... }    // Ergebnisse der Showdown-Duelle
      buchungen: [ { id, packs, grund, zeit?, ziffer?, weg?, item?, menge?, offen? } ]   // ziffer am Tor geholt (weg: packs, busse, segen), item/menge = Fluch o. Ä.,
@@ -23,8 +25,9 @@
 
    Packs zählen Schritt für Schritt in der Reihenfolge, in der sie passiert sind (zeiten, buchung.zeit),
    und bleiben dabei immer zwischen 0 und max. Die Zahl sind Dennis' geschlossene Packs (Rubine, 29.09.): Öffnet er eins,
-   geht sie eins runter. Kostet etwas mehr, als er geschlossen hat, zahlt er den Rest in Karten: pro fehlendem Pack die beste
-   Karte aus einem seiner geöffneten Packs (höchstens eine je geöffnetem Pack). Hat er nichts mehr, verpufft der Rest.
+   geht sie eins runter. Kostet etwas mehr, als er geschlossen hat, zahlt er den Rest in Karten: pro fehlendem Pack eine Karte,
+   blind gezogen aus allen glänzenden und seltenen Karten, die er schon hat (01.10.), höchstens eine je geöffnetem Pack.
+   Hat er nichts mehr, verpufft der Rest.
    Was über den Deckel geht, verfällt. Ohne Zeit (ältere Stände, Demo) gilt die Reihenfolge der Konfiguration, danach die Buchungen. */
 (function (root) {
   const STATUS = ["offen", "bestanden", "verloren"];
@@ -114,6 +117,8 @@
         dp += q.lose.packs || 0;
         (q.lose.items || []).forEach(nehmen);
       }
+      // Geschenk (01.10.): kommt bei Sieg und Niederlage (Buu Huu schenkt bei Die drei Zeichen einen Fluch)
+      if ((status === "bestanden" || status === "verloren") && q.geschenk) (q.geschenk.items || []).forEach(id => geben(id));
       if (q.zaehler) {
         const n = status === "offen" ? 0 : Math.max(0, Math.min(q.zaehler.max || 99, Math.floor(Number(doc.zaehler[q.id]) || 0)));
         treffer[q.id] = n;
@@ -144,7 +149,8 @@
     });
 
     // Einsätze: Flüche zählen runter, einmalige Fähigkeiten sind danach verbraucht.
-    // Fluch: Der Schattendieb stiehlt, was gewürfelt wurde, zum Zeitpunkt des Einsatzes
+    // Fluch: Buu Huu stiehlt, wo das Rad stehen blieb, zum Zeitpunkt des Einsatzes. Bei ALLES steht erst im Lauf der Packs
+    // fest, wie viel das ist (alle geschlossenen, mindestens allesMin), darum trägt der Lauf die Zahl dann nach.
     const raube = [], einsatzListe = [];
     doc.einsaetze.forEach((e, i) => {
       const it = itemCfg(config, e.item);
@@ -153,9 +159,12 @@
       einsatzListe.push({ id: e.id, item: e.item, quest: e.quest, duell: Math.trunc(Number(e.duell)) || null });
       if (!it.einmalig) return;
       if (it.dieb && (!it.stapel || anzahl[e.item] > 0)) {
-        const n = diebZahl(it, e.raub);
-        raube.push({ id: e.id, quest: e.quest, raub: n });
-        if (n) schrittePacks.push({ t: Number(e.zeit) || 0, seq: config.quests.length + doc.buchungen.length + i, packs: -n });
+        const t = Number(e.zeit) || 0, seq = config.quests.length + doc.buchungen.length + i;
+        // packs und karten: was Buu Huu wirklich bekommt (geschlossene Packs, Karten, wenn die fehlten), trägt der Lauf ein
+        const r = e.alles === true ? { id: e.id, quest: e.quest, raub: 0, alles: true, zeit: t, packs: 0, karten: 0 }
+          : { id: e.id, quest: e.quest, raub: diebZahl(it, e.raub), zeit: t, packs: 0, karten: 0 };
+        raube.push(r);
+        if (r.alles || r.raub) schrittePacks.push({ t, seq, alles: r.alles ? Math.max(0, Math.trunc(Number(it.dieb.allesMin)) || 0) : null, raub: r });
       }
       if (it.stapel) anzahl[e.item] = Math.max(0, anzahl[e.item] - 1);
       else if (items[e.item] === "besitz") items[e.item] = "verbraucht";
@@ -182,11 +191,14 @@
     let geoeffnet = 0, karten = 0;              // geöffnete Packs, Karten, mit denen er bezahlt hat
     schrittePacks.sort((a, b) => a.t - b.t || a.seq - b.seq).forEach(x => {
       if (x.offen) { if (packs > 0) { packs--; geoeffnet++; } return; }   // bei 0 gibt es nichts zu öffnen
-      const roh = packs + x.packs;
+      if (x.raub && x.alles != null) x.raub.raub = Math.max(x.alles, packs);   // ALLES: alle geschlossenen, mindestens allesMin
+      const roh = packs + (x.raub ? -x.raub.raub : x.packs);
+      if (x.raub) x.raub.packs = Math.min(packs, x.raub.raub);
       if (roh < 0) {
         const k = Math.min(-roh, geoeffnet - karten);
         karten += k;
         kappung.unten += -roh - k;
+        if (x.raub) x.raub.karten = k;
       }
       if (roh > max) kappung.oben += roh - max;
       packs = Math.max(0, Math.min(max, roh));
@@ -231,13 +243,37 @@
     return Math.max(0, Math.min(max, Math.trunc(Number(raub)) || 0));
   }
 
-  // Der Schattendieb würfelt, gewichtet nach dieb.gewichte (zufall: Zahl in [0, 1), zum Testen austauschbar)
-  function diebWurf(config, zufall = Math.random) {
-    const it = config.items.find(i => i.dieb);
-    const g = (it && it.dieb.gewichte) || [1];
-    let x = zufall() * g.reduce((a, b) => a + b, 0);
-    for (let n = 0; n < g.length; n++) { x -= g[n]; if (x < 0) return n; }
-    return g.length - 1;
+  /* Buu Huus Rad (01.10.): Felder 0, 1, 2, 3 so groß, wie sie wahrscheinlich sind, dahinter ALLES mit der Chance quote (in %).
+     radFelder: [{ wert, alles, von, bis }] mit von und bis zwischen 0 und 1, im Uhrzeigersinn ab oben.
+     allesStufe: der wievielte Fluch seit dem letzten ALLES der nächste wäre (0 = der allererste des Tages, dann nie ALLES).
+     allesChance: Chance auf ALLES für den nächsten Fluch, in %.
+     diebWurf: dreht das Rad. Eine Zahl u in [0, 1) ist die Stelle, an der es stehen bleibt, das Feld dort gilt.
+               Ergebnis { raub, alles, rad: u }. zufall: zum Testen austauschbar. */
+  const diebCfg = config => (config.items.find(i => i.dieb) || {}).dieb || { gewichte: [1] };
+  function radFelder(config, quote = 0) {
+    const d = diebCfg(config), g = d.gewichte || [1], summe = g.reduce((a, b) => a + b, 0) || 1;
+    const a = Math.max(0, Math.min(100, Number(quote) || 0)) / 100;
+    let von = 0;
+    const felder = g.map((w, n) => { const f = { wert: n, alles: false, von, bis: von + (w / summe) * (1 - a) }; von = f.bis; return f; });
+    if (a > 0) felder.push({ wert: null, alles: true, von, bis: 1 });
+    return felder.filter(f => f.bis > f.von);
+  }
+  function allesStufe(config, state) {
+    const r = [...((state && state.raube) || [])].sort((x, y) => (x.zeit || 0) - (y.zeit || 0));
+    if (!r.length) return 0;
+    let seit = 0, schon = false;
+    r.forEach(x => { if (x.alles) { schon = true; seit = 0; } else seit++; });
+    return schon ? seit + 1 : seit;
+  }
+  function allesChance(config, state) {
+    const a = diebCfg(config).alles || [0];
+    return Math.max(0, Math.min(100, Number(a[Math.min(allesStufe(config, state), a.length - 1)]) || 0));
+  }
+  function diebWurf(config, zufall = Math.random, quote = 0) {
+    const u = Math.max(0, Math.min(.999999, Number(zufall()) || 0));
+    const felder = radFelder(config, quote);
+    const f = felder.find(x => u < x.bis) || felder[felder.length - 1];
+    return { raub: f.alles ? 0 : f.wert, alles: !!f.alles, rad: u };
   }
 
   /* Was bringt ein Fluch bei dieser Quest? { quest, text, duell? } oder null.
@@ -274,7 +310,9 @@
     const d = q.showdown ? aktuellesDuell(config, state) : null;
     const dq = d && config.quests.find(x => x.id === d.quest);
     ((dq && dq.einsetzbar) || []).forEach(id => { if (!ids.includes(id)) ids.push(id); });
-    return config.items.map(i => i.id).filter(id => ids.includes(id) && !abgeloest(config, state, id));
+    // Im Showdown hilft ein Fluch nur, wenn das Spiel des Duells einen Vorteil kennt (01.10.: nicht in der Revanche von Die drei Zeichen)
+    const ohneVorteil = q.showdown && !(dq && dq.fluch);
+    return config.items.map(i => i.id).filter(id => ids.includes(id) && !abgeloest(config, state, id) && !(ohneVorteil && itemCfg(config, id).dieb));
   }
 
   /* Ausrüsten beim Spiel (29.09.): Vor dem Spiel legt Dennis Items und Flüche auf die C-Tasten und nimmt sie mit.
@@ -356,6 +394,10 @@
         if (nr >= 1 && quest(e.quest).showdown) x.duell = nr;
         if (it.dieb) {
           x.raub = diebZahl(it, e.raub);
+          if (e.alles === true) { x.alles = true; x.raub = 0; }
+          const u = Number(e.rad), quote = Number(e.quote);
+          if (u >= 0 && u < 1) x.rad = u;
+          if (quote >= 0 && quote <= 100) x.quote = quote;
           if (quest(e.fuer)) x.fuer = e.fuer;
         }
         out.einsaetze.push(x);
@@ -400,7 +442,7 @@
   }
 
   const api = { derive, emptyDoc, normalize, mitEintraegen, effektText, zifferGrund, zahlkraft, showdownDuelle, aktuellesDuell, einsetzbar, dabei, mitnehmbar, rettung,
-    fluchVorteil, diebWurf, abgeloest, aktuelleQuests, jetztEinsetzbar, STATUS, STATUS_LAUF };
+    fluchVorteil, diebWurf, radFelder, allesStufe, allesChance, abgeloest, aktuelleQuests, jetztEinsetzbar, STATUS, STATUS_LAUF };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.QuestEngine = api;
 })(typeof window !== "undefined" ? window : globalThis);

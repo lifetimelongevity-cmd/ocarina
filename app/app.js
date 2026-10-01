@@ -351,9 +351,13 @@
     };
     // Stufen (Wasserwaffen, Nadeln) teilen sich ein Feld (29.09.): nur die erste Stufe bekommt einen Platz
     const gear = C.items.filter(it => it.gruppe !== "faehigkeit" && (!it.feld || C.items.find(x => x.feld === it.feld) === it));
+    // Die Rahmen sind nur so groß wie ihr Inhalt (01.10., Wunsch des Nutzers): vier Items im Quadrat, fünf oder sechs in drei Spalten,
+    // Fähigkeiten nebeneinander, ab drei in zwei Spalten
+    const skills = C.items.filter(it => it.gruppe === "faehigkeit");
     $("#slotsGear").innerHTML = gear.map(slot).join("");
-    $("#slotsGear").style.setProperty("--spalten", gear.length > 6 ? 4 : 3);
-    $("#slotsSkill").innerHTML = C.items.filter(it => it.gruppe === "faehigkeit").map(slot).join("");
+    $("#slotsGear").style.setProperty("--spalten", gear.length <= 4 ? 2 : gear.length <= 6 ? 3 : 4);
+    $("#slotsSkill").innerHTML = skills.map(slot).join("");
+    $("#slotsSkill").style.gridTemplateColumns = `repeat(${Math.min(2, skills.length)}, var(--rslot))`;
     document.querySelectorAll(".slot").forEach(b => b.addEventListener("click", () => tippeFeld(b.dataset.id)));
   }
 
@@ -840,6 +844,10 @@
       tag = `<span class="tag open">VERBRAUCHT</span>`;
       const bei = Object.keys(state.eingesetzt).filter(k => state.eingesetzt[k].includes(id)).pop();
       if (bei) extra = `Eingesetzt bei ${em(bei)}.`;
+    } else if (x.dieb && st === "besitz") {
+      // Fluch (01.10.): immer das kleine Rad, wie groß ALLES gerade ist
+      const quote = E.allesChance(C, state);
+      extra = `${cWahl.includes(id) ? "Kommt mit. " : schon.includes(id) ? "Dabei. " : ""}${radMini(quote)}${esc(radSatz(quote))}`;
     } else if (cWahl.includes(id)) extra = v ? "Kommt mit." : "Kommt mit. Nochmal tippen: zurück.";
     else if (schon.includes(id)) extra = `Dabei bei ${em(spielVon(fq).spiel.id)}.`;
     else if (mit.includes(id)) extra = v ? "Jeder Fluch hat seinen Preis." : "Hilft hier. Antippen zum Mitnehmen.";
@@ -1054,7 +1062,7 @@
     if (dPacks && !fluchE && !nurOffen) lines.push(`<li class="${dPacks > 0 ? "plus" : "minus"}"><span class="ri">${cardSvg()}</span>${dPacks > 0 ? "+" : "−"}${Math.abs(dPacks)} ${packsWort(dPacks)}</li>`);
     // Reichten die geschlossenen Packs nicht, zahlt er in Karten (29.09.)
     const dKarten = (next.karten || 0) - (prev.karten || 0);
-    if (dKarten > 0 && !fluchE) lines.push(`<li class="minus"><span class="ri">${cardSvg("offen")}</span><span>−${dKarten} ${dKarten === 1 ? "Karte, deine beste" : "Karten, je deine beste"}. Keine geschlossenen Packs mehr.</span></li>`);
+    if (dKarten > 0 && !fluchE) lines.push(`<li class="minus"><span class="ri">${cardSvg("offen")}</span><span>−${dKarten} ${dKarten === 1 ? "Karte" : "Karten"}, blind gezogen aus deinen glänzenden und seltenen. Keine geschlossenen Packs mehr.</span></li>`);
     next.ziffern.forEach((v, i) => {
       if (v != null && prev.ziffern[i] == null) lines.push(`<li class="plus"><span class="ri"><span class="tumbler known" style="--hud-h:30px">${v}</span></span>Ziffer ${i + 1}: ${v}</li>`);
     });
@@ -1070,6 +1078,12 @@
       if (prev.items[it.id] !== "besitz" && next.items[it.id] === "besitz") lines.push(itemZeile(it.id, esc(it.name), "plus", erstmals));
       if (prev.items[it.id] === "besitz" && next.items[it.id] === "verloren") lines.push(itemZeile(it.id, `${esc(it.name)} weg`, "minus"));
       if (prev.items[it.id] === "besitz" && next.items[it.id] === "verbraucht" && !eIds.has(it.id)) lines.push(itemZeile(it.id, `${esc(it.name)} eingesetzt`, "minus"));
+    });
+    // Geschenk (01.10.): Buu Huu spielt bei Die drei Zeichen mit und schenkt einen Fluch, bei Sieg und Niederlage
+    const ENTSCH2 = ["bestanden", "verloren"];
+    fertig.filter(q => q.geschenk && ENTSCH2.includes(next.quests[q.id]) && !ENTSCH2.includes(prev.quests[q.id])).forEach(q => {
+      const id = (q.geschenk.items || [])[0], dazu = id && itemById(id).stapel ? next.anzahl[id] - prev.anzahl[id] : 1;
+      lines.push(`<li class="dieb geschenk kommt"><span class="ri dieb-ic">${useSvg("i-dieb")}</span><span>${esc(dazu > 1 && q.geschenk.mehr ? q.geschenk.mehr : q.geschenk.text)}</span></li>`);
     });
     // Einsätze: Was Dennis mitnimmt, holt er sich beim Bund. Schild und Segen setzt er ein. Kommen sie mit anderem (nachgeholt),
     // stehen sie als Zeilen darunter, sonst baut der eigene Moment sie unten.
@@ -1137,11 +1151,10 @@
         if (!fluchE) lines.push(`<li class="dim"><span class="ri"></span><span>Hol ${andere.length === 1 ? "es" : "sie"} dir beim Bund.</span></li>`);
       }
       if (fluchE) {
-        const v = E.fluchVorteil(C, prev, fluchE.quest), raub = (next.raube.find(x => x.id === fluchE.id) || {}).raub || 0;
+        const v = E.fluchVorteil(C, prev, fluchE.quest), r = raubVon(next, fluchE);
         if (v) lines.push(`<li class="plus"><span class="ri" style="color:${itemById(fluchE.item).farbe}">${useSvg(itemById(fluchE.item).symbol)}</span><span>${esc(v.text)}</span></li>`);
-        const weg = Math.max(0, prev.packs - next.packs), karten = Math.max(0, (next.karten || 0) - (prev.karten || 0));
-        lines.push(`<li class="dieb kommt fertig ${weg || karten ? "minus" : "plus"}"><span class="ri dieb-ic">${useSvg("i-dieb")}</span>`
-          + `<span class="dieb-txt">${esc(diebSatz(raub, weg, karten))}</span><b class="dieb-zahl" aria-hidden="true">${raub ? "−" + raub : "0"}</b></li>`);
+        lines.push(`<li class="dieb kommt fertig ${r.packs || r.karten ? "minus" : "plus"}${r.alles ? " alles" : ""}"><span class="ri dieb-ic">${useSvg("i-dieb")}</span>`
+          + `<span class="dieb-txt">${esc(diebSatz(r))}</span><b class="dieb-zahl" aria-hidden="true">${r.alles ? "ALLES" : r.raub ? "−" + r.raub : "0"}</b></li>`);
       }
     } else if (neueD.length) {
       const k = neueD[0], sieg = next.duelle[k] === "sieg";
@@ -1173,9 +1186,8 @@
     if (fluchE && !STILL.matches) {
       diebHalt = prev.packs;
       renderHud(); renderQuests();
-      const it = itemById(fluchE.item), v = E.fluchVorteil(C, prev, fluchE.quest);
-      fluchSzene(it, v, +(next.raube.find(x => x.id === fluchE.id) || {}).raub || 0, Math.max(0, prev.packs - next.packs), prev.packs, zeigen,
-        Math.max(0, (next.karten || 0) - (prev.karten || 0)));
+      fluchSzene({ id: fluchE.id, it: itemById(fluchE.item), v: E.fluchVorteil(C, prev, fluchE.quest), r: raubVon(next, fluchE), vorher: prev.packs,
+        offen: prev.geoeffnet || 0, rad: fluchE.rad, quote: fluchE.quote ?? E.allesChance(C, prev), stufe: E.allesStufe(C, prev) }, zeigen);
     } else zeigen();
     return true;
   }
@@ -1185,87 +1197,296 @@
     + `<span><small class="tarn">${esc(it.gefunden.titel)}</small>${d > 1 ? `+${d} ` : ""}${esc(it.name)}<small class="warnung">${esc(it.gefunden.warnung)}</small></span></li>`;
 
   const diebName = () => ((C.items.find(i => i.dieb) || {}).dieb || {}).name || "Dieb";
-  // karten: was er statt fehlender geschlossener Packs in Karten nimmt (29.09.)
-  const diebSatz = (raub, weg, karten = 0) => !raub ? `Glück gehabt! Der ${diebName()} ist leer abgezogen.`
-    : weg < raub && karten ? `Der ${diebName()} wollte ${raub} ${packsWort(raub)}, ${weg ? `du hattest nur ${weg}` : "du hattest keine geschlossenen"}. Dafür nimmt er ${karten === 1 ? "deine beste Karte" : `${karten} Karten`}.`
-    : weg < raub ? `Der ${diebName()} wollte ${raub} ${packsWort(raub)}, ${weg ? `du hattest nur ${weg}` : "doch du hattest keine"}.`
-    : `Der ${diebName()} hat dir ${raub} ${packsWort(raub)} gestohlen.`;
+  const raubVon = (st, e) => st.raube.find(x => x.id === e.id) || { raub: 0, packs: 0, karten: 0 };
+  // Was Buu Huu bekommen hat, als Satz (r aus state.raube: raub, alles, packs = geschlossene, karten = statt fehlender Packs)
+  function diebSatz(r) {
+    const n = diebName(), p = r.packs || 0, k = r.karten || 0, kw = x => `${x} ${x === 1 ? "Karte" : "Karten"}`;
+    const karten = k ? ` Dafür zieht der Bund ${kw(k)} blind aus deinen glänzenden und seltenen.` : "";
+    if (r.alles) return !p && !k ? `ALLES! Doch du hattest nichts mehr.`
+      : !k ? `ALLES! ${n} holt sich ${p === 1 ? "dein letztes Pack" : `alle ${p} Packs`}.`
+      : `ALLES! ${p ? `${n} holt sich ${p === 1 ? "dein letztes Pack" : `alle ${p} Packs`}.` : "Keine Packs mehr."}${karten}`;
+    if (!r.raub) return `Glück gehabt! ${n} ist leer abgezogen.`;
+    if (p >= r.raub) return `${n} hat dir ${p} ${packsWort(p)} gestohlen.`;
+    return `${n} wollte ${r.raub} ${packsWort(r.raub)}, ${p ? `du hattest nur ${p}` : "doch du hattest keine"}.${karten}`;
+  }
 
-  /* Fluch gesprochen (30.09.): Der Fluch greift (Ringe um das Symbol, der Vorteil erscheint), dann fliegt der Schattendieb
-     zur Pack-Leiste und holt die Karten eine nach der anderen, jede verschwindet im HUD, wenn er sie greift.
-     Hat er nichts zu holen, sucht er kurz und zieht leer ab. Danach das Fenster mit allem. */
-  function fluchSzene(it, v, raub, weg, vorher, fertig, karten = 0) {
-    const el = $("#fluchSzene"), base = () => el.getBoundingClientRect();
-    const timer = [], warte = (ms, f) => timer.push(setTimeout(f, ms));
-    $("#fsIcon").innerHTML = `<span style="color:${it.farbe}">${useSvg(it.symbol)}</span>`;
-    $("#fsText").innerHTML = `<b>DER FLUCH GREIFT</b>${v ? `<span>${esc(v.text)}</span>` : ""}`;
-    el.querySelectorAll(".fs-geist, .fs-karte").forEach(x => x.remove());
-    el.classList.remove("dieb-phase");
-    el.hidden = false;
-    melody("zauber");
-    const ende = () => {
+  /* ---------- Buu Huus Rad (01.10.) ----------
+     Felder 0, 1, 2, 3 und ALLES, so groß, wie wahrscheinlich sie sind (engine.js radFelder): Grün für Glück, dann immer
+     dunkleres Violett, ALLES rot. Groß in der Fluch-Szene (mit Zahlen und Stiften am Rand), klein im Siegel und in der Ausrüstung. */
+  const RAD_FARBE = ["#3b9c5a", "#7d58c8", "#5e3ba3", "#45237e"], RAD_ALLES = "#d22a1f";
+  const radPunkt = (u, r) => { const w = u * 2 * Math.PI - Math.PI / 2; return [50 + r * Math.cos(w), 50 + r * Math.sin(w)]; };
+  function radSvg(quote, gross = false) {
+    const felder = E.radFelder(C, quote), f2 = x => x.toFixed(2);
+    const teile = felder.map((f, i) => {
+      const farbe = f.alles ? RAD_ALLES : RAD_FARBE[f.wert % RAD_FARBE.length], breite = f.bis - f.von;
+      const [x0, y0] = radPunkt(f.von, 48), [x1, y1] = radPunkt(f.bis, 48);
+      const form = breite > .9999 ? `<circle cx="50" cy="50" r="48" fill="${farbe}"/>`
+        : `<path d="M50 50L${f2(x0)} ${f2(y0)}A48 48 0 ${breite > .5 ? 1 : 0} 1 ${f2(x1)} ${f2(y1)}Z" fill="${farbe}"/>`;
+      if (!gross) return form;
+      // Die Zahl steht quer zum Rand, oben lesbar, wenn das Feld unter dem Zeiger liegt
+      const mitte = (f.von + f.bis) / 2, [lx, ly] = radPunkt(mitte, breite > .9999 ? 0 : f.alles ? 31 : 35);
+      const wort = f.alles ? "ALLES" : String(f.wert), klein = f.alles ? Math.min(13, 8 + breite * 30) : 15;
+      return `<g class="rad-feld" data-i="${i}">${form}<text x="${f2(lx)}" y="${f2(ly)}" transform="rotate(${f2(mitte * 360)} ${f2(lx)} ${f2(ly)})"`
+        + ` font-size="${f2(klein)}" text-anchor="middle" dominant-baseline="central" class="rad-wort${f.alles ? " alles" : ""}">${wort}</text></g>`;
+    }).join("");
+    const grenzen = felder.length > 1 ? felder.map(f => { const [x, y] = radPunkt(f.von, 48); return `<line x1="50" y1="50" x2="${f2(x)}" y2="${f2(y)}"/>`; }).join("") : "";
+    const stifte = gross && felder.length > 1 ? felder.map(f => { const [x, y] = radPunkt(f.von, 46.5); return `<circle cx="${f2(x)}" cy="${f2(y)}" r="1.9"/>`; }).join("") : "";
+    return `<svg class="rad-svg" viewBox="0 0 100 100" aria-hidden="true">${teile}<g class="rad-grenzen">${grenzen}</g>`
+      + `<circle class="rad-rand" cx="50" cy="50" r="48.5"/><g class="rad-stifte">${stifte}</g></svg>`;
+  }
+  // Kleines Rad für Siegel und Ausrüstung: zeigt, wie groß ALLES gerade ist
+  const radMini = quote => `<span class="rad-mini" title="Buu Huus Rad">${radSvg(quote)}<i class="rad-mini-zeiger"></i></span>`;
+  // Der Satz zum Rad, vor dem Siegel: 0 bis 3 Packs, ab dem zweiten Fluch auch ALLES
+  const radSatz = quote => `${diebName()} dreht am Rad: 0 bis 3 Packs${quote > 0 ? " oder ALLES!" : "."}`;
+
+  // Klänge der Szene (eigene, keine Originalmusik): Klicken des Zeigers an den Stiften, Herzschlag, Trommelwirbel, Donner
+  function klang(art) {
+    try {
+      audio ??= new (window.AudioContext || window.webkitAudioContext)();
+      if (audio.state === "suspended") audio.resume();
+      const t = audio.currentTime + .005;
+      const ton = (f, f2, d, typ, vol, start = t) => {
+        const o = audio.createOscillator(), g = audio.createGain();
+        o.type = typ; o.frequency.setValueAtTime(f, start); if (f2) o.frequency.exponentialRampToValueAtTime(f2, start + d);
+        g.gain.setValueAtTime(vol, start); g.gain.exponentialRampToValueAtTime(.0001, start + d);
+        o.connect(g).connect(audio.destination); o.start(start); o.stop(start + d + .02);
+      };
+      const rauschen = (d, vol, tief, start = t) => {
+        const n = Math.ceil(audio.sampleRate * d), b = audio.createBuffer(1, n, audio.sampleRate), x = b.getChannelData(0);
+        for (let i = 0; i < n; i++) x[i] = (Math.random() * 2 - 1) * (1 - i / n);
+        const q = audio.createBufferSource(), f = audio.createBiquadFilter(), g = audio.createGain();
+        q.buffer = b; f.type = "lowpass"; f.frequency.value = tief; g.gain.value = vol;
+        q.connect(f).connect(g).connect(audio.destination); q.start(start);
+      };
+      if (art === "tick") ton(1700, 900, .025, "square", .03);
+      else if (art === "herz") { ton(70, 42, .16, "sine", .32); ton(62, 38, .13, "sine", .2, t + .2); }
+      else if (art === "wirbel") for (let i = 0; i < 22; i++) rauschen(.05, .05 + i * .006, 900, t + i * .045);
+      else if (art === "donner") { rauschen(1.1, .45, 260); ton(110, 38, .9, "sawtooth", .07); }
+      else if (art === "glueck") ton(880, 1760, .25, "triangle", .06);
+    } catch (_) {}
+  }
+
+  /* Fluch gesprochen (01.10., Wunsch des Nutzers: ein Moment, bei dem alle zusammen draufschauen, etwa 8 Sekunden bis zur
+     Auflösung). Erst greift der Fluch (Ringe, der Vorteil). Dann geht das Licht aus, nur Dennis' Packs leuchten noch, Buu Huu
+     kichert und kreist um sie. Dann dreht er am Rad: es rattert, wird langsamer, der Herzschlag setzt ein, manchmal bleibt es
+     fast stehen und ruckt dann doch noch ein Feld weiter. Auflösung: 0 (greift ins Leere, Glück gehabt), 1 bis 3 (holt die
+     Karten einzeln aus der Leiste) oder ALLES (Bild wackelt, rot, er räumt die ganze Leiste leer). Fehlen geschlossene Packs,
+     holt er Karten. Überspringen erst nach der Auflösung, damit niemand den Moment aus Versehen wegtippt.
+     o: { it, v (Vorteil), r (Raub aus state.raube), vorher (geschlossene Packs davor), offen (geöffnete), rad (Stelle 0 bis 1,
+     sonst zufällig im Feld), quote (Chance auf ALLES in %), stufe (allesStufe vor diesem Fluch) } */
+  let szene = null;                            // laufende Szene: { id des Einsatzes, still() bricht sie ohne Fenster ab }
+  function fluchSzene(o, fertig) {
+    const el = $("#fluchSzene"), txt = $("#fsText"), radEl = $("#fsRad"), scheibe = $("#fsScheibe"), erg = $("#fsErgebnis");
+    const timer = [], ABBRUCH = {};
+    let aus = false, fertigGerufen = false;
+    const r = o.r, felder = E.radFelder(C, o.quote);
+    const ziel = felder.findIndex(f => r.alles ? f.alles : !f.alles && f.wert === r.raub);
+    const base = () => el.getBoundingClientRect();
+    const warte = ms => new Promise((ok, nein) => timer.push(setTimeout(() => aus ? nein(ABBRUCH) : ok(), ms)));
+    const sag = (html, cls = "") => { txt.className = "fs-text " + cls; txt.innerHTML = html; txt.getAnimations().forEach(a => { a.cancel(); a.play(); }); };
+    const ende = still => {
+      if (fertigGerufen) return;
+      fertigGerufen = true; aus = true; szene = null;
       timer.forEach(clearTimeout);
-      el.hidden = true;
+      el.hidden = true; el.onclick = null;
+      el.classList.remove("nacht", "rad-da", "steht", "wackelt", "rot", "gold");
+      document.documentElement.classList.remove("fs-wackelt");
       el.querySelectorAll(".fs-geist, .fs-karte").forEach(x => x.remove());
       diebHalt = null;
-      fertig();
+      if (still === true) { renderHud(); renderQuests(); } else fertig();
     };
-    el.onclick = ende;                                  // Antippen überspringt
+    szene = { id: o.id, still: () => ende(true) };
+
+    // Aufbau: Fluch-Symbol, Rad mit den Feldern dieses Fluchs, Scheinwerfer auf die Pack-Leiste
+    $("#fsIcon").innerHTML = `<span style="color:${o.it.farbe}">${useSvg(o.it.symbol)}</span>`;
+    scheibe.innerHTML = radSvg(o.quote, true);
+    scheibe.style.transform = "";
+    delete radEl.dataset.ziel; delete radEl.dataset.steht; delete radEl.dataset.ruck;
+    erg.textContent = ""; erg.className = "fs-ergebnis";
+    el.querySelectorAll(".fs-geist, .fs-karte").forEach(x => x.remove());
+    el.classList.remove("nacht", "rad-da", "steht", "wackelt", "rot", "gold");
+    el.onclick = null;
+    el.hidden = false;
+    const leiste = $("#packRow").getBoundingClientRect(), b0 = base();
+    el.style.setProperty("--sx", `${leiste.left - b0.left + leiste.width / 2}px`);
+    el.style.setProperty("--sy", `${leiste.top - b0.top + leiste.height / 2}px`);
+    el.style.setProperty("--sw", `${leiste.width * .62 + 26}px`);
+    el.style.setProperty("--sh", `${leiste.height * .62 + 22}px`);
+    el.style.setProperty("--lx", `${leiste.left - b0.left - 5}px`);
+    el.style.setProperty("--ly", `${leiste.top - b0.top - 4}px`);
+    el.style.setProperty("--lw", `${leiste.width + 10}px`);
+    el.style.setProperty("--lh", `${leiste.height + 8}px`);
 
     // Wo liegt eine Karte der Leiste, relativ zur Szene
     const kartenPos = i => {
-      const c = document.querySelectorAll("#packRow .ic-card")[i], r = c.getBoundingClientRect(), b = base();
-      return { x: r.left - b.left + r.width / 2, y: r.top - b.top + r.height / 2 };
+      const c = document.querySelectorAll("#packRow .ic-card")[Math.max(0, i)], q = c.getBoundingClientRect(), b = base();
+      return { x: q.left - b.left + q.width / 2, y: q.top - b.top + q.height / 2 };
     };
+    const radMitte = () => { const q = radEl.getBoundingClientRect(), b = base(); return { x: q.left - b.left + q.width / 2, y: q.top - b.top + q.height / 2, w: q.width }; };
     const geist = document.createElement("span");
     geist.className = "fs-geist";
     geist.innerHTML = useSvg("i-dieb");
-    const setzen = (x, y) => { geist.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%)`; };
+    const setzen = (x, y, ms, frei) => {
+      if (ms != null) geist.style.transitionDuration = ms + "ms";
+      if (!frei) { const b = base(); x = Math.max(30, Math.min(b.width - 30, x)); y = Math.max(28, Math.min(b.height - 28, y)); }
+      geist.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%)`;
+    };
 
-    warte(1900, () => {
-      el.classList.add("dieb-phase");
-      $("#fsText").innerHTML = `<b>DOCH JEDER FLUCH HAT SEINEN PREIS …</b>`;
-      const b = base();
-      el.appendChild(geist);
-      setzen(b.width + 40, b.height * .55);
-      tone("confirm");
-      void geist.offsetWidth;
-      const ziele = Array.from({ length: weg }, (_, k) => vorher - 1 - k);   // von der letzten vollen Karte rückwärts
-      let t = 250;
-      const hin = ziele.length ? kartenPos(ziele[0]) : kartenPos(Math.max(0, vorher - 1));
-      warte(t, () => setzen(hin.x, hin.y + 26)); t += 850;
-      if (!ziele.length) {
-        // Nichts zu holen (oder 0 gewürfelt): sucht und zieht leer ab
-        warte(t, () => { geist.classList.add("sucht"); $("#fsText").innerHTML = `<b>${esc(diebSatz(raub, 0, karten).toUpperCase())}</b>`; melody("plus"); }); t += 1400;
-      }
-      ziele.forEach((ci, k) => {
-        warte(t, () => {
+    // Das Rad dreht: rattert an jedem Stift, wird langsamer, Herzschlag zum Schluss. Wo es stehen bleibt: im Zielfeld,
+    // meist knapp hinter der Kante, über die der Zeiger zuletzt kam. Manchmal bleibt es davor fast stehen und ruckt dann weiter.
+    const drehen = () => new Promise((ok, nein) => {
+      // vor: das Feld, über das der Zeiger ins Ziel kommt (er läuft rückwärts über die Scheibe, kommt also vom Feld dahinter)
+      const f = felder[ziel], breite = f.bis - f.von, vor = felder[(ziel + 1) % felder.length];
+      const zufall = (a, z) => a + Math.random() * (z - a);
+      const imFeld = o.rad >= f.von && o.rad < f.bis ? o.rad : null;
+      const ruck = felder.length > 1 && breite * 360 > 7 && (vor.bis - vor.von) * 360 > 7 && Math.random() < .45;
+      // Zeiger oben zeigt auf die Stelle phi der Scheibe (0 bis 1 im Uhrzeigersinn), wenn die Scheibe um -phi gedreht ist
+      const phiEnde = felder.length < 2 ? (imFeld ?? Math.random()) : ruck ? f.bis - breite * .3 : f.bis - breite * zufall(.06, imFeld != null ? .3 : .22);
+      const phiStop = ruck ? Math.min(f.bis + (vor.bis - vor.von) * .25, f.bis + 4 / 360) : phiEnde;
+      const start = Math.random() * 360, T = 3400;
+      // Am Ende soll der Zeiger auf phiStop zeigen: Drehung ≡ −phiStop (mod 360), mindestens fünf volle Runden
+      const gesamt = 360 * 5 + (((-start - phiStop * 360) % 360) + 360) % 360;
+      const feldBei = deg => { const phi = (((-deg) % 360) + 360) % 360 / 360; return felder.findIndex(x => phi >= x.von && phi < x.bis); };
+      const zeiger = radEl.querySelector(".fs-zeiger");
+      let letztes = feldBei(start), t0 = 0, herz = 0, fertigGedreht = false;
+      const zeigen = deg => { scheibe.style.transform = `rotate(${deg.toFixed(2)}deg)`; const i = feldBei(deg); if (i !== letztes) { letztes = i; klang("tick"); zeiger.animate([{ transform: "rotate(-26deg)" }, { transform: "none" }], { duration: 110, easing: "ease-out" }); } };
+      scheibe.style.transform = `rotate(${start}deg)`;
+      const schluss = async () => {
+        if (fertigGedreht) return;
+        fertigGedreht = true;
+        zeigen(start + gesamt);
+        let endlage = start + gesamt;
+        try {
+          if (ruck) {
+            await warte(650); klang("herz");
+            await warte(380);
+            endlage = start + gesamt + (phiStop - phiEnde) * 360;
+            scheibe.animate([{ transform: `rotate(${start + gesamt}deg)` }, { transform: `rotate(${endlage}deg)` }], { duration: 240, easing: "cubic-bezier(.2, .9, .3, 1.2)" });
+            scheibe.style.transform = `rotate(${endlage}deg)`;
+            await warte(120); klang("tick");
+            await warte(160);
+          }
+          // Für die Tests: auf welchem Feld der Zeiger steht und welches gewürfelt war
+          radEl.dataset.ziel = ziel; radEl.dataset.steht = feldBei(endlage); radEl.dataset.ruck = ruck ? "1" : "";
+          ok();
+        } catch (e) { nein(e); }
+      };
+      const bild = jetzt => {
+        if (aus) return nein(ABBRUCH);
+        if (!t0) t0 = jetzt;
+        const p = Math.min(1, (jetzt - t0) / T), e = 1 - Math.pow(1 - p, 4);
+        zeigen(start + gesamt * e);
+        if (p > .5 && jetzt - herz > 560) { herz = jetzt; klang("herz"); }
+        if (p < 1) requestAnimationFrame(bild); else schluss();
+      };
+      requestAnimationFrame(bild);
+      timer.push(setTimeout(() => { if (!aus) schluss(); }, T + 900));   // falls das Handy die Bilder angehalten hat
+    });
+
+    // Karte aus der Leiste nehmen (geschlossenes Pack) oder eine Karte aus einem geöffneten Pack ziehen
+    const nimm = (pos, k, offenKarte) => {
+      const karte = document.createElement("span");
+      karte.className = "fs-karte" + (offenKarte ? " offen" : "");
+      karte.innerHTML = offenKarte ? useSvg("i-cards") : cardSvg();
+      karte.style.transform = `translate(${pos.x}px, ${pos.y}px) translate(-50%, -50%)`;
+      el.appendChild(karte);
+      requestAnimationFrame(() => { karte.style.transform = `translate(${pos.x + 14 + (k % 6) * 5}px, ${pos.y + 34 - (k % 6) * 3}px) translate(-50%, -50%) rotate(${-12 + (k % 6) * 9}deg) scale(.8)`; });
+      geist._karten = (geist._karten || []).concat(karte);
+    };
+
+    (async () => {
+      try {
+        // 1. Der Fluch greift
+        sag(`<b>DER FLUCH GREIFT</b>${o.v ? `<span>${esc(o.v.text)}</span>` : ""}`);
+        melody("zauber");
+        await warte(1700);
+        // 2. Licht aus, nur die Packs leuchten, Buu Huu kichert und kreist um sie
+        el.classList.add("nacht");
+        sag(`<b>DOCH JEDER FLUCH HAT SEINEN PREIS …</b>`, "oben");
+        await warte(500);
+        const b = base(), lp = kartenPos(Math.max(0, Math.min(o.vorher, 10) - 1)), mitte = { x: b.width * .5, y: b.height * .58 };
+        el.appendChild(geist);
+        setzen(mitte.x, mitte.y, 0);
+        geist.classList.add("erscheint");
+        melody("kichern");
+        await warte(700);
+        const sx = parseFloat(el.style.getPropertyValue("--sx")), sy = parseFloat(el.style.getPropertyValue("--sy"));
+        const sw = parseFloat(el.style.getPropertyValue("--sw")), sh = parseFloat(el.style.getPropertyValue("--sh"));
+        const bahn = [[1.15, .15], [.25, 1.3], [-.9, .6], [.95, -.1]];
+        for (const [dx, dy] of bahn) { setzen(sx + dx * sw, sy + dy * sh + 18, 400); await warte(360); }
+        // 3. Das Rad
+        el.classList.add("rad-da");
+        const erstmals = o.quote > 0 && o.stufe === 1;
+        sag(`<b>${esc(diebName().toUpperCase())} DREHT AM RAD …</b>${erstmals ? "<span>Diesmal will er mehr …</span>" : ""}`, "oben");
+        await warte(350);
+        const rm = radMitte();
+        setzen(rm.x + rm.w / 2 + 36, rm.y - rm.w * .18, 600);
+        klang("wirbel");
+        await warte(520);
+        await drehen();
+        // 4. Auflösung
+        el.classList.add("steht");
+        radEl.querySelectorAll(".rad-feld").forEach(g => g.classList.toggle("ziel", +g.dataset.i === ziel));
+        const holt = r.packs || 0, karten = r.karten || 0;
+        el.onclick = () => ende();                                 // ab jetzt darf man überspringen
+        if (r.alles) {
+          erg.textContent = "ALLES!"; erg.className = "fs-ergebnis alles";
+          el.classList.add("wackelt", "rot"); document.documentElement.classList.add("fs-wackelt"); klang("donner");
+          sag(`<b>${esc(diebName().toUpperCase())} WILL ALLES!</b>`, "oben rot");
+          await warte(1100);
+          el.classList.remove("wackelt"); document.documentElement.classList.remove("fs-wackelt");
+        } else if (!r.raub) {
+          erg.textContent = "0"; erg.className = "fs-ergebnis null";
+          el.classList.add("gold"); klang("glueck"); melody("fund");
+          sag(`<b>GLÜCK GEHABT!</b>`, "oben gold");
+          await warte(900);
+        } else {
+          erg.textContent = "−" + r.raub; erg.className = "fs-ergebnis minus";
+          melody("minus");
+          sag(`<b>${esc(diebName().toUpperCase())} WILL ${r.raub} ${packsWort(r.raub).toUpperCase()}</b>`, "oben");
+          await warte(900);
+        }
+        // Buu Huu holt sich die Beute: erst geschlossene Packs aus der Leiste, dann Karten aus geöffneten
+        const ziele = Array.from({ length: holt }, (_, k) => o.vorher - 1 - k);
+        const erstes = ziele.length ? kartenPos(ziele[0]) : lp;
+        setzen(erstes.x, erstes.y + 26, 700);
+        await warte(760);
+        if (!holt && !karten) {
+          geist.classList.add("sucht");
+          sag(`<b>${esc(diebSatz(r).toUpperCase())}</b>`, "oben" + (r.raub || r.alles ? "" : " gold"));
+          await warte(1500);
+        }
+        let k = 0;
+        for (const ci of ziele) {
           const p = kartenPos(ci);
-          setzen(p.x, p.y + 26);
-          // Die Karte löst sich aus der Leiste und hängt am Geist
-          const karte = document.createElement("span");
-          karte.className = "fs-karte";
-          karte.innerHTML = cardSvg();
-          karte.style.transform = `translate(${p.x}px, ${p.y}px) translate(-50%, -50%)`;
-          el.appendChild(karte);
+          setzen(p.x, p.y + 26, r.alles ? 260 : 420);
+          await warte(r.alles ? 140 : 260);
+          nimm(p, k++, false);
           diebHalt = ci; renderHud(); tone("error");
-          warte(60, () => { karte.style.transform = `translate(${p.x + 14 + k * 5}px, ${p.y + 34 - k * 3}px) translate(-50%, -50%) rotate(${-12 + k * 9}deg) scale(.8)`; });
-          geist._karten = (geist._karten || []).concat(karte);
-        });
-        t += 700;
-      });
-      if (ziele.length) warte(t, () => { $("#fsText").innerHTML = `<b>${esc(diebSatz(raub, weg, karten).toUpperCase())}</b>`; melody("minus"); });
-      t += 300;
-      warte(t, () => {
+          await warte(r.alles ? 230 : 420);
+        }
+        if (karten) {
+          sag(`<b>KEINE PACKS? MACHT NICHTS …</b><span>Er zieht ${karten} ${karten === 1 ? "Karte" : "Karten"} aus deinen glänzenden und seltenen.</span>`, "oben");
+          await warte(900);
+          for (let j = 0; j < karten; j++) {
+            const p = kartenPos(Math.min(o.vorher - holt + j, o.vorher + o.offen - 1));
+            setzen(p.x, p.y + 26, 360); await warte(260);
+            nimm(p, k++, true); tone("error");
+            await warte(420);
+          }
+        }
+        if (holt || karten) { sag(`<b>${esc(diebSatz(r).toUpperCase())}</b>`, "oben" + (r.alles ? " rot" : "")); await warte(600); }
         // Mit der Beute davon, nach rechts oben aus dem Bild
         const w = base().width;
         geist.classList.add("flieht");
-        setzen(w + 80, -40);
-        (geist._karten || []).forEach((k, i) => { k.classList.add("flieht"); k.style.transform = `translate(${w + 90 + i * 6}px, ${-10 - i * 4}px) translate(-50%, -50%) rotate(${20 + i * 15}deg) scale(.6)`; });
-      });
-      t += 1300;
-      warte(t, ende);
-    });
+        setzen(w + 80, -40, 1100, true);
+        (geist._karten || []).forEach((x, i) => { x.classList.add("flieht"); x.style.transform = `translate(${w + 90 + i * 6}px, ${-10 - i * 4}px) translate(-50%, -50%) rotate(${20 + i * 15}deg) scale(.6)`; });
+        await warte(1300);
+        ende();
+      } catch (e) {
+        if (e !== ABBRUCH) { console.error(e); ende(); }
+      }
+    })();
   }
 
   /* Der Quest Master hat die nächste Quest freigegeben (30.09.): Liegt sie an einer anderen Station, sagt die Fee, wohin es
@@ -1301,6 +1522,7 @@
 
   // Der Quest Master hat etwas zurückgenommen: Die Fee sagt es Dennis. Packs, Items und Nebel springen still mit zurück.
   function zurueckgenommen(prev, next, weg) {
+    if (szene && weg.e.some(e => e.id === szene.id)) szene.still();
     const zeilen = [];
     weg.q.forEach(q => zeilen.push([questIcon(q, "offen", false), `Ergebnis von <b>${esc(q.name)}</b>.`
       + (q.id === next.next ? " Trag es neu ein." : next.quests[q.id] === "laeuft" ? " Die Quest läuft wieder." : "")]));
@@ -1309,7 +1531,7 @@
     weg.s.forEach(q => q.schritte.filter(sx => prev.schritte[q.id][sx.id] && !next.schritte[q.id][sx.id])
       .forEach(sx => zeilen.push([questIcon(q, "laeuft", false), `${esc(q.name)}: „${esc(sx.name)}“.`])));
     weg.e.forEach(e => { const it = itemById(e.item); if (it) zeilen.push([`<span style="color:${it.farbe}">${useSvg(it.symbol)}</span>`, `Einsatz von <b>${esc(it.name)}</b>.`
-      + (it.dieb && Number(e.raub) > 0 ? ` Was der ${esc(it.dieb.name)} stahl, ist zurück.` : "")]); });
+      + (it.dieb && (Number(e.raub) > 0 || e.alles) ? ` Was ${esc(it.dieb.name)} stahl, ist zurück.` : "")]); });
     weg.b.forEach(b => zeilen.push([cardSvg(), b.ziffer ? `Kauf von Ziffer ${esc(b.ziffer)}.` : `„${esc(b.grund || "Buchung")}“.`]));
     const mehr = zeilen.length > 4 ? zeilen.length - 3 : 0;
     const lines = zeilen.slice(0, mehr ? 3 : 4).map(([ic, t]) => `<li><span class="ri">${ic}</span><span>${t}</span></li>`).join("")
@@ -1329,7 +1551,7 @@
         + (offen ? `<li><span class="ri">${cardSvg("offen")}</span><span>${offen} geöffnet</span></li>` : "")
         + (s.karten ? `<li class="minus"><span class="ri">${cardSvg("offen")}</span><span>${s.karten} ${s.karten === 1 ? "Karte" : "Karten"} an den Bund</span></li>` : "")
         + `<li><span class="ri">${cardSvg("empty")}</span><span>${bund} beim Bund</span></li>`
-        + `<li class="dim"><span class="ri"></span><span>Ohne geschlossene Packs zahlst du mit deiner besten Karte.</span></li>`,
+        + `<li class="dim"><span class="ri"></span><span>Ohne geschlossene Packs zahlst du mit Karten, blind gezogen aus deinen glänzenden und seltenen.</span></li>`,
       next: ""
     });
   }
@@ -2002,8 +2224,12 @@
     if (!ids.length) return;
     const { d, spiel } = spielVon(fq), fluch = ids.find(id => itemById(id).dieb), v = fluch ? E.fluchVorteil(C, state, fq) : null;
     const chip = id => { const x = itemById(id); return `<span class="chip">${`<svg aria-hidden="true" style="color:${x.farbe}"><use href="#${x.symbol}"></use></svg>`}${esc(x.kurz || x.name)}</span>`; };
-    const folgen = [fxZeile("DABEI", "", ids.map(chip).join(""))];
-    if (v) folgen.push(fxZeile("FLUCH", "magie", esc(v.text)), `<span class="fx dim">Doch jeder Fluch hat seinen Preis.</span>`);
+    // Fluch (01.10.): Vorteil, dann Buu Huus Rad mit dem aktuellen Feld ALLES, und was passiert, wenn Packs fehlen.
+    // DABEI nennt dann nur, was außer dem Fluch mitkommt, damit alles ins Fenster passt.
+    const quote = E.allesChance(C, state), sonst = ids.filter(id => id !== fluch);
+    const folgen = sonst.length || !v ? [fxZeile("DABEI", "", (v ? sonst : ids).map(chip).join(""))] : [];
+    if (v) folgen.push(fxZeile("FLUCH", "magie", esc(v.text)), fxZeile("PREIS", "lose", `${radMini(quote)}${esc(radSatz(quote))}`),
+      `<span class="fx dim">Ohne Packs zieht er blind aus deinen glänzenden und seltenen Karten.</span>`);
     const schluessel = spielVon(fq).schluessel;
     schwur.oeffnen({
       art: d ? `AUSRÜSTEN FÜR DUELL ${d.nr}` : "AUSRÜSTEN FÜR", icon: questIcon(spiel, "offen", false), titel: spiel.name,
@@ -2013,7 +2239,10 @@
         const zeit = Date.now(), neu = {};
         ids.forEach((id, i) => {
           const x = itemById(id);
-          neu["e_" + uid() + i] = { item: id, quest: fq, ...(d ? { duell: d.nr } : {}), ...(x.dieb ? { raub: E.diebWurf(C), ...(v ? { fuer: v.quest } : {}) } : {}), zeit: zeit + i };
+          // Buu Huu dreht hier am Rad, mit der Chance auf ALLES, die jetzt gilt
+          const q = x.dieb ? E.allesChance(C, state) : 0, w = x.dieb ? E.diebWurf(C, Math.random, q) : null;
+          neu["e_" + uid() + i] = { item: id, quest: fq, ...(d ? { duell: d.nr } : {}), zeit: zeit + i,
+            ...(w ? { raub: w.raub, ...(w.alles ? { alles: true } : {}), rad: +w.rad.toFixed(4), quote: q, ...(v ? { fuer: v.quest } : {}) } : {}) };
         });
         cWahl = [];
         zuQuests = true;
@@ -2420,7 +2649,8 @@
       } else if (a === "einsetzen") {
         const s = E.derive(C, d), qid = E.aktuelleQuests(C, s).find(id => E.mitnehmbar(C, s, id).length);
         const item = qid && E.mitnehmbar(C, s, qid)[0], dl = qid && questById(qid).showdown ? E.aktuellesDuell(C, s) : null;
-        if (item) d.einsaetze.push({ id: uid(), item, quest: qid, zeit: Date.now(), ...(dl ? { duell: dl.nr } : {}), ...(itemById(item).dieb ? { raub: E.diebWurf(C) } : {}) });
+        const rad = () => { const q = E.allesChance(C, s), w = E.diebWurf(C, Math.random, q); return { raub: w.raub, ...(w.alles ? { alles: true } : {}), rad: w.rad, quote: q }; };
+        if (item) d.einsaetze.push({ id: uid(), item, quest: qid, zeit: Date.now(), ...(dl ? { duell: dl.nr } : {}), ...(itemById(item).dieb ? rad() : {}) });
       } else if (a === "glanz") {
         if (state.kommt && questById(state.kommt).glanz) { d.quests[state.kommt] = "bestanden"; d.glanz = { ...d.glanz, [state.kommt]: true }; }
       } else if (state.kommt) d.quests[state.kommt] = a;
@@ -2508,6 +2738,7 @@
   // Bleibt: ob die App auf dem Home-Bildschirm liegt.
   function neuerAnfang(zeigen) {
     if (sammel) { clearTimeout(sammel.t); sammel = null; }
+    if (szene) szene.still();
     try { [OB_KEY, KARTE_KEY, FUND_KEY, ERSTE_KEY, "dq-gps" + (PROBE ? "-probe" : "")].forEach(k => localStorage.removeItem(k)); } catch (e) {}
     abspann.schliessen(); abspann.vergessen();
     beutelGezeigt = false; karteGesehen = false; gesehen = null; neuMarke.clear();

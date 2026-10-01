@@ -1125,32 +1125,93 @@ html.schwach .face { box-shadow: inset 0 0 0 4px rgba(220,222,171,.1), 4px 5px 0
   .ab-triforce, .abspann[data-phase="sieg"] .ab-sieg { animation: none; }
 }
 
-/* Fluch gesprochen (30.09.): Der Fluch greift, der Schattendieb holt die Packs aus der Leiste */
-.fluch-szene { position: absolute; inset: 0; z-index: 56; overflow: hidden; cursor: pointer;
-  background: radial-gradient(circle at 50% 52%, rgba(90, 40, 140, .55), rgba(10, 4, 20, .72) 70%); animation: fsDunkel .5s ease-out both; }
-.fluch-szene.dieb-phase { background: radial-gradient(circle at 50% 52%, rgba(60, 30, 100, .35), rgba(8, 4, 16, .45) 70%); transition: background .6s; }
+/* Fluch gesprochen (01.10.): Der Fluch greift, dann geht das Licht aus, nur die Packs leuchten, Buu Huu dreht am Rad.
+   Das Rad steht in der Mitte, der Text oben, Buu Huu fliegt. Nur transform und opacity bewegen sich. */
+.fluch-szene { position: absolute; inset: 0; z-index: 56; overflow: hidden; animation: fsDunkel .5s ease-out both; }
+.fluch-szene.steht { cursor: pointer; }
+/* Violetter Schleier, solange der Fluch greift. Danach übernimmt die Nacht, damit die Pack-Leiste im Licht steht */
+.fluch-szene::before { content: ""; position: absolute; inset: 0; pointer-events: none; transition: opacity .9s ease-out;
+  background: radial-gradient(circle at 50% 52%, rgba(90, 40, 140, .55), rgba(10, 4, 20, .72) 70%); }
+.fluch-szene.nacht::before { opacity: 0; }
+/* Die Pack-Leiste leuchtet im Dunkeln (Lage setzt app.js) */
+.fs-licht { position: absolute; left: var(--lx, 0); top: var(--ly, 0); width: var(--lw, 0); height: var(--lh, 0); border-radius: 8px; pointer-events: none; opacity: 0;
+  box-shadow: 0 0 0 2px rgba(255, 226, 122, .55), 0 0 22px 8px rgba(255, 226, 122, .32); transition: opacity .9s ease-out .3s; }
+.fluch-szene.nacht .fs-licht { opacity: 1; animation: fsLicht 1.6s ease-in-out .9s infinite alternate; }
+@keyframes fsLicht { to { opacity: .55; } }
+/* Licht aus: alles dunkel bis auf die Pack-Leiste, um die ein Scheinwerfer liegt (--sx, --sy, --sw, --sh setzt app.js) */
+.fs-nacht { position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity .9s ease-out;
+  background: radial-gradient(ellipse var(--sw, 90px) var(--sh, 40px) at var(--sx, 80px) var(--sy, 24px), rgba(3, 2, 8, 0) 0, rgba(3, 2, 8, .08) 55%, rgba(3, 2, 8, .94) 100%); }
+.fluch-szene.nacht .fs-nacht { opacity: 1; }
+/* Blitz bei der Auflösung: rot bei ALLES (bleibt leicht rot), golden bei 0 */
+.fluch-szene::after { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0; }
+.fluch-szene.rot::after { background: radial-gradient(circle at 50% 58%, rgba(235, 40, 25, .62), rgba(150, 0, 0, .38) 55%, rgba(70, 0, 0, .25)); animation: fsBlitz 1.5s ease-out both; }
+.fluch-szene.gold::after { background: radial-gradient(circle at 50% 58%, rgba(255, 226, 122, .5), rgba(255, 226, 122, 0) 65%); animation: fsBlitz 1.2s ease-out both; }
 .fs-kern { position: absolute; left: 50%; top: 44%; width: 120px; height: 120px; transform: translate(-50%, -50%); display: grid; place-items: center; transition: opacity .5s, transform .5s; }
-.dieb-phase .fs-kern { opacity: 0; transform: translate(-50%, -50%) scale(.4); }
+.nacht .fs-kern { opacity: 0; transform: translate(-50%, -50%) scale(.4); }
 .fs-icon svg { width: 64px; height: 64px; filter: drop-shadow(0 0 12px rgba(201, 164, 255, .95)); animation: fsPuls .9s ease-in-out infinite alternate; }
 .fs-ring { position: absolute; inset: 0; border-radius: 50%; border: 3px solid rgba(201, 164, 255, .8); box-shadow: 0 0 18px rgba(201, 164, 255, .6); animation: fsRing 1.4s ease-out infinite; }
 .fs-ring.r2 { animation-delay: .7s; }
-.fs-text { position: absolute; left: 50%; top: calc(44% + 76px); transform: translateX(-50%); width: min(80%, 520px); margin: 0; text-align: center; color: #e9dcff; text-shadow: 0 2px 0 #000;
-  font: 700 var(--fs-body)/1.35 "Trebuchet MS", sans-serif; animation: fsText .5s ease-out .3s both; }
-.fs-text b { display: block; font: 900 calc(var(--fs-body) * 1.25)/1.2 Georgia, serif; letter-spacing: .06em; color: #fff; }
-.dieb-phase .fs-text { top: auto; bottom: 14%; }
-.fs-geist { position: absolute; left: 0; top: 0; color: #f2f8ff; transition: transform .8s cubic-bezier(.45, .05, .35, 1); will-change: transform; pointer-events: none; }
+.fs-text { position: absolute; z-index: 2; left: 50%; top: calc(44% + 76px); transform: translateX(-50%); width: min(84%, 560px); margin: 0; text-align: center; color: #e9dcff; text-shadow: 0 2px 0 #000;
+  font: 700 var(--fs-body)/1.35 "Trebuchet MS", sans-serif; animation: fsText .45s ease-out .05s both; }
+.fs-text b { display: block; font: 900 calc(var(--fs-body) * 1.3)/1.2 Georgia, serif; letter-spacing: .06em; color: #fff; }
+.fs-text span { display: block; margin-top: 2px; }
+.fs-text.oben { top: calc(var(--hud-h, 32px) + 14px); }
+.fs-text.rot b { color: #ff6a5a; text-shadow: 0 2px 0 #000, 0 0 14px rgba(255, 60, 40, .8); }
+.fs-text.gold b { color: #ffe27a; text-shadow: 0 2px 0 #000, 0 0 14px rgba(255, 226, 122, .7); }
+/* Das Rad: Scheibe dreht sich (app.js), Nabe und Zeiger stehen. Das Ergebnis springt in die Mitte. */
+.fs-rad { --rad: min(46svh, 172px); position: absolute; z-index: 1; left: 50%; top: 58%; width: var(--rad); height: var(--rad); pointer-events: none;
+  transform: translate(-50%, -50%) scale(.3); opacity: 0; transition: transform .45s cubic-bezier(.3, 1.5, .5, 1), opacity .3s; }
+@supports not (height: 1svh) { .fs-rad { --rad: min(46vh, 172px); } }
+.fluch-szene.rad-da .fs-rad { transform: translate(-50%, -50%); opacity: 1; }
+.fs-scheibe { position: absolute; inset: 0; border-radius: 50%; will-change: transform;
+  box-shadow: 0 0 0 3px #1a1208, 0 0 0 6px #d6aa4e, 0 0 0 8px #1a1208, 0 0 34px 10px rgba(160, 110, 255, .38); }
+.rad-svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.rad-svg .rad-grenzen line { stroke: rgba(10, 6, 20, .8); stroke-width: .9; }
+.rad-svg .rad-rand { fill: none; stroke: rgba(255, 236, 190, .4); stroke-width: 1; }
+.rad-svg .rad-stifte circle { fill: #f4dc8c; stroke: #3a2a05; stroke-width: .5; }
+.rad-svg .rad-wort { fill: #fff; font-family: Georgia, serif; font-weight: 900; paint-order: stroke; stroke: rgba(0, 0, 0, .7); stroke-width: 2.4px; }
+.rad-svg .rad-wort.alles { letter-spacing: .03em; }
+.rad-feld { transition: opacity .45s; }
+.fluch-szene.steht .rad-feld:not(.ziel) { opacity: .35; }
+.fs-nabe { position: absolute; left: 50%; top: 50%; width: 21%; height: 21%; transform: translate(-50%, -50%); border-radius: 50%;
+  background: radial-gradient(circle at 38% 32%, #fff6c8, #d6aa4e 45%, #6b4a12); box-shadow: 0 0 0 2px #1a1208, 0 2px 5px rgba(0, 0, 0, .7); }
+.fs-zeiger { position: absolute; left: 50%; top: -13px; width: 22px; height: 27px; margin-left: -11px; transform-origin: 50% 18%; }
+.fs-zeiger svg { display: block; width: 100%; height: 100%; overflow: visible; fill: #ffe9a0; stroke: #1a1208; stroke-width: 2; stroke-linejoin: round; filter: drop-shadow(0 2px 2px rgba(0, 0, 0, .75)); }
+.fs-ergebnis { position: absolute; z-index: 2; left: 50%; top: 50%; padding: 5px 13px 4px; border-radius: 8px; white-space: nowrap; color: #fff; background: rgba(8, 4, 16, .88);
+  box-shadow: 0 0 0 2px currentColor, 0 4px 14px rgba(0, 0, 0, .7); font: 900 clamp(24px, 9svh, 36px)/1 Georgia, serif; letter-spacing: .04em;
+  transform: translate(-50%, -50%) scale(.2); opacity: 0; transition: transform .35s cubic-bezier(.3, 1.8, .5, 1), opacity .2s; }
+.fluch-szene.steht .fs-ergebnis:not(:empty) { transform: translate(-50%, -50%); opacity: 1; }
+.fs-ergebnis.alles { color: #ff5a4a; font-size: clamp(28px, 11svh, 46px); text-shadow: 0 0 18px rgba(255, 60, 40, .95); }
+.fs-ergebnis.null { color: #ffe27a; text-shadow: 0 0 14px rgba(255, 226, 122, .8); }
+.fs-ergebnis.minus { color: #ff9b90; }
+/* ALLES: Rad und HUD wackeln */
+.fluch-szene.wackelt .fs-rad, html.fs-wackelt .hud { animation: fsWackeln .1s linear 10; }
+/* Buu Huu: taucht aus dem Dunkeln auf, schwebt, sucht, flieht */
+.fs-geist { position: absolute; z-index: 3; left: 0; top: 0; color: #f2f8ff; transition: transform .8s cubic-bezier(.45, .05, .35, 1); will-change: transform; pointer-events: none; }
 .fs-geist svg { width: 54px; height: 54px; filter: drop-shadow(0 0 10px rgba(170, 220, 255, .9)); animation: fsSchweben .6s ease-in-out infinite alternate; }
+.fs-geist.erscheint svg { animation: fsErscheinen .7s ease-out both, fsSchweben .6s ease-in-out .7s infinite alternate; }
 .fs-geist.sucht svg { animation: fsSuchen .35s ease-in-out 4 alternate; }
 .fs-geist.flieht { transition: transform 1.1s cubic-bezier(.55, 0, .8, .4); }
-.fs-karte { position: absolute; left: 0; top: 0; transition: transform .45s ease-out; pointer-events: none; }
+.fs-karte { position: absolute; z-index: 3; left: 0; top: 0; transition: transform .45s ease-out; pointer-events: none; }
 .fs-karte .ic-card { width: 18px; height: 25px; filter: drop-shadow(0 0 6px rgba(255, 226, 122, .9)); }
+.fs-karte.offen svg { width: 24px; height: 24px; color: #ffe27a; filter: drop-shadow(0 0 7px rgba(255, 226, 122, .95)); }
 .fs-karte.flieht { transition: transform 1.1s cubic-bezier(.55, 0, .8, .4); }
 @keyframes fsDunkel { from { opacity: 0; } }
 @keyframes fsRing { from { transform: scale(.4); opacity: 1; } to { transform: scale(2.2); opacity: 0; } }
 @keyframes fsPuls { to { transform: scale(1.12) rotate(-6deg); } }
 @keyframes fsText { from { opacity: 0; transform: translate(-50%, 8px); } }
 @keyframes fsSchweben { to { transform: translateY(-5px); } }
+@keyframes fsErscheinen { from { opacity: 0; transform: scale(.35); } }
 @keyframes fsSuchen { from { transform: translateX(-8px) rotate(-8deg); } to { transform: translateX(8px) rotate(8deg); } }
+@keyframes fsBlitz { 0% { opacity: 0; } 12% { opacity: 1; } 100% { opacity: .35; } }
+@keyframes fsWackeln { 0%, 100% { translate: 0 0; } 25% { translate: -7px 3px; } 50% { translate: 6px -4px; } 75% { translate: -4px -3px; } }
+/* Kleines Rad im Siegel und in der Ausrüstung: zeigt, wie groß ALLES gerade ist */
+.rad-mini { position: relative; display: inline-block; flex: none; width: 1.55em; height: 1.55em; margin-right: .35em; vertical-align: -.42em; }
+.rad-mini .rad-svg { filter: drop-shadow(0 0 3px rgba(160, 110, 255, .6)); }
+.rad-mini .rad-svg .rad-rand { stroke: #d6aa4e; stroke-width: 5; }
+.rad-mini .rad-svg .rad-grenzen line { stroke-width: 3; }
+.fx > .rad-mini { margin-right: -4px; }
+.rad-mini-zeiger { position: absolute; left: 50%; top: -.22em; width: 0; height: 0; margin-left: -.22em; border: .22em solid transparent; border-top: .34em solid #ffe9a0; filter: drop-shadow(0 1px 0 #000); }
 
 /* ---------- Feste Fenstergrößen (29.09., Wunsch des Nutzers) ----------
    Jedes Fenster hat immer dieselbe Größe, egal ob ein oder vier Zeilen darin stehen: nichts springt. Die Höhe reicht für den

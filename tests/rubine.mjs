@@ -80,7 +80,7 @@ await zu(dennis);
 // Eine Niederlage ohne geschlossene Packs: Er zahlt in Karten
 await buchen(-2, 'Test: Niederlage');
 const karten = await fenster(dennis);
-pruefe(karten.includes('2 Karten') && karten.includes('beste'), 'Niederlage bei 0: Moment nennt 2 Karten an den Bund');
+pruefe(karten.includes('2 Karten') && karten.includes('glänzenden und seltenen'), 'Niederlage bei 0: Moment nennt 2 Karten, blind aus den glänzenden und seltenen');
 await dennis.screenshot({ path: `${OUT}/rubine-4-karten.png` });
 await zu(dennis);
 pruefe((await admin.textContent('#kappung')).includes('Karten an den Bund: 2'), 'Admin: Karten an den Bund: 2');
@@ -107,7 +107,7 @@ await zu(dennis);
 
 // Rikes Rache: nach Hüter der Flamme, mit Nadeln aus Wirbel und Deku-Baum, trägt Ziffer 4
 await admin.click('#reset').catch(() => {}); await warte(800);
-const vorRache = ['logbuch', 'klingen', 'wirbel', 'podrennen', 'kartenwurf', 'auge', 'deku', 'feuerprobe'];
+const vorRache = ['logbuch', 'wirbel', 'klingen', 'podrennen', 'kartenwurf', 'auge', 'deku', 'feuerprobe'];
 for (const id of vorRache) { await admin.click(`#quests li[data-id="${id}"] .seg button[data-v="bestanden"]`).catch(() => fehler.push('Admin-Knopf fehlt: ' + id)); await warte(250); }
 await warte(800); await zu(dennis); await warte(600); await zu(dennis);
 await frei();

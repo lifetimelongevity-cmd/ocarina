@@ -30,6 +30,8 @@ async function ausruesten(p, qid, ids) {
   await p.tap(`#questCard [data-ausruesten="${qid}"]`); await warte(1300);
   for (const id of ids) { await p.tap(`.slot[data-id="${id}"]`); await warte(200); }
   await p.tap('[data-mitnehmen]'); await warte(350); await halten(p);
+  // Mit Fluch: die Szene lässt sich erst nach der Auflösung überspringen
+  for (let i = 0; i < 80 && await p.isVisible('#fluchSzene') && !(await p.evaluate(() => document.getElementById('fluchSzene').classList.contains('steht'))); i++) await warte(200);
   if (await p.isVisible('#fluchSzene')) { await p.click('#fluchSzene'); await warte(500); }
   const f = await fenster(p);
   await zu(p); await warte(900);
@@ -74,11 +76,12 @@ await siegel(dennis, '#questCard [data-ergebnis="bestanden"]', 'PRÜFUNG BESTAND
 await admin.click('#lauf .lauf-q[data-id="amulett"] [data-a="start"]'); await warte(500);
 await zu(dennis);
 
-// Talstation
-await siegel(dennis, '#questCard [data-ergebnis="bestanden"]', 'SIDEQUEST BESTANDEN', 'Die drei Zeichen');
+// Talstation: seit 01.10. erst der Wirbel, dann Die drei Zeichen (dort beginnen die Flüche), dann Speed Flip
 await siegel(dennis, '#questCard [data-ergebnis="verloren"]', 'PRÜFUNG VERLOREN', 'Wirbel der Götter');
-const pod = await siegel(dennis, '#questCard [data-ergebnis="bestanden"]', 'PRÜFUNG BESTANDEN', 'Podrennen');
-pruefe(pod.includes('Kleine Wasserpistole'), 'Podrennen bringt die Kleine Wasserpistole');
+const zeichen = await siegel(dennis, '#questCard [data-ergebnis="bestanden"]', 'SIDEQUEST BESTANDEN', 'Die drei Zeichen');
+pruefe(zeichen.includes('+2') && zeichen.includes('Einen davon schenkt dir Buu Huu'), 'Die drei Zeichen: zwei Flüche, einen schenkt Buu Huu');
+const pod = await siegel(dennis, '#questCard [data-ergebnis="bestanden"]', 'PRÜFUNG BESTANDEN', 'Speed Flip');
+pruefe(pod.includes('Kleine Wasserpistole'), 'Speed Flip bringt die Kleine Wasserpistole');
 
 // Wald: Kartenwurf mit Glanzsieg, dann Auge des Jägers mit der großen Pistole
 const glanz = await siegel(dennis, '#questCard [data-ergebnis="glanz"]', 'GLANZSIEG', 'Kartenwurf');
@@ -119,15 +122,6 @@ pruefe(duelle.length === 3 && duelle[0].includes('Wirbel der Götter REVANCHE'),
 await dennis.screenshot({ path: `${OUT}/durchlauf-1-gipfel.png` });
 for (const [nr, v] of [[1, 'sieg'], [2, 'niederlage'], [3, 'sieg']]) {
   await questOeffnen(dennis, 'bund');
-  if (v === 'niederlage') {
-    // Der Schild (Hüter der Flamme) meldet sich bei der Niederlage selbst. Hier trägt Dennis die Niederlage trotzdem ein.
-    await dennis.tap(`[data-duell="${nr}"][data-v="${v}"]`); await warte(350);
-    pruefe((await dennis.textContent('#swWahl')).includes('Schild einsetzen'), `Duell ${nr} verloren: Der Schild meldet sich`);
-    await dennis.tap('#swWahl [data-w="verloren"]'); await warte(200); await halten(dennis);
-    pruefe((await fenster(dennis)).includes(`DUELL ${nr} VERLOREN`), `Duell ${nr}: „DUELL ${nr} VERLOREN“`);
-    await zu(dennis); await warte(900);
-    continue;
-  }
   await siegel(dennis, `[data-duell="${nr}"][data-v="${v}"]`, `DUELL ${nr} ${v === 'sieg' ? 'GEWONNEN' : 'VERLOREN'}`, `Duell ${nr}`);
 }
 await questOeffnen(dennis, 'bund');
@@ -144,7 +138,7 @@ const erwartet = E.derive(C, {
   quests: { logbuch: 'bestanden', klingen: 'bestanden', wirbel: 'verloren', podrennen: 'bestanden', kartenwurf: 'bestanden', auge: 'bestanden',
             deku: 'bestanden', feuerprobe: 'bestanden', rache: 'bestanden', bund: 'bestanden', amulett: 'bestanden' },
   glanz: { kartenwurf: true }, schritte: { amulett: { gefunden: true } },
-  zeiten: { logbuch: 1, klingen: 2, wirbel: 3, podrennen: 4, kartenwurf: 5, auge: 6, deku: 7, feuerprobe: 8, amulett: 9, rache: 10, bund: 11 }
+  zeiten: { logbuch: 1, wirbel: 2, klingen: 3, podrennen: 4, kartenwurf: 5, auge: 6, deku: 7, feuerprobe: 8, amulett: 9, rache: 10, bund: 11 }
 });
 pruefe((await dennis.textContent('#hudNextName')) === 'Zum Kästchen', 'Am Ende: Zum Kästchen');
 pruefe(Number(await dennis.textContent('#packsVal')) === erwartet.packs, `Dennis: ${erwartet.packs} Packs wie engine.js`);
@@ -152,7 +146,7 @@ pruefe(Number(await admin.textContent('#packs')) === erwartet.packs, `Admin: ${e
 const code = await dennis.$$eval('#tumblers .tumbler', els => els.map(e => e.textContent).join(''));
 pruefe(code === C.code.join(''), 'Code vollständig: ' + code);
 const inv = await admin.textContent('#inv');
-pruefe(['Spritze', 'Kleine Pistole', 'Große Pistole', 'Kreisel', 'Stich', 'Dicke Nadel', 'Schild', 'Segen'].every(x => inv.includes(x)) && !inv.includes('Nakama') && !inv.includes('Stopfnadel'), 'Admin-Inventar: alle drei Wasserwaffen, Kreisel, Stich, dicke Nadel, Schild, Rikes Segen, kein Nakama-Ruf, keine Stopfnadel (Wirbel verloren)');
+pruefe(['Spritze', 'Kleine Pistole', 'Große Pistole', 'Kreisel', 'Stich', 'Dicke Nadel', 'Fluch', 'Segen'].every(x => inv.includes(x)) && !inv.includes('Nakama') && !inv.includes('Stopfnadel') && !inv.includes('Schild'), 'Admin-Inventar: alle drei Wasserwaffen, Kreisel, Stich, dicke Nadel, Flüche, Rikes Segen, kein Schild, keine Stopfnadel (Wirbel verloren)');
 const liste = await admin.textContent('#verlauf');
 pruefe(liste.includes('Kartenwurf: Glanzsieg') && !liste.includes('gilt nicht'), 'Admin: alle Einträge von Dennis gelten, Kartenwurf als Glanzsieg');
 await dennis.click('#hudNext'); await warte(400);

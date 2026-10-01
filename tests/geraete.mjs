@@ -312,18 +312,20 @@ for (const g of GERAETE.filter(g => !process.env.NUR || g.id.startsWith(process.
   await dennis.click('#overlay'); await dennis.waitForTimeout(800);
   await admin.click('button.btn:has-text("Fluch geschenkt")'); await dennis.waitForTimeout(700);
   await dennis.click('#overlay').catch(() => {}); await dennis.waitForTimeout(300);
-  // Die drei Zeichen gewonnen (zweiter Fluch), dann einen Fluch beim Wirbel der Götter sprechen (Notlösung im Admin)
-  await admin.click('#nextWin'); await dennis.waitForTimeout(600);
-  await dennis.click('#overlay').catch(() => {}); await dennis.waitForTimeout(300);
+  // Wirbel und Die drei Zeichen gewonnen (seit 01.10. in dieser Reihenfolge, dort Flüche), dann einen Fluch bei Speed Flip
+  // sprechen (Notlösung im Admin). Die Szene mit Buu Huus Rad lässt sich erst nach der Auflösung überspringen
+  for (let i = 0; i < 2; i++) { await admin.click('#nextWin'); await dennis.waitForTimeout(600); await dennis.click('#overlay').catch(() => {}); await dennis.waitForTimeout(300); }
   await admin.screenshot({ path: `${OUT}/admin-2-naechste.png`, fullPage: true });
-  await admin.click('#nextUse .use-btn[data-item="spruchrolle"]'); await dennis.waitForTimeout(3200);
+  await admin.click('#nextUse .use-btn[data-item="spruchrolle"]'); await dennis.waitForTimeout(600);
+  for (let i = 0; i < 80 && await dennis.isVisible('#fluchSzene') && !(await dennis.evaluate(() => document.getElementById('fluchSzene').classList.contains('steht'))); i++) await dennis.waitForTimeout(200);
+  if (await dennis.isVisible('#fluchSzene')) { await dennis.click('#fluchSzene'); await dennis.waitForTimeout(700); }
   log(`  Einsatz: ${await dennis.$eval('#resultHead .big', e => e.textContent).catch(() => '–')} ${await dennis.$eval('#resultHead .sub', e => e.textContent).catch(() => '')}`);
   await dennis.click('#overlay'); await dennis.waitForTimeout(300);
   const rolle = await admin.$eval('#items li[data-id="spruchrolle"] small', e => e.textContent);
   log(`  Admin zeigt Spruchrolle: ${rolle}`);
   // Showdown: alles bis zum Gipfel, zwei verloren
   // bis einschließlich Rikes Rache (seit 29.09.)
-  for (const v of ['verloren', 'bestanden', 'bestanden', 'verloren', 'bestanden', 'bestanden', 'bestanden']) { await admin.click(v === 'bestanden' ? '#nextWin' : '#nextLose'); await admin.waitForTimeout(150); }
+  for (const v of ['bestanden', 'bestanden', 'verloren', 'bestanden', 'bestanden', 'bestanden']) { await admin.click(v === 'bestanden' ? '#nextWin' : '#nextLose'); await admin.waitForTimeout(150); }   // Speed Flip bis Rikes Rache
   await admin.click('#freigeben'); await admin.waitForTimeout(300);   // Prüfung des Bundes freigeben
   await dennis.waitForTimeout(600); await dennis.evaluate(() => document.querySelector('#overlay').click()); await dennis.waitForTimeout(4500);
   const duelle = await admin.$$eval('.duel-list .d-name', els => els.map(e => e.textContent.replace(/\s+/g, ' ').trim()));

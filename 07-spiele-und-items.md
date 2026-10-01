@@ -52,9 +52,9 @@ Stand 25.09.2026, Namen und Aussichtspunkt geändert am 28.09. Sammelt, was der 
 
 | Nr. | Fähigkeit | Stand |
 |---|---|---|
-| F1 | **Fluch** (hieß bis 28.09. Spruchrolle, ersetzt Token und die einzelnen Flüche) | **Zweischneidig (29.09.):** bringt beim Spiel, vor dem Dennis ihn spricht, einen Vorteil (Tabelle Flüche unten), danach stiehlt der Schattendieb gewürfelt 0 bis 3 Packs. Genau zwei: Sieg bei Die drei Zeichen (4) und beim Kartenwurf (9). Die Prophezeiung ist gestrichen |
+| F1 | **Fluch** (hieß bis 28.09. Spruchrolle, ersetzt Token und die einzelnen Flüche) | **Zweischneidig (29.09.):** bringt beim Spiel, vor dem Dennis ihn spricht, einen Vorteil (Tabelle Flüche unten), danach dreht Buu Huu am Rad (Abschnitt Buu Huus Rad). **Etwa drei am Tag (01.10.)**, erst ab der dritten Aufgabe: Bei Die drei Zeichen (4) schenkt Buu Huu einen, dazu einer je geschlagenem Gegner, dazu je einer beim Sieg im Kartenwurf (9) und bei Hüter der Flamme (3). Die Prophezeiung ist gestrichen |
 | F2 | ~~Schwert~~ | Jetzt Item I6 |
-| F3 | Schild: verlorenes Duell wiederholen | Gut so, als Magie |
+| F3 | ~~Schild~~: verlorenes Duell wiederholen | **Gestrichen** (01.10., Wunsch des Nutzers: weniger verschiedene Abläufe). Er wirkte ohnehin nur am Gipfel, weil alle anderen Duelle vor Hüter der Flamme liegen |
 | F4 | ~~Brosche~~ | **Gestrichen** (25.09.) |
 | F5 | ~~Nakama-Ruf~~ | **Gestrichen** (29.09.): Der Bund sind nur Bene und Fabio, einer von ihnen müsste für Dennis antreten |
 | F6 | **Rikes Segen** (neu 28.09., Herz) | Schenkt am Tor zum Gipfel eine fehlende Ziffer. Einmalig. Aus Rikes Amulett (15) |
@@ -63,12 +63,12 @@ Stand 25.09.2026, Namen und Aussichtspunkt geändert am 28.09. Sammelt, was der 
 ## Regel: Einsetzen pro Quest (25.09.)
 
 - Jede Quest hat eine Liste, was dort einsetzbar ist. Im Menü sieht Dennis bei der nächsten Quest, welche Items und Fähigkeiten er dort nutzen kann. Alles andere ist ausgegraut.
-- **Fluch (seit 29.09.):** Dennis weiß vorher nicht, dass er einen bekommt (die Belohnung heißt nur „Geheimnis“). Beim Fund: „Du hast etwas gefunden … Sei vorsichtig. Flüche haben es in sich.“ Er wählt ihn bei einer Quest und hält das Siegel: Das Fenster zeigt vorher den Vorteil für dieses Spiel und „Jeder Fluch hat seinen Preis“. Danach erscheint der **Schattendieb** (eigene Figur, Geist mit Maske und Beutel), die Zahl rattert und bleibt bei 0 bis 3 stehen, gewichtet 30/35/25/10 % (im Schnitt gut 1 Pack). So viele Packs sind weg, bei 0 heißt es „Glück gehabt“. Gewürfelt wird auf dem Handy, das besiegelt, der Quest Master sieht Vorteil und Raub im Admin und kann den Einsatz zurücknehmen (die Packs kommen zurück).
+- **Fluch (seit 29.09., Rad seit 01.10.):** Dennis weiß vorher nicht, dass er einen bekommt (die Belohnung heißt nur „Geheimnis“). Beim Fund: „Du hast etwas gefunden … Sei vorsichtig. Flüche haben es in sich.“ Er wählt ihn bei einer Quest und hält das Siegel: Das Fenster zeigt vorher den Vorteil für dieses Spiel und Buu Huus Rad, so wie es gerade aussieht. Danach dreht Buu Huu am Rad (Abschnitt Buu Huus Rad). Gedreht wird auf dem Handy, das besiegelt, der Quest Master sieht Vorteil und Raub im Admin und kann den Einsatz zurücknehmen (die Packs kommen zurück).
 
 | Quest | Vorteil, wenn Dennis dort einen Fluch spricht |
 |---|---|
 | Wirbel der Götter | Dennis darf vorher üben (01.10., vorher: Gegner mit der schwachen Hand) |
-| Das Podrennen | Sabotage: Der Bund klebt sich vor seinen Runden einen kleinen Stein aufs Auto, Dennis fährt ohne (01.10.) |
+| Speed Flip (bis 01.10. Das Podrennen) | Sabotage: Der Bund klebt sich vor seinen Runden einen kleinen Stein aufs Auto, Dennis fährt ohne (01.10.) |
 | Rikes Rache | Mehr Zeit auf der Uhr, wie viel, legt der Quest Master fest (01.10., vorher 30 Sekunden) |
 | Kartenwurf | 5 Karten statt 3 |
 | Auge des Jägers | Die Wasserwaffe wird für dieses Spiel eine Stufe stärker, mit der großen Pistole 1 m näher |
@@ -79,7 +79,19 @@ Stand 25.09.2026, Namen und Aussichtspunkt geändert am 28.09. Sammelt, was der 
 
 Bei Rikes Tagebuch und Die drei Zeichen gibt es keinen. Texte in `config.js` (`fluch` je Quest).
 - **Entschieden (25.09.):** Dennis sagt an, der Quest Master bucht das Einsetzen im Admin. Dennis hat keinen Knopf. Überholt am 27.09. (Dennis besiegelt selbst) und am 29.09.:
-- **Ausrüsten beim Spiel (29.09., `08-erlebnis-plan.md` Abschnitt 16):** Items und Flüche nimmt Dennis vor dem Spiel in der Ausrüstung mit: AUSRÜSTEN auf der Quest-Karte, Tippen legt sie auf drei C-Tasten wie in Ocarina of Time, ein Siegel MITNEHMEN für alles. Der Bund gibt ihm dann das echte Ding. Der **Schild** wird nicht mitgenommen, er meldet sich, wenn Dennis ein Duell verliert (Schild einsetzen: noch einmal spielen, oder Verloren eintragen). Rikes Segen meldet sich am Tor. Am Gipfel rüstet sich Dennis für jedes Duell einzeln.
+- **Ausrüsten beim Spiel (29.09., `08-erlebnis-plan.md` Abschnitt 16):** Items und Flüche nimmt Dennis vor dem Spiel in der Ausrüstung mit: AUSRÜSTEN auf der Quest-Karte, Tippen legt sie auf drei C-Tasten wie in Ocarina of Time, ein Siegel MITNEHMEN für alles. Der Bund gibt ihm dann das echte Ding. Rikes Segen meldet sich am Tor (den Schild, der sich bei einer Niederlage meldete, gibt es seit 01.10. nicht mehr). Am Gipfel rüstet sich Dennis für jedes Duell einzeln.
+
+## Buu Huus Rad (entschieden und gebaut am 01.10.)
+
+Wunsch des Nutzers: mehr Hin und Her mit den Packs, aber kein zweiter Mechanismus. Darum nur Flüche, dafür öfter (etwa drei am Tag, nicht bei jedem Spiel) und mit einem Moment am Tag, der richtig weh tut.
+
+- **Wann:** erst ab der dritten Aufgabe, wenn das Spielprinzip klar ist. Darum kommt seit 01.10. der Wirbel vor Die drei Zeichen (beide an der Talstation). Beim Wirbel nimmt Dennis zum ersten Mal etwas mit (Götterkreisel), der Fluch funktioniert dann genauso.
+- **Woher:** Bei Die drei Zeichen spielt Buu Huu mit und schenkt in jedem Fall einen Fluch, dazu einer je geschlagenem Gegner (einer = Sieg, beide = Glanzsieg), dazu je einer beim Sieg im Kartenwurf und bei Hüter der Flamme. Mehr kann der Quest Master mit „Fluch geschenkt“ verteilen.
+- **Das Rad:** Felder 0, 1, 2, 3 so groß, wie sie wahrscheinlich sind (30/35/25/10). **Beim ersten Fluch gibt es kein ALLES** (sonst traut sich Dennis danach nicht mehr). Ab dem zweiten kommt das rote Feld **ALLES** dazu und wächst von Fluch zu Fluch: 30 %, 60 %, dann sicher. Hat ALLES zugeschlagen, fängt es wieder bei 30 % an. ALLES nimmt alle geschlossenen Packs, mindestens 3. Prozente sieht Dennis nicht, aber das Rad selbst: in der Ausrüstung, wenn er den Fluch antippt, und im Siegel-Fenster.
+- **Ohne geschlossene Packs:** Er mischt alle glänzenden und seltenen Karten, die er schon gezogen hat, der Bund zieht blind daraus, eine Karte je fehlendem Pack (höchstens eine je geöffnetem Pack). Hat er gar nichts, geht Buu Huu leer aus.
+- **Die Szene** (`08-erlebnis-plan.md` Abschnitt 19): gut acht Sekunden bis zur Auflösung, zusammen anschauen. Überspringen erst nach der Auflösung.
+- **Rechnung** (`node tests/balance.js`, 01.10., ohne dass der Vorteil die Siegchance hebt): Bei 50 % Siegchance im Schnitt 3 Flüche am Tag, Buu Huu bekommt gut 2 Packs, ALLES trifft an gut jedem dritten Tag etwas, am Ende bleiben im Schnitt 3,4 Packs (ohne Flüche 4,2). Bei 70 % sind es 3,8 Flüche, ALLES an zwei von drei Tagen, am Ende 6 Packs.
+- `config.js`: `dieb: { gewichte, alles: [0, 30, 60, 100], allesMin: 3 }`, `geschenk` bei Die drei Zeichen. `engine.js`: `radFelder()`, `allesStufe()`, `allesChance()`, `diebWurf()` gibt `{ raub, alles, rad }`, ALLES rechnet der Lauf der Packs (`raube` mit `packs` und `karten`).
 
 ## Laufende Quests (25.09.)
 
@@ -99,8 +111,8 @@ Bei Rikes Tagebuch und Die drei Zeichen gibt es keinen. Texte in `config.js` (`f
 
 **Die Regel (28.09.):**
 - **Hauptquests** bringen Packs und eine Ziffer oder ein Item.
-- **Sidequests** und die laufenden Quests bringen eine Fähigkeit.
-- **Jede Niederlage kostet nur Packs.** Einzige Ausnahme seit 29.09.: Spricht Dennis einen Fluch, stiehlt ihm der Schattendieb 0 bis 3 Packs. Das Risiko wählt er selbst.
+- **Sidequests** bringen Flüche, die laufende Quest (Rikes Amulett) Rikes Segen.
+- **Jede Niederlage kostet nur Packs.** Einzige Ausnahme seit 29.09.: Spricht Dennis einen Fluch, dreht Buu Huu am Rad (0 bis 3 Packs, ab dem zweiten Fluch auch ALLES). Das Risiko wählt er selbst.
 - **Ohne alle vier Ziffern kein Finale.** Die Ziffern liegen vor dem Gipfel. Fehlt eine, holt Dennis sie sich am **Tor zum Gipfel**: für 2 Packs, mit Rikes Segen oder per Bußprüfung, die der Quest Master bestimmt. Er besiegelt selbst, der Quest Master kann zurücknehmen oder im Admin selbst buchen.
 - **Items** helfen jeweils bei genau einem späteren Spiel und bleiben. **Fähigkeiten** sind einmalig und wirken bei Duellen und im Showdown.
 - Die Spiele sind bewusst schwer (Grenzen in der Tabelle, jeweils in `config.js` als Notiz für den Quest Master).
@@ -108,19 +120,19 @@ Bei Rikes Tagebuch und Die drei Zeichen gibt es keinen. Texte in `config.js` (`f
 | # | Nr. | Quest | Art | Ort | Sieg | Niederlage | Bestanden, wenn … |
 |---|---|---|---|---|---|---|---|
 | 1 | 1 | Rikes Tagebuch | Hauptquest | Zug | +1, Ziffer 1, Kreisel (I5) | 0 | 5 von 7 Antworten treffen |
-| 2 | 4 | Die drei Zeichen | Sidequest | Wiese | Fluch (F1) | −1 | er zwei Gegner nacheinander schlägt, jeweils Best of 3 |
-| 3 | 14 | Wirbel der Götter | Hauptquest | Wiese | +2, Gepanzerte Karten (I4), Stopfnadel (I9) | −2 | 2 von 3 gegen den besten Blader |
-| 4 | 7 | Das Podrennen | Hauptquest | Wiese | +2, Ziffer 2, Kleine Wasserpistole (I8) | −2 | ein Versuch, schneller als die bessere Runde von Fabio und Bene (01.10.) |
+| 2 | 14 | Wirbel der Götter | Hauptquest | Wiese | +2, Gepanzerte Karten (I4), Stopfnadel (I9) | −2 | 2 von 3 gegen den besten Blader |
+| 3 | 4 | Die drei Zeichen (seit 01.10. nach dem Wirbel) | Sidequest | Wiese | Fluch (F1), **Glanzsieg** (beide geschlagen): noch einer. In jedem Fall schenkt Buu Huu einen | −1 | er einen der beiden schlägt, jeweils Best of 3 |
+| 4 | 7 | Speed Flip (bis 01.10. Das Podrennen) | Hauptquest | Wiese | +2, Ziffer 2, Kleine Wasserpistole (I8) | −2 | ein Versuch, schneller als die bessere Runde von Fabio und Bene (01.10.) |
 | 5 | 9 | Kartenwurf | Sidequest | Wald | Fluch (F1), **Glanzsieg** (2 Karten Vorsprung): dazu Große Wasserpistole (I2) | −2 | mehr Karten im Ziel, Gleichstand zählt als verloren |
 | 6 | 2 | Auge des Jägers | Hauptquest | Wald | +3, Ziffer 3, Stich (I6) | −2 | alle 5 Flammen aus 4 m mit einem Tank |
 | 7 | 12 | Klingen des Deku-Baums | Hauptquest | Wald | +3, Dicke Nadel (I10), Ziffer 4 seit 29.09. bei Rikes Rache | −2 | 2 von 4 Schwertern aus 4 m stecken (Stich: ein Schwert mehr) |
-| 8 | 3 | Hüter der Flamme | Sidequest | Aussicht | Schild (F3) | −2 | das Teelicht 100 Schritte bergauf brennt |
+| 8 | 3 | Hüter der Flamme | Sidequest | Aussicht | Fluch (F1), bis 01.10. der Schild | −2 | das Teelicht 100 Schritte bergauf brennt |
 | 9 | 16 | **Rikes Rache** | Hauptquest | Aussicht | +4, Ziffer 4 | −2 | Faden durchs Nadelöhr auf Zeit, genaues Spiel legt der Quest Master fest (Vorschlag unten), die dickste Nadel zählt |
 | Tor | | fehlende Ziffern | | Gipfel | je Ziffer 2 Packs, Rikes Segen oder Bußprüfung | | |
 | 10 | 5 | Prüfung des Bundes | Hauptquest | Gipfel | +5 | −4 | 2 von 3 Duellen |
 | läuft | 15 | Rikes Amulett | Schritt „Gefunden“ | bis zum Gipfel | Rikes Segen (F6) | 0 | gefunden und zusammengesetzt |
 
-Einsetzbar: Kreisel bei Wirbel, die dickste Nadel bei Rikes Rache, Karten beim Kartenwurf, die stärkste Wasserwaffe beim Auge (Spritze, kleine oder große Pistole), Stich beim Deku-Baum. Fluch überall, wo er einen Vorteil hat (Tabelle oben), Schild bei den Duellen (Die drei Zeichen, Wirbel, Kartenwurf) und im Showdown, Rikes Segen nur am Tor.
+Einsetzbar: Kreisel bei Wirbel, die dickste Nadel bei Rikes Rache, Karten beim Kartenwurf, die stärkste Wasserwaffe beim Auge (Spritze, kleine oder große Pistole), Stich beim Deku-Baum. Fluch überall, wo er einen Vorteil hat (Tabelle oben), Rikes Segen nur am Tor.
 
 **Packs (29.09.):** Über den Tag gibt es 20 Packs (`waehrung.max`, die Leiste oben), der Bund hütet sie. Alle Siege zusammen sind genau 20, seit Rikes Rache steigen sie gleichmäßig mit dem Weg: 1, 2, 2, 3, 3, 4, 5 (Tagebuch, Wirbel, Podrennen, Auge, Deku-Baum, Rikes Rache, Bund). Alle Niederlagen −19. Gewinnt Dennis alles, gehören ihm alle 20, kein Sieg verpufft. Packs zählen in der Reihenfolge, in der gebucht wurde, und bleiben immer zwischen 0 und 20. Über 20 kommt er nur mit einem Bonus des Quest Masters. Nachrechnen mit `node tests/balance.js` (29.09., mit Schattendieb): Gewinnt Dennis jedes Spiel mit 50 %, bleiben ihm im Schnitt 4 Packs, am Tor fehlen ihm im Schnitt 2 Ziffern, in 42 % der Tage braucht er eine Bußprüfung, und 39 % der Tage enden ohne Packs. Mit 70 % sind es im Schnitt gut 8 Packs.
 
@@ -128,13 +140,13 @@ Einsetzbar: Kreisel bei Wirbel, die dickste Nadel bei Rikes Rache, Karten beim K
 
 **Packs unterwegs öffnen (entschieden und gebaut am 29.09.).** Wunsch des Nutzers: Dennis soll unterwegs Packs öffnen dürfen, aber einen Grund haben, ein paar zu behalten. Problem heute: Weil eine Niederlage bei 0 verpufft, schützt sofortiges Öffnen vor allen Verlusten (Rechnung 29.09., 50 % Siegchance: alles sofort öffnen bringt im Schnitt 10 Packs, alles zu lassen 3,9). Gefällt dem Nutzer: geschlossene Packs als Rubine, Öffnen per Siegel. **Keine Zweite Chance** (29.09., zu komplex). Zwei Regeln:
 1. **Die Zahl oben in der App sind seine geschlossenen Packs**, wie Rubine in Zelda. Öffnen darf er jederzeit: Siegel „Pack öffnen“ halten, die Zahl geht eins runter, der Bund gibt ihm das Pack.
-2. **Was etwas kostet, zahlt er mit Rubinen** (Niederlage, Ziffer am Tor). **Hat er keine mehr, zahlt er mit Karten:** pro fehlendem Pack die beste Karte aus seinen geöffneten Packs, der Bund sucht aus. Hat er gar nichts, verpufft die Niederlage, am Tor macht er die Bußprüfung.
+2. **Was etwas kostet, zahlt er mit Rubinen** (Niederlage, Ziffer am Tor). **Hat er keine mehr, zahlt er mit Karten:** pro fehlendem Pack eine Karte, seit 01.10. blind gezogen aus allen glänzenden und seltenen Karten, die er schon hat (vorher die beste, der Bund suchte aus). Hat er gar nichts, verpufft die Niederlage, am Tor macht er die Bußprüfung.
 
 Rechnung (29.09., Siege 1, 2, 2, 3, 3, 4, 5, 50 % Siegchance, Packs und Karten zusammen als Wert): Alles sofort öffnen und alles zu lassen bringen beide im Schnitt 3,8, wie heute. Wer alles sofort öffnet, gibt dabei im Schnitt aber gut 6 seiner besten Karten ab. Das ist der Grund, ein paar Packs zu behalten. Das Kästchen bleibt unberührt. Gebaut: Dennis tippt oben auf seine Packs, PACK ÖFFNEN, Siegel halten, Moment PACK GEÖFFNET. Die Leiste zeigt vorn die geschlossenen, dahinter blass die geöffneten. Zahlt er in Karten, nennt der Moment die Zahl, der Admin zeigt „Karten an den Bund: N“ unter „Packs buchen“ und neben den Packs, wie viele offen sind. Der Quest Master kann das Öffnen auch buchen (Schnellbuchung „Pack geöffnet“). Am Tor zählt, was er zahlen kann (geschlossene Packs plus je geöffnetem Pack eine Karte). Im Abspann: unterwegs geöffnet, Karten an den Bund. `engine.js`: Buchung mit `offen`, Eintrag `o_<id>`, `state.geoeffnet`, `state.karten`, `zahlkraft()`. Test `tests/rubine.mjs`.
 
 **Kästchen (29.09.):** Im Kästchen, das nur der vierstellige Code öffnet, liegen 10 Packs als Überraschung. Die App erwähnt sie nirgends: Der Prolog sagt nur, dass die vier Ziffern am Ende ein verschlossenes Kästchen öffnen und niemand verrät, was darin liegt. Physisch gibt es also 20 Packs für den Tag und 10 im Kästchen.
 
-Sieben Hauptquests = sieben Medaillons (28.09., Rikes Rache seit 29.09.): Rikes Tagebuch (Wasser, blau), Wirbel der Götter (Geister, orange), Das Podrennen (Schatten, violett), Auge des Jägers (Feuer, rot, fünf Flammen), Klingen des Deku-Baums (Wald, grün), Rikes Rache (Nadel mit Herzfaden, Karmin) und Prüfung des Bundes (Triforce, gold). Dennis sieht die Quests in zwei Kammern: oben HAUPTQUESTS, unten SIDEQUESTS samt Prophezeiung und Rikes Amulett. Den Ort unter dem Quest-Titel gibt es nicht mehr, der steht auf der Karte. Items gehen bei Niederlagen nicht verloren. Einziges Startitem ist die Spritze: Beim ersten Besuch der Ausrüstung entpuppt sich der Heilige Beutel des Helden als Wasserspritze, im selben Feld (28.09., vorher Beutel und Spritze als zwei Felder). Einzige Ausnahme von der Regel ist der Glanzsieg im Kartenwurf, der zusätzlich ein Item bringt.
+Sieben Hauptquests = sieben Medaillons (28.09., Rikes Rache seit 29.09.): Rikes Tagebuch (Wasser, blau), Wirbel der Götter (Geister, orange), Das Podrennen (Schatten, violett), Auge des Jägers (Feuer, rot, fünf Flammen), Klingen des Deku-Baums (Wald, grün), Rikes Rache (Nadel mit Herzfaden, Karmin) und Prüfung des Bundes (Triforce, gold). Dennis sieht die Quests in zwei Kammern: oben HAUPTQUESTS, unten SIDEQUESTS samt Prophezeiung und Rikes Amulett. Den Ort unter dem Quest-Titel gibt es nicht mehr, der steht auf der Karte. Items gehen bei Niederlagen nicht verloren. Einziges Startitem ist die Spritze: Beim ersten Besuch der Ausrüstung entpuppt sich der Heilige Beutel des Helden als Wasserspritze, im selben Feld (28.09., vorher Beutel und Spritze als zwei Felder). Einzige Ausnahme von der Regel ist der Glanzsieg im Kartenwurf, der zusätzlich ein Item bringt. Die Reihenfolge an der Talstation ist seit 01.10. Wirbel, Die drei Zeichen, Speed Flip.
 
 **Tarnnamen** (so heißt ein Item in der Vorschau einer Belohnung, bis Dennis es erspielt):
 
@@ -149,7 +161,7 @@ Sieben Hauptquests = sieben Medaillons (28.09., Rikes Rache seit 29.09.): Rikes 
 | I9 | Stopfnadel | Eisendorn |
 | I10 | Dicke Nadel | Uralter Dorn |
 | F1 | Fluch (mehrfach, einmalig) | Versiegeltes Pergament |
-| F3 | Schild des Bundes (einmalig) | Zerbrochenes Wappen |
+| F3 | ~~Schild des Bundes~~ (gestrichen 01.10.) | ~~Zerbrochenes Wappen~~ |
 | F6 | Rikes Segen (einmalig, am Tor) | Versiegelter Brief |
 
 **Showdown:** Revanche möglich bei 2, 4, 7, 9, 12, 14, 16 (Rikes Tagebuch und Hüter der Flamme kommen nicht wieder). Verlorene Spiele in Tagesreihenfolge, höchstens drei, dann mit Wirbel der Götter aufgefüllt. Der Quest Master tippt je Duell Sieg oder Niederlage, die App sagt, wann es reicht (2 von 3).

@@ -62,7 +62,7 @@ pruefe((await fenster(dennis)).includes('PRÜFUNG BESTANDEN'), 'Tagebuch bestand
 await zu(dennis); await warte(800);
 pruefe((await hud(dennis)) === 'Weiter zur TALSTATION', 'HUD: „Weiter zur TALSTATION“, statt: ' + await hud(dennis));
 pruefe((await dennis.textContent('#questCard')).includes('Der Weg führt weiter zur TALSTATION'), 'Quest-Karte im Nebel: Der Weg führt weiter zur TALSTATION');
-pruefe(!(await liste(dennis)).includes('Die drei Zeichen'), 'Die drei Zeichen liegen noch im Nebel');
+pruefe(!(await liste(dennis)).includes('Wirbel der Götter'), 'Wirbel der Götter liegt noch im Nebel');
 await dennis.click('.shoulder-left'); await warte(900); await zu(dennis);
 pruefe((await legende(dennis)).includes('am Samstag') && await dennis.$eval('.mark[data-station="zug"] .you', e => !!e), 'Karte: Dennis steht noch im Zug');
 pruefe(!(await admin.textContent('#verlauf')).includes('Freigegeben: Rikes Tagebuch'), 'Admin-Verlauf: alte Freigabe verschwindet, sobald die Quest entschieden ist');
@@ -78,7 +78,7 @@ await dennis.click('#overlay'); await warte(1300);
 pruefe(await aktiv(dennis) === '0' && await dennis.isVisible('#mapWalker'), 'Nach dem Fenster: Karte, Dennis wandert');
 await dennis.screenshot({ path: `${OUT}/freigabe-6-wandert.png` });
 await warte(3500);
-pruefe(await aktiv(dennis) === '1' && (await hud(dennis)) === 'Die drei Zeichen', 'Angekommen: Quests, Die drei Zeichen sind dran, statt: ' + await hud(dennis));
+pruefe(await aktiv(dennis) === '1' && (await hud(dennis)) === 'Wirbel der Götter', 'Angekommen: Quests, Wirbel der Götter ist dran, statt: ' + await hud(dennis));
 pruefe(await dennis.isVisible('#questCard [data-ergebnis="bestanden"]'), 'Dennis kann eintragen');
 await zu(dennis);
 await dennis.click('.shoulder-left'); await warte(900); await zu(dennis);
@@ -94,24 +94,25 @@ pruefe(await admin.isVisible('#freigeben'), 'Admin: Knopf wieder da');
 await admin.click('#undo'); await warte(900);
 pruefe((await fenster(dennis)).includes('WEITER ZUR TALSTATION'), 'Rückgängig: Freigabe kommt wieder, mit Fenster');
 await dennis.click('#overlay'); await warte(5000);
-pruefe((await hud(dennis)) === 'Die drei Zeichen', 'Danach wieder dran');
+pruefe((await hud(dennis)) === 'Wirbel der Götter', 'Danach wieder dran');
 
 // Dennis besiegelt selbst, der Quest Master gibt sofort frei: erst das Ergebnis, dann die Freigabe (gleiche Station, kein Wandern)
 await dennis.tap('#questCard [data-ergebnis="bestanden"]'); await warte(400); await halten(dennis);
-pruefe((await fenster(dennis)).includes('SIDEQUEST BESTANDEN'), 'Die drei Zeichen bestanden');
+pruefe((await fenster(dennis)).includes('PRÜFUNG BESTANDEN'), 'Wirbel der Götter bestanden');
 await admin.click('#freigeben'); await warte(900);
-pruefe((await fenster(dennis)).includes('SIDEQUEST BESTANDEN'), 'Die Freigabe verdrängt das Ergebnis-Fenster nicht');
+pruefe((await fenster(dennis)).includes('PRÜFUNG BESTANDEN'), 'Die Freigabe verdrängt das Ergebnis-Fenster nicht');
 await dennis.click('#overlay'); await warte(600);
 const weiter = await fenster(dennis);
 pruefe(weiter.includes('ES GEHT WEITER'), 'Danach die Freigabe: „ES GEHT WEITER“ (gleiche Station): ' + weiter.slice(0, 60));
 await dennis.click('#overlay'); await warte(1500);
-pruefe(await aktiv(dennis) === '1' && (await hud(dennis)) === 'Wirbel der Götter', 'Ohne Wandern: Wirbel der Götter ist dran');
+pruefe(await aktiv(dennis) === '1' && (await hud(dennis)) === 'Die drei Zeichen', 'Ohne Wandern: Die drei Zeichen sind dran');
 
 // Verpasst: Dennis lädt neu, der Admin bucht und gibt frei, während der Startbildschirm offen ist
 await dennis.goto(BASE); await warte(600);
 await admin.click('#nextLose'); await warte(300); await admin.click('#freigeben'); await warte(300);
 await dennis.click('#introScreen'); await warte(1500);
-pruefe((await fenster(dennis)).includes('PRÜFUNG VERLOREN'), 'Nach PRESS START: erst der verpasste Moment');
+const verpasst = await fenster(dennis);
+pruefe(verpasst.includes('SIDEQUEST VERLOREN') && verpasst.includes('Buu Huu spielt mit und schenkt dir einen Fluch'), 'Nach PRESS START: erst der verpasste Moment (verloren, Buu Huus Geschenk bleibt)');
 await dennis.click('#overlay'); await warte(600);
 pruefe((await fenster(dennis)).includes('ES GEHT WEITER'), 'Dann die Freigabe');
 await zu(dennis); await warte(1500);
@@ -119,7 +120,7 @@ pruefe((await hud(dennis)) === 'Speed Flip', 'Danach: Speed Flip ist dran');
 
 // Ende: nach der letzten Quest kein Knopf mehr
 await admin.click('#reset'); await warte(500);
-const alle = ['logbuch', 'klingen', 'wirbel', 'podrennen', 'kartenwurf', 'auge', 'deku', 'feuerprobe', 'rache', 'bund'];
+const alle = ['logbuch', 'wirbel', 'klingen', 'podrennen', 'kartenwurf', 'auge', 'deku', 'feuerprobe', 'rache', 'bund'];
 for (const id of alle) { await admin.click(`#quests li[data-id="${id}"] .seg button[data-v="bestanden"]`); await warte(120); }
 await warte(1200);
 pruefe(!(await admin.isVisible('#freigeben')) && (await admin.textContent('#nextTitle')).includes('erledigt'), 'Alles erledigt: kein Knopf zum Freigeben');

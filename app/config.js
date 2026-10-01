@@ -32,17 +32,21 @@
        stapel:   kann mehrfach besessen werden (Anzahl wird gezählt)
        einmalig: ist nach dem Einsetzen verbraucht
        tor:      wird am Tor zum Gipfel eingesetzt statt bei einer Quest (Rikes Segen), meldet sich dort selbst
-       rettung:  wird nicht vorher mitgenommen, sondern meldet sich selbst, wenn Dennis ein Duell verliert (Schild, 29.09.)
+       rettung:  wird nicht vorher mitgenommen, sondern meldet sich selbst, wenn Dennis ein Duell verliert (war der Schild,
+                 gestrichen am 01.10., die Logik bleibt)
        ersetzt:  Items, die dieses ablöst (Stufen wie Zoras Schuppe): Wer es hat, setzt die schwächeren nicht mehr ein
        feld:     Stufen teilen sich ein Feld in der Ausrüstung (29.09., Wunsch des Nutzers). Es zeigt die stärkste, die Dennis hat,
                  sonst den Schatten der ersten, die er noch bekommen kann. Reihenfolge der Stufen = Reihenfolge hier
-       einsatz:  was im Siegel-Fenster steht, wenn Dennis es einsetzt (Schild, Segen am Tor)
+       einsatz:  was im Siegel-Fenster steht, wenn Dennis es einsetzt (Segen am Tor)
        fund:     Startitem: Satz, wenn es sich beim ersten Besuch der Ausrüstung entpuppt
        tarnSymbol: Sprite, solange es getarnt ist (sonst der Schatten von symbol)
        geheim:   Dennis soll nicht wissen, dass er es bekommt: Die Vorschau einer Belohnung zeigt nur „Geheimnis“
        gefunden: Sätze im Moment, in dem er es bekommt (titel über dem Namen, warnung darunter)
-       dieb:     Kehrseite beim Einsetzen (Fluch, 29.09.): Der Schattendieb stiehlt Packs. gewichte[n] = Gewicht für n Packs,
-                 gewürfelt auf dem Handy, das den Einsatz besiegelt
+       dieb:     Kehrseite beim Einsetzen (Fluch, 29.09.): Buu Huu dreht am Rad und stiehlt Packs (01.10.). gewichte[n] = Gewicht
+                 für n Packs. alles[k] = Chance in % auf ALLES beim k-ten Fluch seit dem letzten ALLES, k = 0 ist der allererste
+                 Fluch (nie ALLES, Dennis soll erst mutig werden), ab dem letzten Wert bleibt es dabei. ALLES nimmt alle
+                 geschlossenen Packs, mindestens allesMin (fehlt etwas, zahlt Dennis in Karten). Gedreht wird auf dem Handy,
+                 das den Einsatz besiegelt
        symbol:   Sprite aus index.html
        tarn:     So heißt das Item, solange Dennis es nicht erspielt hat (Ausrüstung und Vorschau einer Belohnung).
                  Beim Gewinnen „entpuppt" es sich. Bis dahin zeigt die Ausrüstung seinen Schatten: Die Form ist zu erkennen.
@@ -83,16 +87,14 @@
         tarn: { name: "Uralter Dorn", kurz: "Dorn", text: "Hart wie altes Holz. Durch ein Loch fällt Licht." } },
       // Hieß bis 28.09. Spruchrolle (id bleibt, damit gespeicherte Stände passen).
       // Seit 29.09. zweischneidig: Vor einem Spiel gesprochen bringt er dort einen Vorteil (fluch bei der Quest),
-      // danach stiehlt der Schattendieb 0 bis 3 Packs (gewichtet 30/35/25/10). Zwei gibt es: Die drei Zeichen und Kartenwurf.
+      // danach dreht Buu Huu am Rad: 0 bis 3 Packs (gewichtet 30/35/25/10), ab dem zweiten Fluch auch ALLES (01.10.).
+      // Seit 01.10. etwa drei am Tag, erst ab der dritten Aufgabe: Bei Die drei Zeichen schenkt Buu Huu einen, dazu einer je
+      // geschlagenem Gegner, einer beim Sieg im Kartenwurf und einer bei Hüter der Flamme.
       { id: "spruchrolle", nr: "F1", gruppe: "faehigkeit", stapel: true, einmalig: true, geheim: true, name: "Fluch", kurz: "Fluch", farbe: "#c9a4ff", symbol: "i-fluch",
         text: "Ein Vorteil bei einem Spiel. Doch jeder Fluch hat seinen Preis.",
         gefunden: { titel: "Du hast etwas gefunden …", warnung: "Vorsicht, Flüche haben es in sich." },
-        dieb: { name: "Buu Huu", gewichte: [30, 35, 25, 10] },   // hieß bis 30.09. Schattendieb
+        dieb: { name: "Buu Huu", gewichte: [30, 35, 25, 10], alles: [0, 30, 60, 100], allesMin: 3 },   // hieß bis 30.09. Schattendieb
         tarn: { name: "Versiegeltes Pergament", kurz: "Pergament", text: "Niemand weiß, was darauf steht." } },
-      { id: "schild", nr: "F3", gruppe: "faehigkeit", einmalig: true, rettung: true, name: "Schild des Bundes", kurz: "Schild", farbe: "#7aa7ff", symbol: "i-shield",
-        text: "Verlierst du ein Duell, spielst du es noch einmal.",
-        einsatz: "Noch einmal spielen statt verlieren. Danach ist er weg.",
-        tarn: { name: "Zerbrochenes Wappen", kurz: "Wappen", text: "Bruchstück eines alten Bundes. Wer es heilt, den schützt es." } },
       { id: "segen", nr: "F6", gruppe: "faehigkeit", einmalig: true, tor: true, name: "Rikes Segen", kurz: "Segen", farbe: "#f08cbc", symbol: "i-segen",
         text: "Rike wacht über dich. Am Tor schenkt sie dir eine fehlende Ziffer.",
         einsatz: "Rikes Segen schenkt dir eine fehlende Ziffer.",
@@ -152,8 +154,10 @@
        win / lose: packs (Zahl), items (Liste), ziffer (1 bis 4, nur bei win)
        glanz:      Glanzsieg (28.09.): ein besonders deutlicher Sieg bringt zusätzlich zu win noch das hier.
                    bedingung steht bei Dennis auf der Quest-Karte. Er trägt ihn selbst ein, der Quest Master kann ihn zurücknehmen.
+       geschenk:   bekommt Dennis in jedem Fall, sobald die Quest entschieden ist, ob Sieg oder Niederlage (01.10.: Buu Huu
+                   schenkt bei Die drei Zeichen einen Fluch). text steht im Ergebnis-Fenster, mehr, wenn er dort mehrere bekommt
        einsetzbar: Items und Fähigkeiten, die hier helfen. Items und Flüche nimmt Dennis vor dem Spiel in der Ausrüstung mit
-                   (C-Tasten, ein Siegel, 29.09.), der Schild meldet sich bei einer Niederlage. Der Quest Master kann zurücknehmen.
+                   (C-Tasten, ein Siegel, 29.09.). Der Quest Master kann zurücknehmen.
        ergebnisWort: Wort auf dem Knopf, mit dem Dennis den Sieg besiegelt (sonst „Bestanden")
        duell:      ein Spiel gegen einen aus dem Bund
        revanche:   kann im Showdown als Revanche wiederkommen, wenn Dennis es verloren hat
@@ -172,14 +176,6 @@
         lose: { packs: 0 },
         einsetzbar: [], logbuch: true },
 
-      // Hieß bis 28.09. „Kreuzung der Klingen“ und war eine Prüfung (id bleibt, damit gespeicherte Stände passen)
-      { id: "klingen", nr: 4, typ: "side", name: "Die drei Zeichen", ort: "Wiese an der Talstation", station: "wiese",
-        text: "Schnick Schnack Schnuck gegen beide aus dem Bund. Je Best of 3.",
-        qm: "Bestanden, wenn Dennis zwei Gegner nacheinander schlägt, jeweils Best of 3. Er wählt die Gegner selbst.",
-        win:  { items: ["spruchrolle"] },
-        lose: { packs: -1 },
-        einsetzbar: ["schild"], duell: true, revanche: true },
-
       { id: "wirbel", nr: 14, typ: "kern", name: "Wirbel der Götter", ort: "Wiese an der Talstation", station: "wiese",
         farbe: "#ec8f2e", emblem: "z-spirit",
         text: "Zwei Kreisel, eine Arena. Wer sich länger dreht, gewinnt.",
@@ -187,7 +183,19 @@
         win:  { packs: 2, items: ["karten_gepanzert", "nadel_stopf"] },
         lose: { packs: -2 },
         fluch: "Du darfst vorher üben.",
-        einsetzbar: ["kreisel", "spruchrolle", "schild"], duell: true, revanche: true },
+        einsetzbar: ["kreisel", "spruchrolle"], duell: true, revanche: true },
+
+      // Hieß bis 28.09. „Kreuzung der Klingen“ und war eine Prüfung (id bleibt, damit gespeicherte Stände passen).
+      // Seit 01.10. die dritte Aufgabe (nach dem Wirbel), hier beginnen die Flüche: Buu Huu spielt mit und schenkt Dennis
+      // in jedem Fall einen, dazu einen je geschlagenem Gegner (einer = Sieg, beide = Glanzsieg).
+      { id: "klingen", nr: 4, typ: "side", name: "Die drei Zeichen", ort: "Wiese an der Talstation", station: "wiese",
+        text: "Schnick Schnack Schnuck gegen beide aus dem Bund. Je Best of 3.",
+        qm: "Dennis spielt gegen beide, je Best of 3, er wählt die Reihenfolge. Einen geschlagen: bestanden. Beide: Glanzsieg. Keinen: verloren. Buu Huu schenkt ihm in jedem Fall einen Fluch, dazu einen je geschlagenem Gegner (bis zu drei). Der erste Fluch des Tages kann noch kein ALLES.",
+        win:  { items: ["spruchrolle"] },
+        glanz: { bedingung: "beide geschlagen", items: ["spruchrolle"] },
+        geschenk: { items: ["spruchrolle"], text: "Buu Huu spielt mit und schenkt dir einen Fluch. Hehehe …", mehr: "Einen davon schenkt dir Buu Huu. Hehehe …" },
+        lose: { packs: -1 },
+        einsetzbar: [], duell: true, revanche: true },
 
       { id: "podrennen", nr: 7, typ: "kern", name: "Speed Flip", ort: "Wiese an der Talstation", station: "wiese",
         farbe: "#a468e6", emblem: "z-shadow",
@@ -205,7 +213,7 @@
         glanz: { bedingung: "2 Karten Vorsprung", items: ["pistole_gross"] },   // einzige Sidequest mit Item, nur als Glanzsieg
         lose: { packs: -2 },
         fluch: "5 Karten statt 3.",
-        einsetzbar: ["karten_gepanzert", "spruchrolle", "schild"], duell: true, revanche: true },
+        einsetzbar: ["karten_gepanzert", "spruchrolle"], duell: true, revanche: true },
 
       { id: "auge", nr: 2, typ: "kern", name: "Auge des Jägers", ort: "Entdeckerpfad", station: "wald",
         farbe: "#e2472f", emblem: "e-flame",
@@ -225,11 +233,11 @@
         fluch: "Ein Schwert mehr.",
         einsetzbar: ["stich", "spruchrolle"], revanche: true },
 
-      // Ersetzt am 28.09. die Feuerprobe („Der Ruf“) und ist eine Sidequest, id bleibt
+      // Ersetzt am 28.09. die Feuerprobe („Der Ruf“) und ist eine Sidequest, id bleibt. Gibt seit 01.10. einen Fluch statt des Schilds
       { id: "feuerprobe", nr: 3, typ: "side", name: "Hüter der Flamme", ort: "Mittelstation", station: "aussicht",
         text: "Ein Teelicht, 100 Schritte bergauf. Es darf nicht ausgehen.",
         qm: "Offenes Teelicht ohne Glas, 100 Schritte bergauf. Erlischt es, verloren. Der Bund lenkt ab, pustet nicht, berührt nicht. Feuerzeug und Ersatzlicht mitnehmen.",
-        win:  { items: ["schild"] },
+        win:  { items: ["spruchrolle"] },
         lose: { packs: -2 },
         fluch: "Halbe Strecke: 50 statt 100 Schritte.",
         einsetzbar: ["spruchrolle"] },
@@ -250,7 +258,7 @@
         qm: "Erst das Tor: Fehlt eine Ziffer, holt Dennis sie für 2 Packs, mit Rikes Segen oder per Bußprüfung, die du bestimmst. Dann 3 Duelle, bestanden bei 2 Siegen: erst verlorene Spiele vom Tag, aufgefüllt mit Wirbel der Götter. Die App zeigt sie unten.",
         win:  { packs: 5 },
         lose: { packs: -4 },
-        einsetzbar: ["spruchrolle", "schild"], tor: true,
+        einsetzbar: ["spruchrolle"], tor: true,
         showdown: { duelle: 3, auffuellen: "wirbel" } },
 
       /* Laufende Quests: sichtbar, sobald der Quest Master sie startet */

@@ -2,7 +2,7 @@
 const assert = require("assert");
 const config = require("./config.js");
 const { derive: derive0, emptyDoc, normalize, mitEintraegen, showdownDuelle, einsetzbar, abgeloest, jetztEinsetzbar, fluchVorteil, diebWurf,
-  dabei, mitnehmbar, rettung, aktuellesDuell } = require("./engine.js");
+  radFelder, allesStufe, allesChance, dabei, mitnehmbar, rettung, aktuellesDuell } = require("./engine.js");
 
 const reihe = config.quests.filter(q => q.typ !== "lauf");
 // Freigabe (30.09.): Für die Tests gilt jede Quest als freigegeben, außer wo die Freigabe selbst geprüft wird (derive0)
@@ -18,7 +18,7 @@ config.quests.forEach(q => {
   if (q.typ !== "lauf") assert.ok(stationen.includes(q.station), q.id + ": Station fehlt");
   if (q.typ !== "side") assert.ok(q.farbe && q.emblem, q.id + ": Medaillon braucht Farbe und Emblem");
   (q.einsetzbar || []).forEach(id => assert.ok(itemIds.includes(id), q.id + ": unbekanntes Item " + id));
-  [q.win, q.lose, q.glanz].filter(Boolean).forEach(e => (e.items || []).forEach(id => assert.ok(itemIds.includes(id), q.id + ": unbekanntes Item " + id)));
+  [q.win, q.lose, q.glanz, q.geschenk].filter(Boolean).forEach(e => (e.items || []).forEach(id => assert.ok(itemIds.includes(id), q.id + ": unbekanntes Item " + id)));
 });
 config.items.forEach(it => assert.ok(it.name && it.kurz && it.symbol && it.text && it.tarn && it.tarn.name, it.id + ": Texte und Tarnung"));
 config.items.forEach(it => (it.ersetzt || []).forEach(id => assert.ok(itemIds.includes(id) && id !== it.id, it.id + ": ersetzt unbekanntes Item " + id)));
@@ -31,7 +31,8 @@ assert.deepStrictEqual(config.items.filter(i => i.feld === "wasser").map(i => i.
 assert.deepStrictEqual(config.items.filter(i => i.feld === "nadel").map(i => i.id), ["nadel_stopf", "nadel_dick"]);
 config.quests.filter(q => q.glanz).forEach(q => assert.ok(q.win && q.glanz.bedingung && q.typ !== "lauf" && !q.showdown, q.id + ": Glanzsieg braucht Sieg und Bedingung"));
 assert.deepStrictEqual(config.quests.map(q => q.nr).sort((a, b) => a - b), [1, 2, 3, 4, 5, 7, 9, 12, 14, 15, 16]);
-assert.deepStrictEqual(config.items.map(i => i.nr), ["I7", "I8", "I2", "I4", "I5", "I6", "I9", "I10", "F1", "F3", "F6"]);
+assert.deepStrictEqual(config.items.map(i => i.nr), ["I7", "I8", "I2", "I4", "I5", "I6", "I9", "I10", "F1", "F6"]);
+assert.ok(!itemIds.includes("schild"), "Der Schild ist gestrichen (01.10.)");
 assert.strictEqual(reihe.filter(q => q.typ === "kern").length, 7, "sieben Medaillons (Rikes Rache seit 29.09.)");
 // Rikes Rache (29.09.): Hauptquest am Aussichtspunkt nach Hüter der Flamme, trägt Ziffer 4, die dickste Nadel zählt
 const rache = config.quests.find(q => q.id === "rache");
@@ -59,8 +60,12 @@ config.quests.forEach(q => {
   if (q.typ === "kern") assert.ok(gibt.every(g => g === "item"), q.id + ": Hauptquest gibt nur Items");
   else assert.ok(gibt.every(g => g === "faehigkeit") && !(q.win && q.win.packs), q.id + ": Sidequest gibt nur Fähigkeiten");
 });
-// Flüche (29.09.): genau zwei Stellen, und überall, wo einer gesprochen werden kann, bringt er einen Vorteil
-assert.deepStrictEqual(config.quests.filter(q => (q.win && q.win.items || []).includes("spruchrolle")).map(q => q.id), ["klingen", "kartenwurf"]);
+// Flüche (01.10.): Sieg bei Die drei Zeichen, im Kartenwurf und bei Hüter der Flamme, dazu Buu Huus Geschenk und der Glanzsieg bei
+// Die drei Zeichen. Erst ab der dritten Aufgabe, und überall, wo einer gesprochen werden kann, bringt er einen Vorteil
+assert.deepStrictEqual(config.quests.filter(q => (q.win && q.win.items || []).includes("spruchrolle")).map(q => q.id), ["klingen", "kartenwurf", "feuerprobe"]);
+const bringtFluch = q => [q.win, q.glanz, q.geschenk].some(e => e && (e.items || []).includes("spruchrolle"));
+assert.strictEqual(reihe.findIndex(bringtFluch), 2, "der erste Fluch kommt mit der dritten Aufgabe");
+assert.deepStrictEqual(reihe.slice(0, 3).map(q => q.id), ["logbuch", "wirbel", "klingen"]);
 config.quests.filter(q => (q.einsetzbar || []).includes("spruchrolle")).forEach(q => assert.ok(q.fluch || q.showdown, q.id + ": Fluch ohne Vorteil"));
 assert.ok(!itemIds.includes("nakama"), "Nakama-Ruf ist gestrichen");
 // Alle vier Ziffern liegen vor der Quest mit dem Tor
@@ -88,15 +93,15 @@ assert.strictEqual(s.kommt, "logbuch");
 assert.deepStrictEqual(s.laufend, []);
 assert.strictEqual(s.zaehler.gesamt, 10);
 // Eine Freigabe gilt nur für die Quest, die gerade kommt
-s = derive0(config, { frei: { klingen: 1 } });
+s = derive0(config, { frei: { wirbel: 1 } });
 assert.strictEqual(s.next, null);
 s = derive0(config, { quests: { logbuch: "bestanden" }, frei: { logbuch: 1 } });
 assert.strictEqual(s.next, null);
-assert.strictEqual(s.kommt, "klingen");
-s = derive0(config, { quests: { logbuch: "bestanden" }, frei: { logbuch: 1, klingen: 2 } });
-assert.strictEqual(s.next, "klingen");
+assert.strictEqual(s.kommt, "wirbel");
+s = derive0(config, { quests: { logbuch: "bestanden" }, frei: { logbuch: 1, wirbel: 2 } });
+assert.strictEqual(s.next, "wirbel");
 // Zurückgenommen (wieder offen) bleibt freigegeben: Dennis trägt neu ein
-s = derive0(config, { quests: {}, frei: { logbuch: 1, klingen: 2 } });
+s = derive0(config, { quests: {}, frei: { logbuch: 1, wirbel: 2 } });
 assert.strictEqual(s.next, "logbuch");
 
 // Packs einer Quest laut Konfiguration, und Packs Schritt für Schritt zwischen 0 und max
@@ -108,14 +113,15 @@ s = derive(config, {
   quests: { logbuch: "bestanden", klingen: "bestanden", wirbel: "verloren", podrennen: "bestanden", kartenwurf: "verloren" },
   buchungen: [{ id: "b1", packs: -1, grund: "Strafe" }]
 });
-assert.strictEqual(s.packs, stufen([P("logbuch", "win"), P("klingen", "win"), P("wirbel", "lose"), P("podrennen", "win"), P("kartenwurf", "lose"), -1]));
+assert.strictEqual(s.packs, stufen([P("logbuch", "win"), P("wirbel", "lose"), P("klingen", "win"), P("podrennen", "win"), P("kartenwurf", "lose"), -1]));
 assert.deepStrictEqual(s.ziffern, [7, 4, null, null]);
 assert.strictEqual(s.items.kreisel, "besitz");
 assert.strictEqual(s.items.karten_gepanzert, "nicht");   // Wirbel verloren
 assert.strictEqual(s.items.pistole_klein, "besitz");   // Podrennen gewonnen
 assert.strictEqual(s.items.pistole_gross, "nicht");    // nur mit Glanzsieg im Kartenwurf
 assert.strictEqual(s.next, "auge");
-assert.deepStrictEqual(s.erhalten, ["spritze", "kreisel", "spruchrolle", "pistole_klein"]);   // Die drei Zeichen bringen einen Fluch
+assert.deepStrictEqual(s.erhalten, ["spritze", "kreisel", "spruchrolle", "pistole_klein"]);   // Die drei Zeichen bringen Flüche
+assert.strictEqual(s.anzahl.spruchrolle, 2);                                                    // Sieg und Buu Huus Geschenk
 assert.deepStrictEqual(s.zaehler, { bestanden: 3, verloren: 2, erledigt: 5, gesamt: 10 });
 
 // 3. Ziffer kaufen über Buchung, Deckel unten bei 0
@@ -144,7 +150,7 @@ assert.strictEqual(s.items.kreisel, "nicht");
 assert.strictEqual(s.packs, 0);
 
 // 7. Firebase-Formen: Listen als Objekt, Duelle als Liste mit Lücke
-s = derive(config, { buchungen: { a: { packs: 2, grund: "x" } }, einsaetze: { a: { id: "a", item: "schild", quest: "bund" } }, duelle: [null, "sieg"] });
+s = derive(config, { buchungen: { a: { packs: 2, grund: "x" } }, einsaetze: { a: { id: "a", item: "kreisel", quest: "bund" } }, duelle: [null, "sieg"] });
 assert.strictEqual(s.packs, 2);
 assert.deepStrictEqual(s.duelle, { "1": "sieg" });
 assert.deepStrictEqual(normalize({ duelle: [null, "sieg", "niederlage"] }).duelle, { "1": "sieg", "2": "niederlage" });
@@ -152,19 +158,17 @@ assert.deepStrictEqual(normalize({ duelle: [null, "sieg", "niederlage"] }).duell
 // 8. Laufende Quest verlangt einen eigenen Status, "laeuft" gilt in der Reihe nicht
 assert.strictEqual(derive(config, { quests: { klingen: "laeuft" } }).quests.klingen, "offen");
 
-// 9. Einsetzen: Spruchrolle zählt runter, Schild ist danach verbraucht, Kreisel bleibt
+// 9. Einsetzen: Fluch zählt runter, Kreisel bleibt
 s = derive(config, {
   quests: { logbuch: "bestanden", klingen: "bestanden", wirbel: "bestanden", podrennen: "bestanden",
             kartenwurf: "bestanden", auge: "bestanden", deku: "bestanden", feuerprobe: "bestanden" },
   buchungen: [{ id: "g", packs: 0, grund: "x", item: "spruchrolle", menge: 1 }],
-  einsaetze: [{ id: "e1", item: "spruchrolle", quest: "klingen" }, { id: "e2", item: "kreisel", quest: "wirbel" },
-              { id: "e3", item: "schild", quest: "bund" }]
+  einsaetze: [{ id: "e1", item: "spruchrolle", quest: "podrennen" }, { id: "e2", item: "kreisel", quest: "wirbel" }]
 });
-assert.strictEqual(s.anzahl.spruchrolle, 2);                 // einer geschenkt, Die drei Zeichen und Kartenwurf, einer eingesetzt
+assert.strictEqual(s.anzahl.spruchrolle, 4);   // vom Quest Master, Die drei Zeichen (Sieg und Geschenk), Kartenwurf, Hüter der Flamme, einer eingesetzt
 assert.strictEqual(s.items.spruchrolle, "besitz");
 assert.strictEqual(s.items.kreisel, "besitz");
-assert.strictEqual(s.items.schild, "verbraucht");
-assert.deepStrictEqual(s.eingesetzt, { klingen: ["spruchrolle"], wirbel: ["kreisel"], bund: ["schild"] });
+assert.deepStrictEqual(s.eingesetzt, { podrennen: ["spruchrolle"], wirbel: ["kreisel"] });
 // Letzte Rolle eingesetzt: verbraucht, nicht „nie gehabt"
 s = derive(config, { buchungen: [{ id: "g", packs: 0, grund: "x", item: "spruchrolle", menge: 1 }], einsaetze: [{ id: "e1", item: "spruchrolle", quest: "logbuch" }] });
 assert.strictEqual(s.anzahl.spruchrolle, 0);
@@ -182,7 +186,7 @@ assert.deepStrictEqual([...jetztEinsetzbar(config, s)], ["pistole_klein", "spruc
 assert.strictEqual(abgeloest(config, s, "spritze"), "pistole_klein");
 assert.strictEqual(abgeloest(config, s, "pistole_klein"), null);
 s = derive(config, { quests: { amulett: "laeuft", logbuch: "bestanden" }, buchungen: [{ id: "g", packs: 0, grund: "x", item: "spruchrolle", menge: 1 }] });
-assert.deepStrictEqual([...jetztEinsetzbar(config, s)], ["spruchrolle"]);       // Amulett läuft, dort hilft die Rolle
+assert.deepStrictEqual([...jetztEinsetzbar(config, s)], ["kreisel", "spruchrolle"]);   // der Kreisel im Wirbel, und das Amulett läuft, dort hilft der Fluch
 
 // 11. Showdown: erst Revanchen in Spielreihenfolge, dann Wirbel der Götter; Rikes Tagebuch und Hüter der Flamme kommen nicht wieder
 s = derive(config, { quests: { logbuch: "verloren", klingen: "bestanden", wirbel: "bestanden", podrennen: "verloren",
@@ -192,16 +196,16 @@ assert.deepStrictEqual(showdownDuelle(config, s).map(d => [d.quest, d.art, d.erg
 s = derive(config, {});
 assert.deepStrictEqual(showdownDuelle(config, s).map(d => d.quest), ["wirbel", "wirbel", "wirbel"]);
 s = derive(config, { quests: { klingen: "verloren", wirbel: "verloren", podrennen: "verloren", kartenwurf: "verloren" } });
-assert.deepStrictEqual(showdownDuelle(config, s).map(d => d.quest), ["klingen", "wirbel", "podrennen"]);
+assert.deepStrictEqual(showdownDuelle(config, s).map(d => d.quest), ["wirbel", "klingen", "podrennen"]);
 // Im Showdown hilft auch, was beim Spiel des aktuellen Duells hilft (29.09.: ausgerüstet wird je Duell)
 s = derive(config, { quests: { auge: "verloren" } });
-assert.deepStrictEqual(einsetzbar(config, s, "bund"), ["spritze", "pistole_klein", "pistole_gross", "spruchrolle", "schild"]);
+assert.deepStrictEqual(einsetzbar(config, s, "bund"), ["spritze", "pistole_klein", "pistole_gross", "spruchrolle"]);
 s = derive(config, { quests: { auge: "verloren" }, duelle: { "1": "sieg" } });
 assert.strictEqual(aktuellesDuell(config, s).quest, "wirbel");
-assert.deepStrictEqual(einsetzbar(config, s, "bund"), ["kreisel", "spruchrolle", "schild"]);
+assert.deepStrictEqual(einsetzbar(config, s, "bund"), ["kreisel", "spruchrolle"]);
 
-// 11b. Ausrüsten beim Spiel (29.09.): mitnehmen, was hilft und Dennis hat, nur einmal je Spiel. Der Schild meldet sich
-// selbst bei einer Niederlage im Duell, Rikes Segen am Tor, darum nimmt Dennis sie nicht mit.
+// 11b. Ausrüsten beim Spiel (29.09.): mitnehmen, was hilft und Dennis hat, nur einmal je Spiel. Rikes Segen meldet sich
+// am Tor, darum nimmt Dennis ihn nicht mit.
 const bisAuge = { logbuch: "bestanden", klingen: "bestanden", wirbel: "bestanden", podrennen: "bestanden", kartenwurf: "bestanden" };
 s = derive(config, { quests: bisAuge });
 assert.deepStrictEqual(mitnehmbar(config, s, "auge"), ["pistole_klein", "spruchrolle"]);
@@ -211,14 +215,10 @@ assert.deepStrictEqual(dabei(config, s, "auge"), ["pistole_klein"]);
 assert.deepStrictEqual(mitnehmbar(config, s, "auge"), ["spruchrolle"]);            // die Pistole ist schon dabei
 assert.strictEqual(s.items.pistole_klein, "besitz");                                  // und bleibt im Beutel
 s = derive(config, { quests: bisAuge, einsaetze: [{ id: "e1", item: "spruchrolle", quest: "auge", raub: 0 }], buchungen: [{ id: "g", packs: 0, grund: "x", item: "spruchrolle", menge: 1 }] });
-assert.strictEqual(s.anzahl.spruchrolle, 2);
+assert.strictEqual(s.anzahl.spruchrolle, 3);
 assert.deepStrictEqual(mitnehmbar(config, s, "auge"), ["pistole_klein"]);           // ein Fluch je Spiel, auch wenn noch einer da ist
-// Schild: nie mitnehmbar, aber Rettung bei Duellen, wenn Dennis ihn hat
-s = derive(config, { quests: { auge: "verloren" }, items: { schild: "besitz" } });
-assert.ok(!mitnehmbar(config, s, "bund").includes("schild"));
-assert.strictEqual(rettung(config, s, "bund"), "schild");
-assert.strictEqual(rettung(config, s, "auge"), null);                                 // Auge des Jägers ist kein Duell
-assert.strictEqual(rettung(config, derive(config, { quests: { auge: "verloren" } }), "bund"), null);   // ohne Schild keine Rettung
+// Der Schild ist gestrichen (01.10.): nichts meldet sich mehr bei einer Niederlage
+assert.strictEqual(rettung(config, derive(config, { quests: { auge: "verloren" } }), "bund"), null);
 // Showdown: dabei gilt je Duell. Duell 1 ausgerüstet, nach dem Sieg ist für Duell 2 wieder alles frei
 const showdownDoc = { quests: { ...bisAuge, auge: "verloren", deku: "bestanden", feuerprobe: "bestanden", rache: "bestanden" },
   einsaetze: [{ id: "e1", item: "pistole_klein", quest: "bund", duell: 1 }], buchungen: [{ id: "z3", packs: 0, grund: "x", ziffer: 3, weg: "busse" }],
@@ -232,6 +232,12 @@ assert.ok(!mitnehmbar(config, s, "bund").includes("pistole_klein"));
 s = derive(config, { ...showdownDoc, duelle: { "1": "sieg" } });
 assert.deepStrictEqual(dabei(config, s, "bund"), []);
 assert.deepStrictEqual(mitnehmbar(config, s, "bund"), ["kreisel", "spruchrolle"]);   // Duell 2 ist Wirbel der Götter
+// Revanche von Die drei Zeichen im Showdown: dort bringt ein Fluch nichts, also nimmt Dennis ihn auch nicht mit (01.10.)
+s = derive(config, { quests: { ...bisAuge, klingen: "verloren", auge: "bestanden", deku: "bestanden", feuerprobe: "bestanden", rache: "bestanden" }, items: { spruchrolle: "besitz" } });
+assert.strictEqual(aktuellesDuell(config, s).quest, "klingen");
+assert.deepStrictEqual(einsetzbar(config, s, "bund"), []);
+s = derive(config, { ...{ quests: { ...bisAuge, klingen: "verloren", auge: "bestanden", deku: "bestanden", feuerprobe: "bestanden", rache: "bestanden" }, items: { spruchrolle: "besitz" } }, duelle: { "1": "sieg" } });
+assert.deepStrictEqual(einsetzbar(config, s, "bund"), ["kreisel", "spruchrolle"]);   // Duell 2 ist der Wirbel, dort hilft er
 // Am Tor gibt es nichts mitzunehmen
 s = derive(config, { quests: { ...bisAuge, auge: "verloren", deku: "bestanden", feuerprobe: "bestanden", rache: "bestanden" } });
 assert.ok(s.tor);
@@ -248,9 +254,9 @@ assert.strictEqual(derive(config, { quests: { amulett: "bestanden" } }).packs, P
 assert.strictEqual(derive(config, { quests: { amulett: "bestanden" } }).items.segen, "besitz");
 
 // 13. Keine Schulden: Wer bei 0 verliert, verliert nichts. Der nächste Sieg zählt voll.
-s = derive(config, { quests: { logbuch: "verloren", klingen: "verloren", wirbel: "bestanden" } });
-assert.strictEqual(s.packs, P("wirbel", "win"));
-assert.strictEqual(s.kappung.unten, -P("klingen", "lose"));
+s = derive(config, { quests: { logbuch: "verloren", wirbel: "verloren", klingen: "bestanden", podrennen: "bestanden" } });
+assert.strictEqual(s.packs, P("podrennen", "win"));
+assert.strictEqual(s.kappung.unten, -P("wirbel", "lose"));
 assert.strictEqual(s.kappung.oben, 0);
 
 // 14. Deckel: Was über max geht, verfällt (mit den Quests allein nie, nur mit einem Bonus). Eine Strafe danach zählt sofort.
@@ -281,11 +287,11 @@ assert.ok(W.projizieren(48.1402, 11.5586).abstand > 40000, "München ist weit we
 
 // 17. Dennis trägt selbst ein (Kanal „dennis"): Ergebnis, Einsatz, Duell, Amulett, Ziffer. Was der Admin entschieden hat, gilt vor.
 const mit = (doc, ein) => derive(config, mitEintraegen(config, { frei: FREI, ...doc }, ein));
-s = mit({}, { q_logbuch: { status: "bestanden", zeit: 10 }, q_klingen: { status: "verloren", zeit: 20 } });
+s = mit({}, { q_logbuch: { status: "bestanden", zeit: 10 }, q_wirbel: { status: "verloren", zeit: 20 } });
 assert.strictEqual(s.quests.logbuch, "bestanden");
-assert.strictEqual(s.quests.klingen, "verloren");
-assert.strictEqual(s.next, "wirbel");
-assert.strictEqual(s.packs, stufen([P("logbuch", "win"), P("klingen", "lose")]));
+assert.strictEqual(s.quests.wirbel, "verloren");
+assert.strictEqual(s.next, "klingen");
+assert.strictEqual(s.packs, stufen([P("logbuch", "win"), P("wirbel", "lose")]));
 // Der Admin hat schon anders entschieden: seine Buchung zählt
 assert.strictEqual(mit({ quests: { logbuch: "verloren" } }, { q_logbuch: { status: "bestanden", zeit: 10 } }).quests.logbuch, "verloren");
 // Unsinn wird ignoriert
@@ -351,7 +357,7 @@ assert.strictEqual(s.items.pistole_gross, "besitz");
 assert.strictEqual(s.items.pistole_klein, "nicht");
 // Glanz zählt nur bei bestanden und nur bei Quests mit glanz
 assert.strictEqual(derive(config, { quests: { ...bisKarten, kartenwurf: "verloren" }, glanz: { kartenwurf: true } }).items.pistole_gross, "nicht");
-assert.deepStrictEqual(derive(config, { quests: bisKarten, glanz: { klingen: true } }).glanz, {});
+assert.deepStrictEqual(derive(config, { quests: bisKarten, glanz: { wirbel: true } }).glanz, {});
 assert.deepStrictEqual(normalize({}).glanz, {});
 // Dennis trägt den Glanzsieg selbst ein. Der Admin hat Vorrang: sein „bestanden" ohne Glanz gilt.
 s = mit({ quests: { logbuch: "bestanden", klingen: "bestanden", wirbel: "bestanden", podrennen: "bestanden" } }, { q_kartenwurf: { status: "bestanden", glanz: true, zeit: 5 } });
@@ -361,20 +367,32 @@ assert.strictEqual(mit({ quests: bisKarten }, { q_kartenwurf: { status: "bestand
 assert.strictEqual(mit({}, { q_logbuch: { status: "bestanden", glanz: true, zeit: 5 } }).glanz.logbuch, undefined);   // Log-Buch kennt keinen Glanz
 assert.strictEqual(mit({}, { q_kartenwurf: { status: "verloren", glanz: true, zeit: 5 } }).glanz.kartenwurf, undefined);
 
-// 20. Fluch mit Kehrseite (29.09.): Vorteil je Spiel, danach stiehlt der Schattendieb 0 bis 3 Packs
+// 20. Fluch mit Kehrseite (29.09.): Vorteil je Spiel, danach dreht Buu Huu am Rad: 0 bis 3 Packs, ab dem zweiten Fluch auch ALLES
 const fluch = config.items.find(i => i.id === "spruchrolle");
 assert.deepStrictEqual(fluch.dieb.gewichte, [30, 35, 25, 10]);
-// Würfel: gewichtet, die Ränder stimmen
-assert.strictEqual(diebWurf(config, () => 0), 0);
-assert.strictEqual(diebWurf(config, () => 0.2999), 0);
-assert.strictEqual(diebWurf(config, () => 0.30), 1);
-assert.strictEqual(diebWurf(config, () => 0.6499), 1);
-assert.strictEqual(diebWurf(config, () => 0.65), 2);
-assert.strictEqual(diebWurf(config, () => 0.90), 3);
-assert.strictEqual(diebWurf(config, () => 0.99999), 3);
+assert.deepStrictEqual(fluch.dieb.alles, [0, 30, 60, 100]);
+// Rad ohne ALLES: Felder so groß wie die Gewichte, die Ränder stimmen
+assert.deepStrictEqual(radFelder(config, 0).map(f => [f.wert, +f.bis.toFixed(4)]), [[0, .3], [1, .65], [2, .9], [3, 1]]);
+assert.strictEqual(diebWurf(config, () => 0).raub, 0);
+assert.strictEqual(diebWurf(config, () => 0.2999).raub, 0);
+assert.strictEqual(diebWurf(config, () => 0.30).raub, 1);
+assert.strictEqual(diebWurf(config, () => 0.6499).raub, 1);
+assert.strictEqual(diebWurf(config, () => 0.65).raub, 2);
+assert.strictEqual(diebWurf(config, () => 0.90).raub, 3);
+assert.deepStrictEqual(diebWurf(config, () => 0.99999), { raub: 3, alles: false, rad: 0.99999 });
 const zaehl = [0, 0, 0, 0];
-for (let i = 0; i < 20000; i++) zaehl[diebWurf(config)]++;
-[30, 35, 25, 10].forEach((g, n) => assert.ok(Math.abs(zaehl[n] / 200 - g) < 2, `Würfel ${n}: ${zaehl[n] / 200} % statt ${g} %`));
+for (let i = 0; i < 20000; i++) zaehl[diebWurf(config).raub]++;
+[30, 35, 25, 10].forEach((g, n) => assert.ok(Math.abs(zaehl[n] / 200 - g) < 2, `Rad ${n}: ${zaehl[n] / 200} % statt ${g} %`));
+// Rad mit ALLES (30 %): die anderen Felder schrumpfen, ALLES liegt zwischen 3 und 0
+const felder30 = radFelder(config, 30);
+assert.deepStrictEqual(felder30.map(f => f.alles ? "ALLES" : f.wert), [0, 1, 2, 3, "ALLES"]);
+assert.ok(Math.abs(felder30[4].von - .7) < 1e-9 && felder30[4].bis === 1);
+assert.deepStrictEqual(diebWurf(config, () => 0.6999, 30), { raub: 3, alles: false, rad: 0.6999 });
+assert.deepStrictEqual(diebWurf(config, () => 0.70, 30), { raub: 0, alles: true, rad: 0.70 });
+assert.deepStrictEqual(radFelder(config, 100).map(f => f.alles), [true]);         // beim vierten Fluch ohne ALLES ist das ganze Rad rot
+let allesZahl = 0;
+for (let i = 0; i < 20000; i++) if (diebWurf(config, Math.random, 30).alles) allesZahl++;
+assert.ok(Math.abs(allesZahl / 200 - 30) < 2, `ALLES ${allesZahl / 200} % statt 30 %`);
 // Vorteil je Spiel
 s = derive(config, {});
 assert.strictEqual(fluchVorteil(config, s, "podrennen").text, "Sabotage! Der Bund fährt mit einem Stein auf dem Dach.");
@@ -391,13 +409,13 @@ s = derive(config, { quests: { podrennen: "verloren" }, duelle: { "1": "sieg" } 
 assert.deepStrictEqual(fluchVorteil(config, s, "bund"), { quest: "wirbel", text: "Du darfst vorher üben.", duell: 2 });
 // Raub: kostet Packs zum Zeitpunkt des Einsatzes, der Fluch ist danach verbraucht
 const dreiZ = { logbuch: "bestanden", klingen: "bestanden", wirbel: "bestanden", podrennen: "bestanden" };
-const vorRaub = derive(config, { quests: dreiZ, zeiten: { logbuch: 1, klingen: 2, wirbel: 3, podrennen: 4 } });
-assert.strictEqual(vorRaub.anzahl.spruchrolle, 1);
-s = derive(config, { quests: dreiZ, zeiten: { logbuch: 1, klingen: 2, wirbel: 3, podrennen: 4 },
+const vorRaub = derive(config, { quests: dreiZ, zeiten: { logbuch: 1, wirbel: 2, klingen: 3, podrennen: 4 } });
+assert.strictEqual(vorRaub.anzahl.spruchrolle, 2);
+s = derive(config, { quests: dreiZ, zeiten: { logbuch: 1, wirbel: 2, klingen: 3, podrennen: 4 },
                      einsaetze: [{ id: "f1", item: "spruchrolle", quest: "podrennen", zeit: 5, raub: 2, fuer: "podrennen" }] });
 assert.strictEqual(s.packs, vorRaub.packs - 2);
-assert.strictEqual(s.items.spruchrolle, "verbraucht");
-assert.deepStrictEqual(s.raube, [{ id: "f1", quest: "podrennen", raub: 2 }]);
+assert.strictEqual(s.anzahl.spruchrolle, 1);
+assert.deepStrictEqual(s.raube, [{ id: "f1", quest: "podrennen", raub: 2, zeit: 5, packs: 2, karten: 0 }]);
 // Mehr als er hat, kann der Dieb nicht stehlen (Packs bleiben bei 0), Unsinn wird auf 0 bis 3 begrenzt
 s = derive(config, { quests: { logbuch: "verloren", klingen: "bestanden" }, einsaetze: [{ id: "f", item: "spruchrolle", quest: "wirbel", zeit: 9, raub: 3 }] });
 assert.strictEqual(s.packs, 0);
@@ -409,13 +427,18 @@ assert.strictEqual(derive(config, { quests: { logbuch: "bestanden" }, einsaetze:
 // Andere Items haben keinen Dieb
 assert.deepStrictEqual(derive(config, { quests: dreiZ, einsaetze: [{ id: "k", item: "kreisel", quest: "wirbel", raub: 2 }] }).raube, []);
 // Dennis spricht den Fluch selbst: raub und fuer kommen mit, zurückgenommen ist auch der Raub weg
-s = mit({ quests: dreiZ, zeiten: { logbuch: 1, klingen: 2, wirbel: 3, podrennen: 4 } }, { e_x: { item: "spruchrolle", quest: "podrennen", raub: 1, fuer: "podrennen", zeit: 5 } });
+s = mit({ quests: dreiZ, zeiten: { logbuch: 1, wirbel: 2, klingen: 3, podrennen: 4 } }, { e_x: { item: "spruchrolle", quest: "podrennen", raub: 1, fuer: "podrennen", zeit: 5 } });
 assert.strictEqual(s.packs, vorRaub.packs - 1);
-assert.deepStrictEqual(s.raube, [{ id: "e_x", quest: "podrennen", raub: 1 }]);
+assert.deepStrictEqual(s.raube, [{ id: "e_x", quest: "podrennen", raub: 1, zeit: 5, packs: 1, karten: 0 }]);
 const mitDoc = mitEintraegen(config, { quests: dreiZ }, { e_x: { item: "spruchrolle", quest: "bund", raub: 2, fuer: "gibtsnicht", zeit: 5 } });
 assert.strictEqual(mitDoc.einsaetze[0].raub, 2);
 assert.strictEqual(mitDoc.einsaetze[0].fuer, undefined);
 assert.strictEqual(mitEintraegen(config, {}, { e_k: { item: "kreisel", quest: "wirbel", raub: 2, zeit: 5 } }).einsaetze[0].raub, undefined);
+// ALLES, Stelle und Chance des Rads kommen mit, Unsinn nicht
+const mitAlles = mitEintraegen(config, {}, { e_a: { item: "spruchrolle", quest: "auge", alles: true, raub: 2, rad: .81, quote: 30, zeit: 5 },
+  e_b: { item: "spruchrolle", quest: "auge", alles: "ja", rad: 7, quote: -1, zeit: 6 } }).einsaetze;
+assert.deepStrictEqual([mitAlles[0].alles, mitAlles[0].raub, mitAlles[0].rad, mitAlles[0].quote], [true, 0, .81, 30]);
+assert.deepStrictEqual([mitAlles[1].alles, mitAlles[1].rad, mitAlles[1].quote], [undefined, undefined, undefined]);
 assert.strictEqual(mit({ quests: dreiZ }, {}).packs, derive(config, { quests: dreiZ }).packs);
 
 // 21. Packs unterwegs öffnen (29.09.): Die Zahl sind die geschlossenen Packs (Rubine). Reicht es nicht, zahlt Dennis in Karten,
@@ -455,5 +478,52 @@ assert.deepStrictEqual([s.packs, s.geoeffnet, s.karten, s.zifferWeg[1]], [0, 5, 
 s = mit({ quests: zuWiese, zeiten: zeitWiese, buchungen: [{ id: "g", packs: 0, grund: "x", item: "spruchrolle", menge: 1, zeit: 3.5 }] },
   { o_a: { zeit: 4 }, o_b: { zeit: 5 }, o_c: { zeit: 6 }, e_f: { item: "spruchrolle", quest: "podrennen", raub: 2, zeit: 7 } });
 assert.deepStrictEqual([s.packs, s.geoeffnet, s.karten], [0, 3, 2]);
+assert.deepStrictEqual([s.raube[0].packs, s.raube[0].karten], [0, 2]);
+
+// 22. Die drei Zeichen (01.10.): Buu Huu schenkt in jedem Fall einen Fluch, dazu einer je geschlagenem Gegner
+// (einer = bestanden, beide = Glanzsieg). Verloren kostet ein Pack, das Geschenk bleibt.
+const zeichen = (st, glanz) => derive(config, { quests: { logbuch: "bestanden", wirbel: "bestanden", klingen: st }, zeiten: { logbuch: 1, wirbel: 2, klingen: 3 }, glanz: glanz ? { klingen: true } : {} });
+assert.strictEqual(zeichen("offen").anzahl.spruchrolle, 0);
+assert.strictEqual(zeichen("verloren").anzahl.spruchrolle, 1);
+assert.strictEqual(zeichen("verloren").packs, P("logbuch", "win") + P("wirbel", "win") + P("klingen", "lose"));
+assert.strictEqual(zeichen("bestanden").anzahl.spruchrolle, 2);
+assert.strictEqual(zeichen("bestanden", true).anzahl.spruchrolle, 3);
+assert.strictEqual(zeichen("bestanden", true).glanz.klingen, true);
+assert.strictEqual(zeichen("bestanden", true).packs, zeichen("bestanden").packs);
+
+// 23. Buu Huus Rad (01.10.): Der erste Fluch kann kein ALLES, danach 30, 60, 100 %, bis ALLES kommt, dann wieder 30.
+// ALLES nimmt alle geschlossenen Packs, mindestens 3, den Rest in Karten. Zurückgenommen ist alles wieder da.
+const radDoc = { quests: { logbuch: "bestanden", wirbel: "bestanden", klingen: "bestanden" }, zeiten: { logbuch: 1, wirbel: 2, klingen: 3 },
+  buchungen: [{ id: "g", packs: 0, grund: "x", item: "spruchrolle", menge: 3, zeit: 3.5 }] };   // 3 Packs, 5 Flüche
+const fl = (id, zeit, x) => ({ id, item: "spruchrolle", quest: "podrennen", zeit, ...x });
+s = derive(config, radDoc);
+assert.deepStrictEqual([s.packs, allesStufe(config, s), allesChance(config, s)], [3, 0, 0]);
+s = derive(config, { ...radDoc, einsaetze: [fl("f1", 4, { raub: 0 })] });
+assert.deepStrictEqual([allesStufe(config, s), allesChance(config, s)], [1, 30]);
+s = derive(config, { ...radDoc, einsaetze: [fl("f1", 4, { raub: 0 }), fl("f2", 5, { raub: 1 })] });
+assert.deepStrictEqual([s.packs, allesStufe(config, s), allesChance(config, s)], [2, 2, 60]);
+s = derive(config, { ...radDoc, einsaetze: [fl("f1", 4, { raub: 0 }), fl("f2", 5, { raub: 0 }), fl("f3", 6, { raub: 0 })] });
+assert.deepStrictEqual([allesStufe(config, s), allesChance(config, s)], [3, 100]);
+s = derive(config, { ...radDoc, einsaetze: [fl("f1", 4, { raub: 0 }), fl("f2", 5, { raub: 0 }), fl("f3", 6, { raub: 0 }), fl("f4", 7, { raub: 0 }), fl("f5", 8, { raub: 0 })] });
+assert.strictEqual(allesChance(config, s), 100);                                       // bleibt beim letzten Wert
+// ALLES mit 5 Packs: alle 5
+const fuenf = { ...radDoc, buchungen: [...radDoc.buchungen, { id: "b", packs: 2, grund: "Bonus", zeit: 3.6 }] };
+s = derive(config, { ...fuenf, einsaetze: [fl("f1", 4, { raub: 0 }), fl("f2", 5, { alles: true })] });
+assert.deepStrictEqual([s.packs, s.karten, s.kappung.unten], [0, 0, 0]);
+assert.deepStrictEqual(s.raube.map(r => [r.id, r.raub, !!r.alles, r.packs, r.karten]), [["f1", 0, false, 0, 0], ["f2", 5, true, 5, 0]]);
+assert.deepStrictEqual([allesStufe(config, s), allesChance(config, s)], [1, 30]);    // nach ALLES wieder schmal
+// ALLES mit 1 Pack und 2 geöffneten: mindestens 3, also 1 Pack und 2 Karten
+s = derive(config, mitEintraegen(config, { ...radDoc, einsaetze: [fl("f1", 4, { raub: 0 })] }, { o_a: { zeit: 4.1 }, o_b: { zeit: 4.2 }, e_x: { item: "spruchrolle", quest: "podrennen", alles: true, zeit: 5 } }));
+assert.deepStrictEqual([s.packs, s.geoeffnet, s.karten, s.kappung.unten], [0, 2, 2, 0]);
+assert.deepStrictEqual(["raub", "packs", "karten"].map(k => s.raube.find(r => r.id === "e_x")[k]), [3, 1, 2]);
+// ALLES ohne alles: nichts zu holen, verpufft
+const leer = { quests: { logbuch: "verloren", wirbel: "verloren", klingen: "verloren" } };
+s = derive(config, { ...leer, einsaetze: [fl("f1", 4, { alles: true })] });
+assert.deepStrictEqual([s.packs, s.karten, s.kappung.unten - derive(config, leer).kappung.unten, s.raube[0].raub], [0, 0, 3, 3]);
+// Eine spätere Buchung ändert den Raub nicht, eine frühere schon (ALLES rechnet zum Zeitpunkt des Fluchs)
+s = derive(config, { ...radDoc, einsaetze: [fl("f1", 4, { alles: true })], buchungen: [...radDoc.buchungen, { id: "s", packs: 4, grund: "Bonus", zeit: 9 }] });
+assert.deepStrictEqual([s.packs, s.raube[0].raub], [4, 3]);
+s = derive(config, { ...radDoc, einsaetze: [fl("f1", 4, { alles: true })], buchungen: [...radDoc.buchungen, { id: "s", packs: 4, grund: "Bonus", zeit: 3.8 }] });
+assert.deepStrictEqual([s.packs, s.raube[0].raub], [0, 7]);
 
 console.log("Alle Tests bestanden.");

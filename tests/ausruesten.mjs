@@ -1,6 +1,6 @@
 // Ausrüsten beim Spiel (29.09., 08-erlebnis-plan.md Abschnitt 16): AUSRÜSTEN auf der Quest-Karte, in der Ausrüstung Items und
-// Fluch auf die C-Tasten legen, ein Siegel MITNEHMEN, Moment AUSGERÜSTET, zurück zu QUESTS mit DABEI. Der Schild meldet sich
-// bei einer Niederlage im Duell selbst, am Gipfel rüstet Dennis sich je Duell. Dazu: Fenster sind immer gleich groß.
+// Fluch auf die C-Tasten legen, ein Siegel MITNEHMEN, Moment AUSGERÜSTET, zurück zu QUESTS mit DABEI. Am Gipfel rüstet Dennis
+// sich je Duell (der Schild ist seit 01.10. gestrichen). Dazu: Fenster sind immer gleich groß.
 // Aufruf: cd app && python3 -m http.server 8765 &   dann   node tests/ausruesten.mjs /tmp/shots
 import { chromium } from 'playwright';
 import fs from 'fs';
@@ -15,7 +15,8 @@ const b = await chromium.launch();
 const ctx = await b.newContext({ viewport: { width: 844, height: 340 }, isMobile: true, hasTouch: true });   // iPhone 13 in Safari, das kleinste
 const text = async (p, sel) => ((await p.textContent(sel).catch(() => '')) || '').replace(/\s+/g, ' ').trim();
 const fenster = async p => (await p.isVisible('#overlay')) ? text(p, '#overlay') : '';
-const zu = async p => { for (let i = 0; i < 3; i++) { if (await p.isVisible('#fluchSzene')) await p.click('#fluchSzene'); while (await p.isVisible('#overlay')) { await p.click('#overlay'); await warte(300); } while (await p.isVisible('#coach')) { await p.click('#coach'); await warte(150); } await warte(400); } };
+const szeneUeberspringen = async p => { for (let i = 0; i < 80 && await p.isVisible('#fluchSzene') && !(await p.evaluate(() => document.getElementById('fluchSzene').classList.contains('steht'))); i++) await warte(200); if (await p.isVisible('#fluchSzene')) { await p.click('#fluchSzene'); await warte(500); } };
+const zu = async p => { for (let i = 0; i < 3; i++) { await szeneUeberspringen(p); while (await p.isVisible('#overlay')) { await p.click('#overlay'); await warte(300); } while (await p.isVisible('#coach')) { await p.click('#coach'); await warte(150); } await warte(400); } };
 const seite = async () => (await p.evaluate(() => document.querySelector('.face.active')?.dataset.page));
 const hoehe = async (p, sel) => p.$eval(sel, e => e.offsetHeight);
 async function halten(p, ms = 1100) {
@@ -66,15 +67,15 @@ await p.screenshot({ path: `${OUT}/ausruesten-2-c-tasten.png` });
 await p.tap('[data-mitnehmen]'); await warte(400);
 const siegel = await text(p, '#schwur');
 const hoeheSiegel = await hoehe(p, '.sw-panel');
-pruefe(siegel.includes('AUSRÜSTEN FÜR') && siegel.includes('Kleine Pistole') && siegel.includes('Fluch') && siegel.includes('Stufe stärker') && siegel.includes('seinen Preis'), 'Siegel: DABEI, Vorteil des Fluchs, Warnung');
+pruefe(siegel.includes('AUSRÜSTEN FÜR') && siegel.includes('Kleine Pistole') && siegel.includes('FLUCH') && siegel.includes('Stufe stärker') && siegel.includes('PREIS') && siegel.includes('Buu Huu dreht am Rad'), 'Siegel: DABEI, Vorteil des Fluchs, Buu Huus Rad');
 await p.screenshot({ path: `${OUT}/ausruesten-3-siegel.png` });
 await p.click('#swZurueck'); await warte(300);
 pruefe(await p.$$eval('.c-taste:not(.leer)', xs => xs.length) === 2, 'ZURÜCK: beides liegt noch auf den C-Tasten');
 await p.tap('[data-mitnehmen]'); await warte(400);
-await p.evaluate(() => { Math.random = () => 0; });   // der Schattendieb würfelt 0
+await p.evaluate(() => { Math.random = () => 0; });   // Buu Huus Rad bleibt auf 0 stehen
 await halten(p);
-pruefe(await p.isVisible('#fluchSzene'), 'Mit Fluch: erst die Szene mit dem Schattendieb');
-await p.click('#fluchSzene'); await warte(600);
+pruefe(await p.isVisible('#fluchSzene'), 'Mit Fluch: erst die Szene mit Buu Huus Rad');
+await szeneUeberspringen(p);
 const ausgeruestet = await fenster(p);
 pruefe(ausgeruestet.includes('AUSGERÜSTET') && ausgeruestet.includes('Kleine Wasserpistole') && ausgeruestet.includes('Stufe stärker') && ausgeruestet.includes('leer abgezogen'), 'Moment AUSGERÜSTET: Pistole, Vorteil, der Dieb zieht leer ab');
 pruefe(await hoehe(p, '#overlay .result') === hoeheMoment, `Moment gleich groß wie der Sieg davor (${hoeheMoment} px)`);
@@ -105,28 +106,17 @@ await t.evaluate(() => document.querySelector('.shoulder-right').click()); await
 pruefe(!(await t.isVisible('#ruestFuer')) && !(await t.isVisible('#cTasten')), 'Ausrüstung ohne Plakette und C-Tasten, wenn nichts hilft');
 await t.close();
 
-// 3. Gipfel: je Duell ausrüsten, der Schild meldet sich bei der Niederlage
+// 3. Gipfel: je Duell ausrüsten. Der Schild ist gestrichen: eine Niederlage im Duell bietet keine Wahl mehr
 const g = await ctx.newPage();
 g.on('pageerror', e => fehler.push('gipfel: ' + e.message));
 await g.goto(BASE + '?demo=bund&direkt'); await warte(900); await zu(g);
 await g.tap('#questCard [data-tor="3"][data-weg="busse"]'); await warte(400); await halten(g); await zu(g); await warte(600);
 const namen = await g.$$eval('.duell .d-name', xs => xs.map(x => x.textContent.replace(/\s+/g, ' ').trim()));
 pruefe(namen[0].startsWith('Die drei Zeichen') && namen[1].startsWith('Auge des Jägers'), 'Duelle: Revanchen Die drei Zeichen und Auge des Jägers');
-pruefe(!(await g.$('#questCard [data-ausruesten]')), 'Duell 1 (Die drei Zeichen): nichts mitzunehmen');
+pruefe(!(await g.$('#questCard [data-ausruesten]')), 'Duell 1 (Die drei Zeichen): nichts mitzunehmen, auch kein Fluch (er bringt dort keinen Vorteil)');
 await g.tap('[data-duell="1"][data-v="niederlage"]'); await warte(400);
-pruefe((await text(g, '#swWahl')).includes('Schild einsetzen') && (await text(g, '#swKopf')).includes('NOCHMAL SPIELEN'), 'Niederlage im Duell: Der Schild meldet sich, vorgewählt');
-await g.screenshot({ path: `${OUT}/ausruesten-6-schild.png` });
-const hoeheSchild = await hoehe(g, '.sw-panel');
-await g.tap('#swWahl [data-w="verloren"]'); await warte(200);
-pruefe((await text(g, '#swKopf')).includes('NIEDERLAGE') && await hoehe(g, '.sw-panel') === hoeheSchild, 'Umschalten auf „Verloren eintragen“: NIEDERLAGE, das Fenster bleibt gleich groß');
-await g.tap('#swWahl [data-w="schild"]'); await warte(200);
-await halten(g);
-const schild = await fenster(g);
-pruefe(schild.includes('SCHILD DES BUNDES') && schild.includes('Noch einmal'), 'Moment: Schild des Bundes, noch einmal spielen');
-await zu(g); await warte(600);
-pruefe(await g.isVisible('.duell.jetzt [data-duell="1"]'), 'Duell 1 ist wieder offen');
-await g.tap('[data-duell="1"][data-v="niederlage"]'); await warte(400);
-pruefe(!(await text(g, '#swWahl')), 'Der Schild ist verbraucht: keine Wahl mehr');
+pruefe(!(await text(g, '#swWahl')) && (await text(g, '#swKopf')).includes('NIEDERLAGE'), 'Niederlage im Duell: keine Wahl mehr, nur NIEDERLAGE');
+await g.screenshot({ path: `${OUT}/ausruesten-6-niederlage.png` });
 await g.click('#swZurueck'); await warte(200);
 await g.tap('[data-duell="1"][data-v="sieg"]'); await warte(400); await halten(g); await zu(g); await warte(600);
 pruefe(await g.isVisible('#questCard [data-ausruesten="bund"]'), 'Duell 2 (Auge des Jägers): AUSRÜSTEN');
@@ -139,7 +129,7 @@ await zu(g); await warte(800);
 await g.tap('[data-duell="2"][data-v="sieg"]'); await warte(400); await halten(g); await zu(g); await warte(600);
 await g.evaluate(() => document.querySelector('.shoulder-right').click()); await warte(1300);
 pruefe((await text(g, '#ruestFuer')) === 'FÜR DUELL 3 · WIRBEL DER GÖTTER' && await g.$$eval('.c-taste.fest', xs => xs.length) === 0, 'Duell 3: neue Plakette, die C-Tasten sind wieder frei');
-pruefe(JSON.stringify(await g.$$eval('.slot.usable', xs => xs.map(x => x.dataset.id))) === '["kreisel"]', 'Duell 3 (Wirbel): der Kreisel leuchtet');
+pruefe(JSON.stringify(await g.$$eval('.slot.usable', xs => xs.map(x => x.dataset.id))) === '["kreisel","spruchrolle"]', 'Duell 3 (Wirbel): Kreisel und Fluch leuchten');
 await g.screenshot({ path: `${OUT}/ausruesten-7-duell3.png` });
 await g.close();
 
