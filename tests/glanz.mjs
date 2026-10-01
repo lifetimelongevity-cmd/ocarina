@@ -1,4 +1,4 @@
-// Wasserwaffen in drei Stufen und Glanzsieg (28.09.): Spritze kommt beim ersten Öffnen des Beutels heraus,
+// Wasserwaffen in drei Stufen und Glanzsieg (28.09.): Die Spritze bringt seit 01.10. die Fee am Samstagmorgen (vorher Startitem),
 // die kleine Pistole bringt das Podrennen, die große der Glanzsieg im Kartenwurf. Im Auge des Jägers leuchtet nur die stärkste.
 // Dennis trägt den Glanzsieg selbst ein, der Quest Master sieht ihn, nimmt ihn zurück (es bleibt ein Sieg) und bucht ihn selbst.
 // Aufruf: cd app && python3 -m http.server 8765 &   dann   node tests/glanz.mjs /tmp/shots
@@ -21,29 +21,36 @@ async function halten(p, ms = 1100) {
 const slot = (p, id) => p.$eval(`.slot[data-id="${id}"]`, e => e.classList.contains('schatten') ? 'schatten' : e.classList.contains('usable') ? 'leuchtet' : [...e.classList].find(c => c.startsWith('st-')));
 const zurAusruestung = async p => { await p.evaluate(() => document.querySelector('.shoulder-right').click()); await warte(900); };   // Quests → Ausrüstung
 
-// 1. Tagesanfang: Beutel öffnen, die Spritze kommt heraus
+// 1. Freitag (seit 01.10.): Der Beutel ist leer, vier Felder voller Schatten. Die Spritze bringt die Fee am Samstagmorgen.
 {
   const ctx = await b.newContext({ viewport: { width: 844, height: 390 }, isMobile: true, hasTouch: true });
   const p = await ctx.newPage(); p.on('pageerror', e => fehler.push('start: ' + e.message));
   await p.goto(BASE + '?demo=start&direkt'); await warte(700);
   await zu(p);
   await zurAusruestung(p);
-  const fund = await fenster(p);
-  pruefe(fund.includes('ERSTES ITEM GEFUNDEN') && fund.includes('Dein Beutel entpuppt sich als Wasserspritze'), 'Ausrüstung: Der Beutel entpuppt sich als Wasserspritze');
-  pruefe(!fund.includes('Heiliger Beutel') && !fund.includes('Stärkere landen'), 'Erster Fund (30.09.): nur Titel und ein Satz');
-  pruefe(await slot(p, 'spritze') === 'schatten' && await p.$eval('.slot[data-id="spritze"] .ic use', u => u.getAttribute('href')) === '#i-beutel', 'Vorher: im Feld der Schatten des Beutels');
-  pruefe((await p.$$('#slotsGear .slot')).length === 5 && !(await p.$('.slot[data-id="beutel"]')), 'Ein Feld je Stufen-Reihe (29.09.): fünf Felder, keins für den Beutel');
-  await p.screenshot({ path: `${OUT}/glanz-1-beutel-wird-spritze.png` });
-  await p.click('#overlay'); await warte(1800);
+  pruefe(!(await p.isVisible('#overlay')), 'Ausrüstung am Freitag: kein Fundfenster, es gibt noch nichts');
+  pruefe((await p.textContent('#coach')).includes('Noch ist dein Beutel leer'), 'Die Fee: Noch ist dein Beutel leer, morgen früh bringt sie etwas');
+  pruefe(await slot(p, 'spritze') === 'schatten' && await p.$eval('.slot[data-id="spritze"] .ic use', u => u.getAttribute('href')) === '#i-spritze', 'Feld der Wasserwaffen: Schatten der Spritze (kein Beutel mehr)');
+  pruefe((await p.$$('#slotsGear .slot')).length === 4 && !(await p.$('.slot[data-id="beutel"]')), 'Vier Felder (01.10.): Wasser, Karten, Klinge, Nadel');
+  await p.screenshot({ path: `${OUT}/glanz-1-freitag.png` });
   while (await p.isVisible('#coach')) { await p.click('#coach'); await warte(200); }
-  pruefe(await slot(p, 'spritze') === 'st-besitz', 'Spritze gehört Dennis');
   pruefe(!(await p.$('.slot[data-id="pistole_klein"]')) && !(await p.$('.slot[data-id="pistole_gross"]')), 'Die Pistolen haben kein eigenes Feld, sie kommen später ins Feld der Spritze');
   await p.evaluate(() => document.querySelector('.slot[data-feld="nadel"]').click()); await warte(300);
-  pruefe(await slot(p, 'nadel_stopf') === 'schatten' && (await p.textContent('#itemBox')).includes('Eisendorn'), 'Feld der Nadel: Schatten, heißt noch Eisendorn');
+  pruefe(await slot(p, 'nadel_fein') === 'schatten' && (await p.textContent('#itemBox')).includes('Splitter'), 'Feld der Nadel: Schatten, heißt noch Splitter');
   await p.evaluate(() => document.querySelector('.slot[data-id="spritze"]').click()); await warte(300);
-  pruefe((await p.textContent('#itemBox')).includes('Steckte in deinem Beutel'), 'Spritze: Steckte in deinem Beutel');
-  pruefe(await p.$eval('.slot[data-id="spritze"] .ic use', u => u.getAttribute('href')) === '#i-spritze', 'Danach: im Feld die Spritze');
+  pruefe((await p.textContent('#itemBox')).includes('Zoras Tropfen') && (await p.textContent('#itemBox')).includes('Kommt bald'), 'Spritze am Freitag: Zoras Tropfen, kommt bald');
   await p.screenshot({ path: `${OUT}/glanz-2-ausruestung-start.png` });
+  await ctx.close();
+}
+// Nach dem Morgen gehört die Spritze Dennis, von Rikes Fee
+{
+  const ctx = await b.newContext({ viewport: { width: 844, height: 390 }, isMobile: true, hasTouch: true });
+  const p = await ctx.newPage(); p.on('pageerror', e => fehler.push('mitte: ' + e.message));
+  await p.goto(BASE + '?demo=mitte&direkt'); await warte(700);
+  await zu(p);
+  await zurAusruestung(p); await zu(p);
+  await p.evaluate(() => document.querySelector('.slot[data-feld="klinge"]').click()); await warte(300);
+  pruefe(await slot(p, 'klinge_rost') !== 'schatten' && (await p.textContent('#itemBox')).includes('Von Rikes Fee') && (await p.textContent('#itemBox')).includes('Stufe 1 von 2'), 'Nach dem Morgen: Verrostete Klinge, Stufe 1 von 2, von Rikes Fee');
   await ctx.close();
 }
 

@@ -21,6 +21,9 @@
      neustart:  Zeitstempel, wann der Quest Master zuletzt alles zurückgesetzt hat (Dennis' Handy fängt dann von vorn an)
      frei:      { [questId]: Zeitstempel }               // Freigabe (30.09.): Der Quest Master gibt jede Quest von Hand frei, wenn Dennis
                                                       // an ihrer Station ankommt. Bis dahin bleibt sie für Dennis im Nebel (next = null)
+     morgen:    Zeitstempel                           // Der Morgen (01.10.): Der Quest Master hat die Zwischensequenz am Samstagmorgen
+                                                      // angestoßen, die Fee bringt die Basis-Items (config.morgen). Fehlt er, gilt der Morgen
+                                                      // mit der Freigabe von config.morgen.vor, oder sobald dort oder danach etwas entschieden ist
    }
 
    Packs zählen Schritt für Schritt in der Reihenfolge, in der sie passiert sind (zeiten, buchung.zeit),
@@ -37,7 +40,7 @@
   const list = x => (Array.isArray(x) ? x.filter(Boolean) : x && typeof x === "object" ? Object.values(x).filter(Boolean) : []);
 
   function emptyDoc() {
-    return { quests: {}, glanz: {}, zaehler: {}, schritte: {}, einsaetze: [], duelle: {}, buchungen: [], items: {}, zeiten: {}, stand: 0, neustart: 0, frei: {} };
+    return { quests: {}, glanz: {}, zaehler: {}, schritte: {}, einsaetze: [], duelle: {}, buchungen: [], items: {}, zeiten: {}, stand: 0, neustart: 0, frei: {}, morgen: 0 };
   }
 
   function normalize(doc) {
@@ -58,7 +61,8 @@
       zeiten: obj(d.zeiten),
       stand: Number(d.stand) || 0,
       neustart: Number(d.neustart) || 0,
-      frei: obj(d.frei)
+      frei: obj(d.frei),
+      morgen: Number(d.morgen) || 0
     };
   }
 
@@ -94,6 +98,8 @@
       else if (items[id] === "besitz") items[id] = "verloren";
     };
     (config.startitems || []).forEach(id => geben(id));
+    const morgen = morgenZeit(config, doc);
+    if (morgen) ((config.morgen && config.morgen.items) || []).forEach(id => geben(id));
 
     config.quests.forEach((q, i) => {
       const erlaubt = q.typ === "lauf" ? STATUS_LAUF : STATUS;
@@ -220,10 +226,24 @@
       next: nextQuest ? nextQuest.id : null,
       kommt: kommt ? kommt.id : null,
       ende: !kommt,
+      morgen,
       laufend: config.quests.filter(q => q.typ === "lauf" && quests[q.id] !== "offen").map(q => q.id),
       zaehler: { bestanden, verloren, erledigt: bestanden + verloren, gesamt: r.length },
       stand: doc.stand
     };
+  }
+
+  /* Der Morgen (01.10.): wann die Fee die Basis-Items gebracht hat (Zeitstempel), sonst 0.
+     Angestoßen vom Quest Master (doc.morgen). Vergisst er es, gilt die Freigabe der Quest config.morgen.vor, und auch jede
+     Entscheidung ab dieser Quest (Notlösung im Admin, ältere Stände): Ohne Stufe 1 kann es kein Upgrade geben. */
+  function morgenZeit(config, doc) {
+    const m = config.morgen;
+    if (!m) return 0;
+    if (doc.morgen) return doc.morgen;
+    const r = reihe(config), ab = r.findIndex(q => q.id === m.vor);
+    if (ab < 0) return 0;
+    if (doc.frei[m.vor]) return Number(doc.frei[m.vor]) || 1;
+    return r.slice(ab).some(q => (STATUS.includes(doc.quests[q.id]) && doc.quests[q.id] !== "offen") || !!doc.frei[q.id]) ? 1 : 0;
   }
 
   // Die drei Duelle im Showdown: zuerst verlorene Spiele vom Tag (Revanche), aufgefüllt mit dem Füllspiel
@@ -441,7 +461,7 @@
     return teile.length ? teile.join(", ") : "nichts";
   }
 
-  const api = { derive, emptyDoc, normalize, mitEintraegen, effektText, zifferGrund, zahlkraft, showdownDuelle, aktuellesDuell, einsetzbar, dabei, mitnehmbar, rettung,
+  const api = { derive, morgenZeit, emptyDoc, normalize, mitEintraegen, effektText, zifferGrund, zahlkraft, showdownDuelle, aktuellesDuell, einsetzbar, dabei, mitnehmbar, rettung,
     fluchVorteil, diebWurf, radFelder, allesStufe, allesChance, abgeloest, aktuelleQuests, jetztEinsetzbar, STATUS, STATUS_LAUF };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.QuestEngine = api;

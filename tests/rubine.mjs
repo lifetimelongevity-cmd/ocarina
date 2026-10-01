@@ -116,7 +116,7 @@ pruefe((await dennis.textContent('#hudNextName')).includes('Rikes Rache'), 'Denn
 await dennis.click('#hudNext'); await warte(600);
 const karte = (await dennis.textContent('#questCard').catch(() => '')) || '';
 pruefe(karte.includes('Rike hat verraten'), 'Quest-Karte zeigt den Text von Rikes Rache');
-pruefe(await dennis.$$eval('#questCard .ruest-minis [data-item]', xs => xs.map(x => x.dataset.item)).then(ids => ids.includes('nadel_dick') && !ids.includes('nadel_stopf')), 'AUSRÜSTEN: nur die dicke Nadel (sie löst die Stopfnadel ab)');
+pruefe(await dennis.$$eval('#questCard .ruest-minis [data-item]', xs => xs.map(x => x.dataset.item)).then(ids => ids.includes('nadel_dick') && !ids.includes('nadel_fein')), 'AUSRÜSTEN: nur die dicke Nadel (sie löst die feine Nadel ab)');
 await dennis.screenshot({ path: `${OUT}/rubine-6-rache.png` });
 const ziffern = await dennis.$$eval('#tumblers .tumbler', ts => ts.map(t => t.textContent));
 pruefe(ziffern[3] === '?' && ziffern.slice(0, 3).every(z => z !== '?'), 'Vor Rikes Rache fehlt nur Ziffer 4');

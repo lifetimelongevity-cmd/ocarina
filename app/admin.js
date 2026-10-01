@@ -123,6 +123,12 @@
     commit(d => { d.frei = { ...d.frei, [id]: Date.now() }; }, "Freigegeben: " + questById(id).name);
   }
 
+  // Der Morgen (01.10.): Rikes Fee bringt Dennis am Samstagmorgen Stufe 1 jedes Items, auf seinem Handy als Zwischensequenz.
+  // Vergisst du es, kommt der Morgen mit der Freigabe der ersten Quest am Samstag (engine.js, morgenZeit).
+  function morgenStarten() {
+    commit(d => { d.morgen = Date.now(); }, "Der Morgen beginnt");
+  }
+
   // Fluch (29.09.): Auch als Notlösung dreht Buu Huu am Rad (01.10., ab dem zweiten Fluch mit ALLES), und das Spiel mit dem
   // Vorteil wird gemerkt. Im Showdown gilt ein Einsatz für das aktuelle Duell (29.09., Dennis rüstet sich je Duell aus)
   function einsetzen(item, quest) {
@@ -172,7 +178,12 @@
       return `<button type="button" class="btn use-btn" data-item="${id}" data-quest="${qid}" ${hat ? "" : "disabled"}>${esc(it.name)} einsetzen <small>${esc(besitzText(id))}</small></button>`;
     }).join("");
     const liste = schon.length ? `<p class="used">Eingesetzt: ${schon.map(id => esc(itemById(id).name)).join(", ")}</p>` : "";
-    return `<p class="sub-h">Einsetzbar</p><div class="chips">${knoepfe || '<span class="hint">nichts</span>'}</div>${ids.some(id => itemById(id).dieb) ? fluchZeile(qid) : ""}${liste}`;
+    // Items in Stufen (01.10.): Es gilt die stärkste, die Dennis hat, auch wenn er sie nicht eigens mitnimmt
+    const stufe = ids.map(itemById).filter(it => it.feld && state.items[it.id] === "besitz").map(it => {
+      const xs = C.items.filter(x => x.feld === it.feld);
+      return `<p class="used">Es gilt: ${esc(it.name)} (Stufe ${xs.indexOf(it) + 1} von ${xs.length})</p>`;
+    }).join("");
+    return `<p class="sub-h">Einsetzbar</p><div class="chips">${knoepfe || '<span class="hint">nichts</span>'}</div>${stufe}${ids.some(id => itemById(id).dieb) ? fluchZeile(qid) : ""}${liste}`;
   }
 
   function bindUse(root) {
@@ -242,6 +253,7 @@
     $("#nextGlanz").addEventListener("click", () => state.kommt && questById(state.kommt).glanz && setQuest(state.kommt, "glanz"));
     $("#nextLose").addEventListener("click", () => state.kommt && setQuest(state.kommt, "verloren"));
     $("#freigeben").addEventListener("click", () => state.kommt && !state.next && freigeben(state.kommt));
+    $("#morgenBtn").addEventListener("click", () => !state.morgen && morgenStarten());
     // Alles zurücksetzen: neuer Zeitstempel in neustart, daran erkennt Dennis' Handy den neuen Anfang (ein Fenster, dann von vorn)
     $("#reset").addEventListener("click", () => {
       if (!confirm("Wirklich alles zurücksetzen? Alle Quests werden offen, Packs, Einsätze, Zähler und Dennis' Tagebuch-Antworten werden gelöscht. Sein Handy fängt von vorn an, mit der Fee. Rückgängig holt den Stand zurück.")) return;
@@ -281,8 +293,9 @@
       d.quests[q.id] = o.zufall ? wurf() : i % 3 === 2 ? "verloren" : "bestanden"; zeit(q.id);
       if (o.zufall && q.glanz && d.quests[q.id] === "bestanden" && Math.random() < .5) d.glanz[q.id] = true;
     });
-    // Gespielte Quests und die nächste gelten als freigegeben, damit der Sprung Dennis gleich die nächste zeigt
-    reihe.slice(0, n + 1).forEach(q => { d.frei[q.id] = t; });
+    // Gespielte Quests und die nächste gelten als freigegeben, damit der Sprung Dennis gleich die nächste zeigt.
+    // Ausnahme: Kommt als Nächstes die erste Quest am Samstag, bleibt sie zu, damit du den Morgen ausprobieren kannst
+    reihe.slice(0, n + 1).forEach(q => { if (!(C.morgen && q.id === C.morgen.vor && !d.quests[q.id])) d.frei[q.id] = t; });
     lauf.forEach(q => {
       const ende = o.ende || (o.zufall && Math.random() < .3);
       d.quests[q.id] = !ende ? "laeuft" : q.zaehler ? "beendet" : o.zufall ? wurf() : "bestanden";
@@ -386,9 +399,14 @@
     $("#nextTitle").textContent = n ? n.name : "Alle Quests erledigt";
     $("#nextMeta").textContent = n ? `${typWort(n)} ${n.nr} · ${n.ort}${frei ? "" : " · bei Dennis noch im Nebel"}` : "Jetzt das Kästchen öffnen.";
     $("#nextFrei").hidden = !n || frei;
+    // Der Morgen: sobald als Nächstes die erste Quest am Samstag kommt, bis er gelaufen ist
+    const morgenFehlt = !!C.morgen && !!n && n.id === C.morgen.vor && !state.morgen;
+    $("#morgenBox").hidden = !morgenFehlt;
+    if (morgenFehlt) $("#morgenHint").textContent = `Am Samstagmorgen, zum Beispiel beim Frühstück: Rikes Fee bringt Dennis ${C.morgen.items.map(id => itemById(id).name).join(", ")} (Szene, gut 30 s). Danach gibst du ${n.name} frei.`;
     if (n && !frei) {
       const st = C.karte.stationen.find(x => x.id === n.station);
-      $("#freiHint").textContent = `Dennis sieht die Quest erst, wenn du sie freigibst. Auf seiner Karte wandert er dann ${st ? `${st.zu} ${st.name}` : "zur Station"}, danach tritt sie aus dem Nebel.`;
+      $("#freiHint").textContent = `Dennis sieht die Quest erst, wenn du sie freigibst. Auf seiner Karte wandert er dann ${st ? `${st.zu} ${st.name}` : "zur Station"}, danach tritt sie aus dem Nebel.`
+        + (morgenFehlt ? " Der Morgen läuft dann vorher von selbst." : "");
     }
     $("#nextQm").textContent = n && n.qm ? n.qm : "";
     $("#nextFx").innerHTML = n ? fxHtml(n) : "";
@@ -540,6 +558,9 @@
       if (!q || state.quests[id] !== "offen") return;
       zeilen.push({ zeit: Number(zeit) || 0, art: "f", von: "qm", text: `Freigegeben: ${q.name}`, weg: () => commit(d => { d.frei = { ...d.frei }; delete d.frei[id]; }, "Freigabe gelöscht: " + q.name) });
     });
+    // Der Morgen (Löschen nimmt die Items still zurück, solange nicht schon die Freigabe danach ihn bringt)
+    if (doc.morgen) zeilen.push({ zeit: doc.morgen, art: "m", von: "qm", text: "Der Morgen: Die Fee hat die Items gebracht",
+      weg: () => commit(d => { delete d.morgen; }, "Morgen gelöscht") });
     zeilen.sort((a, b) => b.zeit - a.zeit);
     const liste = $("#verlauf");
     liste.innerHTML = zeilen.length ? "" : '<li class="empty">Noch nichts passiert.</li>';

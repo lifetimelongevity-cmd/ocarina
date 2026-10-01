@@ -78,7 +78,7 @@ await dennis.click('#overlay'); await warte(1300);
 pruefe(await aktiv(dennis) === '0' && await dennis.isVisible('#mapWalker'), 'Nach dem Fenster: Karte, Dennis wandert');
 await dennis.screenshot({ path: `${OUT}/freigabe-6-wandert.png` });
 await warte(3500);
-pruefe(await aktiv(dennis) === '1' && (await hud(dennis)) === 'Wirbel der Götter', 'Angekommen: Quests, Wirbel der Götter ist dran, statt: ' + await hud(dennis));
+pruefe(await aktiv(dennis) === '1' && (await hud(dennis)) === 'Wirbel der Götter', 'Angekommen: Quests, Wirbel der Götter ist dran (seit 01.10. das erste Spiel am Samstag), statt: ' + await hud(dennis));
 pruefe(await dennis.isVisible('#questCard [data-ergebnis="bestanden"]'), 'Dennis kann eintragen');
 await zu(dennis);
 await dennis.click('.shoulder-left'); await warte(900); await zu(dennis);

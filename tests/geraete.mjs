@@ -41,8 +41,8 @@ async function neueSeite(browser, g, url, { lokal = false, schwach = false } = {
     userAgent: ua(g) });
   if (lokal) await ctx.route('**/config.js', async r => { const res = await r.fetch(); r.fulfill({ response: res, body: (await res.text()).replace('typ: "firebase"', 'typ: "lokal"') }); });
   await ctx.route('**firebasedatabase.app**', r => r.abort());
-  // Rikes Sprachnachrichten (AAC) kann das Chromium der Tests nicht abspielen, dann wartet Buu Huu auf „TIPP AUF ▶“.
-  // Wie in tests/geist.mjs: Platzhalter-Klang statt der echten Dateien
+  // Rikes echte Sprachnachrichten ausblenden (wie tests/geist.mjs): Das Chromium der Tests kann kein AAC, und Frage 1 dauert
+  // gut 30 s. Mit dem Platzhalter-Klang kommt Buu Huu nach 2 s, so lässt sich sein Fenster auf jedem Gerät prüfen.
   await ctx.route('**/assets/logbuch/*.m4a', r => r.fulfill({ status: 404 }));
   // Safe Areas nachstellen
   await ctx.addInitScript(sa => {
@@ -53,7 +53,8 @@ async function neueSeite(browser, g, url, { lokal = false, schwach = false } = {
     });
   }, g.sa);
   const page = await ctx.newPage();
-  page.on('console', m => { if (m.type() === 'error') fehler.push(`${g.id}: ${m.text()}`); });
+  // Fehlende Sprachnachrichten (oben ausgeblendet) sind kein Fehler der Seite
+  page.on('console', m => { if (m.type() === 'error' && !/\.m4a$/.test(m.location().url || '')) fehler.push(`${g.id}: ${m.text()}: ${m.location().url || ''}`); });
   page.on('pageerror', e => fehler.push(`${g.id}: ${e.message}`));
   if (g.cpu) { const cdp = await ctx.newCDPSession(page); await cdp.send('Emulation.setCPUThrottlingRate', { rate: g.cpu }); page._cdp = cdp; }
   await page.goto(BASE + url, { waitUntil: 'load' });
@@ -87,14 +88,14 @@ async function pruefen(page, g, name) {
       if (b.left < sa.l - 1 || b.right > W - sa.r + 1 || (b.bottom > H - sa.b + 1 && !el.classList.contains('sync'))) out.inset.push(`${el.className || el.tagName} [${Math.round(b.left)},${Math.round(b.right)},${Math.round(b.bottom)}]`);
       if (b.right > W + 1 || b.bottom > H + 1) out.ausserhalb.push(el.className);
     }
-    for (const el of document.querySelectorAll('.face.active *, .hud *, .result *, .lb-panel *, .prolog *, .geist-ruf *, .coach-bubble *, .sw-panel *')) {
+    for (const el of document.querySelectorAll('.face.active *, .hud *, .result *, .lb-panel *, .prolog *, .geist-ruf *, .morgen *, .coach-bubble *, .sw-panel *')) {
       if (!bereich(el) || !sichtbar(el)) continue;
       const s = getComputedStyle(el);
       const hatText = [...el.childNodes].some(n => n.nodeType === 3 && n.textContent.trim());
       if (hatText && parseFloat(s.fontSize) < 10) out.klein.push(`${el.className || el.tagName} ${s.fontSize} "${el.textContent.trim().slice(0, 20)}"`);
       if (hatText && s.overflow !== 'visible' && s.textOverflow !== 'ellipsis' && el.scrollWidth > el.clientWidth + 2 && !['TEXTAREA'].includes(el.tagName)) out.ueberlauf.push(`${el.className || el.tagName} "${el.textContent.trim().slice(0, 24)}"`);
     }
-    for (const el of document.querySelectorAll('.face.active button:not([disabled]), .hud button, .shoulder, .lb-panel button:not([disabled]), .prolog button, .sw-panel button')) {
+    for (const el of document.querySelectorAll('.face.active button:not([disabled]), .hud button, .shoulder, .lb-panel button:not([disabled]), .prolog button, .morgen button, .sw-panel button')) {
       if (!bereich(el) || !sichtbar(el)) continue;
       const b = el.getBoundingClientRect();
       if (Math.min(b.width, b.height) < 28) out.tipp.push(`${el.className} ${Math.round(b.width)}x${Math.round(b.height)}`);
@@ -163,9 +164,10 @@ for (const g of GERAETE.filter(g => !process.env.NUR || g.id.startsWith(process.
   await page.click('.sc-close'); await page.waitForTimeout(200);
   await seite(page, 2); await page.waitForTimeout(300);
   // Onboarding durchklicken
-  // Der Beutel entpuppt sich als Spritze (ein Feld), danach beginnen die Hinweise der Fee
-  if (!(await page.$('#overlay[hidden]'))) { await shot(page, g, '3a-onboarding'); alleProbleme += (await pruefen(page, g, 'BEUTEL WIRD SPRITZE')).length; await page.click('#overlay'); await page.waitForTimeout(1600); }
-  else { log('  PROBLEM: Der Beutel entpuppt sich nicht'); alleProbleme++; }
+  // Seit 01.10. gibt es kein Startitem mehr (die Fee bringt die Items am Samstagmorgen): gleich die Hinweise der Fee
+  await page.waitForTimeout(400);
+  if (await page.$('#coach:not([hidden])') && await page.$('#overlay[hidden]')) { await shot(page, g, '3a-onboarding'); alleProbleme += (await pruefen(page, g, 'AUSRÜSTUNG HINWEIS')).length; }
+  else { log('  PROBLEM: Die Fee erklärt die Ausrüstung nicht'); alleProbleme++; }
   for (let i = 0; i < 4; i++) { if (await page.$('#coach:not([hidden])')) { if (i === 2) await shot(page, g, '3b-coach'); await page.click('#coach'); await page.waitForTimeout(300); } }
   await shot(page, g, '3-ausruestung');
   alleProbleme += (await pruefen(page, g, 'AUSRÜSTUNG')).length;
@@ -234,6 +236,25 @@ for (const g of GERAETE.filter(g => !process.env.NUR || g.id.startsWith(process.
   ({ ctx, page } = await neueSeite(browser, g, '?demo=ende&direkt'));
   await shot(page, g, '10-ende');
   alleProbleme += (await pruefen(page, g, 'ENDE')).length;
+  await ctx.close();
+
+  // Der Morgen (01.10.): Zwischensequenz am Samstagmorgen, geprüft, wenn Buu Huu am Beutel zerrt und wenn die Items da sind
+  ({ ctx, page } = await neueSeite(browser, g, '?demo=start&direkt&morgen'));
+  await page.tap('[data-demo="bestanden"]'); await page.waitForTimeout(900);
+  if (await page.isVisible('#morgen')) {
+    const fertig = new Set();
+    for (let i = 0; i < 40 && await page.isVisible('#morgen') && fertig.size < 2; i++) {
+      const ph = await page.evaluate(() => document.querySelector('#morgen').dataset.phase);
+      if ((ph === 'zerrt' || ph === 'items') && !fertig.has(ph)) {
+        fertig.add(ph);
+        await page.waitForTimeout(ph === 'items' ? 2600 : 1200);
+        await shot(page, g, '11-morgen-' + ph);
+        alleProbleme += (await pruefen(page, g, 'MORGEN ' + ph.toUpperCase())).length;
+      }
+      await page.click('#morgen', { position: { x: 120, y: 110 } }); await page.waitForTimeout(300);
+    }
+    if (fertig.size < 2) { log('  PROBLEM: Der Morgen zeigt nicht alle Phasen'); alleProbleme++; }
+  } else { log('  PROBLEM: Der Morgen kommt nicht'); alleProbleme++; }
   await ctx.close();
 }
 
@@ -315,9 +336,12 @@ for (const g of GERAETE.filter(g => !process.env.NUR || g.id.startsWith(process.
   await dennis.click('#overlay'); await dennis.waitForTimeout(800);
   await admin.click('button.btn:has-text("Fluch geschenkt")'); await dennis.waitForTimeout(700);
   await dennis.click('#overlay').catch(() => {}); await dennis.waitForTimeout(300);
-  // Wirbel und Die drei Zeichen gewonnen (seit 01.10. in dieser Reihenfolge, dort Flüche), dann einen Fluch bei Speed Flip
-  // sprechen (Notlösung im Admin). Die Szene mit Buu Huus Rad lässt sich erst nach der Auflösung überspringen
-  for (let i = 0; i < 2; i++) { await admin.click('#nextWin'); await dennis.waitForTimeout(600); await dennis.click('#overlay').catch(() => {}); await dennis.waitForTimeout(300); }
+  // Seit 01.10. zuerst der Wirbel (verloren), dann Die drei Zeichen gewonnen (dort beginnen die Flüche), dann einen Fluch bei
+  // Speed Flip sprechen (Notlösung im Admin). Die Szene mit Buu Huus Rad lässt sich erst nach der Auflösung überspringen
+  await admin.click('#nextLose'); await dennis.waitForTimeout(600);
+  await dennis.click('#overlay').catch(() => {}); await dennis.waitForTimeout(300);
+  await admin.click('#nextWin'); await dennis.waitForTimeout(600);
+  await dennis.click('#overlay').catch(() => {}); await dennis.waitForTimeout(300);
   await admin.screenshot({ path: `${OUT}/admin-2-naechste.png`, fullPage: true });
   await admin.click('#nextUse .use-btn[data-item="spruchrolle"]'); await dennis.waitForTimeout(600);
   for (let i = 0; i < 80 && await dennis.isVisible('#fluchSzene') && !(await dennis.evaluate(() => document.getElementById('fluchSzene').classList.contains('steht'))); i++) await dennis.waitForTimeout(200);
@@ -341,7 +365,7 @@ for (const g of GERAETE.filter(g => !process.env.NUR || g.id.startsWith(process.
   // Dennis' Ausrüstung am Gipfel: was leuchtet?
   await dennis.evaluate(() => { document.querySelector('.shoulder-right').click(); });
   await dennis.waitForTimeout(700);
-  // Onboarding (erzwungen): Beutel, dann öffnet Dennis ihn und die Spritze kommt heraus
+  // Onboarding (erzwungen): Hinweise der Fee (seit 01.10. ohne Startitem)
   for (let i = 0; i < 2; i++) { while (await dennis.$('#overlay:not([hidden])')) { await dennis.click('#overlay'); await dennis.waitForTimeout(300); } await dennis.waitForTimeout(1800); }
   while (await dennis.$('#coach:not([hidden])')) { await dennis.click('#coach'); await dennis.waitForTimeout(250); }
   const slots = await dennis.$$eval('.slot', els => els.map(e => `${e.dataset.id}:${e.classList.contains('schatten') ? 'Schatten' : e.classList.contains('usable') ? 'LEUCHTET' : [...e.classList].filter(c => c.startsWith('st-')).join('')}`));

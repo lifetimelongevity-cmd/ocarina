@@ -76,8 +76,8 @@ pruefe(await dennis.isVisible('[data-ergebnis="bestanden"]'), 'Nach dem Zurückn
 await admin.click('#undo'); await warte(700);
 pruefe((await fenster(dennis)).includes('PRÜFUNG BESTANDEN'), 'Rückgängig: Eintrag ist wieder da, Dennis sieht den Moment');
 await zu(dennis); await warte(1200);
-await frei();                                   // Wirbel der Götter freigeben
-await admin.click('#nextWin'); await warte(900); await zu(dennis);   // Wirbel bestanden (bucht der Quest Master)
+await frei();                                   // Wirbel der Götter freigeben (seit 01.10. vor Die drei Zeichen)
+await admin.click('#nextWin'); await warte(600); await zu(dennis); await warte(800);
 await frei();                                   // Die drei Zeichen freigeben
 
 // Die drei Zeichen (seit 01.10. die dritte Aufgabe) bringen Flüche, verraten sie aber nicht

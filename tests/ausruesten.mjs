@@ -58,9 +58,9 @@ await p.tap('.slot[data-id="pistole_klein"]'); await warte(200);
 await p.tap('.slot[data-id="spruchrolle"]'); await warte(300);
 hoeheBox.push(await hoehe(p, '#itemBox'));
 pruefe((await text(p, '#itemBox')).includes('Hier: Wasserwaffe eine Stufe stärker'), 'Beim Fluch steht, was er hier bringt');
-await p.tap('.slot[data-id="kreisel"]'); await warte(300);
+await p.tap('.slot[data-feld="karten"]'); await warte(300);
 hoeheBox.push(await hoehe(p, '#itemBox'));
-pruefe(!(await p.$eval('.slot[data-id="kreisel"]', e => e.classList.contains('dabei'))) && (await text(p, '[data-mitnehmen]')).includes('MITNEHMEN · 2'), 'Was hier nicht hilft, zeigt nur, was es ist');
+pruefe(!(await p.$eval('.slot[data-feld="karten"]', e => e.classList.contains('dabei'))) && (await text(p, '[data-mitnehmen]')).includes('MITNEHMEN · 2'), 'Was hier nicht hilft, zeigt nur, was es ist');
 pruefe(new Set(hoeheBox).size === 1, 'Textbox bleibt gleich hoch (' + hoeheBox.join(', ') + ' px)');
 await p.screenshot({ path: `${OUT}/ausruesten-2-c-tasten.png` });
 
@@ -129,7 +129,7 @@ await zu(g); await warte(800);
 await g.tap('[data-duell="2"][data-v="sieg"]'); await warte(400); await halten(g); await zu(g); await warte(600);
 await g.evaluate(() => document.querySelector('.shoulder-right').click()); await warte(1300);
 pruefe((await text(g, '#ruestFuer')) === 'FÜR DUELL 3 · WIRBEL DER GÖTTER' && await g.$$eval('.c-taste.fest', xs => xs.length) === 0, 'Duell 3: neue Plakette, die C-Tasten sind wieder frei');
-pruefe(JSON.stringify(await g.$$eval('.slot.usable', xs => xs.map(x => x.dataset.id))) === '["kreisel","spruchrolle"]', 'Duell 3 (Wirbel): Kreisel und Fluch leuchten');
+pruefe(JSON.stringify(await g.$$eval('.slot.usable', xs => xs.map(x => x.dataset.id))) === '["spruchrolle"]', 'Duell 3 (Wirbel): nur der Fluch leuchtet (seit 01.10. ohne Kreisel)');
 await g.screenshot({ path: `${OUT}/ausruesten-7-duell3.png` });
 await g.close();
 

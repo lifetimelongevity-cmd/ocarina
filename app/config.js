@@ -22,9 +22,29 @@
       databaseURL: "https://dennis-quest-default-rtdb.europe-west1.firebasedatabase.app"
     },
 
-    // Einziges Startitem (28.09.): Der Heilige Beutel des Helden entpuppt sich beim ersten Besuch der Ausrüstung
-    // als Wasserspritze. Ein Feld, kein zusätzliches.
-    startitems: ["spritze"],
+    // Keine Startitems mehr (01.10.): Am Freitag im Zug hat Dennis noch nichts, die Basis-Items bringt die Fee am Samstagmorgen
+    startitems: [],
+
+    /* Der Morgen (01.10., Wunsch des Nutzers): Zwischensequenz am Samstagmorgen. Rikes Fee hat in der Nacht bei Dennis zu Hause
+       ein paar Dinge geholt, Buu Huu will sie ihr abjagen, sie verjagt ihn, dann kommen die vier Basis-Items aus dem Beutel.
+       Ab da hat Dennis in jedem Feld der Ausrüstung Stufe 1 und spielt den Tag über die Upgrades frei.
+       Der Quest Master stößt sie im Admin an („Der Morgen beginnt“, gespeichert als morgen im Spiel). Vergisst er es, gilt sie
+       mit der Freigabe der Quest vor (oder sobald dort oder danach etwas entschieden ist), die Szene läuft dann vor der Quest.
+       szenen: was die Fee und Buu Huu sagen, der Reihe nach (wer: fee, geist oder erzaehler). */
+    morgen: {
+      vor: "wirbel",
+      items: ["spritze", "huelle", "klinge_rost", "nadel_fein"],
+      szenen: {
+        nacht:   "Die Nacht vor der großen Prüfung …",
+        fee:     ["Dennis! Wach auf, der Tag ist da!", "Ich war heute Nacht bei dir zu Hause. Rike hat mir etwas für dich mitgegeben."],
+        geist:   ["Buu huu! Was hast du denn da, kleine Fee?", "Das gehört jetzt dem Bund! Hehehe …"],
+        abwehr:  "Finger weg, Geist! Das ist für Dennis!",
+        flucht:  "Buu … das merk ich mir!",
+        beutel:  "Hier, das ist für dich. Ohne das überstehst du den Tag nicht.",
+        stufe:   "Noch sind sie schwach. Gewinne, und sie werden stärker!",
+        titel:   "DAS ABENTEUER BEGINNT"
+      }
+    },
 
     /* Items und Fähigkeiten (Regel vom 28.09.: Hauptquests geben Items, Sidequests und laufende Quests Fähigkeiten)
        gruppe:   "item" (Gegenstand, links in der Ausrüstung, hilft bei genau einem späteren Spiel und bleibt)
@@ -38,8 +58,6 @@
        feld:     Stufen teilen sich ein Feld in der Ausrüstung (29.09., Wunsch des Nutzers). Es zeigt die stärkste, die Dennis hat,
                  sonst den Schatten der ersten, die er noch bekommen kann. Reihenfolge der Stufen = Reihenfolge hier
        einsatz:  was im Siegel-Fenster steht, wenn Dennis es einsetzt (Segen am Tor)
-       fund:     Startitem: Satz, wenn es sich beim ersten Besuch der Ausrüstung entpuppt
-       tarnSymbol: Sprite, solange es getarnt ist (sonst der Schatten von symbol)
        geheim:   Dennis soll nicht wissen, dass er es bekommt: Die Vorschau einer Belohnung zeigt nur „Geheimnis“
        gefunden: Sätze im Moment, in dem er es bekommt (titel über dem Namen, warnung darunter)
        dieb:     Kehrseite beim Einsetzen (Fluch, 29.09.): Buu Huu dreht am Rad und stiehlt Packs (01.10.). gewichte[n] = Gewicht
@@ -51,15 +69,18 @@
        tarn:     So heißt das Item, solange Dennis es nicht erspielt hat (Ausrüstung und Vorschau einer Belohnung).
                  Beim Gewinnen „entpuppt" es sich. Bis dahin zeigt die Ausrüstung seinen Schatten: Die Form ist zu erkennen.
        Texte nennen keine Quest beim Namen, sonst verraten sie, was im Nebel liegt.
-       Wasserwaffen in drei Stufen (28.09.): Spritze (Start), kleine Pistole (Sieg im Podrennen),
-       große Pistole (Glanzsieg im Kartenwurf). Im Auge des Jägers zählt die stärkste.
-       Nadeln (29.09.): Stopfnadel (Sieg im Wirbel), dicke Nadel (Sieg am Deku-Baum). In Rikes Rache zählt die dickste. */
+       Jedes Item hat Stufen in einem Feld (01.10., Wunsch des Nutzers): Stufe 1 bringt die Fee am Samstagmorgen (morgen oben),
+       die Upgrades spielt Dennis frei, jedes vor dem Spiel, bei dem es hilft. Es zählt immer die stärkste Stufe.
+         Wasser: Spritze, kleine Pistole (Sieg im Podrennen), große Pistole (Glanzsieg im Kartenwurf). Für das Auge des Jägers.
+         Karten: leere Hülle (bringt nichts), Gepanzerte Karte (Sieg im Wirbel: eine Karte darf in die Hülle). Für den Kartenwurf.
+         Klinge: Verrostete Klinge (2 Würfe), Stich (Sieg im Auge des Jägers: 4 Würfe). Für den Deku-Baum.
+         Nadel: feine Nadel, dicke Nadel (Sieg am Deku-Baum). Für Rikes Rache.
+       Götterkreisel (I5) und Stopfnadel (I9) sind seit 01.10. gestrichen, den Beyblade gibt es vor Ort. */
     items: [
-      // Startitem: getarnt als Beutel (tarnSymbol), entpuppt sich als Spritze. Hieß bis 28.09. „Dennis' Eier“ (Beutel, I1).
-      { id: "spritze", nr: "I7", gruppe: "item", feld: "wasser", name: "Wasserspritze", kurz: "Spritze", farbe: "#a8e4f5", symbol: "i-spritze", tarnSymbol: "i-beutel",
+      // Hieß bis 28.09. „Dennis' Eier“ (Beutel, I1), bis 01.10. Startitem (getarnt als Beutel)
+      { id: "spritze", nr: "I7", gruppe: "item", feld: "wasser", name: "Wasserspritze", kurz: "Spritze", farbe: "#a8e4f5", symbol: "i-spritze",
         text: "Klein und schnell leer.",
-        fund: "Dein Beutel entpuppt sich als Wasserspritze!",
-        tarn: { name: "Heiliger Beutel des Helden", kurz: "Beutel", text: "Seit jeher an deiner Seite. Was steckt darin?" } },
+        tarn: { name: "Zoras Tropfen", kurz: "Tropfen", text: "Kühl und klein. Was wird wohl daraus?" } },
       { id: "pistole_klein", nr: "I8", gruppe: "item", feld: "wasser", name: "Kleine Wasserpistole", kurz: "Kleine Pistole", farbe: "#7fd0ee", symbol: "i-pistol-klein",
         ersetzt: ["spritze"],
         text: "Mehr Wasser, mehr Reichweite.",
@@ -68,23 +89,29 @@
         ersetzt: ["spritze", "pistole_klein"],
         text: "Die Monsterpistole. Elektrisch, mit Dauerfeuer.",
         tarn: { name: "Zoras Quellstab", kurz: "Quellstab", text: "Relikt aus Zoras Reich. Wer ihn führt, hat den längsten Atem." } },
-      { id: "karten_gepanzert", nr: "I4", gruppe: "item", name: "Gepanzerte Karten", kurz: "Karten", farbe: "#9fd0f0", symbol: "i-cards",
-        text: "Zwei Karten mehr, in festen Hüllen.",
+      // Karten (01.10.): Die Basis ist gemein, eine leere Hülle. Das Upgrade erlaubt eine Karte darin.
+      { id: "huelle", nr: "I11", gruppe: "item", feld: "karten", name: "Leere Hülle", kurz: "Hülle", farbe: "#c8dcea", symbol: "i-huelle",
+        text: "Eine Kartenhülle. Leider ohne Karte.",
+        tarn: { name: "Hohle Schale", kurz: "Schale", text: "Leicht und leer. Wartet darauf, gefüllt zu werden." } },
+      { id: "karten_gepanzert", nr: "I4", gruppe: "item", feld: "karten", name: "Gepanzerte Karte", kurz: "Karte", farbe: "#9fd0f0", symbol: "i-cards",
+        ersetzt: ["huelle"],
+        text: "Eine deiner Karten darf in die Hülle.",
         tarn: { name: "Federn der Eule", kurz: "Federn", text: "Leicht und zielsicher. Fliegen, wohin du sie schickst." } },
-      { id: "kreisel", nr: "I5", gruppe: "item", name: "Götterkreisel", kurz: "Kreisel", farbe: "#e7a14a", symbol: "i-top",
-        text: "Vorher üben, zuerst wählen.",
-        tarn: { name: "Kern der Goronen", kurz: "Kern", text: "Rund, schwer und nie ganz still." } },
-      { id: "stich", nr: "I6", gruppe: "item", name: "Stich", kurz: "Stich", farbe: "#b8d4ff", symbol: "i-sword",
-        text: "Eine Elbenklinge. Ein Schwert mehr.",
-        tarn: { name: "Verrostete Klinge", kurz: "Klinge", text: "Alt und stumpf. Wartet auf ihren Moment." } },
-      // Nadeln für Rikes Rache (29.09.): Ohne Nadel-Item fädelt Dennis feine Nadeln. Die dickste, die er hat, zählt.
-      { id: "nadel_stopf", nr: "I9", gruppe: "item", feld: "nadel", name: "Stopfnadel", kurz: "Stopfnadel", farbe: "#d6dde8", symbol: "i-nadel-stopf",
-        text: "Größeres Öhr, leichter einzufädeln.",
-        tarn: { name: "Eisendorn", kurz: "Dorn", text: "Kräftiger als ein Splitter. Wer weiß, was er aufspießt." } },
+      { id: "klinge_rost", nr: "I12", gruppe: "item", feld: "klinge", name: "Verrostete Klinge", kurz: "Klinge", farbe: "#c99a6b", symbol: "i-klinge-rost",
+        text: "Alt und stumpf. Zwei Würfe.",
+        tarn: { name: "Alter Griff", kurz: "Griff", text: "Schwer in der Hand. Was hing einmal daran?" } },
+      { id: "stich", nr: "I6", gruppe: "item", feld: "klinge", name: "Stich", kurz: "Stich", farbe: "#b8d4ff", symbol: "i-sword",
+        ersetzt: ["klinge_rost"],
+        text: "Eine Elbenklinge. Vier Würfe statt zwei.",
+        tarn: { name: "Schimmernde Klinge", kurz: "Klinge", text: "Leuchtet blau, wenn Gefahr naht." } },
+      // Nadeln für Rikes Rache (29.09., seit 01.10. zwei Stufen): Die dickste, die Dennis hat, zählt.
+      { id: "nadel_fein", nr: "I13", gruppe: "item", feld: "nadel", name: "Feine Nadel", kurz: "Feine Nadel", farbe: "#d6dde8", symbol: "i-nadel-fein",
+        text: "Ein winziges Öhr. Viel Glück.",
+        tarn: { name: "Splitter", kurz: "Splitter", text: "Fein wie ein Haar. Wer weiß, was er aufspießt." } },
       { id: "nadel_dick", nr: "I10", gruppe: "item", feld: "nadel", name: "Dicke Nadel", kurz: "Dicke Nadel", farbe: "#eef2f8", symbol: "i-nadel-dick",
-        ersetzt: ["nadel_stopf"],
-        text: "Das größte Öhr von allen.",
-        tarn: { name: "Uralter Dorn", kurz: "Dorn", text: "Hart wie altes Holz. Durch ein Loch fällt Licht." } },
+        ersetzt: ["nadel_fein"],
+        text: "Das große Öhr. Viel leichter einzufädeln.",
+        tarn: { name: "Eisendorn", kurz: "Dorn", text: "Kräftiger als ein Splitter. Durch ein Loch fällt Licht." } },
       // Hieß bis 28.09. Spruchrolle (id bleibt, damit gespeicherte Stände passen).
       // Seit 29.09. zweischneidig: Vor einem Spiel gesprochen bringt er dort einen Vorteil (fluch bei der Quest),
       // danach dreht Buu Huu am Rad: 0 bis 3 Packs (gewichtet 30/35/25/10), ab dem zweiten Fluch auch ALLES mit 30 %
@@ -173,18 +200,19 @@
         farbe: "#4a8fe8", emblem: "z-water",
         text: "Sieben Fragen über dich. Was hat Rike geantwortet?",
         qm: "Bestanden ab 5 von 7 Treffern, du urteilst, ob sinngemäß. Dennis tippt seine Antworten im Menü, danach spielt Rikes Sprachnachricht. Seine Antworten stehen unten im Admin. Das Ergebnis trägt er danach selbst ein.",
-        win:  { packs: 1, ziffer: 1, items: ["kreisel"] },
+        win:  { packs: 1, ziffer: 1 },           // seit 01.10. ohne Item: Am Freitag gibt es keins, die Fee bringt sie Samstag früh
         lose: { packs: 0 },
         einsetzbar: [], logbuch: true },
 
+      // Seit 01.10. das erste Spiel am Samstag, gleich nach der Zwischensequenz (morgen), vor Die drei Zeichen
       { id: "wirbel", nr: 14, typ: "kern", name: "Wirbel der Götter", ort: "Wiese an der Talstation", station: "wiese",
         farbe: "#ec8f2e", emblem: "z-spirit",
         text: "Zwei Kreisel, eine Arena. Wer sich länger dreht, gewinnt.",
-        qm: "Beyblade gegen den besten Blader des Bundes, bestanden bei 2 von 3. Mit Götterkreisel übt Dennis vorher und wählt zuerst. Füllt auch den Showdown auf. Der Sieg bringt auch die Stopfnadel für Rikes Rache.",
-        win:  { packs: 2, items: ["karten_gepanzert", "nadel_stopf"] },
+        qm: "Beyblade gegen den besten Blader des Bundes, bestanden bei 2 von 3. Die Kreisel gibt es vor Ort, kein Item. Füllt auch den Showdown auf. Der Sieg bringt die Gepanzerte Karte für den Kartenwurf.",
+        win:  { packs: 2, items: ["karten_gepanzert"] },
         lose: { packs: -2 },
         fluch: "Du darfst vorher üben.",
-        einsetzbar: ["kreisel", "spruchrolle"], duell: true, revanche: true },
+        einsetzbar: ["spruchrolle"], duell: true, revanche: true },
 
       // Hieß bis 28.09. „Kreuzung der Klingen“ und war eine Prüfung (id bleibt, damit gespeicherte Stände passen).
       // Seit 01.10. die dritte Aufgabe (nach dem Wirbel), hier beginnen die Flüche: Buu Huu spielt mit und schenkt Dennis
@@ -209,12 +237,12 @@
 
       { id: "kartenwurf", nr: 9, typ: "side", name: "Kartenwurf", ort: "Entdeckerpfad", station: "wald",
         text: "Karten aus deinen Packs ins Ziel. Mehr als dein Gegner.",
-        qm: "Duell mit Karten aus schon geöffneten Packs, fester Abstand, je 3 Karten. Gleichstand zählt als verloren. Gepanzerte Karten geben +2. Glanzsieg: mindestens 2 Karten mehr im Ziel als der Gegner, bringt die Große Wasserpistole.",
+        qm: "Duell mit Karten aus schon geöffneten Packs, fester Abstand, je 3 Karten. Gleichstand zählt als verloren. Mit der Leeren Hülle wirft Dennis nur nackte Karten (die Hülle bringt nichts), mit der Gepanzerten Karte darf eine seiner Karten in die Hülle. Glanzsieg: mindestens 2 Karten mehr im Ziel als der Gegner, bringt die Große Wasserpistole.",
         win:  { items: ["spruchrolle"] },
         glanz: { bedingung: "2 Karten Vorsprung", items: ["pistole_gross"] },   // einzige Sidequest mit Item, nur als Glanzsieg
         lose: { packs: -2 },
         fluch: "5 Karten statt 3.",
-        einsetzbar: ["karten_gepanzert", "spruchrolle"], duell: true, revanche: true },
+        einsetzbar: ["huelle", "karten_gepanzert", "spruchrolle"], duell: true, revanche: true },
 
       { id: "auge", nr: 2, typ: "kern", name: "Auge des Jägers", ort: "Entdeckerpfad", station: "wald",
         farbe: "#e2472f", emblem: "e-flame",
@@ -228,11 +256,11 @@
       { id: "deku", nr: 12, typ: "kern", name: "Klingen des Deku-Baums", ort: "Entdeckerpfad", station: "wald",
         farbe: "#48b454", emblem: "z-forest",
         text: "Wirf deine Klingen in den alten Baum. Nur was stecken bleibt, zählt.",
-        qm: "4 Mini-Schwerter aus 4 m auf einen Baum, bestanden, wenn 2 stecken. Stich gibt ein Schwert mehr. Der Sieg bringt die dicke Nadel für Rikes Rache (Ziffer 4 liegt seit 29.09. bei Rikes Rache).",
+        qm: "Mini-Schwerter aus 4 m auf einen Baum, es zählen Würfe: mit der Verrosteten Klinge 2, mit Stich 4 (es gibt 4 Schwerter, für mehr Würfe sammelt ihr sie wieder ein). Bestanden, wenn mindestens eins stecken bleibt (Vorschlag, vorher testen). Der Sieg bringt die Dicke Nadel für Rikes Rache.",
         win:  { packs: 3, items: ["nadel_dick"] },
         lose: { packs: -2 },
-        fluch: "Ein Schwert mehr.",
-        einsetzbar: ["stich", "spruchrolle"], revanche: true },
+        fluch: "Ein Wurf mehr.",
+        einsetzbar: ["klinge_rost", "stich", "spruchrolle"], revanche: true },
 
       // Ersetzt am 28.09. die Feuerprobe („Der Ruf“) und ist eine Sidequest, id bleibt. Gibt seit 01.10. einen Fluch statt des Schilds
       { id: "feuerprobe", nr: 3, typ: "side", name: "Hüter der Flamme", ort: "Mittelstation", station: "aussicht",
@@ -247,11 +275,11 @@
       { id: "rache", nr: 16, typ: "kern", name: "Rikes Rache", ort: "Mittelstation", station: "aussicht",
         farbe: "#d8405e", emblem: "i-nadel",
         text: "Rike hat verraten, was du gar nicht kannst. Einfädeln, bevor die Zeit abläuft.",
-        qm: "Faden durchs Nadelöhr auf Zeit, das genaue Spiel legst du fest. Vorschlag: fünf Nadeln an fünf Stellen rund um die Mittelstation, eine Uhr für alle, 20 Sekunden je Treffer im Tagebuch (mindestens 60). Es zählt die dickste Nadel, die Dennis hat: ohne Nadel-Item feine Nadeln, sonst Stopfnadeln oder dicke Nadeln. Anlecken und Zwirbeln erlaubt, keine Einfädelhilfe.",
+        qm: "Faden durchs Nadelöhr auf Zeit, das genaue Spiel legst du fest. Vorschlag: fünf Nadeln an fünf Stellen rund um die Mittelstation, eine Uhr für alle, 20 Sekunden je Treffer im Tagebuch (mindestens 60). Es zählt die dickste Nadel, die Dennis hat: feine Nadeln, mit der Dicken Nadel dicke. Anlecken und Zwirbeln erlaubt, keine Einfädelhilfe.",
         win:  { packs: 4, ziffer: 4 },
         lose: { packs: -2 },
         fluch: "Mehr Zeit auf der Uhr.",
-        einsetzbar: ["nadel_stopf", "nadel_dick", "spruchrolle"], revanche: true },
+        einsetzbar: ["nadel_fein", "nadel_dick", "spruchrolle"], revanche: true },
 
       { id: "bund", nr: 5, typ: "kern", name: "Prüfung des Bundes", ort: "Blombergkreuz", station: "gipfel",
         farbe: "#f2c94c", emblem: "z-triforce",
