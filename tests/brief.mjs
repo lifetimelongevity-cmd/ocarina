@@ -84,9 +84,21 @@ async function halten(p, ms) {
   await p.setViewportSize({ width: 780, height: 360 }); await warte(1000);
   pruefe(!(await sichtbar(p, '#brief')), 'Gedreht: der Brief ist weg');
   pruefe(await sichtbar(p, '#introScreen') && await sichtbar(p, '#startQuest'), 'Gedreht: das Titelbild mit PRESS START');
+  await warte(1200);
+  pruefe(await p.$eval('#introScreen', e => e.dataset.musik) === 'an', 'Titelbild nach dem Brief: die Musik läuft (das Siegel hat den Ton freigeschaltet)');
   await p.screenshot({ path: `${OUT}/brief-4-titel.png` });
   await p.reload({ waitUntil: 'load' }); await warte(900);
   pruefe(!(await sichtbar(p, '#brief')) && await sichtbar(p, '#introScreen'), 'Neu geladen: kein Brief mehr, gleich das Titelbild');
+  await warte(600);
+  const m0 = await p.$eval('#introScreen', e => e.dataset.musik);
+  pruefe(m0 === 'an' || (m0 === 'gesperrt' && await p.$eval('#musikBtn', e => e.classList.contains('lockt'))), 'Neu geladen: Musik läuft, oder der Notenknopf leuchtet: ' + m0);
+  await p.click('#musikBtn'); await warte(700);
+  const m1 = await p.$eval('#introScreen', e => e.dataset.musik);
+  pruefe(await sichtbar(p, '#introScreen') && m1 === (m0 === 'an' ? 'aus' : 'an'), 'Notenknopf schaltet um, ohne PRESS START: ' + m0 + ' → ' + m1);
+  if (m1 === 'aus') { await p.click('#musikBtn'); await warte(700); }
+  pruefe(await p.$eval('#introScreen', e => e.dataset.musik) === 'an', 'Notenknopf: Musik an');
+  await p.click('#introScreen'); await warte(300);
+  pruefe(await p.$eval('#introScreen', e => e.dataset.musik) === 'aus', 'PRESS START blendet die Musik aus');
   await ctx.close();
 }
 

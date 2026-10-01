@@ -124,6 +124,17 @@ svg { display: block; }
 .install-btn[hidden] { display: none; }
 .fullscreen-toggle[hidden] ~ .install-btn, .install-btn:has(~ .fullscreen-toggle[hidden]) { right: max(12px, var(--sa-r)); }
 @keyframes installGlow { 50% { opacity: 1; } }
+/* Titelmusik (01.10.): oben links, wie der Vollbild-Knopf. Aus: Note durchgestrichen. Gesperrt: leuchtet golden, Tipp startet sie */
+.musik-btn { position: absolute; z-index: 3; top: max(10px, var(--sa-t)); left: max(12px, var(--sa-l)); display: grid; place-items: center; width: calc(var(--hud-h) - 4px); height: calc(var(--hud-h) - 4px);
+  padding: 0; border: 0; border-radius: 4px; cursor: pointer; color: #12172a; background: linear-gradient(135deg, #d6dae7, #858ba7 65%, #555b75); box-shadow: inset 2px 2px 0 #f4f6ff, 2px 3px 0 #000; }
+.musik-btn svg { width: 62%; height: 62%; }
+.musik-btn .mb-an, .musik-btn[aria-pressed="false"] .mb-aus { display: block; }
+.musik-btn .mb-aus, .musik-btn[aria-pressed="false"] .mb-an { display: none; }
+.musik-btn[aria-pressed="true"] { color: #f3d75c; background: linear-gradient(135deg, #36466d, #15203e 65%, #080d20); }
+.musik-btn.lockt .mb-aus { display: none; } .musik-btn.lockt .mb-an { display: block; }
+.musik-btn.lockt { color: #1c1604; background: linear-gradient(#f5d766, #d8aa2d 60%, #a57a12); outline: 1.5px solid var(--gold); }
+.musik-btn.lockt::after { content: ""; position: absolute; inset: -2px; border-radius: inherit; pointer-events: none; box-shadow: 0 0 16px rgba(242,201,76,.7); opacity: 0; animation: installGlow 2.4s ease-in-out infinite; }
+.musik-btn[hidden] { display: none; }
 
 /* ---------- Schultertasten Z / R ----------
    Die Form ist ein SVG in der Taste (30.09.), vorher clip-path: Auf dem Galaxy S24 verschwanden damit Teile der Tasten. */

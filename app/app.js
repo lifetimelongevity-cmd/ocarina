@@ -230,6 +230,64 @@
     } catch (_) { return () => {}; }
   }
 
+  /* Titelmusik (01.10., Wunsch des Nutzers): eigene Komposition, keine Originalmusik. Ein ruhiges Waldthema im Dreiertakt:
+     Harfe (gezupft, Achtel im Akkord), Flöte (Sinus mit Vibrato) und Bass, 16 Takte nach zwei Takten Vorspiel, dann von vorn.
+     Töne als MIDI-Nummern, Melodie je Takt als [Ton, Schläge] (0 = Pause). */
+  const TITEL = {
+    schlag: .7,
+    akkorde: [[55, 59, 62, 67], [52, 55, 59, 64], [48, 55, 60, 64], [50, 57, 62, 66], [55, 59, 62, 67], [47, 54, 59, 62], [48, 55, 60, 64], [50, 57, 62, 66],
+              [52, 55, 59, 64], [48, 55, 60, 64], [55, 59, 62, 67], [50, 57, 62, 66], [48, 55, 60, 64], [50, 57, 62, 66], [55, 59, 62, 67], [55, 59, 62, 67]],
+    melodie: [[[74, 2], [79, 1]], [[76, 2], [74, 1]], [[72, 1], [76, 1], [79, 1]], [[78, 2], [74, 1]],
+              [[79, 1.5], [81, .5], [83, 1]], [[81, 2], [78, 1]], [[79, 1], [76, 1], [72, 1]], [[74, 3]],
+              [[71, 1], [74, 1], [79, 1]], [[76, 2], [72, 1]], [[74, 1.5], [79, .5], [83, 1]], [[81, 3]],
+              [[79, 1], [76, 1], [84, 1]], [[83, 1.5], [81, .5], [78, 1]], [[79, 3]], [[0, 3]]]
+  };
+  const hz = m => 440 * Math.pow(2, (m - 69) / 12);
+  // Spielt das Thema in Schleife, vier Takte im Voraus eingeplant. Gibt eine Funktion zurück, die es ausblendet.
+  function titelThema() {
+    const haupt = audio.createGain(), s = TITEL.schlag;
+    haupt.connect(audio.destination);
+    const huelle = (o, g, t0, ende) => { o.connect(g).connect(haupt); o.start(t0); o.stop(ende); };
+    const harfe = (m, t0) => {
+      const o = audio.createOscillator(), g = audio.createGain();
+      o.type = "triangle"; o.frequency.setValueAtTime(hz(m), t0);
+      g.gain.setValueAtTime(.0001, t0); g.gain.exponentialRampToValueAtTime(.03, t0 + .006); g.gain.exponentialRampToValueAtTime(.0001, t0 + 1.5);
+      huelle(o, g, t0, t0 + 1.55);
+    };
+    const floete = (m, t0, d) => {
+      if (!m) return;
+      const o = audio.createOscillator(), g = audio.createGain(), v = audio.createOscillator(), vg = audio.createGain();
+      o.type = "sine"; o.frequency.setValueAtTime(hz(m), t0);
+      v.frequency.value = 5.2; vg.gain.setValueAtTime(0, t0); vg.gain.linearRampToValueAtTime(hz(m) * .007, t0 + Math.min(.5, d * .6));
+      v.connect(vg).connect(o.frequency); v.start(t0); v.stop(t0 + d + .3);
+      g.gain.setValueAtTime(.0001, t0); g.gain.exponentialRampToValueAtTime(.05, t0 + .07);
+      g.gain.setValueAtTime(.05, t0 + d * .8); g.gain.exponentialRampToValueAtTime(.0001, t0 + d + .18);
+      huelle(o, g, t0, t0 + d + .25);
+    };
+    const bass = (m, t0, d) => {
+      const o = audio.createOscillator(), g = audio.createGain();
+      o.type = "sine"; o.frequency.setValueAtTime(hz(m - 12), t0);
+      g.gain.setValueAtTime(.0001, t0); g.gain.exponentialRampToValueAtTime(.07, t0 + .03); g.gain.exponentialRampToValueAtTime(.0001, t0 + d);
+      huelle(o, g, t0, t0 + d + .05);
+    };
+    let t = audio.currentTime + .15, takt = -2, timer = null, aus = false;
+    const takte = n => {
+      for (let i = 0; i < n; i++, takt++) {
+        const k = takt < 0 ? 0 : takt % 16, a = TITEL.akkorde[k];
+        [0, 2, 3, 1, 3, 2].forEach((j, e) => harfe(a[j], t + e * s / 2));
+        bass(a[0], t, 3 * s * .95);
+        if (takt >= 0) { let m = t; TITEL.melodie[k].forEach(([ton, b]) => { floete(ton, m, b * s * .96); m += b * s; }); }
+        t += 3 * s;
+      }
+    };
+    const weiter = () => { if (aus) return; takte(4); timer = setTimeout(weiter, Math.max(0, (t - audio.currentTime - 1.5) * 1000)); };
+    weiter();
+    return (ms = 1200) => {
+      aus = true; clearTimeout(timer);
+      try { const j = audio.currentTime; haupt.gain.setValueAtTime(1, j); haupt.gain.linearRampToValueAtTime(.0001, j + ms / 1000); setTimeout(() => haupt.disconnect(), ms + 300); } catch (_) {}
+    };
+  }
+
   /* ---------- Symbole für Quests ---------- */
   function medalHtml(q, st, isNext) {
     const cls = st === "bestanden" || st === "beendet" ? "won" : st === "verloren" ? "lost" : st === "laeuft" ? "running" : "";
@@ -2577,6 +2635,7 @@
   function beginQuest() {
     if (intro.hidden || intro.classList.contains("is-leaving")) return;
     tone("confirm");
+    titelMusik.aus(1600);
     intro.classList.add("is-leaving");
     setTimeout(() => {
       intro.hidden = true;
@@ -2920,6 +2979,7 @@
         el.hidden = true; el.classList.remove("zu-ende", "gebrochen", "halten");
         briefOffen = false;
         introFx.start();
+        setTimeout(titelMusik.an, 500);                  // nach dem Klang der Fee, das Siegel hat den Ton freigeschaltet
       }, STILL.matches ? 0 : 700);
     }
 
@@ -2936,6 +2996,44 @@
       el.hidden = false;
     }
     return { installiert: installiertMelden, offen: () => briefOffen };
+  })();
+
+  /* ---------- Musik auf dem Startbildschirm (01.10., Wunsch des Nutzers) ----------
+     Läuft, solange das Titelbild zu sehen ist (Thema: titelThema() oben). Handys spielen Klang erst nach einem Tipp: Nach dem
+     Brief (Siegel) läuft sie sofort, die installierte App darf sie meist ohnehin. Sonst leuchtet oben links der Notenknopf,
+     ein Tipp darauf startet sie (ohne PRESS START). Derselbe Knopf schaltet sie aus, das Handy merkt es sich (dq-musik-aus).
+     PRESS START blendet sie aus, ein gesperrtes Handy hält sie an. intro.dataset.musik: an, aus, gesperrt (für die Tests). */
+  const titelMusik = (() => {
+    const knopf = $("#musikBtn"), AUS_KEY = "dq-musik-aus";
+    let stop = null, versuch = 0;
+    const stumm = () => { try { return localStorage.getItem(AUS_KEY) === "1"; } catch (_) { return false; } };
+    const sichtbar = () => !intro.hidden && !intro.classList.contains("is-leaving") && !briefOffen && !document.hidden;
+    function zeigen(z) { intro.dataset.musik = z; knopf.setAttribute("aria-pressed", String(z === "an")); knopf.classList.toggle("lockt", z === "gesperrt"); }
+    // Startet, wenn das Handy Klang erlaubt. Ohne Erlaubnis bleibt es bei „gesperrt“, bis jemand tippt.
+    async function an(vomKnopf) {
+      if (stop) return zeigen("an");
+      if (stumm() && !vomKnopf) return zeigen("aus");
+      if (!sichtbar()) return;
+      const nr = ++versuch;
+      try {
+        try { if (navigator.audioSession) navigator.audioSession.type = "playback"; } catch (_) {}   // iPhone: auch mit Stummschalter
+        audio ??= new (window.AudioContext || window.webkitAudioContext)();
+        if (audio.state !== "running") await Promise.race([audio.resume(), new Promise(r => setTimeout(r, 400))]);
+      } catch (_) {}
+      if (nr !== versuch || stop || !sichtbar()) return;
+      if (!audio || audio.state !== "running") return zeigen("gesperrt");
+      stop = titelThema();
+      zeigen("an");
+    }
+    function aus(ms = 1200) { versuch++; if (stop) { stop(ms); stop = null; } zeigen("aus"); }
+    knopf.addEventListener("click", e => {
+      e.stopPropagation();                                 // kein PRESS START
+      if (stop) { try { localStorage.setItem(AUS_KEY, "1"); } catch (_) {} aus(400); }
+      else { try { localStorage.removeItem(AUS_KEY); } catch (_) {} an(true); }
+    });
+    document.addEventListener("visibilitychange", () => (document.hidden ? (stop && (stop(200), stop = null)) : an()));
+    an();
+    return { an: () => an(), aus };
   })();
 
   /* ---------- Demo: Buchungen simulieren, ohne Firebase ---------- */
