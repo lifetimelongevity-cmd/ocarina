@@ -24,6 +24,7 @@ const zurAusruestung = async p => { await p.evaluate(() => document.querySelecto
 // 1. Freitag (seit 01.10.): Der Beutel ist leer, vier Felder voller Schatten. Die Spritze bringt die Fee am Samstagmorgen.
 {
   const ctx = await b.newContext({ viewport: { width: 844, height: 390 }, isMobile: true, hasTouch: true });
+  await ctx.addInitScript(() => { try { localStorage.setItem('dq-brief-v1', '1'); localStorage.setItem('dq-brief-v1-probe', '1'); } catch (e) {} });   // ohne den Brief vor dem Titelbild (eigener Test: brief.mjs)
   const p = await ctx.newPage(); p.on('pageerror', e => fehler.push('start: ' + e.message));
   await p.goto(BASE + '?demo=start&direkt'); await warte(700);
   await zu(p);
@@ -45,6 +46,7 @@ const zurAusruestung = async p => { await p.evaluate(() => document.querySelecto
 // Nach dem Morgen gehört die Spritze Dennis, von Rikes Fee
 {
   const ctx = await b.newContext({ viewport: { width: 844, height: 390 }, isMobile: true, hasTouch: true });
+  await ctx.addInitScript(() => { try { localStorage.setItem('dq-brief-v1', '1'); localStorage.setItem('dq-brief-v1-probe', '1'); } catch (e) {} });   // ohne den Brief vor dem Titelbild (eigener Test: brief.mjs)
   const p = await ctx.newPage(); p.on('pageerror', e => fehler.push('mitte: ' + e.message));
   await p.goto(BASE + '?demo=mitte&direkt'); await warte(700);
   await zu(p);
@@ -56,6 +58,7 @@ const zurAusruestung = async p => { await p.evaluate(() => document.querySelecto
 
 // 2. Admin und Dennis: Podrennen bringt die kleine Pistole, Glanzsieg im Kartenwurf die große
 const ctx = await b.newContext({ viewport: { width: 852, height: 393 }, isMobile: true, hasTouch: true });
+await ctx.addInitScript(() => { try { localStorage.setItem('dq-brief-v1', '1'); localStorage.setItem('dq-brief-v1-probe', '1'); } catch (e) {} });   // ohne den Brief vor dem Titelbild (eigener Test: brief.mjs)
 await ctx.route('**/config.js', async r => { const res = await r.fetch(); r.fulfill({ response: res, body: (await res.text()).replace('typ: "firebase"', 'typ: "lokal"') }); });
 const seite = async url => { const p = await ctx.newPage(); p.on('pageerror', e => fehler.push(url + ': ' + e.message)); await p.goto(BASE + url); await warte(500); return p; };
 const admin = await seite('admin.html');

@@ -25,6 +25,31 @@
     // Keine Startitems mehr (01.10.): Am Freitag im Zug hat Dennis noch nichts, die Basis-Items bringt die Fee am Samstagmorgen
     startitems: [],
 
+    /* Der Brief (01.10., Wunsch des Nutzers): Dennis weiß nichts vom Spiel, er bekommt nur den Link. Beim allerersten Öffnen
+       liegt vor dem Titelbild ein versiegelter Brief von Fabio und Bene. Er hält das Siegel gedrückt, der Brief geht auf,
+       danach das P.S. mit dem Startbildschirm und „Jetzt dreh dein Handy“. Dreht er, geht das Titelbild auf.
+       Einmal pro Handy, Alles zurücksetzen zeigt ihn wieder, ?brief zeigt ihn immer (zum Ansehen).
+       absaetze: der Brief, Absatz für Absatz. ps: darunter, mit dem Knopf für den Startbildschirm */
+    brief: {
+      an: "An Dennis",
+      geheim: "Nur für deine Augen",
+      hinweis: "Halte das Siegel gedrückt",
+      anrede: "Dennis,",
+      absaetze: [
+        "der Bund hat getagt. Das Urteil ist gefallen: Dein letztes Abenteuer als freier Mann beginnt.",
+        "Damit das klar ist: Das hier ist keine Spaßveranstaltung. Hier gibt es nichts geschenkt. Jedes Pack, jede Ziffer, jeder Sieg will verdient sein. Und wir tun alles, damit du scheiterst.",
+        "Ab jetzt beobachten wir dich."
+      ],
+      gruss: "Fabio und Bene",
+      wer: "Der Bund",
+      ps: "Zieh dir das Spiel auf deinen Startbildschirm. Dann läuft es im Vollbild und ist immer griffbereit. Und mach den Ton an.",
+      installiert: "Liegt auf deinem Startbildschirm. Ab jetzt öffnest du es dort.",
+      dreh: "Jetzt dreh dein Handy.",
+      sperre: "Dreht sich nichts? Automatisch drehen einschalten.",
+      sperreIos: "Dreht sich nichts? Ausrichtungssperre im Kontrollzentrum aus.",
+      quer: "Bereit? Dann los."
+    },
+
     /* Der Morgen (01.10., Wunsch des Nutzers): Zwischensequenz am Samstagmorgen. Rikes Fee hat in der Nacht bei Dennis zu Hause
        ein paar Dinge geholt, Buu Huu will sie ihr abjagen, sie verjagt ihn, dann kommen die vier Basis-Items aus dem Beutel.
        Ab da hat Dennis in jedem Feld der Ausrüstung Stufe 1 und spielt den Tag über die Upgrades frei.

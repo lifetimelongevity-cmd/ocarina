@@ -15,6 +15,7 @@ const b = await chromium.launch();
 
 // Galaxy S24 quer in Chrome mit Statusleiste (knappster Fall). Admin und Dennis im selben Browser, Speicher „lokal“
 const ctx = await b.newContext({ viewport: { width: 780, height: 280 }, isMobile: true, hasTouch: true, deviceScaleFactor: 2 });
+await ctx.addInitScript(() => { try { localStorage.setItem('dq-brief-v1', '1'); localStorage.setItem('dq-brief-v1-probe', '1'); } catch (e) {} });   // ohne den Brief vor dem Titelbild (eigener Test: brief.mjs)
 await ctx.route('**/config.js', async r => { const res = await r.fetch(); r.fulfill({ response: res, body: (await res.text()).replace('typ: "firebase"', 'typ: "lokal"') }); });
 const seite = async url => { const p = await ctx.newPage(); p.on('pageerror', e => fehler.push(url + ': ' + e.message)); await p.goto(BASE + url); await warte(500); return p; };
 const fenster = async p => (await p.isVisible('#overlay')) ? (await p.textContent('#overlay')).replace(/\s+/g, ' ').trim() : '';

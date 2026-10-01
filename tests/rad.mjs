@@ -13,6 +13,7 @@ const pruefe = (bed, text) => (bed ? ok : fehler).push(text);
 const warte = ms => new Promise(r => setTimeout(r, ms));
 const b = await chromium.launch();
 const ctx = await b.newContext({ viewport: { width: 780, height: 300 }, isMobile: true, hasTouch: true });   // Galaxy S24, Samsung Internet
+await ctx.addInitScript(() => { try { localStorage.setItem('dq-brief-v1', '1'); localStorage.setItem('dq-brief-v1-probe', '1'); } catch (e) {} });   // ohne den Brief vor dem Titelbild (eigener Test: brief.mjs)
 const p = await ctx.newPage();
 p.on('pageerror', e => fehler.push('Seite: ' + e.message));
 await p.goto(BASE + '?demo=mitte&direkt'); await warte(900);

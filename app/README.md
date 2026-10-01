@@ -55,6 +55,11 @@ Dennis' Antworten und Einträge liegen bewusst neben dem Spiel, damit das Speich
 - Sprungknöpfe: Start, Nach dem Zug, Mitte, Vor dem Bund, Ende, Zufall. Danach ganz normal weiterbuchen.
 - Test im Browser: `tests/probe.mjs`.
 
+## Den Link an Dennis schicken
+
+- Schick ihm einfach `https://docarina.vercel.app/` (seit 01.10.). Beim allerersten Öffnen liegt vor dem Titelbild ein **versiegelter Brief von Fabio und Bene**, auch hochkant: Er hält das Siegel gedrückt, liest, im P.S. zieht er sich das Spiel auf den Startbildschirm (Knopf oder zwei Schritte je Browser), dann dreht er das Handy und das Titelbild geht auf. Danach wie bisher PRESS START und Prolog.
+- Text ändern: `config.js`, Abschnitt `brief`. Selbst ansehen: `docarina.vercel.app/?probe` (einmal pro Handy) oder `?demo&brief` (immer).
+
 ## Ablauf am Spieltag (Quest Master)
 
 - **Vertippt:** Oben rechts **Rückgängig**. Darunter steht, was zurückgenommen wird. Nimmt jede Änderung zurück, auch Sprünge und „Alles zurücksetzen“, bis zu 40 Schritte, und merkt sich das auch nach dem Neuladen. Ist bei Dennis das Ergebnis-Fenster noch offen, geht es still zu.

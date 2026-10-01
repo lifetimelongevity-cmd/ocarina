@@ -40,6 +40,8 @@
   const obGemerkt = key => { try { return !DEMO && !OB_ERZWINGEN && localStorage.getItem(key) === "1"; } catch (e) { return false; } };
   const obMerken = key => { try { if (!DEMO) localStorage.setItem(key, "1"); } catch (e) {} };
   const OB_KEY = "dq-onboarding-v1" + (PROBE ? "-probe" : "");
+  const BRIEF_KEY = "dq-brief-v1" + (PROBE ? "-probe" : "");   // der Brief vor dem Titelbild (01.10.), einmal pro Handy
+  let briefOffen = false;
   let beutelGezeigt = obGemerkt(OB_KEY);
   const onboarded = () => beutelGezeigt || spaeter();
   const DEMO_DOCS = {
@@ -1289,6 +1291,8 @@
       else if (art === "wirbel") for (let i = 0; i < 22; i++) rauschen(.05, .05 + i * .006, 900, t + i * .045);
       else if (art === "donner") { rauschen(1.1, .45, 260); ton(110, 38, .9, "sawtooth", .07); }
       else if (art === "glueck") ton(880, 1760, .25, "triangle", .06);
+      else if (art === "bruch") { rauschen(.16, .5, 4200); ton(190, 55, .3, "sine", .3); }     // das Siegel des Briefs bricht
+      else if (art === "grollen") { rauschen(1.3, .16, 140); ton(55, 48, 1.2, "sine", .12); }   // beim Halten des Siegels
     } catch (_) {}
   }
 
@@ -2675,7 +2679,7 @@
       }
       ctx.globalAlpha = 1;
     }
-    function start() { if (raf || still.matches || intro.hidden) return; size(); last = 0; raf = requestAnimationFrame(frame); }
+    function start() { if (raf || still.matches || intro.hidden || briefOffen) return; size(); last = 0; raf = requestAnimationFrame(frame); }
     function stop() { cancelAnimationFrame(raf); raf = 0; }
     if ("ResizeObserver" in window) new ResizeObserver(size).observe(canvas);
     document.addEventListener("visibilitychange", () => (document.hidden ? stop() : start()));
@@ -2737,6 +2741,7 @@
     installEvent = null; installiert = true;
     try { localStorage.setItem(INST_KEY, "1"); } catch (_) {}
     updateInstall();
+    if (briefOffen) return brief.installiert();          // im Brief sagt es das P.S.
     melody("side");
     showOverlay({ head: `<span class="ri-big">${useSvg("i-check")}</span><p class="big">INSTALLIERT</p><p class="sub">Dennis Quest liegt jetzt auf deinem Startbildschirm.</p>`,
       lines: `<li><span class="ri">▶</span>Ab jetzt dort öffnen, dann läuft es im Vollbild.</li>` });
@@ -2753,6 +2758,152 @@
   updateInstall();
   document.addEventListener("fullscreenchange", updateFs);
   document.addEventListener("webkitfullscreenchange", updateFs);
+
+  /* ---------- Der Brief (01.10., Wunsch des Nutzers) ----------
+     Dennis weiß nichts vom Spiel, er bekommt nur den Link, meist aus WhatsApp und hochkant. Beim allerersten Öffnen liegt vor
+     dem Titelbild ein versiegelter Brief von Fabio und Bene (Texte in config.js, brief). Er hält das Siegel gedrückt (so lernt
+     er gleich die Geste, die er den ganzen Tag braucht, und das Handy darf ab da Klang spielen), das Siegel bricht, der Brief
+     entfaltet sich. Tippen zeigt das P.S.: auf den Startbildschirm, Ton an, „Jetzt dreh dein Handy“. Dreht er (oder tippt
+     LOS), geht das Titelbild auf. Einmal pro Handy (gemerkt, sobald er das P.S. sieht), nie mit ?direkt, in der Demo nur mit
+     ?brief, ?brief zeigt ihn immer. Alles zurücksetzen vergisst ihn. */
+  const brief = (() => {
+    const B = C.brief, el = $("#brief"), zu = $("#briefZu"), offen = $("#briefOffen"), ps = $("#briefPs"), siegel = $("#briefSiegel");
+    const HALTEN = STILL.matches ? 600 : 1200;
+    const SAMSUNG = /SamsungBrowser/i.test(navigator.userAgent);
+    const quer = matchMedia("(orientation: landscape)");
+    let timer = null, schritt = "zu", fertigTimer = null;
+    const gemerkt = () => { try { return localStorage.getItem(BRIEF_KEY) === "1"; } catch (_) { return false; } };
+    const zeigen = !!B && !params.has("direkt") && (params.has("brief") || (!DEMO && !gemerkt()));
+
+    function aufbauen() {
+      $("#briefAn").textContent = B.an;
+      $("#briefGeheim").textContent = B.geheim;
+      $("#briefHinweis").textContent = B.hinweis;
+      const zeilen = [`<p class="anrede">${esc(B.anrede)}</p>`, ...B.absaetze.map(a => `<p>${esc(a)}</p>`),
+        `<p class="gruss">${esc(B.gruss)}<small>${esc(B.wer)}</small></p>`];
+      $("#briefText").innerHTML = zeilen.map((z, i) => z.replace("<p", `<p style="--i:${i}"`)).join("");
+      $("#briefPsText").textContent = B.ps;
+    }
+
+    // Siegel gedrückt halten, bis sich der Ring schließt
+    function start(e) {
+      if (schritt !== "zu" || timer) return;
+      if (e) e.preventDefault();
+      el.style.setProperty("--halten", HALTEN / 1000 + "s");
+      el.classList.add("halten");
+      tone("move"); klang("grollen");
+      timer = setTimeout(brechen, HALTEN);
+    }
+    function abbrechen() { if (!timer) return; clearTimeout(timer); timer = null; el.classList.remove("halten"); }
+    function brechen() {
+      timer = null; schritt = "bricht";
+      el.classList.remove("halten"); el.classList.add("gebrochen");
+      klang("bruch"); melody("siegel");
+      setTimeout(() => melody("zauber"), 420);
+      setTimeout(entfalten, STILL.matches ? 200 : 750);
+    }
+    function entfalten() {
+      schritt = "offen";
+      zu.hidden = true; offen.hidden = false;
+      el.querySelector(".brief-papier").classList.add("auf");
+      const n = offen.querySelectorAll(".brief-text p").length;
+      fertigTimer = setTimeout(fertig, STILL.matches ? 0 : 500 + (n - 1) * 1100 + 900);
+    }
+    function fertig() { clearTimeout(fertigTimer); offen.classList.add("alles", "fertig"); }
+    // Tippen (auf den Brief oder daneben): erst alles zeigen, dann das P.S.
+    el.addEventListener("click", () => {
+      if (schritt !== "offen") return;
+      if (!offen.classList.contains("fertig")) return fertig();
+      tone("move");
+      nachschrift();
+    });
+
+    // P.S.: Startbildschirm und Drehen. Ab hier hat er den Brief gelesen, das Handy merkt es sich.
+    function nachschrift() {
+      schritt = "ps";
+      try { localStorage.setItem(BRIEF_KEY, "1"); } catch (_) {}
+      offen.hidden = true; ps.hidden = false;
+      installZeigen();
+      drehZeigen();
+    }
+    function installZeigen() {
+      const da = isStandalone() || (installiert && !installEvent);
+      $("#briefInstall").hidden = da || !(installEvent || IOS || ANDROID);
+      $("#briefOk").hidden = !da;
+      $("#briefOk").textContent = B.installiert;
+    }
+    function installiertMelden() { $("#briefSchritte").hidden = true; installZeigen(); melody("side"); }
+    $("#briefInstall").addEventListener("click", async e => {
+      e.stopPropagation();
+      tone("confirm");
+      if (installEvent) {
+        const ev = installEvent;
+        installEvent = null;                     // das Fenster lässt sich nur einmal öffnen
+        try { await ev.prompt(); const w = await ev.userChoice; if (w && w.outcome === "accepted") return; } catch (_) {}
+        updateInstall();
+      }
+      // Kein Fenster vom Handy (iPhone, abgebrochen, Samsung Internet ohne Angebot): die Schritte von Hand
+      const s = IOS ? ["Unten auf Teilen tippen (bei neuem iOS erst auf „…“).", "„Zum Home-Bildschirm“, dann „Hinzufügen“."]
+        : SAMSUNG ? ["Unten rechts auf ≡ tippen.", "„Seite hinzufügen zu“, dann „Startbildschirm“."]
+        : ["Oben rechts auf ⋮ tippen.", "„Zum Startbildschirm hinzufügen“ oder „App installieren“."];
+      $("#briefSchritte").innerHTML = s.map(x => `<li><span>${esc(x)}</span></li>`).join("");
+      $("#briefSchritte").hidden = false;
+      $("#briefInstall").hidden = true;
+    });
+
+    // Hochkant: „Jetzt dreh dein Handy“, Drehen öffnet das Titelbild. Android kann auch LOS: Vollbild und quer, selbst wenn
+    // das automatische Drehen aus ist. Quer: „Bereit? Dann los.“ und LOS.
+    const vollbildGeht = () => ANDROID && !!(document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen);
+    function drehZeigen() {
+      const q = quer.matches;
+      $(".brief-handy").hidden = q;
+      $("#briefDrehText").textContent = q ? B.quer : B.dreh;
+      $("#briefSperre").textContent = q ? "" : IOS ? B.sperreIos : B.sperre;
+      $("#briefLos").hidden = !q && !vollbildGeht();
+    }
+    quer.addEventListener?.("change", () => {
+      if (schritt === "ps" && quer.matches) return schliessen();
+      if (schritt === "ps") drehZeigen();
+    });
+    $("#briefLos").addEventListener("click", async e => {
+      e.stopPropagation();
+      if (schritt !== "ps") return;
+      if (quer.matches) return schliessen();
+      try {
+        const d = document.documentElement, req = d.requestFullscreen || d.webkitRequestFullscreen;
+        await Promise.resolve(req.call(d, { navigationUI: "hide" }));
+        await screen.orientation.lock("landscape");    // dreht das Bild, das Ereignis oben schließt den Brief
+      } catch (_) {}
+      setTimeout(() => { if (schritt === "ps" && quer.matches) schliessen(); }, 400);
+    });
+
+    // Der Brief geht, das Titelbild geht mit Klang auf
+    function schliessen() {
+      if (schritt === "weg") return;
+      schritt = "weg";
+      el.classList.add("zu-ende");
+      melody("zauber");
+      setTimeout(() => {
+        el.hidden = true; el.classList.remove("zu-ende", "gebrochen", "halten");
+        briefOffen = false;
+        introFx.start();
+      }, STILL.matches ? 0 : 700);
+    }
+
+    siegel.addEventListener("pointerdown", start);
+    ["pointerup", "pointerleave", "pointercancel"].forEach(t => siegel.addEventListener(t, abbrechen));
+    siegel.addEventListener("contextmenu", e => e.preventDefault());
+    siegel.addEventListener("keydown", e => { if ((e.key === "Enter" || e.key === " ") && !e.repeat) start(e); });
+    siegel.addEventListener("keyup", e => { if (e.key === "Enter" || e.key === " ") abbrechen(); });
+
+    if (zeigen) {
+      aufbauen();
+      briefOffen = true;
+      introFx.stop();
+      el.hidden = false;
+    }
+    return { installiert: installiertMelden, offen: () => briefOffen };
+  })();
 
   /* ---------- Demo: Buchungen simulieren, ohne Firebase ---------- */
   if (DEMO) {
@@ -2864,7 +3015,7 @@
   function neuerAnfang(zeigen) {
     if (sammel) { clearTimeout(sammel.t); sammel = null; }
     if (szene) szene.still();
-    try { [OB_KEY, KARTE_KEY, FUND_KEY, ERSTE_KEY, "dq-gps" + (PROBE ? "-probe" : "")].forEach(k => localStorage.removeItem(k)); } catch (e) {}
+    try { [OB_KEY, KARTE_KEY, FUND_KEY, ERSTE_KEY, BRIEF_KEY, "dq-gps" + (PROBE ? "-probe" : "")].forEach(k => localStorage.removeItem(k)); } catch (e) {}
     abspann.schliessen(); abspann.vergessen();
     morgen.ende(true); morgen.vergessen();
     beutelGezeigt = false; karteGesehen = false; gesehen = null; neuMarke.clear();

@@ -12,6 +12,7 @@ const b = await chromium.launch();
 
 async function seite(url, { w = 852, h = 393 } = {}) {
   const ctx = await b.newContext({ viewport: { width: w, height: h }, isMobile: true, hasTouch: true });
+  await ctx.addInitScript(() => { try { localStorage.setItem('dq-brief-v1', '1'); localStorage.setItem('dq-brief-v1-probe', '1'); } catch (e) {} });   // ohne den Brief vor dem Titelbild (eigener Test: brief.mjs)
   await ctx.route('**firebasedatabase.app**', r => r.abort());
   const p = await ctx.newPage();
   p.on('pageerror', e => fehler.push(url + ': ' + e.message));
@@ -60,6 +61,7 @@ for (const url of ['?demo', '?demo=bund']) {
 {
   // Echter Stand auf einem neuen Handy: im Speicher liegt schon ein Tag mit zwei entschiedenen Quests
   const ctx2 = await b.newContext({ viewport: { width: 852, height: 393 }, isMobile: true, hasTouch: true });
+  await ctx2.addInitScript(() => { try { localStorage.setItem('dq-brief-v1', '1'); localStorage.setItem('dq-brief-v1-probe', '1'); } catch (e) {} });   // ohne den Brief vor dem Titelbild (eigener Test: brief.mjs)
   await ctx2.route('**firebasedatabase.app**', r => r.abort());
   await ctx2.addInitScript(() => localStorage.setItem('dennis-quest-doc:dennis-jga-2026', JSON.stringify({ quests: { logbuch: 'bestanden', wirbel: 'verloren' }, stand: 1 })));
   const p2 = await ctx2.newPage(); p2.on('pageerror', e => fehler.push('neues Handy: ' + e.message));

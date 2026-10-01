@@ -39,6 +39,7 @@ const log = (...a) => { const s = a.join(' '); bericht.push(s); console.log(s); 
 async function neueSeite(browser, g, url, { lokal = false, schwach = false } = {}) {
   const ctx = await browser.newContext({ viewport: { width: g.w, height: g.h }, deviceScaleFactor: g.dpr, isMobile: true, hasTouch: true,
     userAgent: ua(g) });
+  await ctx.addInitScript(() => { try { localStorage.setItem('dq-brief-v1', '1'); localStorage.setItem('dq-brief-v1-probe', '1'); } catch (e) {} });   // ohne den Brief vor dem Titelbild (eigener Test: brief.mjs)
   if (lokal) await ctx.route('**/config.js', async r => { const res = await r.fetch(); r.fulfill({ response: res, body: (await res.text()).replace('typ: "firebase"', 'typ: "lokal"') }); });
   await ctx.route('**firebasedatabase.app**', r => r.abort());
   // Rikes echte Sprachnachrichten ausblenden (wie tests/geist.mjs): Das Chromium der Tests kann kein AAC, und Frage 1 dauert
@@ -262,6 +263,7 @@ for (const g of GERAETE.filter(g => !process.env.NUR || g.id.startsWith(process.
 {
   const g = GERAETE.find(x => x.id === 'samsung-chrome');
   const ctx = await browser.newContext({ viewport: { width: g.w, height: g.h }, deviceScaleFactor: g.dpr, isMobile: true, hasTouch: true, userAgent: UA_SAMSUNG });
+  await ctx.addInitScript(() => { try { localStorage.setItem('dq-brief-v1', '1'); localStorage.setItem('dq-brief-v1-probe', '1'); } catch (e) {} });   // ohne den Brief vor dem Titelbild (eigener Test: brief.mjs)
   await ctx.route('**firebasedatabase.app**', r => r.abort());
   const page = await ctx.newPage();
   const cdp = await ctx.newCDPSession(page);
@@ -301,6 +303,7 @@ for (const g of GERAETE.filter(g => !process.env.NUR || g.id.startsWith(process.
 {
   const g = GERAETE.find(x => x.id === 'iphone15-home');
   const ctx = await browser.newContext({ viewport: { width: g.w, height: g.h }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, userAgent: UA_IOS });
+  await ctx.addInitScript(() => { try { localStorage.setItem('dq-brief-v1', '1'); localStorage.setItem('dq-brief-v1-probe', '1'); } catch (e) {} });   // ohne den Brief vor dem Titelbild (eigener Test: brief.mjs)
   await ctx.route('**/config.js', async r => { const res = await r.fetch(); r.fulfill({ response: res, body: (await res.text()).replace('typ: "firebase"', 'typ: "lokal"') }); });
   const dennis = await ctx.newPage();
   dennis.on('pageerror', e => fehler.push('dennis: ' + e.message));

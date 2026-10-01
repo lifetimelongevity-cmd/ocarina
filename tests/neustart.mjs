@@ -11,6 +11,7 @@ const b = await chromium.launch();
 
 // Admin und Dennis im selben Browser, Speicher „lokal“: beide Seiten sehen sich über localStorage
 const ctx = await b.newContext({ viewport: { width: 852, height: 393 }, isMobile: true, hasTouch: true });
+await ctx.addInitScript(() => { try { localStorage.setItem('dq-brief-v1', '1'); localStorage.setItem('dq-brief-v1-probe', '1'); } catch (e) {} });   // ohne den Brief vor dem Titelbild (eigener Test: brief.mjs)
 await ctx.route('**/config.js', async r => { const res = await r.fetch(); r.fulfill({ response: res, body: (await res.text()).replace('typ: "firebase"', 'typ: "lokal"') }); });
 // Jedes Fenster, das bei Dennis aufgeht, wird mitgeschrieben
 await ctx.addInitScript(() => {
@@ -129,6 +130,7 @@ pruefe((await admin.textContent('#lbList')).includes('Neu 7'), 'Tagebuch-Knopf: 
 // und es schreibt nichts auf den Server.
 {
   const ctx2 = await b.newContext({ viewport: { width: 852, height: 393 }, isMobile: true, hasTouch: true });
+  await ctx2.addInitScript(() => { try { localStorage.setItem('dq-brief-v1', '1'); localStorage.setItem('dq-brief-v1-probe', '1'); } catch (e) {} });   // ohne den Brief vor dem Titelbild (eigener Test: brief.mjs)
   const schreibt = [];
   await ctx2.route('**firebasedatabase.app/**', async r => {
     if (r.request().method() !== 'GET') { schreibt.push(r.request().method()); return r.fulfill({ status: 200, body: 'null' }); }
@@ -154,8 +156,8 @@ pruefe((await admin.textContent('#lbList')).includes('Neu 7'), 'Tagebuch-Knopf: 
   await p.evaluate(() => { while (!document.getElementById('coach').hidden) document.getElementById('coach').click(); });
   await warte(3500);
   pruefe((await p.evaluate(() => window.__fenster.slice(-1)[0] || '')).includes('NEUER ANFANG'), 'Firebase-Handy: Fenster NEUER ANFANG');
-  const speicher = await p.evaluate(() => ['dennis-quest-eintraege:dennis-jga-2026-dennis', 'dennis-quest-logbuch:dennis-jga-2026-logbuch', 'dq-prolog-v2', 'dq-onboarding-v1'].map(k => localStorage.getItem(k)));
-  pruefe(speicher.join('|') === '{}|{}||', 'Firebase-Handy vergisst Einträge, Tagebuch, Prolog, Beutel: ' + speicher.join('|'));
+  const speicher = await p.evaluate(() => ['dennis-quest-eintraege:dennis-jga-2026-dennis', 'dennis-quest-logbuch:dennis-jga-2026-logbuch', 'dq-prolog-v2', 'dq-onboarding-v1', 'dq-brief-v1'].map(k => localStorage.getItem(k)));
+  pruefe(speicher.join('|') === '{}|{}|||', 'Firebase-Handy vergisst Einträge, Tagebuch, Prolog, Beutel, Brief: ' + speicher.join('|'));
   await p.click('#overlay'); await warte(700);
   await p.click('#introScreen'); await warte(700);
   pruefe(await p.isVisible('#prolog'), 'Firebase-Handy: nach dem Neuladen gleich PRESS START, der Prolog kommt');

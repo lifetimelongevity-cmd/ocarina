@@ -14,6 +14,7 @@ const b = await chromium.launch();
 
 // Admin und Dennis im selben Browser, Speicher „lokal“: beide Seiten sehen sich über localStorage
 const ctx = await b.newContext({ viewport: { width: 852, height: 393 }, isMobile: true, hasTouch: true });
+await ctx.addInitScript(() => { try { localStorage.setItem('dq-brief-v1', '1'); localStorage.setItem('dq-brief-v1-probe', '1'); } catch (e) {} });   // ohne den Brief vor dem Titelbild (eigener Test: brief.mjs)
 await ctx.route('**/config.js', async r => { const res = await r.fetch(); r.fulfill({ response: res, body: (await res.text()).replace('typ: "firebase"', 'typ: "lokal"') }); });
 const seite = async url => { const p = await ctx.newPage(); p.on('pageerror', e => fehler.push(url + ': ' + e.message)); await p.goto(BASE + url); await warte(500); return p; };
 const fenster = async p => (await p.isVisible('#overlay')) ? (await p.textContent('#overlay')).replace(/\s+/g, ' ').trim() : '';
@@ -168,6 +169,7 @@ await ctx.close();
 
 // Gipfel (Demo): Tor mit fehlender Ziffer 3, Amulett bringt Rikes Segen, dann Duelle und Ergebnis nach der Mehrheit
 const ctx2 = await b.newContext({ viewport: { width: 844, height: 340 }, isMobile: true, hasTouch: true });
+await ctx2.addInitScript(() => { try { localStorage.setItem('dq-brief-v1', '1'); localStorage.setItem('dq-brief-v1-probe', '1'); } catch (e) {} });   // ohne den Brief vor dem Titelbild (eigener Test: brief.mjs)
 const p = await ctx2.newPage(); p.on('pageerror', e => fehler.push('gipfel: ' + e.message));
 await p.goto(BASE + '?demo=bund&direkt'); await warte(600);
 pruefe(await p.isVisible('#questCard [data-tor="3"][data-weg="busse"]') && await p.isVisible('#questCard [data-tor="3"][data-weg="packs"]'), 'Tor: Ziffer 3 fehlt, für Packs oder per Buße');
@@ -211,6 +213,7 @@ await ctx2.close();
 // Tor per Bußprüfung und für Packs
 for (const [weg, titel] of [['busse', 'BUSSE BESTANDEN'], ['packs', 'ZIFFER GEKAUFT']]) {
   const ctx3 = await b.newContext({ viewport: { width: 852, height: 393 }, isMobile: true, hasTouch: true });
+  await ctx3.addInitScript(() => { try { localStorage.setItem('dq-brief-v1', '1'); localStorage.setItem('dq-brief-v1-probe', '1'); } catch (e) {} });   // ohne den Brief vor dem Titelbild (eigener Test: brief.mjs)
   const t = await ctx3.newPage(); t.on('pageerror', e => fehler.push('tor: ' + e.message));
   await t.goto(BASE + '?demo=bund&direkt'); await warte(600);
   const vorher = +(await t.textContent('#packsVal'));

@@ -3,6 +3,7 @@
 import { chromium } from 'playwright';
 const b = await chromium.launch();
 const ctx = await b.newContext({ viewport: { width: 852, height: 393 } });
+await ctx.addInitScript(() => { try { localStorage.setItem('dq-brief-v1', '1'); localStorage.setItem('dq-brief-v1-probe', '1'); } catch (e) {} });   // ohne den Brief vor dem Titelbild (eigener Test: brief.mjs)
 await ctx.route('**firebasedatabase.app**', r => r.abort());
 const p = await ctx.newPage();
 const err = []; p.on('pageerror', e => err.push(e.message));

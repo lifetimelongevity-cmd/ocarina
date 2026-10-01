@@ -12,6 +12,7 @@ const pruefe = (bed, text) => (bed ? ok : fehler).push(text);
 
 const b = await chromium.launch();
 const ctx = await b.newContext();
+await ctx.addInitScript(() => { try { localStorage.setItem('dq-brief-v1', '1'); localStorage.setItem('dq-brief-v1-probe', '1'); } catch (e) {} });   // ohne den Brief vor dem Titelbild (eigener Test: brief.mjs)
 await ctx.route('**/config.js', async r => { const res = await r.fetch(); r.fulfill({ response: res, body: (await res.text()).replace('typ: "firebase"', 'typ: "lokal"') }); });
 await ctx.route('**firebasedatabase.app**', r => r.abort());
 const seite = async (url, w, h) => {

@@ -8,6 +8,7 @@ const ok = [], fehler = [];
 const pruefe = (bed, text) => (bed ? ok : fehler).push(text);
 const b = await chromium.launch();
 const ctx = await b.newContext({ viewport: { width: 780, height: 360 }, deviceScaleFactor: 3, isMobile: true, hasTouch: true });
+await ctx.addInitScript(() => { try { localStorage.setItem('dq-brief-v1', '1'); localStorage.setItem('dq-brief-v1-probe', '1'); } catch (e) {} });   // ohne den Brief vor dem Titelbild (eigener Test: brief.mjs)
 await ctx.addInitScript(() => { Object.defineProperty(navigator, 'hardwareConcurrency', { get: () => 8 }); Object.defineProperty(navigator, 'deviceMemory', { get: () => 8 }); });
 await ctx.route('**firebasedatabase.app**', r => r.abort());
 const p = await ctx.newPage();

@@ -13,6 +13,7 @@ const pruefe = (bed, text) => (bed ? ok : fehler).push(text);
 const warte = ms => new Promise(r => setTimeout(r, ms));
 const b = await chromium.launch();
 const ctx = await b.newContext({ viewport: { width: 844, height: 340 }, isMobile: true, hasTouch: true });   // iPhone 13 in Safari, das kleinste
+await ctx.addInitScript(() => { try { localStorage.setItem('dq-brief-v1', '1'); localStorage.setItem('dq-brief-v1-probe', '1'); } catch (e) {} });   // ohne den Brief vor dem Titelbild (eigener Test: brief.mjs)
 const text = async (p, sel) => ((await p.textContent(sel).catch(() => '')) || '').replace(/\s+/g, ' ').trim();
 const fenster = async p => (await p.isVisible('#overlay')) ? text(p, '#overlay') : '';
 const szeneUeberspringen = async p => { for (let i = 0; i < 80 && await p.isVisible('#fluchSzene') && !(await p.evaluate(() => document.getElementById('fluchSzene').classList.contains('steht'))); i++) await warte(200); if (await p.isVisible('#fluchSzene')) { await p.click('#fluchSzene'); await warte(500); } };
