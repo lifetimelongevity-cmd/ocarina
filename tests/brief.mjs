@@ -40,7 +40,8 @@ async function halten(p, ms) {
   const { ctx, p } = await seite(360, 680, 'samsung');
   pruefe(await sichtbar(p, '#brief'), 'S24 hochkant: der Brief liegt da');
   pruefe(await p.evaluate(() => document.elementFromPoint(innerWidth / 2, innerHeight / 2).closest('#brief') !== null), 'S24 hochkant: der Brief liegt über „Handy quer halten“');
-  pruefe((await p.textContent('#briefZu')).includes('An Dennis') && (await p.textContent('#briefZu')).includes('Halte das Siegel gedrückt'), 'Verschlossen: „An Dennis“ und „Halte das Siegel gedrückt“');
+  const zuText = await p.textContent('#briefZu');
+  pruefe(zuText.includes('An Dennis') && zuText.includes('Mach den Ton an') && zuText.includes('Halte das Siegel gedrückt'), 'Verschlossen: „An Dennis“, gleich „Mach den Ton an“, „Halte das Siegel gedrückt“');
   pruefe(await passt(p), 'S24 hochkant: verschlossener Brief passt ins Bild');
   await p.screenshot({ path: `${OUT}/brief-1-zu.png` });
   await halten(p, 300); await warte(500);
@@ -59,6 +60,7 @@ async function halten(p, ms) {
   pruefe(await sichtbar(p, '#briefPs'), 'Zweiter Tipp: das P.S.');
   pruefe(await p.evaluate(() => localStorage.getItem('dq-brief-v1')) === '1', 'Ab dem P.S. merkt sich das Handy den Brief');
   pruefe(await sichtbar(p, '#briefInstall'), 'P.S.: Knopf AUF DEN STARTBILDSCHIRM');
+  pruefe(!(await p.textContent('#briefPsText')).includes('Ton'), 'Der Ton steht nicht noch einmal im P.S.');
   pruefe((await p.textContent('#briefDrehText')) === 'Jetzt dreh dein Handy.' && (await sichtbar(p, '.brief-handy')), 'Hochkant: „Jetzt dreh dein Handy.“ mit Handy');
   pruefe((await p.textContent('#briefSperre')).includes('Automatisch drehen'), 'Hinweis aufs automatische Drehen (Android)');
   pruefe(await sichtbar(p, '#briefLos'), 'Android hochkant: LOS (Vollbild und quer)');

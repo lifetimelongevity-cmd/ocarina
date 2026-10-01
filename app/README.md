@@ -57,7 +57,7 @@ Dennis' Antworten und Einträge liegen bewusst neben dem Spiel, damit das Speich
 
 ## Den Link an Dennis schicken
 
-- Schick ihm einfach `https://docarina.vercel.app/` (seit 01.10.). Beim allerersten Öffnen liegt vor dem Titelbild ein **versiegelter Brief von Fabio und Bene**, auch hochkant: Er hält das Siegel gedrückt, liest, im P.S. zieht er sich das Spiel auf den Startbildschirm (Knopf oder zwei Schritte je Browser), dann dreht er das Handy und das Titelbild geht auf. Danach wie bisher PRESS START und Prolog.
+- Schick ihm einfach `https://docarina.vercel.app/` (seit 01.10.). Beim allerersten Öffnen liegt vor dem Titelbild ein **versiegelter Brief von Fabio und Bene**, auch hochkant: „Mach den Ton an“, dann hält er das Siegel gedrückt, liest, im P.S. zieht er sich das Spiel auf den Startbildschirm (Knopf oder zwei Schritte je Browser), dann dreht er das Handy und das Titelbild geht auf. Danach wie bisher PRESS START und Prolog.
 - Text ändern: `config.js`, Abschnitt `brief`. Selbst ansehen: `docarina.vercel.app/?probe` (einmal pro Handy) oder `?demo&brief` (immer).
 
 ## Ablauf am Spieltag (Quest Master)

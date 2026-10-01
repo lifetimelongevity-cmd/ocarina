@@ -27,12 +27,13 @@
 
     /* Der Brief (01.10., Wunsch des Nutzers): Dennis weiß nichts vom Spiel, er bekommt nur den Link. Beim allerersten Öffnen
        liegt vor dem Titelbild ein versiegelter Brief von Fabio und Bene. Er hält das Siegel gedrückt, der Brief geht auf,
-       danach das P.S. mit dem Startbildschirm und „Jetzt dreh dein Handy“. Dreht er, geht das Titelbild auf.
+       danach das P.S. mit dem Startbildschirm und „Jetzt dreh dein Handy“. „Mach den Ton an“ steht schon auf dem verschlossenen Brief. Dreht er, geht das Titelbild auf.
        Einmal pro Handy, Alles zurücksetzen zeigt ihn wieder, ?brief zeigt ihn immer (zum Ansehen).
        absaetze: der Brief, Absatz für Absatz. ps: darunter, mit dem Knopf für den Startbildschirm */
     brief: {
       an: "An Dennis",
       geheim: "Nur für deine Augen",
+      ton: "Mach den Ton an",                         // gleich am Anfang (Wunsch des Nutzers), Siegelbruch und Titelbild klingen
       hinweis: "Halte das Siegel gedrückt",
       anrede: "Dennis,",
       absaetze: [
@@ -40,7 +41,7 @@
       ],
       gruss: "Fabio und Bene",
       wer: "Der Bund",
-      ps: "Zieh dir das Spiel auf deinen Startbildschirm. Dann läuft es im Vollbild und ist immer griffbereit. Und mach den Ton an.",
+      ps: "Zieh dir das Spiel auf deinen Startbildschirm. Dann läuft es im Vollbild und ist immer griffbereit.",
       installiert: "Liegt auf deinem Startbildschirm. Ab jetzt öffnest du es dort.",
       dreh: "Jetzt dreh dein Handy.",
       sperre: "Dreht sich nichts? Automatisch drehen einschalten.",

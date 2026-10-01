@@ -2763,7 +2763,8 @@
      Dennis weiß nichts vom Spiel, er bekommt nur den Link, meist aus WhatsApp und hochkant. Beim allerersten Öffnen liegt vor
      dem Titelbild ein versiegelter Brief von Fabio und Bene (Texte in config.js, brief). Er hält das Siegel gedrückt (so lernt
      er gleich die Geste, die er den ganzen Tag braucht, und das Handy darf ab da Klang spielen), das Siegel bricht, der Brief
-     entfaltet sich. Tippen zeigt das P.S.: auf den Startbildschirm, Ton an, „Jetzt dreh dein Handy“. Dreht er (oder tippt
+     entfaltet sich. „Mach den Ton an“ steht schon auf dem verschlossenen Brief. Tippen zeigt das P.S.: auf den Startbildschirm,
+     „Jetzt dreh dein Handy“. Dreht er (oder tippt
      LOS), geht das Titelbild auf. Einmal pro Handy (gemerkt, sobald er das P.S. sieht), nie mit ?direkt, in der Demo nur mit
      ?brief, ?brief zeigt ihn immer. Alles zurücksetzen vergisst ihn. */
   const brief = (() => {
@@ -2778,6 +2779,7 @@
     function aufbauen() {
       $("#briefAn").textContent = B.an;
       $("#briefGeheim").textContent = B.geheim;
+      $("#briefTon").textContent = B.ton;
       $("#briefHinweis").textContent = B.hinweis;
       const zeilen = [`<p class="anrede">${esc(B.anrede)}</p>`, ...B.absaetze.map(a => `<p>${esc(a)}</p>`),
         `<p class="gruss">${esc(B.gruss)}<small>${esc(B.wer)}</small></p>`];

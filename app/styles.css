@@ -694,13 +694,18 @@ html.probe body::after { content: ""; position: fixed; inset: 0; z-index: 9999; 
 /* Verschlossen: gefaltet, die Falz läuft durch das Siegel */
 .brief-zu { display: grid; justify-items: center; gap: 6px; text-align: center; }
 .brief-zu[hidden], .brief-offen[hidden], .brief-ps[hidden] { display: none; }
-.brief-zu::before { content: ""; position: absolute; left: 0; right: 0; top: 56%; height: 1px; pointer-events: none;
-  background: linear-gradient(90deg, transparent, rgba(90,60,20,.4) 18%, rgba(90,60,20,.4) 82%, transparent); box-shadow: 0 1px 0 rgba(255,255,255,.35); }
 .brief-an { margin: 4px 0 0; font: 400 clamp(26px, 8vmin, 32px)/1.1 "Hylia Serif", Georgia, serif; letter-spacing: .03em; }
-.brief-geheim { margin: 0 0 8px; font: italic 400 13px/1.2 Georgia, serif; color: #7a5a2a; }
+.brief-geheim { margin: 0 0 6px; font: italic 400 13px/1.2 Georgia, serif; color: #7a5a2a; }
+.brief-ton { display: inline-flex; align-items: center; gap: 7px; margin: 0 0 4px; padding: 5px 11px 5px 9px; border: 1px solid rgba(90,60,20,.35); border-radius: 999px;
+  background: rgba(255,255,255,.28); font: 800 11px/1 "Courier New", monospace; letter-spacing: .1em; text-transform: uppercase; color: #3b2a12; }
+.brief-ton svg { width: 17px; height: 17px; flex: none; color: #a3221b; }
 .brief-siegel { position: relative; display: block; width: min(108px, 30vh); aspect-ratio: 1; margin: 4px 0; padding: 0; border: 0; border-radius: 50%; background: none; cursor: pointer;
   touch-action: none; -webkit-tap-highlight-color: transparent; }
 .brief-siegel:focus-visible { outline: 2px solid #3b2a12; outline-offset: 4px; }
+/* Die Falz des gefalteten Briefs läuft quer durch das Siegel, das Papier schneidet sie ab */
+.brief-papier { overflow: hidden; }
+.brief-siegel::before { content: ""; position: absolute; top: 50%; left: -70vw; right: -70vw; z-index: -1; height: 1px; pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(90,60,20,.4) 35%, rgba(90,60,20,.4) 65%, transparent); box-shadow: 0 1px 0 rgba(255,255,255,.35); }
 .brief-siegel::after { content: ""; position: absolute; inset: -40%; border-radius: 50%; pointer-events: none; opacity: 0;
   background: radial-gradient(circle, rgba(255,232,160,.95) 0%, rgba(255,200,90,.45) 30%, transparent 62%); }
 .brief-ring { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg); pointer-events: none; }
@@ -727,7 +732,7 @@ html.probe body::after { content: ""; position: fixed; inset: 0; z-index: 9999; 
 .brief.gebrochen .brief-ring { opacity: 0; transition: opacity .3s; }
 .brief-hinweis { margin: 4px 0 2px; font: 800 11px/1.2 "Courier New", monospace; letter-spacing: .12em; text-transform: uppercase; color: #7a5a2a; animation: hinweisPuls 1.8s ease-in-out infinite; }
 @keyframes hinweisPuls { 50% { opacity: .45; } }
-.brief.gebrochen .brief-hinweis, .brief.gebrochen .brief-an, .brief.gebrochen .brief-geheim { opacity: 0; transition: opacity .35s; animation: none; }
+.brief.gebrochen .brief-hinweis, .brief.gebrochen .brief-an, .brief.gebrochen .brief-geheim, .brief.gebrochen .brief-ton, .brief.gebrochen .brief-siegel::before { opacity: 0; transition: opacity .35s; animation: none; }
 
 /* Offen: der Brief entfaltet sich, Absatz für Absatz */
 .brief-offen { position: relative; padding-bottom: 6px; animation: briefAuf 500ms ease-out both; cursor: pointer; }
@@ -772,7 +777,6 @@ html.probe body::after { content: ""; position: fixed; inset: 0; z-index: 9999; 
 /* Querformat, wenig Höhe (Galaxy S24 ab 280 px): breiter Brief, kleinere Schrift, P.S. in zwei Spalten */
 @media (orientation: landscape) {
   .brief-papier { width: min(100%, 580px); padding: clamp(10px, 4.5vh, 20px) clamp(16px, 5vh, 26px); }
-  .brief-zu::before { top: 54%; }
   .brief-geheim { margin-bottom: 2px; }
   .brief-text { font-size: clamp(12.5px, 4.7vh, 15px); line-height: 1.42; }
   .brief-text p { margin-bottom: .5em; }
