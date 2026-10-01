@@ -128,6 +128,8 @@
   let cWahl = [], cWahlFuer = "", cNeu = null;  // was in den Plätzen liegt und noch nicht besiegelt ist, für welches Spiel, was gerade dazukam
   let zuQuests = false;                         // nach dem Mitnehmen zurück zu QUESTS, sobald der Moment zu ist
   let audio;
+  // Ton immer an (01.10., Wunsch des Nutzers): Auf dem iPhone schluckt der Stummschalter sonst alle Klänge der Seite
+  try { if (navigator.audioSession) navigator.audioSession.type = "playback"; } catch (_) {}
 
   function tone(kind = "move") {
     try {
@@ -2844,7 +2846,7 @@
     const HALTEN = (B && B.halten) || 15000, hinweis = $("#briefHinweis");
     const SAMSUNG = /SamsungBrowser/i.test(navigator.userAgent);
     const quer = matchMedia("(orientation: landscape)");
-    let timer = null, schritt = "zu", fertigTimer = null, texte = [], brumm = null;
+    let timer = null, schritt = "zu", fertigTimer = null, texte = [], brumm = null, losgelassen = 0;
     const gemerkt = () => { try { return localStorage.getItem(BRIEF_KEY) === "1"; } catch (_) { return false; } };
     const zeigen = !!B && !params.has("direkt") && (params.has("brief") || (!DEMO && !gemerkt()));
 
@@ -2876,7 +2878,8 @@
     function abbrechen() {
       if (!timer) return;
       aufhoeren();
-      hinweis.textContent = B.losgelassen || B.hinweis;
+      const sprueche = [].concat(B.losgelassen || B.hinweis);
+      hinweis.textContent = sprueche[Math.min(losgelassen++, sprueche.length - 1)];   // erst der Waldschrat, dann „Jaaa, genau!!“
       hinweis.classList.remove("schimpf"); void hinweis.offsetWidth; hinweis.classList.add("schimpf");
       tone("error");
     }
@@ -3014,18 +3017,18 @@
   /* ---------- Musik auf dem Startbildschirm (01.10., Wunsch des Nutzers) ----------
      Läuft, solange das Titelbild zu sehen ist (Thema: titelThema() oben). Handys spielen Klang erst nach einem Tipp: Nach dem
      Brief (Siegel) läuft sie sofort, die installierte App darf sie meist ohnehin. Sonst leuchtet oben links der Notenknopf,
-     ein Tipp darauf startet sie (ohne PRESS START). Derselbe Knopf schaltet sie aus, das Handy merkt es sich (dq-musik-aus).
-     PRESS START blendet sie aus, ein gesperrtes Handy hält sie an. intro.dataset.musik: an, aus, gesperrt (für die Tests). */
+     ein Tipp darauf startet sie (ohne PRESS START). Ausschalten lässt sie sich nicht (Wunsch des Nutzers: Ton immer an), der
+     Knopf erscheint nur, solange das Handy noch keinen Klang erlaubt. PRESS START blendet sie aus, ein gesperrtes Handy hält
+     sie an. intro.dataset.musik: an, aus, gesperrt (für die Tests). */
   const titelMusik = (() => {
-    const knopf = $("#musikBtn"), AUS_KEY = "dq-musik-aus";
+    const knopf = $("#musikBtn");
     let stop = null, versuch = 0;
-    const stumm = () => { try { return localStorage.getItem(AUS_KEY) === "1"; } catch (_) { return false; } };
+    try { localStorage.removeItem("dq-musik-aus"); } catch (_) {}   // bis 01.10. ließ sich die Musik ausschalten, das gilt nicht mehr
     const sichtbar = () => !intro.hidden && !intro.classList.contains("is-leaving") && !briefOffen && !document.hidden;
-    function zeigen(z) { intro.dataset.musik = z; knopf.setAttribute("aria-pressed", String(z === "an")); knopf.classList.toggle("lockt", z === "gesperrt"); }
+    function zeigen(z) { intro.dataset.musik = z; knopf.hidden = z !== "gesperrt"; knopf.setAttribute("aria-pressed", String(z === "an")); knopf.classList.toggle("lockt", z === "gesperrt"); }
     // Startet, wenn das Handy Klang erlaubt. Ohne Erlaubnis bleibt es bei „gesperrt“, bis jemand tippt.
     async function an(vomKnopf) {
       if (stop) return zeigen("an");
-      if (stumm() && !vomKnopf) return zeigen("aus");
       if (!sichtbar()) return;
       const nr = ++versuch;
       try {
@@ -3041,8 +3044,7 @@
     function aus(ms = 1200) { versuch++; if (stop) { stop(ms); stop = null; } zeigen("aus"); }
     knopf.addEventListener("click", e => {
       e.stopPropagation();                                 // kein PRESS START
-      if (stop) { try { localStorage.setItem(AUS_KEY, "1"); } catch (_) {} aus(400); }
-      else { try { localStorage.removeItem(AUS_KEY); } catch (_) {} an(true); }
+      an(true);
     });
     document.addEventListener("visibilitychange", () => (document.hidden ? (stop && (stop(200), stop = null)) : an()));
     an();

@@ -992,7 +992,7 @@ button.dabei-zeile { cursor: pointer; }
   background: radial-gradient(circle at 40% 32%, #3a300c, #0c0a04 72%); box-shadow: 0 0 0 2.5px var(--gold), 0 3px 6px rgba(0,0,0,.8); }
 .platz.fluch .platz-feld { border-radius: 50%; }
 .platz-feld svg { width: 70%; height: 70%; color: var(--c, var(--gold)); filter: drop-shadow(1px 1px 0 #000); }
-.platz-name { font: 900 clamp(8.5px, 2.6vh, 10px)/1 "Courier New", monospace; letter-spacing: .08em; color: var(--gold); text-shadow: 1px 1px 0 #000, 0 0 4px #000; }
+.platz-name { font: 900 clamp(10px, 2.9vh, 11px)/1 "Courier New", monospace; letter-spacing: .08em; color: var(--gold); text-shadow: 1px 1px 0 #000, 0 0 4px #000; }
 .platz.leer .platz-feld { background: rgba(12,10,4,.7); box-shadow: 0 3px 6px rgba(0,0,0,.8); outline: 2px dashed rgba(242,201,76,.6); outline-offset: -2px; }
 .platz.leer .platz-feld svg { opacity: .3; filter: grayscale(1); }
 .platz.leer .platz-name { color: rgba(242,201,76,.75); }

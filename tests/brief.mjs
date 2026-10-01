@@ -49,9 +49,11 @@ async function halten(p, ms) {
   await halten(p, 300); await warte(500);
   pruefe(await sichtbar(p, '#briefZu') && !(await p.$eval('#brief', e => e.classList.contains('gebrochen'))), 'Kurzer Tipp aufs Siegel öffnet nichts');
   pruefe((await p.textContent('#briefHinweis')).includes('Waldschrat'), 'Zu früh losgelassen: „Ey, gedrückt halten, du Waldschrat!“');
+  await halten(p, 300); await warte(500);
+  pruefe((await p.textContent('#briefHinweis')).includes('Jaaa, genau!! Bro'), 'Zum zweiten Mal losgelassen: „Jaaa, genau!! Bro, GEDRÜCKT HALTEN …“');
   await p.screenshot({ path: `${OUT}/brief-1b-waldschrat.png` });
   await halten(p, HALT - 2500); await warte(500);
-  pruefe(await sichtbar(p, '#briefZu') && (await p.textContent('#briefHinweis')).includes('Waldschrat'), 'Auch nach ein paar Sekunden losgelassen: noch zu, wieder der Waldschrat');
+  pruefe(await sichtbar(p, '#briefZu') && (await p.textContent('#briefHinweis')).includes('Jaaa, genau'), 'Auch nach ein paar Sekunden losgelassen: noch zu, ab jetzt immer „Jaaa, genau!!“');
   {
     const k = await p.locator('#briefSiegel').boundingBox();
     await p.mouse.move(k.x + k.width / 2, k.y + k.height / 2); await p.mouse.down(); await warte(HALT * .5);
@@ -92,11 +94,9 @@ async function halten(p, ms) {
   await warte(600);
   const m0 = await p.$eval('#introScreen', e => e.dataset.musik);
   pruefe(m0 === 'an' || (m0 === 'gesperrt' && await p.$eval('#musikBtn', e => e.classList.contains('lockt'))), 'Neu geladen: Musik läuft, oder der Notenknopf leuchtet: ' + m0);
-  await p.click('#musikBtn'); await warte(700);
-  const m1 = await p.$eval('#introScreen', e => e.dataset.musik);
-  pruefe(await sichtbar(p, '#introScreen') && m1 === (m0 === 'an' ? 'aus' : 'an'), 'Notenknopf schaltet um, ohne PRESS START: ' + m0 + ' → ' + m1);
-  if (m1 === 'aus') { await p.click('#musikBtn'); await warte(700); }
-  pruefe(await p.$eval('#introScreen', e => e.dataset.musik) === 'an', 'Notenknopf: Musik an');
+  if (m0 === 'gesperrt') { await p.click('#musikBtn'); await warte(700); }
+  pruefe(await sichtbar(p, '#introScreen') && await p.$eval('#introScreen', e => e.dataset.musik) === 'an', 'Notenknopf startet die Musik, ohne PRESS START');
+  pruefe(!(await sichtbar(p, '#musikBtn')), 'Läuft die Musik, ist der Knopf weg: ausschalten geht nicht (Ton immer an)');
   await p.click('#introScreen'); await warte(300);
   pruefe(await p.$eval('#introScreen', e => e.dataset.musik) === 'aus', 'PRESS START blendet die Musik aus');
   await ctx.close();

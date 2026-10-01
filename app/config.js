@@ -37,7 +37,7 @@
       hinweis: "Halte das Siegel gedrückt",
       halten: 15000,                                  // Millisekunden, mit Absicht unverhältnismäßig lang (Wunsch des Nutzers: 15 s)
       haltenTexte: ["Halten …", "Weiter halten …", "Nicht loslassen …", "Noch nicht …", "Fast …", "Gleich …"],   // wechseln beim Halten
-      losgelassen: "Ey, gedrückt halten, du Waldschrat!",                                // lässt er zu früh los
+      losgelassen: ["Ey, gedrückt halten, du Waldschrat!", "Jaaa, genau!! Bro, GEDRÜCKT HALTEN …"],   // lässt er zu früh los: erst, ab dem zweiten Mal
       anrede: "Dennis,",
       absaetze: [
         "auch wenn nicht viel Zeit war … sollst du doch ein letztes Abenteuer als freier Mann haben."
