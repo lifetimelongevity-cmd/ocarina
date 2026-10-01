@@ -57,7 +57,7 @@ const admin = await seite('admin.html');
 await admin.$$eval('details', ds => ds.forEach(d => { d.open = true; }));
 admin.on('dialog', d => d.accept());
 await admin.click('#reset'); await warte(300);
-const dennis = await seite('?direkt');
+const dennis = await seite('?direkt&morgen');
 await frei();
 
 // Freitag im Zug: Log-Buch
@@ -68,15 +68,23 @@ for (let i = 0; i < 7; i++) {
   for (let k = 0; k < 30 && await dennis.isVisible('#geistRuf'); k++) { await dennis.click('#geistRuf', { timeout: 1500 }).catch(() => {}); await warte(200); }
 }
 await dennis.click('#lbClose'); await warte(300);
-await siegel(dennis, '#questCard [data-ergebnis="bestanden"]', 'PRÜFUNG BESTANDEN', 'Rikes Tagebuch');
+await dennis.tap('#questCard [data-ergebnis="bestanden"]'); await warte(350); await halten(dennis);
+pruefe((await fenster(dennis)).includes('PRÜFUNG BESTANDEN'), 'Rikes Tagebuch: „PRÜFUNG BESTANDEN“');
+await zu(dennis); await warte(600);
+pruefe(await dennis.$$eval('#slotsGear .slot.schatten', l => l.length) === 4, 'Freitag: noch kein Item');
 
-// Samstagmorgen: Amulett starten
+// Samstagmorgen (01.10.): Der Quest Master stößt den Morgen an, die Fee bringt die vier Basis-Items. Dann Amulett starten.
+await admin.click('#morgenBtn'); await warte(900);
+pruefe(await dennis.isVisible('#morgen'), 'Samstagmorgen: die Zwischensequenz läuft');
+for (let i = 0; i < 3 && await dennis.isVisible('#morgen'); i++) { await dennis.click('#mgSkip'); await warte(500); }
+pruefe(await dennis.$$eval('#slotsGear .slot.schatten', l => l.length) === 0, 'Nach dem Morgen: alle vier Felder mit Stufe 1');
 await admin.click('#lauf .lauf-q[data-id="amulett"] [data-a="start"]'); await warte(500);
 await zu(dennis);
+await frei();
 
-// Talstation
-await siegel(dennis, '#questCard [data-ergebnis="bestanden"]', 'SIDEQUEST BESTANDEN', 'Die drei Zeichen');
+// Talstation: seit 01.10. zuerst der Wirbel
 await siegel(dennis, '#questCard [data-ergebnis="verloren"]', 'PRÜFUNG VERLOREN', 'Wirbel der Götter');
+await siegel(dennis, '#questCard [data-ergebnis="bestanden"]', 'SIDEQUEST BESTANDEN', 'Die drei Zeichen');
 const pod = await siegel(dennis, '#questCard [data-ergebnis="bestanden"]', 'PRÜFUNG BESTANDEN', 'Podrennen');
 pruefe(pod.includes('Kleine Wasserpistole'), 'Podrennen bringt die Kleine Wasserpistole');
 
@@ -105,7 +113,7 @@ await siegel(dennis, '#questCard [data-ergebnis="bestanden"]', 'BESTANDEN', 'Amu
 await questOeffnen(dennis, 'rache');
 await dennis.tap('#questCard [data-ausruesten="rache"]'); await warte(1300);
 const nadeln = await dennis.$$eval('.slot.usable', els => els.map(e => e.dataset.id));
-pruefe(nadeln.includes('nadel_dick') && !nadeln.includes('nadel_stopf'), 'Rikes Rache: die dicke Nadel leuchtet');
+pruefe(nadeln.includes('nadel_dick') && !nadeln.includes('nadel_fein'), 'Rikes Rache: die dicke Nadel leuchtet, nicht die feine');
 await dennis.evaluate(() => document.querySelector('.shoulder-left').click()); await warte(1300);
 const rache = await siegel(dennis, '#questCard [data-ergebnis="bestanden"]', 'PRÜFUNG BESTANDEN', 'Rikes Rache');
 pruefe(rache.includes('Ziffer 4'), 'Rikes Rache bringt Ziffer 4');
@@ -141,10 +149,10 @@ await dennis.click('[data-ab="zu"]'); await warte(400);
 
 // Hütte: Kästchen. Erwartung aus engine.js mit denselben Ergebnissen
 const erwartet = E.derive(C, {
-  quests: { logbuch: 'bestanden', klingen: 'bestanden', wirbel: 'verloren', podrennen: 'bestanden', kartenwurf: 'bestanden', auge: 'bestanden',
+  quests: { logbuch: 'bestanden', wirbel: 'verloren', klingen: 'bestanden', podrennen: 'bestanden', kartenwurf: 'bestanden', auge: 'bestanden',
             deku: 'bestanden', feuerprobe: 'bestanden', rache: 'bestanden', bund: 'bestanden', amulett: 'bestanden' },
   glanz: { kartenwurf: true }, schritte: { amulett: { gefunden: true } },
-  zeiten: { logbuch: 1, klingen: 2, wirbel: 3, podrennen: 4, kartenwurf: 5, auge: 6, deku: 7, feuerprobe: 8, amulett: 9, rache: 10, bund: 11 }
+  zeiten: { logbuch: 1, wirbel: 2, klingen: 3, podrennen: 4, kartenwurf: 5, auge: 6, deku: 7, feuerprobe: 8, amulett: 9, rache: 10, bund: 11 }
 });
 pruefe((await dennis.textContent('#hudNextName')) === 'Zum Kästchen', 'Am Ende: Zum Kästchen');
 pruefe(Number(await dennis.textContent('#packsVal')) === erwartet.packs, `Dennis: ${erwartet.packs} Packs wie engine.js`);
@@ -152,7 +160,7 @@ pruefe(Number(await admin.textContent('#packs')) === erwartet.packs, `Admin: ${e
 const code = await dennis.$$eval('#tumblers .tumbler', els => els.map(e => e.textContent).join(''));
 pruefe(code === C.code.join(''), 'Code vollständig: ' + code);
 const inv = await admin.textContent('#inv');
-pruefe(['Spritze', 'Kleine Pistole', 'Große Pistole', 'Kreisel', 'Stich', 'Dicke Nadel', 'Schild', 'Segen'].every(x => inv.includes(x)) && !inv.includes('Nakama') && !inv.includes('Stopfnadel'), 'Admin-Inventar: alle drei Wasserwaffen, Kreisel, Stich, dicke Nadel, Schild, Rikes Segen, kein Nakama-Ruf, keine Stopfnadel (Wirbel verloren)');
+pruefe(['Spritze', 'Kleine Pistole', 'Große Pistole', 'Hülle', 'Klinge', 'Stich', 'Feine Nadel', 'Dicke Nadel', 'Schild', 'Segen'].every(x => inv.includes(x)) && !inv.includes('Nakama') && !inv.includes('Kreisel'), 'Admin-Inventar: alle drei Wasserwaffen, Hülle, beide Klingen und Nadeln, Schild, Rikes Segen, kein Kreisel');
 const liste = await admin.textContent('#verlauf');
 pruefe(liste.includes('Kartenwurf: Glanzsieg') && !liste.includes('gilt nicht'), 'Admin: alle Einträge von Dennis gelten, Kartenwurf als Glanzsieg');
 await dennis.click('#hudNext'); await warte(400);
@@ -161,7 +169,7 @@ await zu(dennis);
 // Ausrüstung am Ende
 await dennis.evaluate(() => document.querySelector('.shoulder-right').click()); await warte(1000); await zu(dennis);
 const slots = await dennis.$$eval('.slot', els => els.map(e => `${e.dataset.id}:${e.classList.contains('schatten') ? 'schatten' : [...e.classList].find(c => c.startsWith('st-'))}`));
-pruefe(slots.every(x => !x.endsWith('schatten') || x.startsWith('karten_gepanzert') || x.startsWith('nadel_stopf')), 'Ausrüstung: alles erspielt außer Gepanzerten Karten und Stopfnadel (Wirbel verloren)');
+pruefe(slots.every(x => !x.endsWith('schatten')) && slots.some(x => x.startsWith('huelle:')) && slots.some(x => x.startsWith('stich:')) && slots.some(x => x.startsWith('nadel_dick:')), 'Ausrüstung: kein Schatten, Karten bleiben bei der Leeren Hülle (Wirbel verloren), Stich und dicke Nadel');
 await dennis.screenshot({ path: `${OUT}/durchlauf-3-ausruestung.png` });
 await ctx.close();
 await b.close();

@@ -45,8 +45,7 @@
   const DEMO_DOCS = {
     start: { quests: {} },
     mitte: {
-      quests: { logbuch: "bestanden", klingen: "bestanden", wirbel: "verloren", podrennen: "bestanden", amulett: "laeuft" },
-      einsaetze: [{ id: "e1", item: "kreisel", quest: "wirbel" }],
+      quests: { logbuch: "bestanden", wirbel: "verloren", klingen: "bestanden", podrennen: "bestanden", amulett: "laeuft" },
       buchungen: [{ id: "b1", packs: -1, grund: "Strafe vom Quest Master" }]
     },
     // Kurz vor dem Ende: alles gespielt bis auf den Bund, am Tor fehlt Ziffer 3, danach zwei Revanchen, Amulett gefunden
@@ -89,9 +88,10 @@
   const questById = id => C.quests.find(q => q.id === id);
   const itemById = id => C.items.find(i => i.id === id);
   // Was Dennis von einem Item sieht: Solange er es nicht erspielt hat, nur den Schatten (die Form ist zu erkennen)
-  // und die Tarnung als Name. Beim Gewinnen „entpuppt" es sich. Das Startitem enthüllt der erste Besuch der Ausrüstung:
-  // Der Heilige Beutel des Helden entpuppt sich als Wasserspritze, im selben Feld (tarnSymbol zeigt bis dahin den Beutel).
+  // und die Tarnung als Name. Beim Gewinnen „entpuppt" es sich. Startitems enthüllt der erste Besuch der Ausrüstung
+  // (seit 01.10. gibt es keine mehr: Stufe 1 jedes Items bringt die Fee am Samstagmorgen, MORGEN).
   const START = C.startitems || [];
+  const MORGEN = (C.morgen && C.morgen.items) || [];
   const verborgen = id => START.includes(id) ? !onboarded() : state.items[id] === "nicht";
   const getarnt = id => !!itemById(id).tarn && verborgen(id);
   const itemSicht = id => {
@@ -155,7 +155,9 @@
     // Platzhalter, solange Rikes Sprachnachricht fehlt: die ersten Töne eines Liebesthemas (eigene Tonfolge)
     stimme:   [[659, .3], [784, .3], [880, .45], [784, .3], [659, .6]],
     // Der Schattendieb des Bundes kichert (Tagebuch, 30.09.)
-    kichern:  [[932, .06], [831, .06], [932, .06], [831, .06], [698, .08], [587, .26]]
+    kichern:  [[932, .06], [831, .06], [932, .06], [831, .06], [698, .08], [587, .26]],
+    // Sonnenaufgang am Samstagmorgen (01.10.)
+    morgen:   [[392, .16], [523, .16], [659, .16], [784, .22], [659, .12], [784, .12], [1047, .6]]
   };
   function melody(name) {
     try {
@@ -779,7 +781,7 @@
   function renderEquip() {
     pruefeWahl();
     const fq = fuerQuest(), mit = new Set(kannMit(fq)), schon = schonDabei(fq);
-    if (!sel[2]) sel[2] = [...mit][0] || state.erhalten[state.erhalten.length - 1] || START[0];
+    if (!sel[2]) sel[2] = [...mit][0] || state.erhalten[state.erhalten.length - 1] || START[0] || C.items[0].id;
     sel[2] = slotId(sel[2]);
     document.querySelectorAll(".slot").forEach(b => {
       if (b.dataset.feld) { b.dataset.id = feldZeigt(b.dataset.feld); b.style.setProperty("--c", itemById(b.dataset.id).farbe); }
@@ -832,6 +834,7 @@
     if (schatten) {
       const wie = q && q.glanz && (q.glanz.items || []).includes(id) ? "mit einem Glanzsieg " : "";
       if (q) extra = entgangen(id) ? `Entgangen bei ${em(q.id)}.` : aufgedeckt(q.id) ? `Zu holen ${wie}bei ${em(q.id)}.` : "Wartet im Nebel.";
+      else if (MORGEN.includes(id)) extra = "Kommt bald.";
     } else if (st === "verloren") {
       tag = `<span class="tag lost">VERLOREN</span>`;
       const nahm = C.quests.find(k => (k.lose && k.lose.items || []).includes(id) && state.quests[k.id] === "verloren");
@@ -848,6 +851,7 @@
     else if (E.abgeloest(C, state, id)) extra = `Abgelöst von ${esc(itemById(E.abgeloest(C, state, id)).name)}.`;
     else if (q && state.quests[q.id] !== "offen") extra = `Erbeutet bei ${em(q.id)}${state.glanz[q.id] && (q.glanz.items || []).includes(id) ? " (Glanzsieg)" : ""}.`;
     else if (START.includes(id)) extra = "Steckte in deinem Beutel.";
+    else if (MORGEN.includes(id)) extra = "Von Rikes Fee.";
     // Stufen in einem Feld: welche Stufe gerade drin ist
     if (x.feld && !schatten) { const xs = feldItems(x.feld); extra = `Stufe ${xs.findIndex(y => y.id === id) + 1} von ${xs.length}.${extra ? " " + extra : ""}`; }
     if (!schatten && neuMarke.has(id)) tag = `<span class="tag won">NEU</span>` + tag;
@@ -963,6 +967,8 @@
   function nachholen() {
     const alt = gesehenDoc && E.normalize(gesehenDoc), neu = lastDoc && E.normalize(lastDoc);
     merkeGesehen();
+    // Neues Handy, und der Morgen war schon: einmal zeigen
+    if (!alt && state && !DEMO && morgenFaellig(null, state)) return morgen.start(state.morgen, () => {});
     if (!alt || !neu || JSON.stringify({ ...alt, stand: 0 }) === JSON.stringify({ ...neu, stand: 0 })) return;
     const reihe = C.quests.map(q => q.id), zeit = id => Number(neu.zeiten[id]) || 9e15;
     // Einzeln nachgeholt wird nur, was neu entschieden oder gestartet ist. Was zurückgenommen wurde, kommt gesammelt
@@ -978,6 +984,13 @@
       docs.push(d);
     });
     docs.push(neu);
+    // Der Morgen ist ein eigener Schritt, bevor die Quests ab dem Samstag nachgeholt werden (Items erst, dann Upgrades)
+    const mz = E.morgenZeit(C, neu);
+    if (mz && !E.morgenZeit(C, alt)) {
+      const ab = docs.findIndex(d => E.morgenZeit(C, E.normalize(d)));   // der erste Schritt mit dem Morgen (nie der alte Stand)
+      const vorher = { ...JSON.parse(JSON.stringify(docs[ab - 1])), morgen: mz };
+      docs.splice(ab, 0, vorher);
+    }
     schlange = docs.slice(1).map((d, i) => [docs[i], d]);
     // Die neue nächste Quest bleibt im Nebel, bis alle Momente gelaufen sind
     const vorher = E.derive(C, alt);
@@ -1015,6 +1028,19 @@
   // dann tritt die nächste Quest erst am Ende der Reihe aus dem Nebel.
   function announce(prev, next, prevDoc, doc, opt = {}) {
     prevDoc = E.normalize(prevDoc); doc = E.normalize(doc);
+    // Läuft gerade der Morgen, kommt alles Neue danach dran
+    if (morgen.offen() && !opt.kette) { schlange.push([prevDoc, doc]); return true; }
+    // Der Morgen (01.10.): erst die Zwischensequenz, dann der Rest dieses Schritts (meist die Freigabe der ersten Quest am
+    // Samstag), als hätte Dennis die Items schon vorher gehabt. Ist ein Fenster offen, kommt er danach.
+    if (morgenFaellig(prev, next)) {
+      if (!opt.kette && !$("#overlay").hidden) { schlange.push([prevDoc, doc]); return true; }
+      morgen.start(next.morgen, () => {
+        const mitMorgen = { ...prevDoc, morgen: next.morgen };
+        if (!announce(E.derive(C, mitMorgen), next, mitMorgen, doc, opt) && (schlange.length || revealPending)) naechsterMoment();
+        renderHud(); renderQuests();
+      });
+      return true;
+    }
     const glanzNeu = q => next.glanz[q.id] && !prev.glanz[q.id];
     const fertig = C.quests.filter(q => (prev.quests[q.id] !== next.quests[q.id] && ["bestanden", "verloren", "beendet"].includes(next.quests[q.id])) || glanzNeu(q));
     const gestartet = LAUF.filter(q => prev.quests[q.id] === "offen" && next.quests[q.id] === "laeuft");
@@ -1404,23 +1430,25 @@
   }
 
   /* ---------- Onboarding: erster Besuch der Ausrüstung ---------- */
-  // Das Fundfenster zeigt den Heiligen Beutel des Helden, der sich als Wasserspritze entpuppt (ein Feld, 28.09.).
-  // Dann tritt die Spritze in ihrem Feld aus dem Schatten, danach kurze Hinweise der Fee.
+  // Mit Startitem zeigt das Fundfenster, wie es sich entpuppt, danach tritt es in seinem Feld aus dem Schatten.
+  // Seit 01.10. gibt es keins: Am Freitag ist der Beutel leer, die Fee kündigt an, dass sie am Morgen etwas bringt.
+  // Danach kurze Hinweise der Fee.
   let obLaeuft = false;
   function onboarding() {
     if (obLaeuft) return;
     obLaeuft = true;
-    const id = START[0], x = itemById(id);
+    const id = START[0], x = id && itemById(id);
     const fertig = () => {
       beutelGezeigt = true; obLaeuft = false;
       obMerken(OB_KEY);
       funde();                                   // erster Besuch: alles, was da ist, gilt als gesehen
-      aufleuchten([id]);
+      if (x) aufleuchten([id]);
+      const leer = !x && !C.items.some(it => state.items[it.id] !== "nicht");
       setTimeout(() => coach([
-        [$("#slotsGear").parentElement, "Hier landet, was du dir erspielst. Schatten zeigen, was noch fehlt."],
+        [$("#slotsGear").parentElement, leer ? "Noch ist dein Beutel leer. Morgen früh bringe ich dir etwas!" : "Hier landet, was du dir erspielst. Schatten zeigen, was noch fehlt."],
         [$(".equip-body"), "Vor jedem Spiel: Tipp an, was du mitnimmst."],
         ...(karteGesehen || spaeter() ? [] : [[$(".shoulder-right"), "Tipp auf R. Weiter zur Karte!"]])
-      ]), STILL.matches ? 0 : 1100);
+      ]), STILL.matches || !x ? 0 : 1100);
     };
     if (!x) return fertig();
     melody("pruefung");
@@ -1465,7 +1493,7 @@
     if (sofort) ersteQuestPruefen();
   }
   const frei = () => page === 1 && intro.hidden && $("#overlay").hidden && $("#coach").hidden && $("#prolog").hidden
-    && $("#schwur").hidden && $("#logbuch").hidden && $("#fluchSzene").hidden;
+    && $("#schwur").hidden && $("#logbuch").hidden && $("#fluchSzene").hidden && $("#morgen").hidden;
   function ersteQuestPruefen() {
     if (!blanko || ersteTimer) return;
     if (spaeter() || !state || state.ende) { blanko = false; render(); return; }
@@ -1690,6 +1718,102 @@
     if (page === 0) { const ids = STATIONEN.map(s => s.id); selectStation(ids[(ids.indexOf(sel[0]) + step + ids.length) % ids.length]); }
     if (page === 2) { const ids = [...document.querySelectorAll(".slot")].map(b => b.dataset.id); selectItem(ids[(ids.indexOf(sel[2]) + step + ids.length) % ids.length]); }
   });
+
+  /* ---------- Der Morgen: Zwischensequenz am Samstagmorgen (01.10., Wunsch des Nutzers) ----------
+     Am Freitag hat Dennis noch kein Item. Am Samstagmorgen geht die Sonne auf, Rikes Fee bringt den Beutel, den sie in der
+     Nacht bei ihm zu Hause geholt hat, Buu Huu will ihn stehlen und zerrt daran, ein Lichtblitz der Fee jagt ihn davon. Dann
+     springen die vier Basis-Items heraus (Stufe 1), zum Schluss „DAS ABENTEUER BEGINNT“. Der Quest Master stößt sie an
+     (morgen im Spiel), sonst kommt sie mit der Freigabe der ersten Quest am Samstag, immer vor deren Fenster.
+     Tippen zeigt erst den ganzen Satz, dann den nächsten Schritt. ÜBERSPRINGEN springt zu den Items, dort beendet es.
+     Einmal pro Handy und Morgen (gemerkt wird der Zeitstempel). Mit ?direkt nur zusammen mit ?morgen (Tests und Laptop). */
+  const MORGEN_KEY = "dq-morgen-v1" + (PROBE ? "-probe" : "");
+  const MORGEN_SZENE = !!C.morgen && (!params.has("direkt") || params.has("morgen"));
+  let morgenGesehen = 0;
+  try { if (!DEMO) morgenGesehen = Number(localStorage.getItem(MORGEN_KEY)) || 0; } catch (e) {}
+  const morgenFaellig = (prev, next) => MORGEN_SZENE && !!next.morgen && !(prev && prev.morgen) && next.morgen !== morgenGesehen;
+  const morgen = (() => {
+    const el = $("#morgen"), text = $("#mgText"), wer = $("#mgWer"), items = $("#mgItems");
+    let i = -1, tippen = null, timer = [], danach = null, schritte = [];
+    const warte = (ms, f) => timer.push(setTimeout(f, ms));
+    const SCHRITTE = () => {
+      const s = C.morgen.szenen;
+      return [
+        { phase: "nacht", text: s.nacht, auto: 2400 },
+        { phase: "morgen", wer: "fee", text: s.fee[0], ton: "morgen" },
+        { phase: "morgen", wer: "fee", text: s.fee[1] },
+        { phase: "geist", wer: "geist", text: s.geist[0], ton: "kichern" },
+        { phase: "zerrt", wer: "geist", text: s.geist[1], ton: "error" },
+        { phase: "abwehr", wer: "fee", text: s.abwehr, ton: "zauber" },
+        { phase: "flucht", wer: "geist", text: s.flucht, ton: "minus", auto: 1800 },
+        { phase: "beutel", wer: "fee", text: s.beutel, ton: "side" },
+        { phase: "items", wer: "fee", text: s.stufe },
+        { phase: "titel", text: "", ton: "pruefung", auto: 3200 }
+      ];
+    };
+    const WER = { fee: "RIKES FEE", geist: "BUU HUU · IM DIENST DES BUNDES" };
+    function schreibe(t, fertig) {
+      clearInterval(tippen); tippen = null;
+      if (STILL.matches || !t) { text.textContent = t; if (fertig) fertig(); return; }
+      let n = 0;
+      text.textContent = "";
+      tippen = setInterval(() => { n += 2; text.textContent = t.slice(0, n); if (n >= t.length) { clearInterval(tippen); tippen = null; if (fertig) fertig(); } }, 28);
+    }
+    function zeige() {
+      const sx = schritte[i];
+      timer.forEach(clearTimeout); timer = [];
+      el.dataset.phase = sx.phase;
+      el.dataset.wer = sx.wer || "";
+      wer.textContent = WER[sx.wer] || "";
+      if (sx.ton === "error") tone("error"); else if (sx.ton) melody(sx.ton); else tone("move");
+      if (sx.phase === "items") {
+        // Ein Item nach dem anderen, jedes mit einem kleinen Klang, zum Schluss die Fanfare
+        [...items.children].forEach((x, k) => warte(250 + k * 420, () => { x.classList.add("da"); tone("confirm"); }));
+        warte(250 + items.children.length * 420, () => melody("fund"));
+      }
+      schreibe(sx.text, sx.auto ? () => warte(sx.auto, weiter) : null);
+    }
+    function weiter() {
+      if (el.hidden) return;
+      if (tippen) { clearInterval(tippen); tippen = null; text.textContent = schritte[i].text; if (schritte[i].auto) warte(schritte[i].auto, weiter); return; }
+      if (++i >= schritte.length) return ende();
+      zeige();
+    }
+    // Überspringen: das Drama weg, die Items zeigt sie trotzdem. Bei den Items oder danach ist Schluss.
+    function ueberspringen() {
+      const k = schritte.findIndex(sx => sx.phase === "items");
+      if (i >= k) return ende();
+      clearInterval(tippen); tippen = null;
+      i = k; zeige();
+    }
+    function ende(still) {
+      if (el.hidden) return;
+      clearInterval(tippen); tippen = null; timer.forEach(clearTimeout); timer = [];
+      el.hidden = true;
+      const f = danach; danach = null;
+      if (f && still !== true) f();
+    }
+    function start(zeit, dann) {
+      morgenGesehen = zeit;
+      try { if (!DEMO) localStorage.setItem(MORGEN_KEY, String(zeit)); } catch (e) {}
+      if (!C.morgen) return dann && dann();
+      $("#coach").hidden = true;
+      schritte = SCHRITTE(); i = -1; danach = dann || null;
+      const ids = C.morgen.items;
+      items.innerHTML = ids.map((id, k) => {
+        const x = itemById(id), n = x.feld ? feldItems(x.feld).length : 1;
+        return `<span class="mg-item" style="--c:${x.farbe};--k:${k}"><span class="mg-well">${useSvg(x.symbol)}</span><b>${esc(x.name)}</b><small>STUFE 1 VON ${n}</small></span>`;
+      }).join("");
+      el.querySelector(".mg-titel b").textContent = C.morgen.szenen.titel;
+      el.dataset.phase = "nacht"; text.textContent = ""; wer.textContent = "";
+      el.hidden = false;
+      // Die Figuren stehen erst draußen, dann geht es los (sonst sprängen sie gleich an ihren Platz)
+      requestAnimationFrame(() => requestAnimationFrame(weiter));
+    }
+    el.addEventListener("click", e => { if (!e.target.closest("#mgSkip")) weiter(); });
+    $("#mgSkip").addEventListener("click", e => { e.stopPropagation(); tone("move"); ueberspringen(); });
+    function vergessen() { morgenGesehen = 0; try { localStorage.removeItem(MORGEN_KEY); } catch (e) {} }
+    return { start, weiter, ende, vergessen, offen: () => !el.hidden };
+  })();
 
   /* ---------- Schattendieb im Tagebuch: Rikes Antwort wird zur Quest (30.09., Wunsch des Nutzers) ----------
      Rike hat auf Frage 1 verraten, dass Dennis keinen Faden durchs Nadelöhr bekommt. Ist ihre Antwort vorbei, huscht der
@@ -2111,7 +2235,8 @@
         const st = s.quests[q.id], erg = st === "verloren" ? useSvg("i-x") : useSvg("i-check");
         return `<li><span class="ab-ic">${questIcon(q, st, false)}</span><span class="ab-name">${esc(q.name)}${s.glanz[q.id] ? " · Glanzsieg" : ""}</span><span class="ab-erg ${st === "verloren" ? "lost" : "won"}">${erg}</span></li>`;
       }).join("");
-      const beute = C.items.filter(it => s.items[it.id] && s.items[it.id] !== "nicht")
+      // Je Feld nur die stärkste Stufe (01.10.: jedes Item hat Stufen, die abgelösten zählen nicht mehr)
+      const beute = C.items.filter(it => s.items[it.id] && s.items[it.id] !== "nicht" && !E.abgeloest(C, s, it.id))
         .map(it => `<li><span class="ab-ic" style="color:${it.farbe}">${useSvg(it.symbol)}</span><span class="ab-name">${esc(it.name)}</span></li>`).join("");
       const zahl = (label, wert) => `<li><span class="ab-ic"></span><span class="ab-name">${label}</span><b>${wert}</b></li>`;
       const typ = t => REIHE.filter(q => q.typ === t), bestanden = l => l.filter(q => s.quests[q.id] === "bestanden").length;
@@ -2208,7 +2333,7 @@
   // Von selbst nur, wenn Dennis im Menü ist und gerade nichts anderes offen hat
   function abspannPruefen() {
     if (!spielEnde() || abspann.offen() || abspann.gezeigt() || schlange.length) return;
-    if (!intro.hidden || !$("#overlay").hidden || !$("#prolog").hidden || !$("#schwur").hidden || !$("#logbuch").hidden) return;
+    if (!intro.hidden || !$("#overlay").hidden || !$("#prolog").hidden || !$("#schwur").hidden || !$("#logbuch").hidden || !$("#morgen").hidden) return;
     abspann.start();
   }
 
@@ -2510,6 +2635,7 @@
     if (sammel) { clearTimeout(sammel.t); sammel = null; }
     try { [OB_KEY, KARTE_KEY, FUND_KEY, ERSTE_KEY, "dq-gps" + (PROBE ? "-probe" : "")].forEach(k => localStorage.removeItem(k)); } catch (e) {}
     abspann.schliessen(); abspann.vergessen();
+    morgen.ende(true); morgen.vergessen();
     beutelGezeigt = false; karteGesehen = false; gesehen = null; neuMarke.clear();
     prolog.vergessen();
     einStore.vergessen(); lbStore.vergessen();

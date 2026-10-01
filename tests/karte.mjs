@@ -61,7 +61,7 @@ for (const url of ['?demo', '?demo=bund']) {
   // Echter Stand auf einem neuen Handy: im Speicher liegt schon ein Tag mit zwei entschiedenen Quests
   const ctx2 = await b.newContext({ viewport: { width: 852, height: 393 }, isMobile: true, hasTouch: true });
   await ctx2.route('**firebasedatabase.app**', r => r.abort());
-  await ctx2.addInitScript(() => localStorage.setItem('dennis-quest-doc:dennis-jga-2026', JSON.stringify({ quests: { logbuch: 'bestanden', klingen: 'verloren' }, stand: 1 })));
+  await ctx2.addInitScript(() => localStorage.setItem('dennis-quest-doc:dennis-jga-2026', JSON.stringify({ quests: { logbuch: 'bestanden', wirbel: 'verloren' }, stand: 1 })));
   const p2 = await ctx2.newPage(); p2.on('pageerror', e => fehler.push('neues Handy: ' + e.message));
   await p2.goto(BASE); await warte(500);
   await p2.click('#introScreen'); await warte(900);

@@ -40,13 +40,27 @@ Stand 25.09.2026, Namen und Aussichtspunkt geändert am 28.09. Sammelt, was der 
 | I1 | ~~Beutel (Dennis' Eier)~~ | | **Kein eigenes Feld mehr** (28.09.): Der Beutel ist die Tarnung der Spritze (I7) |
 | I2 | Große Wasserpistole (Monsterpistole, elektrisch) | 2 | Stärkste Stufe. **Glanzsieg im Kartenwurf** (28.09.), löst Spritze und kleine Pistole ab |
 | I3 | ~~Großer Ring~~ | | **Gestrichen** (25.09.) |
-| I4 | Gepanzerte Karten bzw. +2 Karten | 9 | Idee steht |
-| I5 | Beyblade-Vorteil (eigener Kreisel zum Üben oder erste Wahl) | 14 | Name offen |
-| I6 | **Stich** (Schwert aus Herr der Ringe, war F2, 25.09.) | 12 | Ein Schwert mehr, also ein Versuch mehr |
-| I7 | **Wasserspritze** (28.09.) | 2 | Einziges Startitem: Der Heilige Beutel des Helden entpuppt sich beim ersten Besuch der Ausrüstung als Spritze, im selben Feld, und die Fee erklärt die Stufen |
+| I4 | **Gepanzerte Karte** (seit 01.10.: eine Karte darf in die Hülle) | 9 | Sieg im Wirbel, löst die Leere Hülle ab |
+| I5 | ~~Götterkreisel~~ | | **Gestrichen** (01.10.): bricht das Muster der Stufen, den Beyblade gibt es vor Ort |
+| I6 | **Stich** (Schwert aus Herr der Ringe, war F2, 25.09.) | 12 | Seit 01.10. Stufe 2 der Klinge: 4 Würfe statt 2. Sieg im Auge des Jägers |
+| I7 | **Wasserspritze** (28.09.) | 2 | Stufe 1 der Wasserwaffen. Bis 01.10. Startitem (als Beutel getarnt), jetzt bringt sie die Fee am Samstagmorgen |
 | I8 | **Kleine Wasserpistole** (28.09.) | 2 | Sieg im Podrennen, löst die Spritze ab |
-| I9 | **Stopfnadel** (29.09.) | 16 | Mittleres Öhr, Sieg im Wirbel der Götter. Ohne Nadel-Item fädelt Dennis die feine Nadel |
-| I10 | **Dicke Nadel** (29.09.) | 16 | Größtes Öhr, Sieg bei den Klingen des Deku-Baums, löst die Stopfnadel ab |
+| I9 | ~~Stopfnadel~~ | | **Gestrichen** (01.10.): Nadeln haben nur noch zwei Stufen |
+| I10 | **Dicke Nadel** (29.09.) | 16 | Stufe 2 der Nadel, Sieg bei den Klingen des Deku-Baums, löst die Feine Nadel ab |
+| I11 | **Leere Hülle** (01.10.) | 9 | Stufe 1 der Karten, bringt nichts (gemein mit Absicht). Von der Fee am Samstagmorgen |
+| I12 | **Verrostete Klinge** (01.10.) | 12 | Stufe 1 der Klinge: 2 Würfe. Von der Fee am Samstagmorgen |
+| I13 | **Feine Nadel** (01.10.) | 16 | Stufe 1 der Nadel. Von der Fee am Samstagmorgen |
+
+**Jedes Item hat Stufen (01.10., Wunsch des Nutzers).** Vier Felder in der Ausrüstung, jedes mit einer Stufe 1 und einem oder zwei Upgrades. Es zählt immer die stärkste Stufe, die Dennis hat.
+
+| Feld | Stufe 1 (Basis) | Upgrade | gewonnen bei | hilft bei |
+|---|---|---|---|---|
+| Wasser | Wasserspritze (I7) | Kleine Wasserpistole (I8), Große Wasserpistole (I2) | Podrennen, Glanzsieg im Kartenwurf | Auge des Jägers |
+| Karten | Leere Hülle (I11): Dennis wirft nackte Karten | Gepanzerte Karte (I4): eine Karte darf in die Hülle | Wirbel der Götter | Kartenwurf |
+| Klinge | Verrostete Klinge (I12): 2 Würfe | Stich (I6): 4 Würfe | Auge des Jägers | Klingen des Deku-Baums |
+| Nadel | Feine Nadel (I13) | Dicke Nadel (I10) | Klingen des Deku-Baums | Rikes Rache |
+
+**Der Morgen (01.10.).** Am Freitag im Zug gibt es kein Item, auch das Tagebuch bringt keins mehr (vorher den Kreisel). Am Samstagmorgen läuft auf Dennis' Handy eine Zwischensequenz: Die Sonne geht hinter den Bergen auf, Rikes Fee bringt den Beutel, den sie in der Nacht bei Dennis zu Hause geholt hat, Buu Huu will ihn stehlen, die Fee verjagt ihn mit einem Lichtblitz, dann springen die vier Basis-Items heraus, zum Schluss „DAS ABENTEUER BEGINNT“. Der Quest Master stößt sie im Admin an („Der Morgen beginnt“, zum Beispiel beim Frühstück). Vergisst er es, läuft sie mit der Freigabe des Wirbels, vor dessen Fenster. Erstes Spiel am Samstag ist seit 01.10. der **Wirbel der Götter** (vor Die drei Zeichen), er braucht kein Item. Jedes Upgrade gewinnt Dennis nach dem Morgen und vor dem Spiel, bei dem es hilft (`engine.test.js` prüft das).
 
 ## Fähigkeiten (Magie, kein physischer Gegenstand nötig)
 
@@ -106,20 +120,21 @@ Bei Rikes Tagebuch und Die drei Zeichen gibt es keinen. Texte in `config.js` (`f
 
 | # | Nr. | Quest | Art | Ort | Sieg | Niederlage | Bestanden, wenn … |
 |---|---|---|---|---|---|---|---|
-| 1 | 1 | Rikes Tagebuch | Hauptquest | Zug | +1, Ziffer 1, Kreisel (I5) | 0 | 5 von 7 Antworten treffen |
-| 2 | 4 | Die drei Zeichen | Sidequest | Wiese | Fluch (F1) | −1 | er zwei Gegner nacheinander schlägt, jeweils Best of 3 |
-| 3 | 14 | Wirbel der Götter | Hauptquest | Wiese | +2, Gepanzerte Karten (I4), Stopfnadel (I9) | −2 | 2 von 3 gegen den besten Blader |
+| 1 | 1 | Rikes Tagebuch | Hauptquest | Zug | +1, Ziffer 1 (seit 01.10. ohne Item) | 0 | 5 von 7 Antworten treffen |
+| Morgen | | Zwischensequenz | | Samstag früh | Rikes Fee bringt Stufe 1 aller vier Items | | |
+| 2 | 14 | Wirbel der Götter | Hauptquest | Wiese | +2, Gepanzerte Karte (I4) | −2 | 2 von 3 gegen den besten Blader |
+| 3 | 4 | Die drei Zeichen | Sidequest | Wiese | Fluch (F1) | −1 | er zwei Gegner nacheinander schlägt, jeweils Best of 3 |
 | 4 | 7 | Das Podrennen | Hauptquest | Wiese | +2, Ziffer 2, Kleine Wasserpistole (I8) | −2 | ein Versuch unter einer Zeit, die der Quest Master nur jedes zweite Mal schafft |
 | 5 | 9 | Kartenwurf | Sidequest | Wald | Fluch (F1), **Glanzsieg** (2 Karten Vorsprung): dazu Große Wasserpistole (I2) | −2 | mehr Karten im Ziel, Gleichstand zählt als verloren |
 | 6 | 2 | Auge des Jägers | Hauptquest | Wald | +3, Ziffer 3, Stich (I6) | −2 | alle 5 Flammen aus 4 m mit einem Tank |
-| 7 | 12 | Klingen des Deku-Baums | Hauptquest | Wald | +3, Dicke Nadel (I10), Ziffer 4 seit 29.09. bei Rikes Rache | −2 | 2 von 4 Schwertern aus 4 m stecken (Stich: ein Schwert mehr) |
+| 7 | 12 | Klingen des Deku-Baums | Hauptquest | Wald | +3, Dicke Nadel (I10), Ziffer 4 seit 29.09. bei Rikes Rache | −2 | mindestens ein Schwert bleibt stecken, aus 4 m (Vorschlag 01.10., testen): Verrostete Klinge 2 Würfe, Stich 4 |
 | 8 | 3 | Hüter der Flamme | Sidequest | Aussicht | Schild (F3) | −2 | das Teelicht 100 Schritte bergauf brennt |
 | 9 | 16 | **Rikes Rache** | Hauptquest | Aussicht | +4, Ziffer 4 | −2 | Faden durchs Nadelöhr auf Zeit, genaues Spiel legt der Quest Master fest (Vorschlag unten), die dickste Nadel zählt |
 | Tor | | fehlende Ziffern | | Gipfel | je Ziffer 2 Packs, Rikes Segen oder Bußprüfung | | |
 | 10 | 5 | Prüfung des Bundes | Hauptquest | Gipfel | +5 | −4 | 2 von 3 Duellen |
 | läuft | 15 | Rikes Amulett | Schritt „Gefunden“ | bis zum Gipfel | Rikes Segen (F6) | 0 | gefunden und zusammengesetzt |
 
-Einsetzbar: Kreisel bei Wirbel, die dickste Nadel bei Rikes Rache, Karten beim Kartenwurf, die stärkste Wasserwaffe beim Auge (Spritze, kleine oder große Pistole), Stich beim Deku-Baum. Fluch überall, wo er einen Vorteil hat (Tabelle oben), Schild bei den Duellen (Die drei Zeichen, Wirbel, Kartenwurf) und im Showdown, Rikes Segen nur am Tor.
+Einsetzbar (01.10.): die dickste Nadel bei Rikes Rache, Hülle oder Gepanzerte Karte beim Kartenwurf, die stärkste Wasserwaffe beim Auge (Spritze, kleine oder große Pistole), Verrostete Klinge oder Stich beim Deku-Baum. Der Wirbel braucht kein Item. Fluch überall, wo er einen Vorteil hat (Tabelle oben), Schild bei den Duellen (Die drei Zeichen, Wirbel, Kartenwurf) und im Showdown, Rikes Segen nur am Tor.
 
 **Packs (29.09.):** Über den Tag gibt es 20 Packs (`waehrung.max`, die Leiste oben), der Bund hütet sie. Alle Siege zusammen sind genau 20, seit Rikes Rache steigen sie gleichmäßig mit dem Weg: 1, 2, 2, 3, 3, 4, 5 (Tagebuch, Wirbel, Podrennen, Auge, Deku-Baum, Rikes Rache, Bund). Alle Niederlagen −19. Gewinnt Dennis alles, gehören ihm alle 20, kein Sieg verpufft. Packs zählen in der Reihenfolge, in der gebucht wurde, und bleiben immer zwischen 0 und 20. Über 20 kommt er nur mit einem Bonus des Quest Masters. Nachrechnen mit `node tests/balance.js` (29.09., mit Schattendieb): Gewinnt Dennis jedes Spiel mit 50 %, bleiben ihm im Schnitt 4 Packs, am Tor fehlen ihm im Schnitt 2 Ziffern, in 42 % der Tage braucht er eine Bußprüfung, und 39 % der Tage enden ohne Packs. Mit 70 % sind es im Schnitt gut 8 Packs.
 
@@ -133,20 +148,21 @@ Rechnung (29.09., Siege 1, 2, 2, 3, 3, 4, 5, 50 % Siegchance, Packs und Karten z
 
 **Kästchen (29.09.):** Im Kästchen, das nur der vierstellige Code öffnet, liegen 10 Packs als Überraschung. Die App erwähnt sie nirgends: Der Prolog sagt nur, dass die vier Ziffern am Ende ein verschlossenes Kästchen öffnen und niemand verrät, was darin liegt. Physisch gibt es also 20 Packs für den Tag und 10 im Kästchen.
 
-Sieben Hauptquests = sieben Medaillons (28.09., Rikes Rache seit 29.09.): Rikes Tagebuch (Wasser, blau), Wirbel der Götter (Geister, orange), Das Podrennen (Schatten, violett), Auge des Jägers (Feuer, rot, fünf Flammen), Klingen des Deku-Baums (Wald, grün), Rikes Rache (Nadel mit Herzfaden, Karmin) und Prüfung des Bundes (Triforce, gold). Dennis sieht die Quests in zwei Kammern: oben HAUPTQUESTS, unten SIDEQUESTS samt Prophezeiung und Rikes Amulett. Den Ort unter dem Quest-Titel gibt es nicht mehr, der steht auf der Karte. Items gehen bei Niederlagen nicht verloren. Einziges Startitem ist die Spritze: Beim ersten Besuch der Ausrüstung entpuppt sich der Heilige Beutel des Helden als Wasserspritze, im selben Feld (28.09., vorher Beutel und Spritze als zwei Felder). Einzige Ausnahme von der Regel ist der Glanzsieg im Kartenwurf, der zusätzlich ein Item bringt.
+Sieben Hauptquests = sieben Medaillons (28.09., Rikes Rache seit 29.09.): Rikes Tagebuch (Wasser, blau), Wirbel der Götter (Geister, orange), Das Podrennen (Schatten, violett), Auge des Jägers (Feuer, rot, fünf Flammen), Klingen des Deku-Baums (Wald, grün), Rikes Rache (Nadel mit Herzfaden, Karmin) und Prüfung des Bundes (Triforce, gold). Dennis sieht die Quests in zwei Kammern: oben HAUPTQUESTS, unten SIDEQUESTS samt Prophezeiung und Rikes Amulett. Den Ort unter dem Quest-Titel gibt es nicht mehr, der steht auf der Karte. Items gehen bei Niederlagen nicht verloren. Startitems gibt es seit 01.10. keine mehr, Stufe 1 jedes Items bringt die Fee am Samstagmorgen (bis dahin war die Spritze Startitem, getarnt als Heiliger Beutel des Helden). Einzige Ausnahme von der Regel ist der Glanzsieg im Kartenwurf, der zusätzlich ein Item bringt.
 
 **Tarnnamen** (so heißt ein Item in der Vorschau einer Belohnung, bis Dennis es erspielt):
 
 | Nr. | Item | Tarnname |
 |---|---|---|
-| I7 | Wasserspritze (Startitem, als Beutel getarnt) | Heiliger Beutel des Helden |
+| I7 | Wasserspritze (bis 01.10. als Beutel getarnt) | Zoras Tropfen |
 | I8 | Kleine Wasserpistole | Silberne Schuppe |
 | I2 | Große Wasserpistole | Zoras Quellstab |
-| I4 | Gepanzerte Karten (+2 Karten) | Federn der Eule |
-| I5 | Götterkreisel (üben, erste Wahl) | Kern der Goronen |
-| I6 | Stich | Verrostete Klinge |
-| I9 | Stopfnadel | Eisendorn |
-| I10 | Dicke Nadel | Uralter Dorn |
+| I11 | Leere Hülle | Hohle Schale |
+| I4 | Gepanzerte Karte | Federn der Eule |
+| I12 | Verrostete Klinge | Alter Griff |
+| I6 | Stich | Schimmernde Klinge (bis 01.10. Verrostete Klinge) |
+| I13 | Feine Nadel | Splitter |
+| I10 | Dicke Nadel | Eisendorn (bis 01.10. Uralter Dorn) |
 | F1 | Fluch (mehrfach, einmalig) | Versiegeltes Pergament |
 | F3 | Schild des Bundes (einmalig) | Zerbrochenes Wappen |
 | F6 | Rikes Segen (einmalig, am Tor) | Versiegelter Brief |
@@ -177,7 +193,7 @@ Schon vorhanden: eine ganz kleine Wasserpistole und eine kleine Spritze.
 **Vor dem Spieltag testen:**
 
 - **Schwerter:** Brieföffner haben meist eine stumpfe Spitze. An einem Baum ausprobieren, ob sie stecken bleiben. Wenn nicht: ein morscher Stumpf als Ziel, oder es zählt, was mit der Spitze trifft. Nur werfen, wenn niemand hinter dem Baum ist.
-- **Nur 4 Schwerter:** „1 bis 4, mit Stich eins mehr“ bräuchte 5. Vorschlag: Das silberne ist Stich, Dennis bekommt 1 bis 3, mit Stich eins mehr. Dann `qm` bei `deku` in `config.js` anpassen.
+- **Nur 4 Schwerter:** Gelöst am 01.10.: Es zählen Würfe, Verrostete Klinge 2, Stich 4 (der Fluch einen mehr, dafür die Schwerter wieder einsammeln).
 - **Beyblade:** Auf dem Bild sind nur Kreisel und Starter, keine Arena. Draußen reicht eine große Salatschüssel oder ein Wok.
 - **RC-Auto:** Klein und für glatten Boden. Auf Gras bleibt es vermutlich hängen, also Parcours auf festem Weg (Teer oder feiner Schotter), Tore aus Wanderstöcken oder Trinkflaschen. Akku oder Batterien prüfen. Zeitgrenze: Einer aus dem Bund fährt vor, seine Zeit muss Dennis schlagen.
 - **Knobelspiele:** Vorher selbst lösen und Zeit stoppen. Für Sidequests welche nehmen, die 10 bis 20 Minuten dauern. Unterwegs ohne Frist ist riskant, gut passt der Zug am Freitag nach dem Log-Buch (Frist bis München).
@@ -210,15 +226,15 @@ Wunsch des Nutzers (29.09.): Rike hat im Tagebuch auf „Was kannst du laut Rike
 
 **Zeit, geknüpft an Rikes Tagebuch:** 20 Sekunden für jede Antwort, die Dennis im Tagebuch über Rike richtig hatte, mindestens 60 Sekunden (5 Treffer = 100 Sekunden für alle fünf). Je besser er sie kennt, desto gnädiger ist ihre Rache. Alternative: eine feste Zeit, die ihr beim Testen nur jedes zweite Mal schafft.
 
-**Die Nadel als Item:** Ohne Nadel-Item stecken feine Nadeln mit winzigem Öhr. Hat Dennis eine dickere Nadel erspielt, steckt der Bund alle fünf Stellen mit dieser Sorte. Es zählt die dickste, wie bei den Wasserwaffen.
+**Die Nadel als Item (seit 01.10. zwei Stufen):** Mit der Feinen Nadel stecken feine Nadeln mit winzigem Öhr. Hat Dennis die Dicke Nadel erspielt, steckt der Bund alle fünf Stellen mit dieser Sorte. Es zählt die dickste, wie bei den Wasserwaffen.
 
 | Nadel | Öhr | Tarnname | Woher |
 |---|---|---|---|
-| Feine Nadel | winzig | | ohne Item, Rikes Wahl |
-| Stopfnadel (I9) | mittel | Eisendorn | Sieg im Wirbel der Götter |
-| Dicke Nadel (I10), Woll- oder Sticknadel, stumpfe Spitze | groß | Uralter Dorn | Sieg bei den Klingen des Deku-Baums, löst die Stopfnadel ab |
+| Feine Nadel (I13) | winzig | Splitter | Stufe 1, von der Fee am Samstagmorgen |
+| ~~Stopfnadel (I9)~~ | | | gestrichen am 01.10. |
+| Dicke Nadel (I10), Woll- oder Sticknadel, stumpfe Spitze | groß | Eisendorn | Sieg bei den Klingen des Deku-Baums, löst die Feine Nadel ab |
 
-**Ein Feld je Stufen-Reihe (Wunsch des Nutzers, 29.09.):** Die Nadeln teilen sich im Beutel ein Feld, genauso die drei Wasserwaffen. Das Feld zeigt die stärkste Stufe, die Dennis hat (in der Textbox „Stufe 2 von 3“), vorher den Schatten der ersten, die er noch bekommen kann. Der Beutel hat damit fünf Felder: Wasserwaffe, Karten, Kreisel, Stich, Nadel. In `config.js` gehören Stufen über `feld` zusammen (`wasser`, `nadel`), die spätere löst jeweils alle früheren ab (`ersetzt`, `engine.test.js` prüft das).
+**Ein Feld je Stufen-Reihe (Wunsch des Nutzers, 29.09.):** Die Nadeln teilen sich im Beutel ein Feld, genauso die drei Wasserwaffen. Das Feld zeigt die stärkste Stufe, die Dennis hat (in der Textbox „Stufe 2 von 3“), vorher den Schatten der ersten, die er noch bekommen kann. Der Beutel hat damit fünf Felder: Wasserwaffe, Karten, Kreisel, Stich, Nadel (seit 01.10. vier: Wasser, Karten, Klinge, Nadel, alle mit Stufen). In `config.js` gehören Stufen über `feld` zusammen (`wasser`, `nadel`), die spätere löst jeweils alle früheren ab (`ersetzt`, `engine.test.js` prüft das).
 
 **Belohnung (entschieden 29.09.):** Sieg **+4 Packs**, Niederlage −2, dazu die **Ziffer 4**: Sie wandert vom Deku-Baum hierher, und der Deku-Baum gibt dafür die dicke Nadel. So bringt jede Hauptquest Packs und eine Ziffer oder ein Item, und Rike hütet die letzte Ziffer des Kästchens. Einfachere Variante: nur Packs, wie der Bund, und der Deku-Baum behält Ziffer 4 und gibt die dicke Nadel zusätzlich.
 
@@ -243,7 +259,7 @@ Wunsch des Nutzers (29.09.): Rike hat im Tagebuch auf „Was kannst du laut Rike
 
 **Symbole:** Vorschau mit den echten Stilen der App in `entwuerfe/rikes-rache/symbole.png`, zum Einbauen in `entwuerfe/rikes-rache/symbole.svg.html`. Für das Medaillon `i-nadel` (A), für die Items `i-nadel-stopf` und `i-nadel-dick` (Nadeln silbern, der rote Faden im Öhr). `i-nadel-fein` und `i-faden` (Roter Faden) werden nicht mehr gebraucht.
 
-**Material:** Nadelset mit feinen Nähnadeln, Stopfnadeln und dicken Woll- oder Sticknadeln, je Sorte mindestens fünf (Drogerie, etwa 2 bis 4 €), rotes Nähgarn oder Stickgarn, kleine Schere, fünf vorgeschnittene Fäden plus Ersatz, Stoppuhr am Handy. Vorher selbst testen, wie lange fünf Nadeln jeder Sorte dauern. Die feine sollte knapp scheitern, sonst ist die dicke nichts wert.
+**Material:** Nadelset mit feinen Nähnadeln und dicken Woll- oder Sticknadeln (Stopfnadeln braucht es seit 01.10. nicht mehr), je Sorte mindestens fünf (Drogerie, etwa 2 bis 4 €), rotes Nähgarn oder Stickgarn, kleine Schere, fünf vorgeschnittene Fäden plus Ersatz, Stoppuhr am Handy. Vorher selbst testen, wie lange fünf Nadeln jeder Sorte dauern. Die feine sollte knapp scheitern, sonst ist die dicke nichts wert.
 
 **Gebaut (29.09.):** Quest `rache` in `config.js` (nr 16, Station Aussicht, nach Hüter der Flamme, Medaillon `i-nadel`, Farbe `#d8405e`, revanche, Fluch: 30 Sekunden mehr), Items `nadel_stopf` und `nadel_dick` (dick mit `ersetzt: ["nadel_stopf"]`, beide in einem Feld `nadel`), Stopfnadel beim Sieg im Wirbel, dicke Nadel beim Sieg am Deku-Baum, Ziffer 4 hierher, Packs neu laut Tabelle. Prolog zeigt sieben Prüfungen im Nebel, die Geschichte im Abspann spricht von zehn Prüfungen. Tests: `engine.test.js`, `tests/durchlauf.mjs` (ganzer Tag mit Rikes Rache), `tests/rubine.mjs`.
 

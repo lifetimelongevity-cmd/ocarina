@@ -107,7 +107,7 @@ await zu(dennis);
 
 // Rikes Rache: nach Hüter der Flamme, mit Nadeln aus Wirbel und Deku-Baum, trägt Ziffer 4
 await admin.click('#reset').catch(() => {}); await warte(800);
-const vorRache = ['logbuch', 'klingen', 'wirbel', 'podrennen', 'kartenwurf', 'auge', 'deku', 'feuerprobe'];
+const vorRache = ['logbuch', 'wirbel', 'klingen', 'podrennen', 'kartenwurf', 'auge', 'deku', 'feuerprobe'];
 for (const id of vorRache) { await admin.click(`#quests li[data-id="${id}"] .seg button[data-v="bestanden"]`).catch(() => fehler.push('Admin-Knopf fehlt: ' + id)); await warte(250); }
 await warte(800); await zu(dennis); await warte(600); await zu(dennis);
 await frei();
@@ -116,7 +116,7 @@ pruefe((await dennis.textContent('#hudNextName')).includes('Rikes Rache'), 'Denn
 await dennis.click('#hudNext'); await warte(600);
 const karte = (await dennis.textContent('#questCard').catch(() => '')) || '';
 pruefe(karte.includes('Rike hat verraten'), 'Quest-Karte zeigt den Text von Rikes Rache');
-pruefe(await dennis.$$eval('#questCard .ruest-minis [data-item]', xs => xs.map(x => x.dataset.item)).then(ids => ids.includes('nadel_dick') && !ids.includes('nadel_stopf')), 'AUSRÜSTEN: nur die dicke Nadel (sie löst die Stopfnadel ab)');
+pruefe(await dennis.$$eval('#questCard .ruest-minis [data-item]', xs => xs.map(x => x.dataset.item)).then(ids => ids.includes('nadel_dick') && !ids.includes('nadel_fein')), 'AUSRÜSTEN: nur die dicke Nadel (sie löst die feine Nadel ab)');
 await dennis.screenshot({ path: `${OUT}/rubine-6-rache.png` });
 const ziffern = await dennis.$$eval('#tumblers .tumbler', ts => ts.map(t => t.textContent));
 pruefe(ziffern[3] === '?' && ziffern.slice(0, 3).every(z => z !== '?'), 'Vor Rikes Rache fehlt nur Ziffer 4');

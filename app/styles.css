@@ -427,10 +427,11 @@ html.schwach .map-fog { animation: none; }
   background: radial-gradient(circle at 50% 46%, color-mix(in srgb, var(--c), transparent 68%), transparent 66%), linear-gradient(#1b1109, #2d1d0f);
   box-shadow: inset 0 3px 7px rgba(0,0,0,.8), inset 0 -1px 0 rgba(255,222,170,.14), 0 0 0 1.5px var(--gold), 0 0 0 3px rgba(20,12,4,.8), 0 2px 3px rgba(0,0,0,.6); }
 .slot .well .ic { position: relative; z-index: 1; }
-/* Ab und zu läuft ein Glanz über alles, was Dennis gehört */
-.slot.st-besitz:not(.rune) .well::before { content: ""; position: absolute; z-index: 2; inset: -30% -60%; pointer-events: none;
+/* Ab und zu läuft ein Glanz über das gewählte Item, wenn es Dennis gehört. Seit 01.10. nur dort: Seit dem Morgen gehören ihm
+   vier Items, ein Glanz auf jedem machte das Blättern auf dem S24 zäh (tests/blaettern.mjs) */
+.slot.st-besitz.is-selected:not(.rune) .well::before { content: ""; position: absolute; z-index: 2; inset: -30% -60%; pointer-events: none;
   background: linear-gradient(105deg, transparent 42%, rgba(255,250,225,.42) 50%, transparent 58%); transform: translateX(-70%);
-  animation: glanz 8s ease-in-out calc(var(--i) * 1.3s + 1s) infinite; }
+  animation: glanz 6s ease-in-out 1s infinite; }
 @keyframes glanz { 0%, 78% { transform: translateX(-70%); } 92%, 100% { transform: translateX(70%); } }
 /* Schatten: noch nicht erspielt. Nur die Form, eine offene Naht drumherum */
 .slot.schatten .well { background: radial-gradient(circle at 50% 46%, rgba(255,232,190,.16), transparent 70%), linear-gradient(#2e2012, #20160b);
@@ -1151,6 +1152,92 @@ html.schwach .face { box-shadow: inset 0 0 0 4px rgba(220,222,171,.1), 4px 5px 0
 @keyframes fsText { from { opacity: 0; transform: translate(-50%, 8px); } }
 @keyframes fsSchweben { to { transform: translateY(-5px); } }
 @keyframes fsSuchen { from { transform: translateX(-8px) rotate(-8deg); } to { transform: translateX(8px) rotate(8deg); } }
+
+/* ---------- Der Morgen (01.10.): Zwischensequenz am Samstagmorgen (app.js, morgen) ----------
+   Nacht, dann geht hinter den Bergen die Sonne auf. Die Fee fliegt mit dem Beutel herein, Buu Huu huscht dazu und zerrt daran,
+   ein Lichtblitz der Fee jagt ihn davon, der Beutel öffnet sich, die vier Basis-Items kommen heraus, zum Schluss der Titel.
+   Jede Figur ist eine Ebene so groß wie die Bühne und wird nur verschoben (--x, --y): Bewegung nur über transform und opacity.
+   Wo sie gerade steht, sagt data-phase am Abschnitt. */
+.morgen { position: absolute; inset: 0; z-index: 57; display: grid; grid-template-rows: minmax(0, 1fr) auto; justify-items: center; gap: 8px; overflow: hidden; cursor: pointer;
+  padding: calc(var(--pad-t) + 10px) calc(var(--pad-r) + 12px) calc(var(--foot-h) + 10px) calc(var(--pad-l) + 12px);
+  background: #02040b; animation: prologIn 600ms ease-out both; -webkit-user-select: none; user-select: none; }
+.morgen[hidden] { display: none; }
+.mg-himmel { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(#02040b, #0a1230 70%, #141d44); }
+.mg-sterne { position: absolute; inset: 0; transition: opacity 2.6s ease-in;
+  background-image: radial-gradient(circle, rgba(255,255,255,.95) 0 1px, transparent 1.5px), radial-gradient(circle, rgba(255,255,255,.55) 0 .8px, transparent 1.3px),
+    radial-gradient(circle, rgba(190,215,255,.8) 0 1.1px, transparent 1.6px);
+  background-size: 97px 89px, 53px 61px, 171px 143px; background-position: 0 0, 23px 37px, 71px 11px; }
+.mg-tag { position: absolute; inset: 0; opacity: 0; transition: opacity 2.6s ease-out;
+  background: linear-gradient(#24346e 0%, #6a4c93 38%, #e0716a 70%, #f7b267 88%, #ffd88a 100%); }
+.mg-sonne { position: absolute; left: 84%; bottom: 0; width: 34vh; aspect-ratio: 1; margin-left: -17vh; border-radius: 50%; transform: translateY(70%);
+  background: radial-gradient(circle, #fff6c8 0 32%, rgba(255,214,120,.85) 46%, rgba(255,170,90,.35) 62%, transparent 72%); transition: transform 3.2s cubic-bezier(.2,.7,.3,1); }
+.mg-berge { position: absolute; left: 0; right: 0; bottom: 0; width: 100%; height: 26%; }
+/* Buu Huu taucht alles in sein Violett, der Blitz der Fee vertreibt es */
+.mg-himmel::after { content: ""; position: absolute; inset: 0; opacity: 0; transition: opacity .6s; background: radial-gradient(ellipse at 70% 40%, rgba(90,40,150,.75), rgba(20,8,40,.85)); }
+.morgen:not([data-phase="nacht"]) .mg-tag { opacity: 1; }
+.morgen:not([data-phase="nacht"]) .mg-sterne { opacity: 0; }
+.morgen:not([data-phase="nacht"]) .mg-sonne { transform: translateY(-8%); }
+.morgen[data-phase="geist"] .mg-himmel::after, .morgen[data-phase="zerrt"] .mg-himmel::after { opacity: 1; }
+
+.mg-buehne { position: relative; width: 100%; min-height: 0; pointer-events: none; }
+.mg-fee, .mg-beutel, .mg-geist { position: absolute; inset: 0; --x: 50%; --y: 50%; --s: 1; --r: 0deg; --o: 1;
+  transform: translate(var(--x), var(--y)); opacity: var(--o); transition: transform 1s cubic-bezier(.2,.8,.3,1), opacity .5s; will-change: transform; }
+/* Außen die Position (Ebene so groß wie die Bühne), darin der Platz mit Drehung und Größe, ganz innen die Bewegung */
+.mg-fee > span, .mg-beutel > span, .mg-geist > span { position: absolute; left: 0; top: 0; transform: translate(-50%, -50%) rotate(var(--r)) scale(var(--s)); transition: transform .6s cubic-bezier(.3,1.4,.5,1); }
+.mg-fee img { display: block; width: clamp(52px, 17vh, 80px); height: auto; filter: drop-shadow(0 0 14px rgba(160,220,255,.95)) drop-shadow(0 0 30px rgba(255,160,220,.5)); animation: mgSchweben 2.4s ease-in-out infinite; }
+.mg-beutel svg, .mg-geist svg { display: block; }
+.mg-beutel svg { width: clamp(30px, 10vh, 46px); height: clamp(30px, 10vh, 46px); color: #b07a3e; filter: drop-shadow(0 3px 0 rgba(0,0,0,.6)); }
+.mg-geist svg { width: clamp(46px, 15vh, 70px); height: clamp(46px, 15vh, 70px); color: #f2f8ff; filter: drop-shadow(0 0 12px rgba(170,220,255,.9)) drop-shadow(0 0 26px rgba(120,60,200,.6)); animation: fsSchweben .6s ease-in-out infinite alternate; }
+@keyframes mgSchweben { 50% { transform: translateY(-6px) rotate(-3deg); } }
+/* Wo die Figuren in jeder Phase stehen */
+.mg-fee { --x: 118%; --y: -30%; }
+.mg-beutel { --x: 118%; --y: -10%; }
+.mg-geist { --x: 130%; --y: 40%; --o: 0; }
+.morgen:is([data-phase="morgen"], [data-phase="geist"], [data-phase="zerrt"], [data-phase="flucht"], [data-phase="beutel"]) .mg-fee { --x: 26%; --y: 40%; }
+.morgen:is([data-phase="morgen"], [data-phase="geist"]) .mg-beutel { --x: 27%; --y: 80%; }
+.morgen[data-phase="geist"] .mg-geist { --x: 72%; --y: 38%; --o: 1; }
+.morgen[data-phase="zerrt"] .mg-geist { --x: 44%; --y: 66%; --o: 1; transition-duration: .7s; }
+.morgen[data-phase="zerrt"] .mg-beutel { --x: 35%; --y: 78%; }
+.morgen[data-phase="zerrt"] .mg-beutel svg { animation: mgZerrt .18s ease-in-out infinite alternate; }
+@keyframes mgZerrt { from { transform: translateX(-3px) rotate(-10deg); } to { transform: translateX(3px) rotate(10deg); } }
+.morgen[data-phase="abwehr"] .mg-fee { --x: 30%; --y: 40%; --s: 1.3; }
+.morgen[data-phase="abwehr"] .mg-beutel, .morgen[data-phase="flucht"] .mg-beutel { --x: 29%; --y: 80%; }
+.morgen[data-phase="abwehr"] .mg-geist { --x: 80%; --y: 20%; --r: 25deg; --s: .85; --o: 1; transition-duration: .35s; }
+.morgen[data-phase="flucht"] .mg-geist { --x: 135%; --y: -50%; --r: 200deg; --s: .5; --o: 0; transition: transform 1.3s cubic-bezier(.55,0,.8,.4), opacity 1.3s; }
+.morgen[data-phase="beutel"] .mg-beutel { --x: 50%; --y: 52%; --s: 1.7; }
+.morgen[data-phase="beutel"] .mg-beutel svg { animation: mgPocht .5s ease-in-out infinite alternate; }
+@keyframes mgPocht { to { transform: scale(1.08); } }
+.morgen:is([data-phase="items"], [data-phase="titel"]) .mg-fee { --x: 10%; --y: 34%; --s: .75; }
+.morgen:is([data-phase="items"], [data-phase="titel"]) .mg-beutel { --x: 50%; --y: 52%; --s: 2.4; --o: 0; transition: transform .5s ease-out, opacity .5s ease-out; }
+/* Der Lichtblitz der Fee */
+.mg-blitz { position: absolute; inset: -20%; opacity: 0; pointer-events: none; background: radial-gradient(circle at 30% 45%, #fff, rgba(220,240,255,.85) 30%, rgba(255,255,255,0) 70%); }
+.morgen[data-phase="abwehr"] .mg-blitz { animation: mgBlitz .9s ease-out both; }
+@keyframes mgBlitz { 0% { opacity: 0; } 12% { opacity: 1; } 100% { opacity: 0; } }
+/* Die vier Items springen aus dem Beutel */
+.mg-items { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; gap: clamp(10px, 3.4vw, 34px); }
+.mg-item { display: grid; justify-items: center; gap: 6px; width: clamp(64px, 17vw, 110px); text-align: center; opacity: 0; transform: translateY(30%) scale(.3); }
+.mg-item.da { opacity: 1; transform: none; transition: transform .6s cubic-bezier(.3,1.5,.5,1), opacity .3s; }
+.mg-well { display: grid; place-items: center; width: clamp(40px, 14vh, 62px); aspect-ratio: 1; border-radius: 50%; color: var(--c);
+  background: radial-gradient(circle at 35% 30%, rgba(255,255,255,.18), rgba(10,14,28,.85) 70%); border: 2px solid #0b0d16; box-shadow: 0 0 0 2px rgba(242,201,76,.75), 0 0 18px rgba(255,236,160,.45); }
+.mg-well svg { width: 64%; height: 64%; filter: drop-shadow(0 0 6px var(--c)); }
+.mg-item b { color: #fff8e1; font: 800 var(--fs-small)/1.1 "Trebuchet MS", sans-serif; text-shadow: 0 2px 0 #000; }
+.mg-item small { color: var(--gold); font: 800 var(--fs-tiny)/1 "Courier New", monospace; letter-spacing: .1em; text-shadow: 0 1px 0 #000; }
+.morgen:not([data-phase="items"]) .mg-items { visibility: hidden; }
+/* Zum Schluss der Titel, die Textbox tritt zurück */
+.mg-titel { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 8px; visibility: hidden; }
+.mg-triforce { width: clamp(40px, 14vh, 64px); height: clamp(40px, 14vh, 64px); color: var(--gold); filter: drop-shadow(0 0 14px rgba(242,201,76,.8)); }
+.mg-titel b { color: #fff1a8; font: 400 clamp(22px, 9vh, 42px)/1.1 "Hylia Serif", Georgia, serif; letter-spacing: .06em; text-align: center; text-shadow: 0 0 14px rgba(242,201,76,.7), 2px 2px 0 #3a2a05; }
+.morgen[data-phase="titel"] .mg-titel { visibility: visible; animation: mgTitel 1.1s cubic-bezier(.2,.8,.3,1) both; }
+@keyframes mgTitel { from { opacity: 0; transform: scale(1.6); } }
+.morgen[data-phase="titel"] .mg-box { opacity: 0; }
+.mg-box { position: relative; transition: opacity .4s; }
+.mg-wer { min-height: 1em; margin: 0 0 4px; color: #9fd8ff; font: 800 var(--fs-tiny)/1 "Courier New", monospace; letter-spacing: .12em; }
+.morgen[data-wer="geist"] .mg-box { outline-color: #8f78c8; }
+.morgen[data-wer="geist"] .mg-wer { color: #c9a4ff; }
+.morgen[data-phase="nacht"] .mg-text, .morgen[data-phase="nacht"] .prolog-text { font-style: italic; color: #cfd8f0; }
+@media (prefers-reduced-motion: reduce) {
+  .morgen, .morgen *, .morgen *::after { animation: none !important; transition: none !important; }
+}
 
 /* ---------- Feste Fenstergrößen (29.09., Wunsch des Nutzers) ----------
    Jedes Fenster hat immer dieselbe Größe, egal ob ein oder vier Zeilen darin stehen: nichts springt. Die Höhe reicht für den
