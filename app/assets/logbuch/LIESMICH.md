@@ -20,7 +20,7 @@ Rike nennt dort wirklich den Faden im Nadelöhr (siehe unten), seine Sätze pass
 
 Dennis tippt in ein bis drei Worten, was Rike gesagt hat, besiegelt es, dann hört er ihre Nachricht.
 
-## Stand (30.09.): sechs von sieben da, Frage 5 fehlt
+## Stand (01.10.): alle sieben da
 
 Die Originale von WhatsApp liegen in `quellen/` (nicht veröffentlicht). `quellen/schneiden.py` kürzt sie auf die
 wichtigen Stellen, schneidet nur in Sprechpausen, blendet weich über und macht alle gleich laut. Andere Schnitte:
@@ -32,7 +32,7 @@ Sekunden dort ändern, `python3 quellen/schneiden.py 4` (braucht ffmpeg). Die Ab
 | 2 | 0:34 | 0:33 | Vergesslichkeit: Bei jedem Besuch bleibt was liegen oder er nimmt was mit. Wichtiges schreibt sie ihm auf oder erinnert zwei, drei Mal | nur Stille |
 | 3 | 0:50 | 0:41 | Ihr fiel nichts ein, darum hat sie Laurenz gefragt: Dennis ist unglaublich gutgläubig und glaubt ihm trotzdem jeden Quatsch | Ende, dort bricht die Aufnahme mitten im Satz ab |
 | 4 | 3:16 | 0:32 | Erstes Date bei Vapiano: Nach wenigen Minuten wirft Dennis die Cola um. Sie dachte Nervosität, heute weiß sie: Tollpatschigkeit | „Drei Momente“ als Einleitung, das Treffen nachts in Göttingen, der Heimweg in der Orientierungswoche, auf dem er einer gestürzten Radfahrerin hilft |
-| 5 | fehlt | | | |
+| 5 | 0:43 | 0:40 | Einen direkten Ort gibt es nicht: Als sie Göttingen verlassen haben, er nach Regensburg, sie nach Leipzig, und sie die Fernbeziehung von zweieinhalb Jahren (gut) überstanden haben, dazu jeder gemeinsame Urlaub. Ein schleichender Prozess, kein Aha-Moment, aber danach kann nichts mehr passieren | nur Stille |
 | 6 | 2:47 | 1:09 | Dass er sich nicht so ernst nimmt (steht auf und erzählt schlechte Witze, jung geblieben), mehr noch seine Fürsorglichkeit: Chips am Abend, kocht nach der Arbeit, wird ein fürsorglicher Papa | „Egal wie alt er wird“, Singen, Akzente, Tanzen im Wohnzimmer, der Satz zur Erkrankung, Einkaufen, Massage |
 | 7 | 3:05 | 1:02 | Er ist der Allerbeste, am meisten schätzt sie, wie viel Mühe er sich mit ihrer Familie gibt: versteht sich mit ihren Brüdern, Familienupdates kommen inzwischen von Dennis | Offenes Ohr, hilft ihren Freunden, bringt sie zum Lachen, Anruf um 17 Uhr, Kuchen für die Eltern, Tennisspiele, Fotojobs für den Bruder („sein persönlicher Agent“), Tennisclub |
 
