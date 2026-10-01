@@ -1830,7 +1830,7 @@
           text: "Das wird eine Reise, vom Zug bis auf den Gipfel. Und unterwegs wirst du geprüft werden." },
         // Die 20 Packs hütet der Bund, das Kästchen am Ende bleibt ein Geheimnis (29.09.: darin liegt eine Überraschung)
         { bild: `<span class="pb-cards${max > 10 ? " two" : ""}" style="--n:${max > 10 ? Math.ceil(max / 2) : max}">${karten(max)}</span>`,
-          text: `Der Bund hütet ${max} Packs. Hauptquests bringen dir Packs und Ziffern, Sidequests Fähigkeiten.` },
+          text: `Der Bund hütet ${max} Packs. Ja, richtig gehört: ${max}! Aber dir wird nichts geschenkt. Jedes Pack ist umkämpft, und im Zweifel kriegst du keins.` },
         { bild: `<span class="pb-chest">${useSvg("i-chest")}${useSvg("i-lock", "pb-lock")}</span><span class="pb-tumblers">${C.code.map(() => `<span class="tumbler">?</span>`).join("")}</span>`,
           text: "Die vier Ziffern öffnen am Ende ein verschlossenes Kästchen. Was darin liegt, verrät dir niemand. Ohne alle vier kein Gipfel." },
         { bild: `<span class="pb-split"><span class="pb-cards mine" style="--n:${Math.min(halb, 10)}">${karten(halb)}</span><small>deins</small></span><span class="pb-split"><span class="pb-cards" style="--n:${Math.min(max - halb, 10)}">${karten(max - halb, "empty")}</span><small>beim Bund</small></span>`,
