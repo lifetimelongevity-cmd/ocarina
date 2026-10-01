@@ -14,7 +14,7 @@ Stand 25.09.2026, Namen und Aussichtspunkt geändert am 28.09. Sammelt, was der 
 | 4 | **Die drei Zeichen** (hieß Kreuzung der Klingen, Name seit 28.09.) | **Entschieden (25.09., Name 28.09.):** Schnick Schnack Schnuck, Best of 3. Dennis wählt seinen Gegner aus dem Bund. Der Name verrät das Spiel, die Disziplin ist kein Geheimnis mehr. | |
 | 5 | Prüfung des Bundes (Showdown auf dem Gipfel) | **Entschieden (25.09.):** 3 Duelle. Zuerst die Spiele, die Dennis am Tag verloren hat (Revanche), aufgefüllt mit Wirbel der Götter. Die App zeigt dem Quest Master die drei. | |
 | 6 | Prophezeiung | **Bleibt** (25.09.). Morgens sagt Dennis 2 bis 3 Dinge voraus, die der Bund heute tun wird („Bene wird sich dehnen"). Jede, die in Erfüllung geht, bringt ihm einen **Fluch** (F1, früher Spruchrolle). Läuft den ganzen Tag, der Quest Master bucht, sobald sich eine erfüllt. | Anzahl Vorhersagen, Rolle oder Pack pro Treffer |
-| 7 | **Das Podrennen** (RC-Auto, ersetzt Waffenschmied) | Name steht (25.09.). Kleines ferngesteuertes Auto, Parcours auf Zeit. Wird eine Prüfung. | Parcours |
+| 7 | **Speed Flip** (bis 01.10. „Das Podrennen“, RC-Auto, ersetzt Waffenschmied) | Name seit 01.10. nach Rocket League, id bleibt `podrennen`. Kleines ferngesteuertes Auto, Parcours auf Zeit. Wird eine Prüfung. | Parcours |
 | 8 | ~~Ringschmied~~ | **Gestrichen** (25.09.), mit dem Großen Ring. | |
 | 9 | Kartenwurf | Bleibt, **als Duell**, mit Karten aus schon geöffneten Packs, fester Abstand. Start mit 3 Karten, Item gibt +2. Fähigkeiten können helfen (näher ran, nur einer wirft). | Abstand, Ziel |
 | 10 | ~~Nakama-Quiz~~ | **Gestrichen.** | |

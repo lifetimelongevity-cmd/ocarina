@@ -115,7 +115,7 @@ pruefe((await fenster(dennis)).includes('PRÜFUNG VERLOREN'), 'Nach PRESS START:
 await dennis.click('#overlay'); await warte(600);
 pruefe((await fenster(dennis)).includes('ES GEHT WEITER'), 'Dann die Freigabe');
 await zu(dennis); await warte(1500);
-pruefe((await hud(dennis)) === 'Das Podrennen', 'Danach: Das Podrennen ist dran');
+pruefe((await hud(dennis)) === 'Speed Flip', 'Danach: Speed Flip ist dran');
 
 // Ende: nach der letzten Quest kein Knopf mehr
 await admin.click('#reset'); await warte(500);

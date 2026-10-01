@@ -91,7 +91,7 @@ const tafel = await p.textContent('#stationCard');
 pruefe(tafel.includes('Die drei Zeichen') && tafel.includes('711 m · am Parkplatz'), 'Tafel Talstation: Quests, Höhe, am Parkplatz');
 pruefe(await p.$eval('#stationCard', e => e.classList.contains('rechts')), 'Tafel liegt gegenüber der Station');
 await p.click('.sc-row[data-quest="podrennen"]'); await warte(800);
-pruefe(await aktiv(p) === '1' && (await p.textContent('#questCard .tb-title')).includes('Podrennen'), 'Zeile öffnet die Quest');
+pruefe(await aktiv(p) === '1' && (await p.textContent('#questCard .tb-title')).includes('Speed Flip'), 'Zeile öffnet die Quest');
 await zurKarte(p);
 await p.click('.mark[data-station="huette"]'); await warte(300);
 pruefe((await p.textContent('#stationCard')).includes('Verschlossen, noch') && !(await p.textContent('#stationCard')).includes('Packs'), 'Tafel Hütte: das Kästchen, verschlossen, ohne Packs');
