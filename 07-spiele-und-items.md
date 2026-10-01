@@ -67,8 +67,9 @@ Stand 25.09.2026, Namen und Aussichtspunkt geändert am 28.09. Sammelt, was der 
 
 | Quest | Vorteil, wenn Dennis dort einen Fluch spricht |
 |---|---|
-| Wirbel der Götter | Der Gegner startet den Kreisel mit der schwachen Hand |
-| Das Podrennen | 3 Sekunden mehr auf der Uhr |
+| Wirbel der Götter | Dennis darf vorher üben (01.10., vorher: Gegner mit der schwachen Hand) |
+| Das Podrennen | Ein paar Sekunden geschenkt, wie viele, legt der Quest Master vor Ort fest (01.10.) |
+| Rikes Rache | Mehr Zeit auf der Uhr, wie viel, legt der Quest Master fest (01.10., vorher 30 Sekunden) |
 | Kartenwurf | 5 Karten statt 3 |
 | Auge des Jägers | Die Wasserwaffe wird für dieses Spiel eine Stufe stärker, mit der großen Pistole 1 m näher |
 | Klingen des Deku-Baums | Ein Schwert mehr |
@@ -109,7 +110,7 @@ Bei Rikes Tagebuch und Die drei Zeichen gibt es keinen. Texte in `config.js` (`f
 | 1 | 1 | Rikes Tagebuch | Hauptquest | Zug | +1, Ziffer 1, Kreisel (I5) | 0 | 5 von 7 Antworten treffen |
 | 2 | 4 | Die drei Zeichen | Sidequest | Wiese | Fluch (F1) | −1 | er zwei Gegner nacheinander schlägt, jeweils Best of 3 |
 | 3 | 14 | Wirbel der Götter | Hauptquest | Wiese | +2, Gepanzerte Karten (I4), Stopfnadel (I9) | −2 | 2 von 3 gegen den besten Blader |
-| 4 | 7 | Das Podrennen | Hauptquest | Wiese | +2, Ziffer 2, Kleine Wasserpistole (I8) | −2 | ein Versuch unter einer Zeit, die der Quest Master nur jedes zweite Mal schafft |
+| 4 | 7 | Das Podrennen | Hauptquest | Wiese | +2, Ziffer 2, Kleine Wasserpistole (I8) | −2 | ein Versuch, schneller als die bessere Runde von Fabio und Bene (01.10.) |
 | 5 | 9 | Kartenwurf | Sidequest | Wald | Fluch (F1), **Glanzsieg** (2 Karten Vorsprung): dazu Große Wasserpistole (I2) | −2 | mehr Karten im Ziel, Gleichstand zählt als verloren |
 | 6 | 2 | Auge des Jägers | Hauptquest | Wald | +3, Ziffer 3, Stich (I6) | −2 | alle 5 Flammen aus 4 m mit einem Tank |
 | 7 | 12 | Klingen des Deku-Baums | Hauptquest | Wald | +3, Dicke Nadel (I10), Ziffer 4 seit 29.09. bei Rikes Rache | −2 | 2 von 4 Schwertern aus 4 m stecken (Stich: ein Schwert mehr) |
