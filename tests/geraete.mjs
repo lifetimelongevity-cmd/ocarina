@@ -41,6 +41,9 @@ async function neueSeite(browser, g, url, { lokal = false, schwach = false } = {
     userAgent: ua(g) });
   if (lokal) await ctx.route('**/config.js', async r => { const res = await r.fetch(); r.fulfill({ response: res, body: (await res.text()).replace('typ: "firebase"', 'typ: "lokal"') }); });
   await ctx.route('**firebasedatabase.app**', r => r.abort());
+  // Rikes echte Sprachnachrichten ausblenden (wie tests/geist.mjs): Das Chromium der Tests kann kein AAC, und Frage 1 dauert
+  // gut 30 s. Mit dem Platzhalter-Klang kommt Buu Huu nach 2 s, so lässt sich sein Fenster auf jedem Gerät prüfen.
+  await ctx.route('**/assets/logbuch/*.m4a', r => r.fulfill({ status: 404 }));
   // Safe Areas nachstellen
   await ctx.addInitScript(sa => {
     document.addEventListener('DOMContentLoaded', () => {
@@ -50,7 +53,8 @@ async function neueSeite(browser, g, url, { lokal = false, schwach = false } = {
     });
   }, g.sa);
   const page = await ctx.newPage();
-  page.on('console', m => { if (m.type() === 'error') fehler.push(`${g.id}: ${m.text()}`); });
+  // Fehlende Sprachnachrichten (oben ausgeblendet) sind kein Fehler der Seite
+  page.on('console', m => { if (m.type() === 'error' && !/\.m4a$/.test(m.location().url || '')) fehler.push(`${g.id}: ${m.text()}: ${m.location().url || ''}`); });
   page.on('pageerror', e => fehler.push(`${g.id}: ${e.message}`));
   if (g.cpu) { const cdp = await ctx.newCDPSession(page); await cdp.send('Emulation.setCPUThrottlingRate', { rate: g.cpu }); page._cdp = cdp; }
   await page.goto(BASE + url, { waitUntil: 'load' });
