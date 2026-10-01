@@ -191,7 +191,7 @@
 
       { id: "podrennen", nr: 7, typ: "kern", name: "Das Podrennen", ort: "Wiese an der Talstation", station: "wiese",
         farbe: "#a468e6", emblem: "z-shadow",
-        text: "Fahr den Gleiter durch den Parcours, schneller als der Bund.",
+        text: "Fahr dein Battle-Car durch den Parcours, schneller als der Bund.",
         qm: "RC-Auto auf Zeit, ein Versuch, auf festem Boden (auf Gras bleibt das kleine Auto hängen). Erst fahren Fabio und du je eine Runde, Dennis muss die bessere der beiden Zeiten schlagen. Mit Fluch bekommt er ein paar Sekunden geschenkt, wie viele, legst du vor Ort fest.",
         win:  { packs: 2, ziffer: 2, items: ["pistole_klein"] },
         lose: { packs: -2 },
