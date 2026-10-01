@@ -41,6 +41,9 @@ async function neueSeite(browser, g, url, { lokal = false, schwach = false } = {
     userAgent: ua(g) });
   if (lokal) await ctx.route('**/config.js', async r => { const res = await r.fetch(); r.fulfill({ response: res, body: (await res.text()).replace('typ: "firebase"', 'typ: "lokal"') }); });
   await ctx.route('**firebasedatabase.app**', r => r.abort());
+  // Rikes Sprachnachrichten (AAC) kann das Chromium der Tests nicht abspielen, dann wartet Buu Huu auf „TIPP AUF ▶“.
+  // Wie in tests/geist.mjs: Platzhalter-Klang statt der echten Dateien
+  await ctx.route('**/assets/logbuch/*.m4a', r => r.fulfill({ status: 404 }));
   // Safe Areas nachstellen
   await ctx.addInitScript(sa => {
     document.addEventListener('DOMContentLoaded', () => {
