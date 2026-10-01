@@ -237,6 +237,28 @@
         <span class="result-more" aria-hidden="true">▼</span>
       </div>
     </section>
+    <!-- Die finale Schlacht (01.10.): Vor der Prüfung des Bundes kämpft Rikes Fee am Gipfelkreuz gegen Buu Huu, danach beginnen
+         die drei Duelle. Nutzt die Bühne des Morgens (Klassen mg-…), eigener Himmel und Strahlen. Gebaut in app.js (schlacht) -->
+    <section class="morgen schlacht" id="schlacht" hidden aria-label="Die finale Schlacht">
+      <div class="sl-himmel" aria-hidden="true">
+        <span class="sl-wolken"></span><span class="sl-wolken zwei"></span><span class="sl-wetter"></span>
+        <svg class="sl-berg" viewBox="0 0 800 160" preserveAspectRatio="xMidYMax slice"><path d="M0 160V114l90-14 80 8 100-28 70-24 40-16 20-4 20 4 40 16 70 24 100 28 80-8 90 12v48Z" fill="#140c22"/><path d="M397 4h6v36h-6ZM386 13h28v5h-28Z" fill="#140c22"/><path d="M0 160v-20l120-12 120 10 160-16 160 16 120-10 120 12v20Z" fill="#06040b"/></svg>
+      </div>
+      <button class="prolog-skip" id="slSkip" type="button">ÜBERSPRINGEN</button>
+      <div class="mg-buehne" aria-hidden="true">
+        <span class="mg-blitz sl-knall"></span>
+        <div class="sl-strahlen"><span class="sl-strahl fee"></span><span class="sl-strahl geist"></span><span class="sl-funke"></span></div>
+        <span class="mg-fee"><span><img src="assets/fee.png" alt="" draggable="false"></span></span>
+        <span class="mg-geist"><span><svg><use href="#i-dieb"></use></svg></span></span>
+        <div class="mg-items sl-duelle" id="slDuelle"></div>
+        <div class="mg-titel"><svg class="mg-triforce"><use href="#z-triforce"></use></svg><b id="slTitel"></b></div>
+      </div>
+      <div class="prolog-box textbox mg-box" role="dialog" aria-modal="true" aria-labelledby="slText">
+        <p class="mg-wer" id="slWer"></p>
+        <p class="prolog-text" id="slText"></p>
+        <span class="result-more" aria-hidden="true">▼</span>
+      </div>
+    </section>
     <!-- Fluch gesprochen (01.10.): Der Fluch greift, das Licht geht aus, Buu Huu dreht am Rad und holt sich die Beute (app.js, fluchSzene) -->
     <div class="fluch-szene" id="fluchSzene" hidden aria-hidden="true">
       <div class="fs-nacht"></div>

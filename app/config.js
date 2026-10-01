@@ -73,6 +73,26 @@
       }
     },
 
+    /* Die finale Schlacht (01.10., Wunsch des Nutzers): Zwischensequenz vor der Prüfung des Bundes. Am Gipfelkreuz zieht ein
+       Sturm auf, Buu Huu stellt sich Dennis in den Weg (er hat sich den Morgen gemerkt), Rikes Fee kämpft gegen ihn, Strahl gegen
+       Strahl, bis es knallt. Sie hält ihn auf, den Bund muss Dennis selbst bezwingen. Zum Schluss die drei Duelle und
+       „DIE FINALE SCHLACHT BEGINNT“. Kommt von selbst, sobald die Quest freigegeben und das Tor offen ist (alle vier Ziffern),
+       einmal pro Handy und Freigabe. szenen: was gesagt wird, der Reihe nach (wer: fee oder geist, gipfel erzählt). */
+    schlacht: {
+      quest: "bund",
+      szenen: {
+        gipfel:  "Das Kreuz am Gipfel. Der Wind wird kalt. Ein Schatten zieht auf …",
+        fee:     ["Dennis, du hast es geschafft! Ganz oben, am Kreuz des Blombergs.", "Nur noch eine Prüfung, dann gehört die Legende dir."],
+        geist:   ["Buu huu! Weißt du noch, Fee? Heute Morgen? Ich hab’s mir gemerkt!", "Hier oben endet eure Reise. Der Bund hat mich fürs Finale angeheuert!"],
+        trotz:   "Dann musst du erst an mir vorbei, Geist!",
+        patt:    "Buu … du bist stärker als heute Morgen.",
+        rat:     "Ich halte ihn auf, so gut ich kann. Den Bund musst du selbst bezwingen.",
+        hohn:    "Drei Duelle, Dennis. Zwei musst du gewinnen. Hehehe … viel Glück!",
+        duelle:  "Rike glaubt an dich. Zeig ihnen, wer du bist!",
+        titel:   "DIE FINALE SCHLACHT BEGINNT"
+      }
+    },
+
     /* Items und Fähigkeiten (Regel vom 28.09.: Hauptquests geben Items, Sidequests und laufende Quests Fähigkeiten)
        gruppe:   "item" (Gegenstand, links in der Ausrüstung, hilft bei genau einem späteren Spiel und bleibt)
                  oder "faehigkeit" (Magie, rechts, einmalig bei Duellen und im Showdown)

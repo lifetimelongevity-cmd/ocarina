@@ -1437,6 +1437,84 @@ html.schwach .face { box-shadow: inset 0 0 0 4px rgba(220,222,171,.1), 4px 5px 0
   .morgen, .morgen *, .morgen *::after { animation: none !important; transition: none !important; }
 }
 
+/* ---------- Die finale Schlacht (01.10.): Zwischensequenz vor der Prüfung des Bundes (app.js, schlacht) ----------
+   Nutzt die Bühne des Morgens (.morgen, Figuren, Karten, Titel, Textbox), dazu ein Sturm am Gipfelkreuz und zwei Strahlen.
+   Die Fee kommt von links, Buu Huu von rechts, beim Kampf ringen die Strahlen in der Mitte (die Gruppe schiebt hin und her),
+   beim Knall fliegen beide zurück und die Bühne wackelt. Zum Schluss wird der Himmel golden. Bewegung nur über transform
+   und opacity. Phasen: gipfel, ankunft, drohung, trotz, kampf, patt, rat, hohn, duelle, titel. */
+.schlacht { background: #05030a; }
+.sl-himmel { position: absolute; inset: 0; pointer-events: none; overflow: hidden; background: linear-gradient(#05030a, #170b26 50%, #34142e 82%, #4a1a2a); }
+.sl-wolken { position: absolute; left: -30%; right: -30%; top: -6%; height: 58%; opacity: .6; animation: slZiehen 24s ease-in-out infinite alternate;
+  background: radial-gradient(ellipse 16% 42% at 18% 40%, rgba(64,44,96,.95), transparent 70%), radial-gradient(ellipse 22% 36% at 50% 26%, rgba(48,30,72,.95), transparent 70%),
+    radial-gradient(ellipse 15% 34% at 82% 44%, rgba(72,40,92,.9), transparent 70%); }
+.sl-wolken.zwei { top: 10%; opacity: .45; animation-duration: 36s; animation-direction: alternate-reverse;
+  background: radial-gradient(ellipse 20% 30% at 30% 50%, rgba(40,24,60,.95), transparent 70%), radial-gradient(ellipse 18% 34% at 70% 40%, rgba(58,30,70,.9), transparent 70%); }
+@keyframes slZiehen { from { transform: translateX(-10%); } to { transform: translateX(10%); } }
+/* Wetterleuchten hinter den Wolken, ab Buu Huus Auftritt öfter */
+.sl-wetter { position: absolute; inset: 0; opacity: 0; background: radial-gradient(ellipse at 64% 18%, rgba(220,210,255,.85), rgba(150,130,230,.25) 45%, transparent 75%);
+  animation: slWetter 7s 1.2s linear infinite; }
+.schlacht:is([data-phase="drohung"], [data-phase="trotz"], [data-phase="kampf"], [data-phase="patt"], [data-phase="hohn"]) .sl-wetter { animation-duration: 3.4s; }
+@keyframes slWetter { 0%, 70% { opacity: 0; } 71% { opacity: .7; } 72.5% { opacity: .08; } 74% { opacity: .5; } 78%, 100% { opacity: 0; } }
+.sl-berg { position: absolute; left: 0; right: 0; bottom: 0; width: 100%; height: 54%; }
+/* Buu Huu taucht alles in Violett, zum Schluss geht hinter dem Kreuz ein goldenes Licht auf */
+.sl-himmel::after, .sl-himmel::before { content: ""; position: absolute; inset: 0; opacity: 0; transition: opacity .8s; }
+.sl-himmel::after { background: radial-gradient(ellipse at 72% 40%, rgba(96,40,160,.6), rgba(20,8,40,.55)); }
+.sl-himmel::before { background: radial-gradient(ellipse 60% 80% at 50% 100%, rgba(242,201,76,.55), rgba(242,150,60,.18) 50%, transparent 75%); transition-duration: 1.6s; }
+.schlacht:is([data-phase="drohung"], [data-phase="kampf"], [data-phase="hohn"]) .sl-himmel::after { opacity: 1; }
+.schlacht:is([data-phase="duelle"], [data-phase="titel"]) .sl-himmel::before { opacity: 1; }
+
+/* Wo die Figuren in jeder Phase stehen (die Fee kommt von links, Buu Huu von rechts) */
+.schlacht .mg-fee { --x: -20%; --y: 30%; }
+.schlacht .mg-geist { --x: 130%; --y: 20%; --o: 0; }
+.schlacht[data-phase="ankunft"] .mg-fee { --x: 30%; --y: 42%; }
+.schlacht[data-phase="drohung"] .mg-fee { --x: 24%; --y: 46%; }
+.schlacht[data-phase="drohung"] .mg-geist { --x: 72%; --y: 38%; --o: 1; }
+.schlacht[data-phase="trotz"] .mg-fee { --x: 28%; --y: 44%; --s: 1.2; }
+.schlacht[data-phase="trotz"] .mg-geist { --x: 74%; --y: 40%; --o: 1; }
+.schlacht[data-phase="kampf"] .mg-fee { --x: 20%; --y: 45%; --s: 1.15; }
+.schlacht[data-phase="kampf"] .mg-geist { --x: 80%; --y: 45%; --s: 1.1; --o: 1; }
+.schlacht[data-phase="patt"] .mg-fee { --x: 11%; --y: 58%; --r: -24deg; transition-duration: .35s; }
+.schlacht[data-phase="patt"] .mg-geist { --x: 88%; --y: 52%; --r: 28deg; --s: .9; --o: 1; transition-duration: .35s; }
+.schlacht[data-phase="rat"] .mg-fee { --x: 28%; --y: 42%; }
+.schlacht[data-phase="rat"] .mg-geist { --x: 84%; --y: 32%; --s: .9; --o: 1; }
+.schlacht[data-phase="hohn"] .mg-fee { --x: 22%; --y: 44%; }
+.schlacht[data-phase="hohn"] .mg-geist { --x: 68%; --y: 36%; --s: 1.1; --o: 1; }
+.schlacht[data-phase="duelle"] .mg-fee { --x: 7%; --y: 28%; --s: .7; }
+.schlacht[data-phase="duelle"] .mg-geist { --x: 92%; --y: 66%; --s: .6; --o: .8; }
+.schlacht[data-phase="titel"] .mg-fee { --x: 7%; --y: 28%; --s: .7; }
+.schlacht[data-phase="titel"] .mg-geist { --x: 135%; --y: -50%; --r: 200deg; --s: .5; --o: 0; transition: transform 1.3s cubic-bezier(.55,0,.8,.4), opacity 1.3s; }
+/* Im Kampf zittern beide */
+.schlacht[data-phase="kampf"] .mg-fee img, .schlacht[data-phase="kampf"] .mg-geist svg { animation: slZittern .08s linear infinite alternate; }
+@keyframes slZittern { from { transform: translate(-1.5px, 1px); } to { transform: translate(1.5px, -1px); } }
+
+/* Strahl gegen Strahl: Die Strahlen wachsen aus den Figuren zur Mitte, dort sprüht der Funke, die Gruppe ringt hin und her */
+.sl-strahlen { position: absolute; inset: 0; opacity: 0; transition: opacity .25s; --h: clamp(6px, 3vh, 12px); --f: clamp(40px, 18vh, 80px); }
+.schlacht[data-phase="kampf"] .sl-strahlen { opacity: 1; animation: slRingen 3.2s .4s ease-in-out both; }
+@keyframes slRingen { 0% { transform: none; } 16% { transform: translateX(-5%); } 32% { transform: translateX(3%); } 50% { transform: translateX(-3%); }
+  66% { transform: translateX(6%); } 82% { transform: translateX(-2%); } 100% { transform: translateX(1%); } }
+.sl-strahl { position: absolute; top: 45%; width: 36%; height: var(--h); margin-top: calc(var(--h) / -2); border-radius: 99px; transform: scaleX(0); transition: transform .45s cubic-bezier(.2,.8,.3,1); }
+.sl-strahl.fee { left: 14%; transform-origin: left center; background: linear-gradient(90deg, rgba(160,220,255,0), #a8e2ff 25%, #fff);
+  box-shadow: 0 0 12px rgba(160,220,255,.9), 0 0 28px rgba(255,160,220,.5); }
+.sl-strahl.geist { left: 50%; transform-origin: right center; background: linear-gradient(90deg, #fff, #b58cff 70%, rgba(120,60,200,0));
+  box-shadow: 0 0 12px rgba(170,120,255,.9), 0 0 28px rgba(90,40,150,.7); }
+.schlacht[data-phase="kampf"] .sl-strahl { transform: scaleX(1); }
+.sl-funke { position: absolute; left: 50%; top: 45%; width: var(--f); height: var(--f); margin: calc(var(--f) / -2) 0 0 calc(var(--f) / -2); border-radius: 50%; transform: scale(0);
+  background: radial-gradient(circle, #fff 0 18%, rgba(235,215,255,.9) 32%, rgba(180,140,255,.4) 55%, transparent 70%); }
+.schlacht[data-phase="kampf"] .sl-funke { animation: slFunke .2s .4s ease-in-out infinite alternate both; }
+@keyframes slFunke { from { transform: scale(.7) rotate(0deg); } to { transform: scale(1.15) rotate(24deg); } }
+/* Der Knall: weißes Licht aus der Mitte, die Bühne wackelt */
+.sl-knall { background: radial-gradient(circle at 50% 45%, #fff, rgba(235,220,255,.85) 30%, rgba(255,255,255,0) 70%); }
+.schlacht[data-phase="patt"] .sl-knall { animation: mgBlitz 1s ease-out both; }
+.schlacht[data-phase="patt"] .mg-buehne { animation: slWackeln .55s ease-out; }
+@keyframes slWackeln { 0%, 100% { transform: none; } 15% { transform: translate(-6px, 3px); } 30% { transform: translate(5px, -4px); } 45% { transform: translate(-4px, 2px); }
+  60% { transform: translate(3px, -2px); } 80% { transform: translate(-1px, 1px); } }
+/* Während des Kampfs spricht niemand, zum Schluss die drei Duelle wie die Items am Morgen */
+.schlacht[data-phase="kampf"] .mg-box { opacity: 0; }
+.schlacht[data-phase="duelle"] .mg-items { visibility: visible; }
+.sl-duelle .mg-item small { white-space: nowrap; }
+.schlacht[data-wer="fee"] .mg-wer { color: #9fd8ff; }
+.schlacht[data-phase="gipfel"] .prolog-text { font-style: italic; color: #cfd8f0; }
+
 /* ---------- Feste Fenstergrößen (29.09., Wunsch des Nutzers) ----------
    Jedes Fenster hat immer dieselbe Größe, egal ob ein oder vier Zeilen darin stehen: nichts springt. Die Höhe reicht für den
    längsten Inhalt auf dem kleinsten Handy (iPhone 13 in Safari, gemessen), die Schrift ist überall dieselbe (--fs-body).

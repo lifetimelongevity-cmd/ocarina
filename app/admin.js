@@ -406,7 +406,8 @@
     if (n && !frei) {
       const st = C.karte.stationen.find(x => x.id === n.station);
       $("#freiHint").textContent = `Dennis sieht die Quest erst, wenn du sie freigibst. Auf seiner Karte wandert er dann ${st ? `${st.zu} ${st.name}` : "zur Station"}, danach tritt sie aus dem Nebel.`
-        + (morgenFehlt ? " Der Morgen läuft dann vorher von selbst." : "");
+        + (morgenFehlt ? " Der Morgen läuft dann vorher von selbst." : "")
+        + (C.schlacht && n.id === C.schlacht.quest ? " Danach kommt die finale Schlacht (Fee gegen Buu Huu, gut 40 s, mit Ton), sobald alle vier Ziffern da sind." : "");
     }
     $("#nextQm").textContent = n && n.qm ? n.qm : "";
     $("#nextFx").innerHTML = n ? fxHtml(n) : "";

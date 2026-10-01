@@ -1026,6 +1026,7 @@
     // Kam etwas dazu, während Dennis in der Ausrüstung steht (Treffer, Geschenk): gleich hier aus dem Schatten holen
     if (page === 2 && onboarded() && $("#overlay").hidden) funde();
     setTimeout(abspannPruefen, 600);
+    setTimeout(schlachtPruefen, 600);
   }
 
   /* ---------- Verpasste Momente nachholen (08-erlebnis-plan.md, 3.6) ---------- */
@@ -1108,8 +1109,8 @@
   // dann tritt die nächste Quest erst am Ende der Reihe aus dem Nebel.
   function announce(prev, next, prevDoc, doc, opt = {}) {
     prevDoc = E.normalize(prevDoc); doc = E.normalize(doc);
-    // Läuft gerade der Morgen, kommt alles Neue danach dran
-    if (morgen.offen() && !opt.kette) { schlange.push([prevDoc, doc]); return true; }
+    // Läuft gerade der Morgen oder die finale Schlacht, kommt alles Neue danach dran
+    if ((morgen.offen() || schlacht.offen()) && !opt.kette) { schlange.push([prevDoc, doc]); return true; }
     // Der Morgen (01.10.): erst die Zwischensequenz, dann der Rest dieses Schritts (meist die Freigabe der ersten Quest am
     // Samstag), als hätte Dennis die Items schon vorher gehabt. Ist ein Fenster offen, kommt er danach.
     if (morgenFaellig(prev, next)) {
@@ -1363,6 +1364,10 @@
       else if (art === "glueck") ton(880, 1760, .25, "triangle", .06);
       else if (art === "bruch") { rauschen(.16, .5, 4200); ton(190, 55, .3, "sine", .3); }     // das Siegel des Briefs bricht
       else if (art === "grollen") { rauschen(1.3, .16, 140); ton(55, 48, 1.2, "sine", .12); }   // beim Halten des Siegels
+      else if (art === "strahl") {                                                                // Fee gegen Buu Huu: zwei Strahlen ringen
+        ton(196, 392, 3, "sawtooth", .03); ton(208, 370, 3, "sawtooth", .03); ton(784, 1568, 3, "triangle", .025);
+        for (let i = 0; i < 6; i++) rauschen(.12, .12, 1800, t + .3 + i * .45);
+      }
     } catch (_) {}
   }
 
@@ -1789,7 +1794,7 @@
     if (sofort) ersteQuestPruefen();
   }
   const frei = () => page === 1 && intro.hidden && $("#overlay").hidden && $("#coach").hidden && $("#prolog").hidden
-    && $("#schwur").hidden && $("#logbuch").hidden && $("#fluchSzene").hidden && $("#morgen").hidden;
+    && $("#schwur").hidden && $("#logbuch").hidden && $("#fluchSzene").hidden && $("#morgen").hidden && $("#schlacht").hidden;
   function ersteQuestPruefen() {
     if (!blanko || ersteTimer) return;
     if (spaeter() || !state || state.ende) { blanko = false; render(); return; }
@@ -1969,6 +1974,7 @@
     renderHud();
     melody("nebel");
     setTimeout(() => { row?.classList.remove("revealing"); card.classList.remove("revealing"); }, 1400);
+    setTimeout(schlachtPruefen, 1700);     // am Gipfel: erst aus dem Nebel, dann die finale Schlacht
   }
 
   document.querySelectorAll("[data-nav]").forEach(b => b.addEventListener("click", e => { e.stopPropagation(); turn(b.dataset.nav === "next" ? 1 : -1); }));
@@ -2030,25 +2036,15 @@
   let morgenGesehen = 0;
   try { if (!DEMO) morgenGesehen = Number(localStorage.getItem(MORGEN_KEY)) || 0; } catch (e) {}
   const morgenFaellig = (prev, next) => MORGEN_SZENE && !!next.morgen && !(prev && prev.morgen) && next.morgen !== morgenGesehen;
-  const morgen = (() => {
-    const el = $("#morgen"), text = $("#mgText"), wer = $("#mgWer"), items = $("#mgItems");
+  /* Zwischensequenz (Morgen und finale Schlacht): Schritte mit Phase (data-phase am Abschnitt, daran hängen Figuren und
+     Himmel im CSS), Sprecher, Text, Klang und auto (ms bis zum nächsten Schritt, sonst Tippen). Ein Schritt mit karten
+     zeigt die Karten der Bühne (.mg-item: Items am Morgen, Duelle am Gipfel) nacheinander. Tippen zeigt erst den ganzen Satz, dann den nächsten Schritt.
+     ÜBERSPRINGEN springt zu den Karten, dort oder danach beendet es. */
+  function zwischensequenz(el, schritteFn) {
+    const text = el.querySelector(".prolog-text"), wer = el.querySelector(".mg-wer"), skip = el.querySelector(".prolog-skip");
+    const karten = el.querySelector(".mg-items");
     let i = -1, tippen = null, timer = [], danach = null, schritte = [];
     const warte = (ms, f) => timer.push(setTimeout(f, ms));
-    const SCHRITTE = () => {
-      const s = C.morgen.szenen;
-      return [
-        { phase: "nacht", text: s.nacht, auto: 2400 },
-        { phase: "morgen", wer: "fee", text: s.fee[0], ton: "morgen" },
-        { phase: "morgen", wer: "fee", text: s.fee[1] },
-        { phase: "geist", wer: "geist", text: s.geist[0], ton: "kichern" },
-        { phase: "zerrt", wer: "geist", text: s.geist[1], ton: "error" },
-        { phase: "abwehr", wer: "fee", text: s.abwehr, ton: "zauber" },
-        { phase: "flucht", wer: "geist", text: s.flucht, ton: "minus", auto: 1800 },
-        { phase: "beutel", wer: "fee", text: s.beutel, ton: "side" },
-        { phase: "items", wer: "fee", text: s.stufe },
-        { phase: "titel", text: "", ton: "pruefung", auto: 3200 }
-      ];
-    };
     const WER = { fee: "RIKES FEE", geist: "BUU HUU · IM DIENST DES BUNDES" };
     function schreibe(t, fertig) {
       clearInterval(tippen); tippen = null;
@@ -2064,10 +2060,11 @@
       el.dataset.wer = sx.wer || "";
       wer.textContent = WER[sx.wer] || "";
       if (sx.ton === "error") tone("error"); else if (sx.ton) melody(sx.ton); else tone("move");
-      if (sx.phase === "items") {
-        // Ein Item nach dem anderen, jedes mit einem kleinen Klang, zum Schluss die Fanfare
-        [...items.children].forEach((x, k) => warte(250 + k * 420, () => { x.classList.add("da"); tone("confirm"); }));
-        warte(250 + items.children.length * 420, () => melody("fund"));
+      if (sx.klang) klang(sx.klang);
+      if (sx.karten) {
+        // Eine Karte nach der anderen, jede mit einem kleinen Klang, zum Schluss die Fanfare
+        [...karten.children].forEach((x, k) => warte(250 + k * 420, () => { x.classList.add("da"); tone("confirm"); }));
+        warte(250 + karten.children.length * 420, () => melody("fund"));
       }
       schreibe(sx.text, sx.auto ? () => warte(sx.auto, weiter) : null);
     }
@@ -2077,10 +2074,10 @@
       if (++i >= schritte.length) return ende();
       zeige();
     }
-    // Überspringen: das Drama weg, die Items zeigt sie trotzdem. Bei den Items oder danach ist Schluss.
+    // Überspringen: das Drama weg, die Karten zeigt sie trotzdem. Bei den Karten oder danach ist Schluss.
     function ueberspringen() {
-      const k = schritte.findIndex(sx => sx.phase === "items");
-      if (i >= k) return ende();
+      const k = schritte.findIndex(sx => sx.karten);
+      if (k < 0 || i >= k) return ende();
       clearInterval(tippen); tippen = null;
       i = k; zeige();
     }
@@ -2091,28 +2088,111 @@
       const f = danach; danach = null;
       if (f && still !== true) f();
     }
-    function start(zeit, dann) {
-      morgenGesehen = zeit;
-      try { if (!DEMO) localStorage.setItem(MORGEN_KEY, String(zeit)); } catch (e) {}
-      if (!C.morgen) return dann && dann();
+    // Karten und Titel baut der Aufrufer vorher
+    function start(dann) {
       $("#coach").hidden = true;
-      schritte = SCHRITTE(); i = -1; danach = dann || null;
-      const ids = C.morgen.items;
-      items.innerHTML = ids.map((id, k) => {
-        const x = itemById(id), n = x.feld ? feldItems(x.feld).length : 1;
-        return `<span class="mg-item" style="--c:${x.farbe};--k:${k}"><span class="mg-well">${useSvg(x.symbol)}</span><b>${esc(x.name)}</b><small>STUFE 1 VON ${n}</small></span>`;
-      }).join("");
-      el.querySelector(".mg-titel b").textContent = C.morgen.szenen.titel;
-      el.dataset.phase = "nacht"; text.textContent = ""; wer.textContent = "";
+      schritte = schritteFn(); i = -1; danach = dann || null;
+      el.dataset.phase = schritte[0].phase; text.textContent = ""; wer.textContent = "";
       el.hidden = false;
       // Die Figuren stehen erst draußen, dann geht es los (sonst sprängen sie gleich an ihren Platz)
       requestAnimationFrame(() => requestAnimationFrame(weiter));
     }
-    el.addEventListener("click", e => { if (!e.target.closest("#mgSkip")) weiter(); });
-    $("#mgSkip").addEventListener("click", e => { e.stopPropagation(); tone("move"); ueberspringen(); });
+    el.addEventListener("click", e => { if (!e.target.closest(".prolog-skip")) weiter(); });
+    skip.addEventListener("click", e => { e.stopPropagation(); tone("move"); ueberspringen(); });
+    return { start, weiter, ende, offen: () => !el.hidden };
+  }
+
+  const morgen = (() => {
+    const el = $("#morgen"), items = $("#mgItems");
+    const seq = zwischensequenz(el, () => {
+      const s = C.morgen.szenen;
+      return [
+        { phase: "nacht", text: s.nacht, auto: 2400 },
+        { phase: "morgen", wer: "fee", text: s.fee[0], ton: "morgen" },
+        { phase: "morgen", wer: "fee", text: s.fee[1] },
+        { phase: "geist", wer: "geist", text: s.geist[0], ton: "kichern" },
+        { phase: "zerrt", wer: "geist", text: s.geist[1], ton: "error" },
+        { phase: "abwehr", wer: "fee", text: s.abwehr, ton: "zauber" },
+        { phase: "flucht", wer: "geist", text: s.flucht, ton: "minus", auto: 1800 },
+        { phase: "beutel", wer: "fee", text: s.beutel, ton: "side" },
+        { phase: "items", wer: "fee", text: s.stufe, karten: true },
+        { phase: "titel", text: "", ton: "pruefung", auto: 3200 }
+      ];
+    });
+    function start(zeit, dann) {
+      morgenGesehen = zeit;
+      try { if (!DEMO) localStorage.setItem(MORGEN_KEY, String(zeit)); } catch (e) {}
+      if (!C.morgen) return dann && dann();
+      items.innerHTML = C.morgen.items.map((id, k) => {
+        const x = itemById(id), n = x.feld ? feldItems(x.feld).length : 1;
+        return `<span class="mg-item" style="--c:${x.farbe};--k:${k}"><span class="mg-well">${useSvg(x.symbol)}</span><b>${esc(x.name)}</b><small>STUFE 1 VON ${n}</small></span>`;
+      }).join("");
+      el.querySelector(".mg-titel b").textContent = C.morgen.szenen.titel;
+      seq.start(dann);
+    }
     function vergessen() { morgenGesehen = 0; try { localStorage.removeItem(MORGEN_KEY); } catch (e) {} }
-    return { start, weiter, ende, vergessen, offen: () => !el.hidden };
+    return { start, weiter: seq.weiter, ende: seq.ende, vergessen, offen: seq.offen };
   })();
+
+  /* ---------- Die finale Schlacht: Zwischensequenz vor der Prüfung des Bundes (01.10., Wunsch des Nutzers) ----------
+     Am Gipfelkreuz zieht ein Sturm auf. Rikes Fee empfängt Dennis, Buu Huu stellt sich ihnen in den Weg (er hat sich den Morgen
+     gemerkt), die Fee kämpft gegen ihn, Strahl gegen Strahl, bis es knallt und beide zurückfliegen. Sie hält ihn auf, den Bund
+     muss Dennis selbst bezwingen: Die drei Duelle erscheinen, zum Schluss „DIE FINALE SCHLACHT BEGINNT“, dann QUESTS.
+     Kommt von selbst, sobald die Quest dran ist (freigegeben) und das Tor offen ist, wenn Dennis im Menü nichts anderes offen hat:
+     nach dem Fenster der Freigabe und dem Weg auf der Karte, wenn die Quest aus dem Nebel tritt, oder nach der letzten Ziffer am
+     Tor. Nicht mehr, sobald ein Duell eingetragen ist. Einmal pro Handy und Freigabe (gemerkt wird ihr Zeitstempel).
+     Mit ?direkt und in der Demo nur zusammen mit ?schlacht (Tests und Laptop). Texte in config.js (schlacht). */
+  const SCHLACHT_KEY = "dq-schlacht-v1" + (PROBE ? "-probe" : "");
+  const SCHLACHT_SZENE = !!C.schlacht && ((!params.has("direkt") && !DEMO) || params.has("schlacht"));
+  let schlachtGesehen = 0;
+  try { if (!DEMO) schlachtGesehen = Number(localStorage.getItem(SCHLACHT_KEY)) || 0; } catch (e) {}
+  const schlacht = (() => {
+    const el = $("#schlacht"), duelle = $("#slDuelle");
+    const seq = zwischensequenz(el, () => {
+      const s = C.schlacht.szenen;
+      return [
+        { phase: "gipfel", text: s.gipfel, klang: "grollen", auto: 2600 },
+        { phase: "ankunft", wer: "fee", text: s.fee[0], ton: "morgen" },
+        { phase: "ankunft", wer: "fee", text: s.fee[1] },
+        { phase: "drohung", wer: "geist", text: s.geist[0], ton: "kichern", klang: "donner" },
+        { phase: "drohung", wer: "geist", text: s.geist[1], ton: "error" },
+        { phase: "trotz", wer: "fee", text: s.trotz, ton: "zauber" },
+        { phase: "kampf", text: "", klang: "strahl", auto: 3200 },
+        { phase: "patt", wer: "geist", text: s.patt, ton: "minus", klang: "donner" },
+        { phase: "rat", wer: "fee", text: s.rat },
+        { phase: "hohn", wer: "geist", text: s.hohn, ton: "kichern" },
+        { phase: "duelle", wer: "fee", text: s.duelle, karten: true },
+        { phase: "titel", text: "", ton: "pruefung", auto: 3400 }
+      ];
+    });
+    function start(zeit, dann) {
+      schlachtGesehen = zeit;
+      try { if (!DEMO) localStorage.setItem(SCHLACHT_KEY, String(zeit)); } catch (e) {}
+      // Die drei Duelle wie in der Quest-Karte: erst die Revanchen, aufgefüllt mit dem Wirbel
+      duelle.innerHTML = E.showdownDuelle(C, state).map((d, k) => {
+        const q = questById(d.quest), farbe = q.typ === "side" ? "#3ddc97" : q.farbe;
+        return `<span class="mg-item" style="--c:${farbe};--k:${k}"><span class="mg-well">${useSvg(q.typ === "side" ? "i-gem" : q.emblem || "z-triforce")}</span>`
+          + `<b>${esc(q.name)}</b><small>DUELL ${d.nr}${d.art === "revanche" ? " · REVANCHE" : ""}</small></span>`;
+      }).join("");
+      $("#slTitel").textContent = C.schlacht.szenen.titel;
+      seq.start(dann);
+    }
+    function vergessen() { schlachtGesehen = 0; try { localStorage.removeItem(SCHLACHT_KEY); } catch (e) {} }
+    return { start, weiter: seq.weiter, ende: seq.ende, vergessen, offen: seq.offen };
+  })();
+  // Zeitstempel der Freigabe, wenn die Schlacht jetzt fällig wäre (sonst 0)
+  function schlachtZeit() {
+    const id = C.schlacht && C.schlacht.quest;
+    if (!SCHLACHT_SZENE || !state || !lastDoc || state.next !== id || state.tor || Object.keys(state.duelle).length) return 0;
+    return Number(E.normalize(lastDoc).frei[id]) || 1;
+  }
+  function schlachtPruefen() {
+    const z = schlachtZeit();
+    if (!z || z === schlachtGesehen || schlacht.offen() || schlange.length || revealPending) return;
+    if (!intro.hidden || !$("#overlay").hidden || !$("#prolog").hidden || !$("#schwur").hidden || !$("#logbuch").hidden
+      || !$("#morgen").hidden || !$("#fluchSzene").hidden || !$("#geistRuf").hidden || abspann.offen()) return;
+    schlacht.start(z, () => { if (schlange.length) naechsterMoment(); else showNextQuest(); });
+  }
 
   /* ---------- Schattendieb im Tagebuch: Rikes Antwort wird zur Quest (30.09., Wunsch des Nutzers) ----------
      Rike hat auf Frage 1 verraten, dass Dennis keinen Faden durchs Nadelöhr bekommt. Ist ihre Antwort vorbei, huscht der
@@ -2639,7 +2719,7 @@
   // Von selbst nur, wenn Dennis im Menü ist und gerade nichts anderes offen hat
   function abspannPruefen() {
     if (!spielEnde() || abspann.offen() || abspann.gezeigt() || schlange.length) return;
-    if (!intro.hidden || !$("#overlay").hidden || !$("#prolog").hidden || !$("#schwur").hidden || !$("#logbuch").hidden || !$("#morgen").hidden) return;
+    if (!intro.hidden || !$("#overlay").hidden || !$("#prolog").hidden || !$("#schwur").hidden || !$("#logbuch").hidden || !$("#morgen").hidden || schlacht.offen()) return;
     abspann.start();
   }
 
@@ -2662,6 +2742,7 @@
       if (prolog.start()) { merkeGesehen(); blankoStart(false); }
       else { if (ersteOffen()) blankoStart(true); nachholen(); }
       setTimeout(abspannPruefen, 900);
+      setTimeout(schlachtPruefen, 900);
     }, 500);
   }
   intro.addEventListener("click", beginQuest);        // PRESS START: Tippen irgendwo startet
@@ -3109,6 +3190,7 @@
     if (blanko && spaeter()) ersteQuestPruefen();
     abspann.pruefen();
     setTimeout(abspannPruefen, 900);        // Spielende: Finale, sobald nichts anderes mehr offen ist
+    setTimeout(schlachtPruefen, 900);       // am Gipfel: die finale Schlacht, sobald nichts anderes mehr offen ist
     if (!$("#schwur").hidden) schwur.pruefen();
     // Log-Buch-Sprachnachrichten vorladen, solange das Log-Buch noch nicht entschieden ist
     if (state.quests.logbuch === "offen") logbuch.vorladen();
@@ -3164,6 +3246,7 @@
     try { [OB_KEY, KARTE_KEY, FUND_KEY, ERSTE_KEY, BRIEF_KEY, "dq-gps" + (PROBE ? "-probe" : "")].forEach(k => localStorage.removeItem(k)); } catch (e) {}
     abspann.schliessen(); abspann.vergessen();
     morgen.ende(true); morgen.vergessen();
+    schlacht.ende(true); schlacht.vergessen();
     beutelGezeigt = false; karteGesehen = false; gesehen = null; neuMarke.clear();
     prolog.vergessen();
     einStore.vergessen(); lbStore.vergessen();
