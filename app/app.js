@@ -1809,7 +1809,7 @@
   }
 
   /* ---------- Prolog: einmal pro Handy nach dem ersten PRESS START (08-erlebnis-plan.md, 3.2) ---------- */
-  // Rikes Fee stellt sich vor, heißt Dennis willkommen und erklärt in sechs Tafeln, worum es geht, danach zeigt sie
+  // Rikes Fee stellt sich vor, heißt Dennis willkommen und erklärt in sieben Tafeln, worum es geht, danach zeigt sie
   // kurz das Menü. Tippen blättert, ÜBERSPRINGEN beendet. Nur am Anfang des Spiels (siehe Onboarding oben).
   const PROLOG_KEY = "dq-prolog-v2" + (PROBE ? "-probe" : "");   // v2 (28.09.): sechs Tafeln, wer die alten vier kennt, sieht sie neu
   const prolog = (() => {
@@ -1831,6 +1831,9 @@
         // Die 20 Packs hütet der Bund, das Kästchen am Ende bleibt ein Geheimnis (29.09.: darin liegt eine Überraschung)
         { bild: `<span class="pb-cards${max > 10 ? " two" : ""}" style="--n:${max > 10 ? Math.ceil(max / 2) : max}">${karten(max)}</span>`,
           text: `Der Bund hütet ${max} Packs. Ja, richtig gehört: ${max}! Aber dir wird nichts geschenkt. Jedes Pack ist umkämpft, und im Zweifel kriegst du keins.` },
+        // Was die Quests bringen (eigene Tafel seit 01.10., Wunsch des Nutzers)
+        { bild: `<span class="pb-arten"><span class="pb-split">${medalHtml(C.quests.find(q => q.typ === "kern"), "bestanden", false)}<small>Hauptquest</small></span><span class="pb-split">${gemHtml("bestanden", false)}<small>Sidequest</small></span></span>`,
+          text: "Hauptquests bringen dir Packs und Ziffern, Sidequests Fähigkeiten." },
         { bild: `<span class="pb-chest">${useSvg("i-chest")}${useSvg("i-lock", "pb-lock")}</span><span class="pb-tumblers">${C.code.map(() => `<span class="tumbler">?</span>`).join("")}</span>`,
           text: "Die vier Ziffern öffnen am Ende ein verschlossenes Kästchen. Was darin liegt, verrät dir niemand. Ohne alle vier kein Gipfel." },
         { bild: `<span class="pb-split"><span class="pb-cards mine" style="--n:${Math.min(halb, 10)}">${karten(halb)}</span><small>deins</small></span><span class="pb-split"><span class="pb-cards" style="--n:${Math.min(max - halb, 10)}">${karten(max - halb, "empty")}</span><small>beim Bund</small></span>`,

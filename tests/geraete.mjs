@@ -142,7 +142,7 @@ for (const g of GERAETE.filter(g => !process.env.NUR || g.id.startsWith(process.
   if (pressStart.r > g.w - g.sa.r || pressStart.b > g.h - g.sa.b) { log('  PROBLEM: PRESS START in Safe Area', JSON.stringify(pressStart)); alleProbleme++; }
   await page.click('#introScreen');
   await page.waitForTimeout(700);
-  // Prolog der Fee (mit ?onboarding jedes Mal): sechs Tafeln, dann ein kurzer Rundgang
+  // Prolog der Fee (mit ?onboarding jedes Mal): sieben Tafeln, dann ein kurzer Rundgang
   await page.waitForTimeout(1700); await shot(page, g, '0b-prolog');
   alleProbleme += (await pruefen(page, g, 'PROLOG')).length;
   for (let i = 0; i < 20 && await page.isVisible('#prolog'); i++) { await page.click('#prolog'); await page.waitForTimeout(300); }

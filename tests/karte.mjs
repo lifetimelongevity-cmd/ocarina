@@ -25,11 +25,11 @@ const zurKarte = async p => { await weg(p); await p.click('.shoulder-left'); awa
 const aktiv = p => p.evaluate(() => document.querySelector('.face.active').dataset.page);
 const legende = p => p.evaluate(() => ['#mlWert', '#mlWo', '#mlRest'].map(s => document.querySelector(s).textContent).join(' | '));
 
-// Prolog: erscheint nach PRESS START am Anfang des Spiels, sechs Tafeln, danach Rundgang mit der Fee
+// Prolog: erscheint nach PRESS START am Anfang des Spiels, sieben Tafeln, danach Rundgang mit der Fee
 let { ctx, p } = await seite('?demo=start');
 await p.click('#introScreen'); await warte(900);
 pruefe(await p.isVisible('#prolog'), 'Prolog erscheint nach PRESS START');
-pruefe((await p.$$('#prologDots i')).length === 6, 'Prolog hat sechs Tafeln');
+pruefe((await p.$$('#prologDots i')).length === 7, 'Prolog hat sieben Tafeln');
 await warte(1500);
 pruefe((await p.textContent('#prologText')).includes('Ich bin die Fee. Rike hat mich'), 'Tafel 1: Die Fee stellt sich vor, Rike hat sie geschickt');
 await p.click('#prolog'); await warte(1800);
