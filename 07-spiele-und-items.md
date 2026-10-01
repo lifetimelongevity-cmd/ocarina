@@ -68,7 +68,7 @@ Stand 25.09.2026, Namen und Aussichtspunkt geändert am 28.09. Sammelt, was der 
 | Quest | Vorteil, wenn Dennis dort einen Fluch spricht |
 |---|---|
 | Wirbel der Götter | Dennis darf vorher üben (01.10., vorher: Gegner mit der schwachen Hand) |
-| Das Podrennen | Ein paar Sekunden geschenkt, wie viele, legt der Quest Master vor Ort fest (01.10.) |
+| Das Podrennen | Sabotage: Der Bund klebt sich vor seinen Runden einen kleinen Stein aufs Auto, Dennis fährt ohne (01.10.) |
 | Rikes Rache | Mehr Zeit auf der Uhr, wie viel, legt der Quest Master fest (01.10., vorher 30 Sekunden) |
 | Kartenwurf | 5 Karten statt 3 |
 | Auge des Jägers | Die Wasserwaffe wird für dieses Spiel eine Stufe stärker, mit der großen Pistole 1 m näher |

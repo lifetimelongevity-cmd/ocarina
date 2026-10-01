@@ -377,7 +377,7 @@ for (let i = 0; i < 20000; i++) zaehl[diebWurf(config)]++;
 [30, 35, 25, 10].forEach((g, n) => assert.ok(Math.abs(zaehl[n] / 200 - g) < 2, `Würfel ${n}: ${zaehl[n] / 200} % statt ${g} %`));
 // Vorteil je Spiel
 s = derive(config, {});
-assert.strictEqual(fluchVorteil(config, s, "podrennen").text, "Ein paar Sekunden geschenkt.");
+assert.strictEqual(fluchVorteil(config, s, "podrennen").text, "Sabotage! Der Bund fährt mit einem Stein auf dem Dach.");
 assert.strictEqual(fluchVorteil(config, s, "logbuch"), null);
 assert.strictEqual(fluchVorteil(config, s, "klingen"), null);
 // Auge des Jägers: die stärkste Waffe wird eine Stufe stärker, mit der großen darf er näher ran
@@ -386,7 +386,7 @@ assert.ok(fluchVorteil(config, derive(config, { quests: { ...bisKarten } }), "au
 assert.strictEqual(fluchVorteil(config, derive(config, { quests: bisKarten, glanz: { kartenwurf: true } }), "auge").text, "1 m näher ran.");
 // Showdown: es gilt der Vorteil des Spiels im ersten offenen Duell
 s = derive(config, { quests: { podrennen: "verloren" }, duelle: {} });
-assert.deepStrictEqual(fluchVorteil(config, s, "bund"), { quest: "podrennen", text: "Ein paar Sekunden geschenkt.", duell: 1 });
+assert.deepStrictEqual(fluchVorteil(config, s, "bund"), { quest: "podrennen", text: "Sabotage! Der Bund fährt mit einem Stein auf dem Dach.", duell: 1 });
 s = derive(config, { quests: { podrennen: "verloren" }, duelle: { "1": "sieg" } });
 assert.deepStrictEqual(fluchVorteil(config, s, "bund"), { quest: "wirbel", text: "Du darfst vorher üben.", duell: 2 });
 // Raub: kostet Packs zum Zeitpunkt des Einsatzes, der Fluch ist danach verbraucht
