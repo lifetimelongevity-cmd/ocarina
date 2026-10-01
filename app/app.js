@@ -2769,10 +2769,10 @@
      ?brief, ?brief zeigt ihn immer. Alles zurücksetzen vergisst ihn. */
   const brief = (() => {
     const B = C.brief, el = $("#brief"), zu = $("#briefZu"), offen = $("#briefOffen"), ps = $("#briefPs"), siegel = $("#briefSiegel");
-    const HALTEN = STILL.matches ? 600 : 1200;
+    const HALTEN = (B && B.halten) || 15000, hinweis = $("#briefHinweis");
     const SAMSUNG = /SamsungBrowser/i.test(navigator.userAgent);
     const quer = matchMedia("(orientation: landscape)");
-    let timer = null, schritt = "zu", fertigTimer = null;
+    let timer = null, schritt = "zu", fertigTimer = null, texte = [], brumm = null;
     const gemerkt = () => { try { return localStorage.getItem(BRIEF_KEY) === "1"; } catch (_) { return false; } };
     const zeigen = !!B && !params.has("direkt") && (params.has("brief") || (!DEMO && !gemerkt()));
 
@@ -2787,19 +2787,50 @@
       $("#briefPsText").textContent = B.ps;
     }
 
-    // Siegel gedrückt halten, bis sich der Ring schließt
+    // Siegel gedrückt halten, bis sich der Ring schließt. Mit Absicht viel zu lang (config.js, brief.halten): Der Ring füllt
+    // sich langsam, ein Brummen schwillt an, der Hinweis wechselt. Lässt er zu früh los: „Ey, gedrückt halten, du Waldschrat!“
     function start(e) {
       if (schritt !== "zu" || timer) return;
       if (e) e.preventDefault();
       el.style.setProperty("--halten", HALTEN / 1000 + "s");
       el.classList.add("halten");
-      tone("move"); klang("grollen");
+      hinweis.classList.remove("schimpf");
+      tone("move"); klang("grollen"); brummen(true);
+      const t = B.haltenTexte || [];
+      texte = t.map((x, i) => setTimeout(() => { hinweis.textContent = x; }, i * HALTEN / t.length));
       timer = setTimeout(brechen, HALTEN);
     }
-    function abbrechen() { if (!timer) return; clearTimeout(timer); timer = null; el.classList.remove("halten"); }
+    function aufhoeren() { clearTimeout(timer); timer = null; texte.forEach(clearTimeout); texte = []; brummen(false); el.classList.remove("halten"); }
+    function abbrechen() {
+      if (!timer) return;
+      aufhoeren();
+      hinweis.textContent = B.losgelassen || B.hinweis;
+      hinweis.classList.remove("schimpf"); void hinweis.offsetWidth; hinweis.classList.add("schimpf");
+      tone("error");
+    }
+    // Brummen beim Halten (eigener Klang): tief und leise, wird höher und lauter, bis das Siegel bricht
+    function brummen(an) {
+      try {
+        if (brumm) {
+          const { o, g } = brumm, t = audio.currentTime;
+          g.gain.cancelScheduledValues(t); g.gain.setValueAtTime(Math.max(g.gain.value, .0001), t); g.gain.exponentialRampToValueAtTime(.0001, t + .15);
+          o.stop(t + .2); brumm = null;
+        }
+        if (!an) return;
+        audio ??= new (window.AudioContext || window.webkitAudioContext)();
+        if (audio.state === "suspended") audio.resume();
+        const t = audio.currentTime, d = HALTEN / 1000;
+        const o = audio.createOscillator(), f = audio.createBiquadFilter(), g = audio.createGain();
+        o.type = "sawtooth"; o.frequency.setValueAtTime(46, t); o.frequency.exponentialRampToValueAtTime(150, t + d);
+        f.type = "lowpass"; f.frequency.setValueAtTime(180, t); f.frequency.exponentialRampToValueAtTime(1100, t + d);
+        g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(.012, t + d * .3); g.gain.exponentialRampToValueAtTime(.07, t + d);
+        o.connect(f).connect(g).connect(audio.destination); o.start(t); o.stop(t + d + .4);
+        brumm = { o, g };
+      } catch (_) {}
+    }
     function brechen() {
-      timer = null; schritt = "bricht";
-      el.classList.remove("halten"); el.classList.add("gebrochen");
+      aufhoeren(); schritt = "bricht";
+      el.classList.add("gebrochen");
       klang("bruch"); melody("siegel");
       setTimeout(() => melody("zauber"), 420);
       setTimeout(entfalten, STILL.matches ? 200 : 750);

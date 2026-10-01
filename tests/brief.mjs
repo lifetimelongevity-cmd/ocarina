@@ -17,6 +17,8 @@ const UA = {
   chrome: 'Mozilla/5.0 (Linux; Android 14; SM-S921B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Mobile Safari/537.36',
   ios: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1'
 };
+// Das Siegel braucht mit Absicht lange (config.js, brief.halten)
+const HALT = Number(fs.readFileSync(new URL('../app/config.js', import.meta.url), 'utf8').match(/\bhalten: (\d+)/)[1]) + 500;
 const b = await chromium.launch();
 
 async function seite(w, h, ua, url = '') {
@@ -46,8 +48,19 @@ async function halten(p, ms) {
   await p.screenshot({ path: `${OUT}/brief-1-zu.png` });
   await halten(p, 300); await warte(500);
   pruefe(await sichtbar(p, '#briefZu') && !(await p.$eval('#brief', e => e.classList.contains('gebrochen'))), 'Kurzer Tipp aufs Siegel öffnet nichts');
-  await halten(p, 1400); await warte(900);
-  pruefe(await sichtbar(p, '#briefOffen') && !(await sichtbar(p, '#briefZu')), 'Siegel gehalten: der Brief geht auf');
+  pruefe((await p.textContent('#briefHinweis')).includes('Waldschrat'), 'Zu früh losgelassen: „Ey, gedrückt halten, du Waldschrat!“');
+  await p.screenshot({ path: `${OUT}/brief-1b-waldschrat.png` });
+  await halten(p, HALT - 2500); await warte(500);
+  pruefe(await sichtbar(p, '#briefZu') && (await p.textContent('#briefHinweis')).includes('Waldschrat'), 'Auch nach ein paar Sekunden losgelassen: noch zu, wieder der Waldschrat');
+  {
+    const k = await p.locator('#briefSiegel').boundingBox();
+    await p.mouse.move(k.x + k.width / 2, k.y + k.height / 2); await p.mouse.down(); await warte(HALT * .5);
+    const t = await p.textContent('#briefHinweis');
+    pruefe(!t.includes('Waldschrat') && t.length > 0, 'Beim Halten wechselt der Hinweis: ' + t);
+    await warte(HALT * .5); await p.mouse.up();
+  }
+  await warte(900);
+  pruefe(await sichtbar(p, '#briefOffen') && !(await sichtbar(p, '#briefZu')), 'Siegel lange genug gehalten: der Brief geht auf');
   const text = await p.textContent('#briefText');
   pruefe(text.includes('Fabio und Bene') && text.includes('ein letztes Abenteuer als freier Mann'), 'Brief von Fabio und Bene: ein letztes Abenteuer als freier Mann');
   pruefe(!/Rike/.test(await p.textContent('#brief')), 'Rike kommt im Brief nicht vor');
@@ -81,7 +94,7 @@ async function halten(p, ms) {
 {
   const { ctx, p } = await seite(780, 280, 'chrome');
   pruefe(await sichtbar(p, '#brief') && await passt(p), 'S24 quer 780×280: der Brief liegt da und passt');
-  await halten(p, 1400); await warte(900);
+  await halten(p, HALT); await warte(900);
   await p.mouse.click(20, 20); await warte(300);
   pruefe(await passt(p), 'S24 quer 780×280: offener Brief passt');
   await p.screenshot({ path: `${OUT}/brief-5-quer-offen.png` });
@@ -102,7 +115,7 @@ async function halten(p, ms) {
 // 3. iPhone hochkant: kein LOS (Apple erlaubt kein Vollbild), Ausrichtungssperre, Schritte mit Teilen
 {
   const { ctx, p } = await seite(390, 664, 'ios');
-  await halten(p, 1400); await warte(900);
+  await halten(p, HALT); await warte(900);
   await p.mouse.click(20, 20); await warte(300); await p.mouse.click(20, 20); await warte(700);
   pruefe(!(await sichtbar(p, '#briefLos')), 'iPhone hochkant: kein LOS');
   pruefe((await p.textContent('#briefSperre')).includes('Ausrichtungssperre'), 'iPhone: Hinweis auf die Ausrichtungssperre');
@@ -118,7 +131,7 @@ async function halten(p, ms) {
 for (const [w, h, ua] of [[360, 560, 'samsung'], [360, 600, 'chrome'], [375, 600, 'ios'], [393, 700, 'ios'], [844, 340, 'ios'], [852, 342, 'ios'], [915, 356, 'samsung'], [780, 300, 'samsung']]) {
   const { ctx, p } = await seite(w, h, ua);
   let alle = await passt(p);
-  await halten(p, 1400); await warte(900);
+  await halten(p, HALT); await warte(900);
   await p.mouse.click(5, 5); await warte(300); alle = alle && await passt(p);
   await p.mouse.click(5, 5); await warte(700); alle = alle && await passt(p);
   await p.click('#briefInstall').catch(() => {}); await warte(300); alle = alle && await passt(p);

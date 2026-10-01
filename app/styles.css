@@ -732,6 +732,10 @@ html.probe body::after { content: ""; position: fixed; inset: 0; z-index: 9999; 
 .brief.gebrochen .brief-ring { opacity: 0; transition: opacity .3s; }
 .brief-hinweis { margin: 4px 0 2px; font: 800 11px/1.2 "Courier New", monospace; letter-spacing: .12em; text-transform: uppercase; color: #7a5a2a; animation: hinweisPuls 1.8s ease-in-out infinite; }
 @keyframes hinweisPuls { 50% { opacity: .45; } }
+.brief.halten .brief-hinweis { animation: none; color: #3b2a12; }
+/* Zu früh losgelassen: „Ey, gedrückt halten, du Waldschrat!“ */
+.brief-hinweis.schimpf { color: #a3221b; letter-spacing: .05em; animation: briefSchimpf 450ms ease-out; }
+@keyframes briefSchimpf { 15%, 55% { transform: translateX(-6px) rotate(-1.5deg); } 35%, 75% { transform: translateX(6px) rotate(1.5deg); } }
 .brief.gebrochen .brief-hinweis, .brief.gebrochen .brief-an, .brief.gebrochen .brief-geheim, .brief.gebrochen .brief-ton, .brief.gebrochen .brief-siegel::before { opacity: 0; transition: opacity .35s; animation: none; }
 
 /* Offen: der Brief entfaltet sich, Absatz für Absatz */
