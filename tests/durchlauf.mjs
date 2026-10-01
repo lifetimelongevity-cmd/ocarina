@@ -26,7 +26,7 @@ async function halten(p, ms = 1100) {
   const k = await p.locator('#swSiegel').boundingBox();
   await p.mouse.move(k.x + k.width / 2, k.y + k.height / 2); await p.mouse.down(); await warte(ms); await p.mouse.up(); await warte(700);
 }
-// Ausrüsten beim Spiel (29.09.): AUSRÜSTEN auf der Quest-Karte, Felder antippen (C-Tasten), MITNEHMEN, Siegel halten
+// Ausrüsten beim Spiel (29.09.): AUSRÜSTEN auf der Quest-Karte, Felder antippen (in ihre Plätze), MITNEHMEN, Siegel halten
 async function ausruesten(p, qid, ids) {
   await p.tap(`#questCard [data-ausruesten="${qid}"]`); await warte(1300);
   for (const id of ids) { await p.tap(`.slot[data-id="${id}"]`); await warte(200); }

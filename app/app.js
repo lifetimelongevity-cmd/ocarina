@@ -125,7 +125,7 @@
   let revealPending = null;                     // Quest, die nach dem Ergebnis-Fenster aus dem Nebel tritt
   // Ausrüsten beim Spiel (29.09., 08-erlebnis-plan.md Abschnitt 16)
   let ruestFuer = null;                         // Quest, für die die Ausrüstung rüstet (AUSRÜSTEN auf ihrer Quest-Karte), sonst von selbst
-  let cWahl = [], cWahlFuer = "", cNeu = null;  // was auf den C-Tasten liegt und noch nicht besiegelt ist, für welches Spiel, was gerade dazukam
+  let cWahl = [], cWahlFuer = "", cNeu = null;  // was in den Plätzen liegt und noch nicht besiegelt ist, für welches Spiel, was gerade dazukam
   let zuQuests = false;                         // nach dem Mitnehmen zurück zu QUESTS, sobald der Moment zu ist
   let audio;
 
@@ -315,7 +315,8 @@
   const pruefungen = n => `${n} ${n === 1 ? "Prüfung" : "Prüfungen"}`;
   const aktiv = id => id === state.next || state.quests[id] === "laeuft";
 
-  /* Ausrüsten beim Spiel (29.09.): Vor dem Spiel legt Dennis in der Ausrüstung auf die C-Tasten, was er mitnimmt, und
+  /* Ausrüsten beim Spiel (29.09., zwei Plätze statt drei C-Tasten seit 01.10.): Vor dem Spiel legt Dennis in der Ausrüstung
+     in die Plätze unter sich, was er mitnimmt (das Item für dieses Spiel, vielleicht den Fluch), und
      besiegelt alles auf einmal (MITNEHMEN). Die Plakette sagt, wofür: die Quest, von der er mit AUSRÜSTEN kam, solange sie
      aktiv ist, sonst die erste aktuelle, bei der er etwas mitnehmen kann oder schon hat, sonst die nächste.
      Im Showdown rüstet er sich für jedes Duell einzeln. Schild und Rikes Segen nimmt er nicht mit, sie melden sich selbst. */
@@ -331,7 +332,7 @@
     const q = questById(qid), d = q && q.showdown ? E.aktuellesDuell(C, state) : null;
     return { q, d, spiel: d ? questById(d.quest) : q, schluessel: qid + (d ? "#" + d.nr : "") };
   }
-  // Die Wahl auf den C-Tasten gilt nur für ein Spiel und nur, solange alles darin noch mitnehmbar ist
+  // Die Wahl in den Plätzen gilt nur für ein Spiel und nur, solange alles darin noch mitnehmbar ist
   function pruefeWahl() {
     const fq = fuerQuest(), k = fq ? spielVon(fq).schluessel : "";
     if (k !== cWahlFuer) { cWahl = []; cWahlFuer = k; }
@@ -385,7 +386,8 @@
       else ausruesten(t.dataset.ausruesten);
     });
     $("#itemBox").addEventListener("click", e => { if (e.target.closest("[data-mitnehmen]")) schwurMitnehmen(); });
-    document.querySelectorAll(".c-taste").forEach(b => b.addEventListener("click", () => { if (b.dataset.id) tippeFeld(b.dataset.id); else tone("move"); }));
+    // Ein Platz antippen: leer legt das Passende hinein, gewählt nimmt es wieder heraus, besiegelt zeigt nur, was es ist
+    document.querySelectorAll(".platz").forEach(b => b.addEventListener("click", () => { if (b.dataset.id) tippeFeld(b.dataset.id); else tone("move"); }));
 
     // Karte: Weg durch die Stationen, eine Marke pro Station. Tippen zeigt die Stationstafel, zweites Tippen die Quest.
     $("#mapRoute").setAttribute("d", pfad(ABSCHNITTE.length));
@@ -840,7 +842,7 @@
   }
 
   // Ausrüstung: Zustände, überall gleich (08-erlebnis-plan.md, 3.8, 3.12 und 16): Schatten = noch nicht erspielt,
-  // Farbe mit Goldrand = deins, leuchtet = hilft beim Spiel, für das gerade gerüstet wird, Haken = liegt auf einer C-Taste
+  // Farbe mit Goldrand = deins, leuchtet = hilft beim Spiel, für das gerade gerüstet wird, Haken = liegt in seinem Platz
   // oder ist schon dabei, grau = verbraucht oder verloren.
   function renderEquip() {
     pruefeWahl();
@@ -855,30 +857,38 @@
         + `${!schatten && mit.has(id) && !gewaehlt ? " usable" : ""}${drin ? " dabei" : ""}${neuMarke.has(id) ? " neu" : ""}${fundLaeuft.has(id) ? " fund" : ""}${sel[2] === id ? " is-selected" : ""}`;
       b.querySelector(".ic use").setAttribute("href", "#" + x.symbol);
       b.querySelector(".count").textContent = x.stapel && !schatten && st === "besitz" ? "×" + state.anzahl[id] : "";
-      b.setAttribute("aria-label", `${x.name}, ${schatten ? "noch nicht erspielt" : { besitz: gewaehlt ? "auf einer C-Taste" : drin ? "dabei" : mit.has(id) ? "hilft jetzt, tippen nimmt es mit" : "im Beutel", verloren: "verloren", verbraucht: "verbraucht" }[st]}`);
+      b.setAttribute("aria-label", `${x.name}, ${schatten ? "noch nicht erspielt" : { besitz: gewaehlt ? "liegt in seinem Platz" : drin ? "dabei" : mit.has(id) ? "hilft jetzt, tippen nimmt es mit" : "im Beutel", verloren: "verloren", verbraucht: "verbraucht" }[st]}`);
     });
-    renderCTasten(fq, schon);
+    renderPlaetze(fq, schon);
     renderItemBox(sel[2]);
   }
 
-  // Plakette und C-Tasten: wofür Dennis sich rüstet und was er mitnimmt. Besiegeltes steht fest, Gewähltes lässt sich zurücklegen.
-  const C_NAME = ["links", "unten", "rechts"];
-  function renderCTasten(fq, schon) {
-    const auf = [...schon, ...cWahl].slice(0, 3);
-    const zeigen = !!fq && (auf.length > 0 || kannMit(fq).length > 0);
+  // Plakette und Plätze: wofür Dennis sich rüstet und was er mitnimmt. Je Spiel gibt es höchstens ein Item (die stärkste Stufe
+  // seines Felds) und den Fluch, darum zwei Plätze, beschriftet nach dem Feld. Ein Platz erscheint nur, wenn etwas hineinpasst.
+  // Leer zeigt er den Umriss, gewählt pulsiert er, besiegelt steht er fest.
+  const PLATZ_NAME = { wasser: "WAFFE", karten: "KARTE", klinge: "KLINGE", nadel: "NADEL" };
+  function renderPlaetze(fq, schon) {
+    const alle = fq ? [...new Set([...schon, ...kannMit(fq)])] : [];
+    const inhalt = { item: alle.find(id => !itemById(id).dieb), fluch: alle.find(id => itemById(id).dieb) };
+    const zeigen = !!(inhalt.item || inhalt.fluch);
     $("#ruestFuer").hidden = !zeigen;
-    $("#cTasten").hidden = !zeigen;
+    $("#plaetze").hidden = !zeigen;
     $("#charWindow").classList.toggle("ruesten", zeigen);
-    if (!zeigen) return;
-    const { d, spiel } = spielVon(fq);
-    $("#ruestFuer").textContent = d ? `FÜR DUELL ${d.nr} · ${spiel.name.toUpperCase()}` : `FÜR ${spiel.name.toUpperCase()}`;
-    document.querySelectorAll(".c-taste").forEach((b, i) => {
-      const id = auf[i], x = id ? itemById(id) : null, fest = !!id && schon.includes(id);
+    if (zeigen) {
+      const { d, spiel } = spielVon(fq);
+      $("#ruestFuer").textContent = d ? `FÜR DUELL ${d.nr} · ${spiel.name.toUpperCase()}` : `FÜR ${spiel.name.toUpperCase()}`;
+    }
+    document.querySelectorAll(".platz").forEach(b => {
+      const art = b.dataset.platz, id = inhalt[art], x = id ? itemById(id) : null;
+      b.hidden = !id;
       b.dataset.id = id || "";
-      b.className = `c-taste ${["l", "d", "r"][i]}${id ? "" : " leer"}${fest ? " fest" : ""}${id && id === cNeu ? " neu" : ""}`;
-      b.style.setProperty("--c", x ? x.farbe : "");
-      b.querySelector("use").setAttribute("href", "#" + (x ? x.symbol : "i-card"));
-      b.setAttribute("aria-label", !x ? `C-Taste ${C_NAME[i]}, frei` : `${x.name}, ${fest ? "dabei" : "nochmal tippen legt es zurück"}`);
+      if (!x) { b.className = `platz ${art} leer`; return; }     // ausgeblendet ohne alten Zustand (sonst stünde er im nächsten Duell noch fest)
+      const fest = schon.includes(id), drin = fest || cWahl.includes(id), name = art === "fluch" ? "FLUCH" : PLATZ_NAME[x.feld] || "ITEM";
+      b.className = `platz ${art}${drin ? "" : " leer"}${fest ? " fest" : ""}${id === cNeu ? " neu" : ""}`;
+      b.style.setProperty("--c", x.farbe);
+      b.querySelector("use").setAttribute("href", "#" + x.symbol);
+      b.querySelector(".platz-name").textContent = name;
+      b.setAttribute("aria-label", `${name}: ${x.name}, ${fest ? "dabei" : drin ? "kommt mit, tippen nimmt es heraus" : "leer, tippen legt es hinein"}`);
     });
     cNeu = null;
   }
@@ -938,14 +948,14 @@
     renderItemBox(id);
     if (play) tone("move");
   }
-  // Tippen: Was hier hilft, kommt auf die nächste freie C-Taste, liegt es schon dort, geht es zurück in den Beutel.
+  // Tippen: Was hier hilft, kommt in seinen Platz, liegt es schon dort, geht es zurück in den Beutel.
   // Alles andere zeigt nur, was es ist.
   function tippeFeld(id) {
     const fq = fuerQuest(), schon = schonDabei(fq);
     sel[2] = id;
     neuMarke.delete(id);
     if (cWahl.includes(id)) { cWahl = cWahl.filter(x => x !== id); tone("move"); }
-    else if (kannMit(fq).includes(id) && schon.length + cWahl.length < 3) { cWahl.push(id); cNeu = id; tone("confirm"); }
+    else if (kannMit(fq).includes(id)) { cWahl.push(id); cNeu = id; tone("confirm"); }
     else tone("move");
     renderEquip();
   }
@@ -2404,7 +2414,7 @@
       ausfuehren: w => w === "schild" ? schildEinsetzen(schild, qid, d.nr) : eintrag("d_" + d.nr, { ergebnis: v })
     });
   }
-  // MITNEHMEN (29.09.): alles auf den C-Tasten mit einem Siegel. Das Fenster zeigt, was dabei ist, beim Fluch den Vorteil.
+  // MITNEHMEN (29.09.): alles in den Plätzen mit einem Siegel. Das Fenster zeigt, was dabei ist, beim Fluch den Vorteil.
   // Geschrieben wird ein Einsatz je Ding, in einem Rutsch (der Fluch zuletzt, dann würfelt der Schattendieb).
   function schwurMitnehmen() {
     const fq = fuerQuest();

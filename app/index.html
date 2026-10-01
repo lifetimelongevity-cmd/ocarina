@@ -141,7 +141,7 @@
           <!-- Seite 2: AUSRÜSTUNG · Was habe ich dabei? Links der Beutel (Items), Mitte Dennis im Bogenfenster,
                rechts Runenkreise (Fähigkeiten). Noch nicht Erspieltes ist ein Schatten.
                Ausrüsten beim Spiel (29.09., 08-erlebnis-plan.md Abschnitt 16): Die Plakette sagt, wofür. Was hilft, leuchtet,
-               Tippen legt es auf eine C-Taste unter Dennis, MITNEHMEN in der Textbox besiegelt alles auf einmal. -->
+               Tippen legt es in seinen Platz unter Dennis (Item oder Fluch), MITNEHMEN in der Textbox besiegelt alles auf einmal. -->
           <section class="face face-equip" data-page="2" aria-label="Ausrüstung">
             <header class="face-head">
               <h2>AUSRÜSTUNG</h2>
@@ -156,10 +156,10 @@
                 <img src="assets/avatar-okarina.webp" alt="Dennis spielt Okarina" width="560" height="1218" decoding="async">
                 <span class="motes" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
                 <span class="notes" aria-hidden="true"><i>♪</i><i>♫</i><i>♪</i></span>
-                <div class="c-tasten" id="cTasten" hidden role="group" aria-label="Was du mitnimmst">
-                  <button type="button" class="c-taste l" data-c="0"><svg aria-hidden="true"><use href="#i-card"></use></svg><i class="pfeil"></i></button>
-                  <button type="button" class="c-taste d" data-c="1"><svg aria-hidden="true"><use href="#i-card"></use></svg><i class="pfeil"></i></button>
-                  <button type="button" class="c-taste r" data-c="2"><svg aria-hidden="true"><use href="#i-card"></use></svg><i class="pfeil"></i></button>
+                <!-- Zwei Plätze statt drei C-Tasten (01.10.): links das Item für dieses Spiel (WAFFE, KARTE, KLINGE, NADEL), rechts der Fluch -->
+                <div class="plaetze" id="plaetze" hidden role="group" aria-label="Was du mitnimmst">
+                  <button type="button" class="platz item leer" data-platz="item" hidden><span class="platz-feld"><svg aria-hidden="true"><use href="#i-card"></use></svg></span><b class="platz-name">ITEM</b></button>
+                  <button type="button" class="platz fluch leer" data-platz="fluch" hidden><span class="platz-feld"><svg aria-hidden="true"><use href="#i-fluch"></use></svg></span><b class="platz-name">FLUCH</b></button>
                 </div>
               </div>
               <p class="plakette ruest-fuer" id="ruestFuer" hidden></p>

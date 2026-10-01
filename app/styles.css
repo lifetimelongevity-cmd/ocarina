@@ -976,37 +976,31 @@ button.dabei-zeile { cursor: pointer; }
 .item-box .ib-mitnehmen { grid-column: 3; grid-row: 1 / span 2; align-self: center; margin: 0; }
 .item-box .ib-mitnehmen[hidden] { display: inline-flex; visibility: hidden; }
 
-/* Ausrüsten beim Spiel (29.09.): Plakette „FÜR …“ über dem Bogenfenster, drei C-Tasten unter Dennis wie am N64-Controller.
-   Leer zeigt die Taste ihren Pfeil, belegt das Ding und den Pfeil am Rand. Gewählt pulsiert, besiegelt steht fest. */
+/* Ausrüsten beim Spiel (29.09., Plätze seit 01.10.): Plakette „FÜR …“ über dem Bogenfenster, unter Dennis zwei beschriftete
+   Plätze: das Item für dieses Spiel und der Fluch. Leer zeigt der Platz den Umriss dessen, was hineingehört (gestrichelt),
+   gewählt pulsiert er, besiegelt steht er fest (Goldglanz). */
 .equip-body { position: relative; }
 .ruest-fuer { position: absolute; z-index: 6; left: 50%; top: 2px; transform: translateX(-50%); margin: 0; padding: 3px 9px 2px; border-radius: 3px;
   white-space: nowrap; pointer-events: none; color: #1c1604; background: var(--cursor); font: 900 var(--fs-tiny)/1.15 "Courier New", monospace; letter-spacing: .06em;
   box-shadow: 0 0 0 1px #1c1604, 0 2px 5px rgba(0,0,0,.6); }
-.character-window.ruesten::after { height: 36%; }
-.c-tasten { position: absolute; z-index: 4; left: 50%; bottom: clamp(4px, 1.6vh, 8px); transform: translateX(-50%); display: flex; gap: clamp(6px, 1.8vh, 10px); }
-.c-tasten[hidden] { display: none; }
-.c-taste { --cz: clamp(28px, 9.4vh, 38px); position: relative; display: grid; place-items: center; width: var(--cz); height: var(--cz); flex: none; padding: 0; border: 0; border-radius: 50%; cursor: pointer;
+.character-window.ruesten::after { height: 46%; }
+.plaetze { position: absolute; z-index: 4; left: 50%; bottom: clamp(3px, 1.2vh, 7px); transform: translateX(-50%); display: flex; gap: clamp(10px, 3vh, 18px); }
+.plaetze[hidden], .platz[hidden] { display: none; }
+.platz { --pz: clamp(28px, 9.4vh, 38px); display: grid; justify-items: center; gap: 2px; padding: 0; border: 0; background: none; cursor: pointer; }
+.platz:focus-visible { outline: 2px solid #fff; outline-offset: 3px; border-radius: 6px; }
+.platz-feld { position: relative; display: grid; place-items: center; width: var(--pz); height: var(--pz); border-radius: 8px;
   background: radial-gradient(circle at 40% 32%, #3a300c, #0c0a04 72%); box-shadow: 0 0 0 2.5px var(--gold), 0 3px 6px rgba(0,0,0,.8); }
-.c-taste svg { width: 68%; height: 68%; color: var(--c, var(--gold)); filter: drop-shadow(1px 1px 0 #000); }
-.c-taste:focus-visible { outline: 2px solid #fff; outline-offset: 4px; }
-.c-taste.leer { cursor: default; background: radial-gradient(circle at 40% 32%, rgba(242,201,76,.2), rgba(12,10,4,.85) 70%); box-shadow: 0 0 0 2px rgba(242,201,76,.5), 0 3px 6px rgba(0,0,0,.8); }
-.c-taste.leer svg { display: none; }
-.c-taste .pfeil { position: absolute; width: 0; height: 0; border: 0 solid transparent; }
-.c-taste.leer .pfeil { position: static; opacity: .75; }
-.c-taste.l .pfeil { border-width: 5px 6px 5px 0; border-right-color: var(--gold); }
-.c-taste.r .pfeil { border-width: 5px 0 5px 6px; border-left-color: var(--gold); }
-.c-taste.d .pfeil { border-width: 6px 5px 0 5px; border-top-color: var(--gold); }
-.c-taste.leer.l .pfeil { border-width: 7px 9px 7px 0; }
-.c-taste.leer.r .pfeil { border-width: 7px 0 7px 9px; }
-.c-taste.leer.d .pfeil { border-width: 9px 7px 0 7px; }
-.c-taste:not(.leer).l .pfeil { left: -9px; top: 50%; margin-top: -5px; }
-.c-taste:not(.leer).r .pfeil { right: -9px; top: 50%; margin-top: -5px; }
-.c-taste:not(.leer).d .pfeil { bottom: -9px; left: 50%; margin-left: -5px; }
-.c-taste:not(.leer):not(.fest)::after { content: ""; position: absolute; inset: -5px; border-radius: 50%; border: 2px solid color-mix(in srgb, var(--c, var(--gold)), #fff 35%); pointer-events: none; animation: usablePulse 1.6s ease-in-out infinite; }
-.c-taste.fest { box-shadow: 0 0 0 2.5px var(--gold), 0 0 12px rgba(242,201,76,.55), 0 3px 6px rgba(0,0,0,.8); }
-.c-taste.neu svg { animation: cHop .42s cubic-bezier(.3, 1.6, .5, 1) both; }
+.platz.fluch .platz-feld { border-radius: 50%; }
+.platz-feld svg { width: 70%; height: 70%; color: var(--c, var(--gold)); filter: drop-shadow(1px 1px 0 #000); }
+.platz-name { font: 900 clamp(8.5px, 2.6vh, 10px)/1 "Courier New", monospace; letter-spacing: .08em; color: var(--gold); text-shadow: 1px 1px 0 #000, 0 0 4px #000; }
+.platz.leer .platz-feld { background: rgba(12,10,4,.7); box-shadow: 0 3px 6px rgba(0,0,0,.8); outline: 2px dashed rgba(242,201,76,.6); outline-offset: -2px; }
+.platz.leer .platz-feld svg { opacity: .3; filter: grayscale(1); }
+.platz.leer .platz-name { color: rgba(242,201,76,.75); }
+.platz:not(.leer):not(.fest) .platz-feld::after { content: ""; position: absolute; inset: -5px; border-radius: inherit; border: 2px solid color-mix(in srgb, var(--c, var(--gold)), #fff 35%); pointer-events: none; animation: usablePulse 1.6s ease-in-out infinite; }
+.platz.fest .platz-feld { box-shadow: 0 0 0 2.5px var(--gold), 0 0 12px rgba(242,201,76,.55), 0 3px 6px rgba(0,0,0,.8); }
+.platz.neu .platz-feld svg { animation: cHop .42s cubic-bezier(.3, 1.6, .5, 1) both; }
 @keyframes cHop { from { opacity: .2; transform: translateY(-60%) scale(.3); } }
-/* Feld mit Haken: liegt auf einer C-Taste oder ist schon dabei */
+/* Feld mit Haken: liegt in seinem Platz oder ist schon dabei */
 .slot .haken { display: none; position: absolute; z-index: 6; right: -6px; top: -6px; width: 18px; height: 18px; place-items: center; border-radius: 50%; color: #1c1604; background: var(--gold); box-shadow: 0 0 0 1.5px #1c1604; }
 .slot .haken svg { width: 11px; height: 11px; }
 .slot.dabei .haken { display: grid; }
@@ -1015,7 +1009,7 @@ button.dabei-zeile { cursor: pointer; }
 .slot.rune.dabei .haken { right: -4px; top: -4px; }
 .sw-folgen .fx-lbl.magie { color: #c9a4ff; }
 @media (prefers-reduced-motion: reduce) {
-  .quest-card .ruesten .qc-action, .c-taste::after, .c-taste.neu svg { animation: none !important; }
+  .quest-card .ruesten .qc-action, .platz-feld::after, .platz.neu .platz-feld svg { animation: none !important; }
 }
 /* Code-Fenster am Ende: fehlende Ziffer kaufen */
 .result-lines li .kauf, .result-lines li .kauf-fehlt { margin-left: auto; flex: none; }

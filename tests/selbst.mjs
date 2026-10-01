@@ -110,12 +110,12 @@ await admin.fill('#customAmount', '2'); await admin.fill('#customReason', 'Test:
 await admin.click('#customForm button[type="submit"]'); await warte(900); await zu(dennis);
 const packsVor = Number(await dennis.textContent('#packsVal'));
 await dennis.evaluate(() => { const r = document.querySelector('.q-row[data-id="podrennen"]'); r && r.click(); }); await warte(300);
-// Ausrüsten beim Spiel (29.09.): AUSRÜSTEN auf der Quest-Karte, in der Ausrüstung den Fluch auf eine C-Taste, ein Siegel
+// Ausrüsten beim Spiel (29.09.): AUSRÜSTEN auf der Quest-Karte, in der Ausrüstung den Fluch in seinen Platz, ein Siegel
 pruefe(await dennis.isVisible('#questCard [data-ausruesten="podrennen"]'), 'Speed Flip: AUSRÜSTEN auf der Quest-Karte');
 await dennis.tap('#questCard [data-ausruesten="podrennen"]'); await warte(1200);
 pruefe((await dennis.textContent('#ruestFuer')).includes('SPEED FLIP') && await dennis.isVisible('.slot.usable[data-id="spruchrolle"]'), 'Ausrüstung für Speed Flip: der Fluch leuchtet');
 await dennis.tap('.slot[data-id="spruchrolle"]'); await warte(300);
-pruefe((await dennis.getAttribute('.c-taste.l', 'data-id')) === 'spruchrolle', 'Tippen legt den Fluch auf die erste C-Taste');
+pruefe((await dennis.getAttribute('.platz.fluch', 'data-id')) === 'spruchrolle' && await dennis.isHidden('.platz.item'), 'Tippen legt den Fluch in den Platz FLUCH (Speed Flip hat kein Item, also kein Platz dafür)');
 const box = await dennis.textContent('#itemBox');
 pruefe(box.includes('Sabotage') && box.includes('0 bis 3 Packs.') && !box.includes('ALLES') && await dennis.$('#itemBox .rad-mini'), 'Textbox: Vorteil und das kleine Rad, beim ersten Fluch noch ohne ALLES');
 await dennis.tap('[data-mitnehmen]'); await warte(400);

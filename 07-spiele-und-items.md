@@ -93,7 +93,7 @@ Stand 25.09.2026, Namen und Aussichtspunkt geändert am 28.09. Sammelt, was der 
 
 Bei Rikes Tagebuch und Die drei Zeichen gibt es keinen. Texte in `config.js` (`fluch` je Quest).
 - **Entschieden (25.09.):** Dennis sagt an, der Quest Master bucht das Einsetzen im Admin. Dennis hat keinen Knopf. Überholt am 27.09. (Dennis besiegelt selbst) und am 29.09.:
-- **Ausrüsten beim Spiel (29.09., `08-erlebnis-plan.md` Abschnitt 16):** Items und Flüche nimmt Dennis vor dem Spiel in der Ausrüstung mit: AUSRÜSTEN auf der Quest-Karte, Tippen legt sie auf drei C-Tasten wie in Ocarina of Time, ein Siegel MITNEHMEN für alles. Der Bund gibt ihm dann das echte Ding. Rikes Segen meldet sich am Tor (den Schild, der sich bei einer Niederlage meldete, gibt es seit 01.10. nicht mehr). Am Gipfel rüstet sich Dennis für jedes Duell einzeln.
+- **Ausrüsten beim Spiel (29.09., `08-erlebnis-plan.md` Abschnitt 16):** Items und Flüche nimmt Dennis vor dem Spiel in der Ausrüstung mit: AUSRÜSTEN auf der Quest-Karte, Tippen legt sie in zwei beschriftete Plätze unter Dennis (seit 01.10.: das Item, benannt nach dem Feld, zum Beispiel WAFFE, und FLUCH, vorher drei C-Tasten), ein Siegel MITNEHMEN für alles. Der Bund gibt ihm dann das echte Ding. Rikes Segen meldet sich am Tor (den Schild, der sich bei einer Niederlage meldete, gibt es seit 01.10. nicht mehr). Am Gipfel rüstet sich Dennis für jedes Duell einzeln.
 
 ## Buu Huus Rad (entschieden und gebaut am 01.10.)
 

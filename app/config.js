@@ -212,7 +212,7 @@
        geschenk:   bekommt Dennis in jedem Fall, sobald die Quest entschieden ist, ob Sieg oder Niederlage (01.10.: Buu Huu
                    schenkt bei Die drei Zeichen einen Fluch). text steht im Ergebnis-Fenster, mehr, wenn er dort mehrere bekommt
        einsetzbar: Items und Fähigkeiten, die hier helfen. Items und Flüche nimmt Dennis vor dem Spiel in der Ausrüstung mit
-                   (C-Tasten, ein Siegel, 29.09.). Der Quest Master kann zurücknehmen.
+                   (Plätze für Item und Fluch, ein Siegel, 29.09.). Der Quest Master kann zurücknehmen.
        ergebnisWort: Wort auf dem Knopf, mit dem Dennis den Sieg besiegelt (sonst „Bestanden")
        duell:      ein Spiel gegen einen aus dem Bund
        revanche:   kann im Showdown als Revanche wiederkommen, wenn Dennis es verloren hat

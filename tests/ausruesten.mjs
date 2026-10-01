@@ -1,5 +1,5 @@
-// Ausrüsten beim Spiel (29.09., 08-erlebnis-plan.md Abschnitt 16): AUSRÜSTEN auf der Quest-Karte, in der Ausrüstung Items und
-// Fluch auf die C-Tasten legen, ein Siegel MITNEHMEN, Moment AUSGERÜSTET, zurück zu QUESTS mit DABEI. Am Gipfel rüstet Dennis
+// Ausrüsten beim Spiel (29.09., 08-erlebnis-plan.md Abschnitt 16, Plätze seit 01.10.): AUSRÜSTEN auf der Quest-Karte, in der
+// Ausrüstung das Item und den Fluch in ihre Plätze legen (WAFFE und FLUCH statt drei C-Tasten), ein Siegel MITNEHMEN, Moment AUSGERÜSTET, zurück zu QUESTS mit DABEI. Am Gipfel rüstet Dennis
 // sich je Duell (der Schild ist seit 01.10. gestrichen). Dazu: Fenster sind immer gleich groß.
 // Aufruf: cd app && python3 -m http.server 8765 &   dann   node tests/ausruesten.mjs /tmp/shots
 import { chromium } from 'playwright';
@@ -43,19 +43,21 @@ await p.screenshot({ path: `${OUT}/ausruesten-1-quest.png` });
 
 await p.tap('#questCard [data-ausruesten="auge"]'); await warte(1300);
 pruefe(await seite() === '2', 'AUSRÜSTEN dreht zur Ausrüstung');
-pruefe((await text(p, '#ruestFuer')) === 'FÜR AUGE DES JÄGERS' && await p.isVisible('#cTasten'), 'Plakette „FÜR AUGE DES JÄGERS“, darunter die C-Tasten');
-pruefe(await p.$$eval('.c-taste.leer', xs => xs.length) === 3, 'Drei C-Tasten, alle frei');
+pruefe((await text(p, '#ruestFuer')) === 'FÜR AUGE DES JÄGERS' && await p.isVisible('#plaetze'), 'Plakette „FÜR AUGE DES JÄGERS“, darunter die Plätze');
+const plaetze = await p.$$eval('.platz:not([hidden])', xs => xs.map(x => x.querySelector('.platz-name').textContent + (x.classList.contains('leer') ? ' leer' : '')));
+pruefe(JSON.stringify(plaetze) === '["WAFFE leer","FLUCH leer"]', 'Zwei Plätze, beide leer: WAFFE und FLUCH (' + plaetze.join(', ') + ')');
 const leuchtet = await p.$$eval('.slot.usable', xs => xs.map(x => x.dataset.id));
 pruefe(JSON.stringify(leuchtet) === '["pistole_klein","spruchrolle"]', 'Es leuchtet, was hilft: kleine Pistole und Fluch');
 const hoeheBox = [];
 hoeheBox.push(await hoehe(p, '#itemBox'));
 await p.tap('.slot[data-id="pistole_klein"]'); await warte(300);
 hoeheBox.push(await hoehe(p, '#itemBox'));
-pruefe((await p.getAttribute('.c-taste.l', 'data-id')) === 'pistole_klein' && await p.$eval('.slot[data-id="pistole_klein"]', e => e.classList.contains('dabei')), 'Tippen legt die Pistole auf die C-Taste links, das Feld trägt einen Haken');
+pruefe((await p.getAttribute('.platz.item', 'data-id')) === 'pistole_klein' && !(await p.$eval('.platz.item', e => e.classList.contains('leer'))) && await p.$eval('.slot[data-id="pistole_klein"]', e => e.classList.contains('dabei')), 'Tippen legt die Pistole in den Platz WAFFE, das Feld trägt einen Haken');
 pruefe((await text(p, '#itemBox')).includes('Kommt mit') && (await text(p, '[data-mitnehmen]')).includes('MITNEHMEN · 1'), 'Textbox: „Kommt mit“, MITNEHMEN · 1');
-await p.tap('.c-taste.l'); await warte(300);
-pruefe(await p.$$eval('.c-taste.leer', xs => xs.length) === 3 && !(await p.isVisible('[data-mitnehmen]')), 'Tippen auf die C-Taste legt sie zurück');
-await p.tap('.slot[data-id="pistole_klein"]'); await warte(200);
+await p.tap('.platz.item'); await warte(300);
+pruefe(await p.$$eval('.platz.leer:not([hidden])', xs => xs.length) === 2 && !(await p.isVisible('[data-mitnehmen]')), 'Tippen auf den Platz nimmt die Pistole wieder heraus');
+await p.tap('.platz.item'); await warte(200);
+pruefe((await p.getAttribute('.platz.item', 'data-id')) === 'pistole_klein' && !(await p.$eval('.platz.item', e => e.classList.contains('leer'))), 'Tippen auf den leeren Platz legt die Pistole hinein');
 await p.tap('.slot[data-id="spruchrolle"]'); await warte(300);
 hoeheBox.push(await hoehe(p, '#itemBox'));
 pruefe((await text(p, '#itemBox')).includes('Hier: Wasserwaffe eine Stufe stärker'), 'Beim Fluch steht, was er hier bringt');
@@ -63,7 +65,7 @@ await p.tap('.slot[data-feld="karten"]'); await warte(300);
 hoeheBox.push(await hoehe(p, '#itemBox'));
 pruefe(!(await p.$eval('.slot[data-feld="karten"]', e => e.classList.contains('dabei'))) && (await text(p, '[data-mitnehmen]')).includes('MITNEHMEN · 2'), 'Was hier nicht hilft, zeigt nur, was es ist');
 pruefe(new Set(hoeheBox).size === 1, 'Textbox bleibt gleich hoch (' + hoeheBox.join(', ') + ' px)');
-await p.screenshot({ path: `${OUT}/ausruesten-2-c-tasten.png` });
+await p.screenshot({ path: `${OUT}/ausruesten-2-plaetze.png` });
 
 await p.tap('[data-mitnehmen]'); await warte(400);
 const siegel = await text(p, '#schwur');
@@ -71,7 +73,7 @@ const hoeheSiegel = await hoehe(p, '.sw-panel');
 pruefe(siegel.includes('AUSRÜSTEN FÜR') && siegel.includes('Kleine Pistole') && siegel.includes('FLUCH') && siegel.includes('Stufe stärker') && siegel.includes('PREIS') && siegel.includes('Buu Huu dreht am Rad'), 'Siegel: DABEI, Vorteil des Fluchs, Buu Huus Rad');
 await p.screenshot({ path: `${OUT}/ausruesten-3-siegel.png` });
 await p.click('#swZurueck'); await warte(300);
-pruefe(await p.$$eval('.c-taste:not(.leer)', xs => xs.length) === 2, 'ZURÜCK: beides liegt noch auf den C-Tasten');
+pruefe(await p.$$eval('.platz:not(.leer):not([hidden])', xs => xs.length) === 2, 'ZURÜCK: beides liegt noch in seinem Platz');
 await p.tap('[data-mitnehmen]'); await warte(400);
 await p.evaluate(() => { Math.random = () => 0; });   // Buu Huus Rad bleibt auf 0 stehen
 await halten(p);
@@ -88,9 +90,9 @@ pruefe(dabei.includes('DABEI') && dabei.includes('Kleine Pistole') && dabei.incl
 pruefe(!(await p.$eval('#questCard', e => e.classList.contains('vor-dem-spiel'))), 'Jetzt sind BESTANDEN und VERLOREN die leuchtenden Knöpfe');
 await p.screenshot({ path: `${OUT}/ausruesten-5-dabei.png` });
 await p.tap('#questCard .dabei-zeile'); await warte(1300);
-pruefe(await p.$$eval('.c-taste.fest', xs => xs.length) === 2 && !(await p.$('.slot.usable')), 'Ausrüstung: beides steht fest auf den C-Tasten, nichts leuchtet mehr');
-await p.tap('.c-taste.l'); await warte(300);
-pruefe((await text(p, '#itemBox')).includes('Dabei bei Auge des Jägers') && await p.$$eval('.c-taste.fest', xs => xs.length) === 2, 'Besiegeltes lässt sich nicht zurücklegen: „Dabei bei Auge des Jägers“');
+pruefe(await p.$$eval('.platz.fest', xs => xs.length) === 2 && !(await p.$('.slot.usable')), 'Ausrüstung: beide Plätze stehen fest, nichts leuchtet mehr');
+await p.tap('.platz.item'); await warte(300);
+pruefe((await text(p, '#itemBox')).includes('Dabei bei Auge des Jägers') && await p.$$eval('.platz.fest', xs => xs.length) === 2, 'Besiegeltes lässt sich nicht herausnehmen: „Dabei bei Auge des Jägers“');
 // Siegel-Fenster gleich groß wie beim Ergebnis
 await p.evaluate(() => document.querySelector('.shoulder-left').click()); await warte(1300);
 await p.tap('#questCard [data-ergebnis="verloren"]'); await warte(400);
@@ -104,7 +106,7 @@ t.on('pageerror', e => fehler.push('tagebuch: ' + e.message));
 await t.goto(BASE + '?demo=start&direkt'); await warte(900); await zu(t);
 pruefe(!(await t.$('#questCard [data-ausruesten]')), 'Tagebuch: kein AUSRÜSTEN');
 await t.evaluate(() => document.querySelector('.shoulder-right').click()); await warte(1300); await zu(t);
-pruefe(!(await t.isVisible('#ruestFuer')) && !(await t.isVisible('#cTasten')), 'Ausrüstung ohne Plakette und C-Tasten, wenn nichts hilft');
+pruefe(!(await t.isVisible('#ruestFuer')) && !(await t.isVisible('#plaetze')), 'Ausrüstung ohne Plakette und Plätze, wenn nichts hilft');
 await t.close();
 
 // 3. Gipfel: je Duell ausrüsten. Der Schild ist gestrichen: eine Niederlage im Duell bietet keine Wahl mehr
@@ -129,7 +131,8 @@ pruefe((await fenster(g)).includes('Duell 2 · Auge des Jägers'), 'Moment: ausg
 await zu(g); await warte(800);
 await g.tap('[data-duell="2"][data-v="sieg"]'); await warte(400); await halten(g); await zu(g); await warte(600);
 await g.evaluate(() => document.querySelector('.shoulder-right').click()); await warte(1300);
-pruefe((await text(g, '#ruestFuer')) === 'FÜR DUELL 3 · WIRBEL DER GÖTTER' && await g.$$eval('.c-taste.fest', xs => xs.length) === 0, 'Duell 3: neue Plakette, die C-Tasten sind wieder frei');
+pruefe((await text(g, '#ruestFuer')) === 'FÜR DUELL 3 · WIRBEL DER GÖTTER' && await g.$$eval('.platz.fest', xs => xs.length) === 0, 'Duell 3: neue Plakette, die Plätze sind wieder frei');
+pruefe(JSON.stringify(await g.$$eval('.platz:not([hidden])', xs => xs.map(x => x.dataset.platz))) === '["fluch"]', 'Duell 3 (Wirbel, kein Item): nur der Platz FLUCH');
 pruefe(JSON.stringify(await g.$$eval('.slot.usable', xs => xs.map(x => x.dataset.id))) === '["spruchrolle"]', 'Duell 3 (Wirbel): nur der Fluch leuchtet (seit 01.10. ohne Kreisel)');
 await g.screenshot({ path: `${OUT}/ausruesten-7-duell3.png` });
 await g.close();

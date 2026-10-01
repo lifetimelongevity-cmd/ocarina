@@ -335,7 +335,7 @@
     return config.items.map(i => i.id).filter(id => ids.includes(id) && !abgeloest(config, state, id) && !(ohneVorteil && itemCfg(config, id).dieb));
   }
 
-  /* Ausrüsten beim Spiel (29.09.): Vor dem Spiel legt Dennis Items und Flüche auf die C-Tasten und nimmt sie mit.
+  /* Ausrüsten beim Spiel (29.09.): Vor dem Spiel legt Dennis das Item und den Fluch in ihre Plätze und nimmt sie mit.
      dabei:      was er für das aktuelle Spiel schon mitgenommen hat (im Showdown für das aktuelle Duell)
      mitnehmbar: was er jetzt noch mitnehmen kann. Nicht dabei: was sich selbst meldet (Schild bei einer Niederlage im Duell,
                  Rikes Segen am Tor), und am Tor gar nichts, dort zählen erst die Ziffern.
