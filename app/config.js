@@ -36,9 +36,7 @@
       hinweis: "Halte das Siegel gedrückt",
       anrede: "Dennis,",
       absaetze: [
-        "der Bund hat getagt. Das Urteil ist gefallen: Dein letztes Abenteuer als freier Mann beginnt.",
-        "Damit das klar ist: Das hier ist keine Spaßveranstaltung. Hier gibt es nichts geschenkt. Jedes Pack, jede Ziffer, jeder Sieg will verdient sein. Und wir tun alles, damit du scheiterst.",
-        "Ab jetzt beobachten wir dich."
+        "auch wenn nicht viel Zeit war … sollst du doch ein letztes Abenteuer als freier Mann haben."
       ],
       gruss: "Fabio und Bene",
       wer: "Der Bund",

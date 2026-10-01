@@ -48,7 +48,7 @@ async function halten(p, ms) {
   await halten(p, 1400); await warte(900);
   pruefe(await sichtbar(p, '#briefOffen') && !(await sichtbar(p, '#briefZu')), 'Siegel gehalten: der Brief geht auf');
   const text = await p.textContent('#briefText');
-  pruefe(text.includes('Fabio und Bene') && text.includes('keine Spaßveranstaltung') && text.includes('nichts geschenkt'), 'Brief von Fabio und Bene, keine Spaßveranstaltung, nichts geschenkt');
+  pruefe(text.includes('Fabio und Bene') && text.includes('ein letztes Abenteuer als freier Mann'), 'Brief von Fabio und Bene: ein letztes Abenteuer als freier Mann');
   pruefe(!/Rike/.test(await p.textContent('#brief')), 'Rike kommt im Brief nicht vor');
   pruefe(await p.evaluate(() => localStorage.getItem('dq-brief-v1')) === null, 'Noch nicht gemerkt, solange er liest');
   await p.mouse.click(20, 20); await warte(300);
