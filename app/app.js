@@ -19,6 +19,13 @@
   const params = new URLSearchParams(location.search);
   const SCHWACH = params.has("schwach") || (navigator.hardwareConcurrency || 8) <= 4 || (navigator.deviceMemory || 8) <= 3;
   document.documentElement.classList.toggle("schwach", SCHWACH);
+  // Ruckel-Messer (01.10.): ?messen schaltet ihn ein, ?messen=aus wieder aus. Das Handy merkt es sich, damit er auch
+  // vom Home-Bildschirm aus läuft. Nur dann wird messen.js geladen.
+  try {
+    if (params.get("messen") === "aus") localStorage.removeItem("dq-messen");
+    else if (params.has("messen")) localStorage.setItem("dq-messen", "1");
+    if (localStorage.getItem("dq-messen")) { const m = document.createElement("script"); m.src = "messen.js"; document.body.appendChild(m); }
+  } catch (_) {}
 
   /* ---------- Speicher: echt, Probelauf oder Demo ---------- */
   const DEMO = params.has("demo");
@@ -486,12 +493,24 @@
       ${ruest.html}
       ${unten}`;
     // Kleine Handys: Ist ein Knopf zum Eintragen unter dem Rand, rollt die Karte hin (bis zum letzten, sonst fehlt VERLOREN)
-    const knopf = card.querySelector(".duell.jetzt") || [...card.querySelectorAll(".qc-eintrag")].pop();
-    card.scrollTop = 0;
-    if (knopf) {
+    karteRollen();
+  }
+  // Erst im nächsten Bild rollen und messen, einmal für alle Änderungen (01.10.): Sofort zwang jedes Neuzeichnen den Browser,
+  // das ganze Layout mitten im Skript auszurechnen, beim Ergebnis-Fenster mehrmals hintereinander.
+  let rollenAngefragt = false, rollenNachher = false;
+  function karteRollen() {
+    if (rollenAngefragt) return;
+    rollenAngefragt = true;
+    requestAnimationFrame(() => {
+      rollenAngefragt = false;
+      if (page !== 1) { rollenNachher = true; return; }   // verdeckt lässt sich nichts messen: beim Hinblättern
+      rollenNachher = false;
+      const card = $("#questCard"), knopf = card.querySelector(".duell.jetzt") || [...card.querySelectorAll(".qc-eintrag")].pop();
+      card.scrollTop = 0;                          // auch das Setzen zwingt zum Layout, darum erst hier
+      if (!knopf) return;
       const k = knopf.getBoundingClientRect(), c = card.getBoundingClientRect();
       if (k.bottom > c.bottom - 8) card.scrollTop += k.bottom - c.bottom + 12;
-    }
+    });
   }
 
   /* Was Dennis bei einer Quest selbst eintragen kann (er besiegelt, der Quest Master kann zurücknehmen):
@@ -906,8 +925,10 @@
     [...$("#resultLines").children].forEach((li, i) => li.style.setProperty("--d", i));
     // Kommt ein neues Fenster, solange das alte offen ist, bleibt dessen Folge (Quest aus dem Nebel holen) erhalten
     const offen = overlayAfter && !$("#overlay").hidden ? overlayAfter : null;
+    // War das Fenster schon offen, die Animation neu starten. Ohne erzwungenes Layout (01.10.): Ein verstecktes Fenster
+    // startet sie beim Erscheinen ohnehin von vorn.
+    if (!$("#overlay").hidden) r.getAnimations().forEach(a => { a.cancel(); a.play(); });
     $("#overlay").hidden = false;
-    r.style.animation = "none"; void r.offsetWidth; r.style.animation = "";
     overlayAfter = after || offen;
   }
   function closeOverlay() {
@@ -1375,7 +1396,7 @@
       drehung.forEach(a => a.cancel()); drehung = [];
       alt.classList.remove("geht");
       $("#game").classList.remove("dreht");
-      if (page === 1) { const row = document.querySelector(".q-row.is-selected"); if (row) scrollIntoList(row); }
+      if (page === 1) { const row = document.querySelector(".q-row.is-selected"); if (row) scrollIntoList(row); if (rollenNachher) karteRollen(); }
       if (page === 2 && $("#overlay").hidden) { if (!onboarded()) onboarding(); else funde(); }
       if (page === 0) { spieleLauf(); if (!laufFrame) kartenHinweis(); }
       ersteQuestPruefen();
@@ -1489,7 +1510,7 @@
       return [
         { bild: "fee", text: "Hey, wach auf, Dennis! Ich bin die Fee. Rike hat mich zu dir geschickt." },
         // Der Titel vom Startbild (29.09., statt „Mini-JGA“)
-        { bild: `<span class="pb-titel"><small>Willkommen in</small><b>The Legend of Dennis</b></span>`, ton: "pruefung",
+        { bild: `<span class="pb-titel"><small>Willkommen in</small><b>The Legend of Dennis<span aria-hidden="true"></span></b></span>`, ton: "pruefung",
           text: "Willkommen in deiner eigenen Legende! Ab jetzt weiche ich dir nicht mehr von der Seite." },
         // Die Reise: vom Zug bis zum Gipfel, jede Prüfung noch im Nebel
         { bild: `<span class="pb-reise"><span class="pb-ort">${useSvg("i-train")}</span>${Array.from({ length: pruefungen }, (_, k) =>
@@ -1568,11 +1589,11 @@
   // lässt sich die Taste selbst antippen: Das blättert weiter und schließt die Hinweise (goTo ruft coachZu).
   let coachZu = null;
   function coach(schritte) {
-    const bubble = $("#coach");
+    const bubble = $("#coach"), ring = $("#coachRing");
     let i = -1, ziel = null;
     const weiter = () => {
       if (ziel) ziel.classList.remove("coach-focus");
-      if (++i >= schritte.length) { bubble.hidden = true; bubble.onclick = null; coachZu = null; ersteQuestPruefen(); return; }
+      if (++i >= schritte.length) { bubble.hidden = true; ring.hidden = true; bubble.onclick = null; coachZu = null; ersteQuestPruefen(); return; }
       const [el, text] = schritte[i];
       ziel = el; el.classList.add("coach-focus");
       const b = bubble.querySelector(".coach-bubble");
@@ -1586,6 +1607,9 @@
       b.style.top = unten ? Math.min(box.height - b.offsetHeight - 8, r.bottom - box.top + 10) + "px" : "";
       b.style.bottom = unten ? "" : Math.min(box.height - b.offsetHeight - 8, box.bottom - r.top + 10) + "px";
       if (el.classList.contains("equip-body")) { b.style.top = ""; b.style.bottom = "12px"; }
+      // Leuchtring um das Ziel (eigene Ebene, pulsiert nur in der Deckkraft)
+      Object.assign(ring.style, { left: r.left - box.left - 4 + "px", top: r.top - box.top - 4 + "px", width: r.width + 8 + "px", height: r.height + 8 + "px" });
+      ring.hidden = false;
       b.style.animation = "none"; void b.offsetWidth; b.style.animation = "";
       tone("move");
     };

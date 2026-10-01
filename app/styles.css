@@ -116,12 +116,14 @@ svg { display: block; }
 .install-btn { position: absolute; z-index: 3; top: max(10px, var(--sa-t)); right: calc(max(12px, var(--sa-r)) + var(--hud-h) + 6px); display: inline-flex; align-items: center; gap: 8px;
   height: calc(var(--hud-h) - 4px); min-height: 36px; padding: 0 14px; border: 2px solid #080a10; outline: 1.5px solid var(--gold); border-radius: 4px; cursor: pointer;
   background: linear-gradient(#f5d766, #d8aa2d 60%, #a57a12); color: #1c1604; font: 900 clamp(11px, 3.6vh, 14px)/1 "Courier New", monospace; letter-spacing: .06em;
-  box-shadow: inset 2px 2px 0 rgba(255,255,255,.4), 2px 3px 0 #000; animation: installGlow 2.4s ease-in-out infinite; }
+  box-shadow: inset 2px 2px 0 rgba(255,255,255,.4), 2px 3px 0 #000; }
+/* Leuchten als eigene Ebene, nur die Deckkraft ändert sich: Das rechnet der Grafikchip allein, ohne Neumalen (01.10.) */
+.install-btn::after { content: ""; position: absolute; inset: -2px; border-radius: inherit; pointer-events: none; box-shadow: 0 0 16px rgba(242,201,76,.7); opacity: 0; animation: installGlow 2.4s ease-in-out infinite; }
 .install-btn svg { width: 1.35em; height: 1.35em; flex: none; }
 .install-btn:active { filter: brightness(1.15); transform: translateY(1px); }
 .install-btn[hidden] { display: none; }
 .fullscreen-toggle[hidden] ~ .install-btn, .install-btn:has(~ .fullscreen-toggle[hidden]) { right: max(12px, var(--sa-r)); }
-@keyframes installGlow { 50% { box-shadow: inset 2px 2px 0 rgba(255,255,255,.4), 2px 3px 0 #000, 0 0 16px rgba(242,201,76,.7); } }
+@keyframes installGlow { 50% { opacity: 1; } }
 
 /* ---------- Schultertasten Z / R ----------
    Die Form ist ein SVG in der Taste (30.09.), vorher clip-path: Auf dem Galaxy S24 verschwanden damit Teile der Tasten. */
@@ -147,10 +149,14 @@ svg { display: block; }
 .menu-cube { position: absolute; inset: 0; }
 .face { position: absolute; inset: 0; visibility: hidden; }
 .face.active, .face.geht, .menu-cube.warm .face { visibility: visible; }
+/* Verdeckte Seiten rechnet der Browser gar nicht erst durch (01.10.): Neue Stände bauen sonst bei jedem Ergebnis alle drei
+   Seiten im Layout neu auf. Beim Hinblättern holt er es für die eine Seite nach. */
+.face:not(.active):not(.geht) { content-visibility: hidden; }
+.menu-cube.warm .face { content-visibility: visible; }
 /* Während der Drehung (app.js setzt .dreht) ohne weiche Schatten: weniger Arbeit pro Bild */
 .game.dreht .face { box-shadow: inset 0 0 0 4px rgba(220,222,171,.1), 4px 5px 0 #000; }
 /* Verdeckte Seiten ruhen: Nebel, Runen und Wippen laufen nur auf der Seite, die Dennis gerade sieht */
-.face:not(.active):not(.geht) *, .face:not(.active):not(.geht) *::before, .face:not(.active):not(.geht) *::after { animation-play-state: paused; }
+.face:not(.active):not(.geht) *, .face:not(.active):not(.geht) *::before, .face:not(.active):not(.geht) *::after { animation-play-state: paused !important; }
 
 .face { --stone: #59613a; display: grid; grid-template-rows: auto minmax(0, 1fr); padding: 0 10px 8px; overflow: hidden; color: var(--cream);
   border: 5px solid #222617; outline: 2px solid #060805;
@@ -659,7 +665,7 @@ html.probe body::after { content: ""; position: fixed; inset: 0; z-index: 9999; 
 @media (prefers-reduced-motion: reduce) {
   .medal-stage > *, .medal-stage::before, .medal-stage::after, .result.big-moment *, .q-row.revealing, .q-row.revealing::after, .quest-card.revealing > *,
   .is-next::before, .slot.is-selected::before, .slot.usable::after, .slot .well::before, .slot.rune .rune-ring, .slot.rune .ic, .slot .neu-tag, .cw-licht, .motes i,
-  .result-lines .reveal .ri svg, .character-window img, .notes i, .lb-wave i, .intro-cam, .install-btn, .intro-sun, .intro-rays, .intro-rays i, .intro-path-light, .start-quest, .mark .you, .result-more, .pack-row .gain, .tumbler.gain, .rotate-hint .phone { animation: none !important; }
+  .result-lines .reveal .ri svg, .character-window img, .notes i, .lb-wave i, .intro-cam, .install-btn::after, .coach-ring, .quest-card .ruesten .qc-action::after, .intro-sun, .intro-rays, .intro-rays i, .intro-path-light, .start-quest, .mark .you, .result-more, .pack-row .gain, .tumbler.gain, .rotate-hint .phone { animation: none !important; }
   .intro-screen { transition: none; }
 }
 
@@ -670,8 +676,11 @@ html.probe body::after { content: ""; position: fixed; inset: 0; z-index: 9999; 
   background: linear-gradient(#1d2a55, #0e1733); border: 2px solid var(--gold); border-radius: 4px; box-shadow: 0 4px 0 #000; animation: coachIn 260ms ease-out both; }
 .coach-bubble .result-more { right: 8px; bottom: 2px; }
 @keyframes coachIn { from { opacity: 0; transform: translateY(6px); } }
-.coach-focus { outline: 2px solid var(--gold); outline-offset: 4px; border-radius: 4px; box-shadow: 0 0 22px rgba(242,201,76,.6); animation: coachGlow 1.4s ease-in-out infinite; }
-@keyframes coachGlow { 50% { box-shadow: 0 0 8px rgba(242,201,76,.25); } }
+.coach-focus { outline: 2px solid var(--gold); outline-offset: 4px; border-radius: 4px; }
+/* Das Leuchten um das Ziel ist ein eigener Ring, der nur seine Deckkraft ändert (01.10., vorher pulsierender Schatten am Ziel) */
+.coach-ring { position: absolute; z-index: 57; pointer-events: none; border-radius: 6px; box-shadow: 0 0 22px rgba(242,201,76,.6); animation: coachGlow 1.4s ease-in-out infinite; }
+.coach-ring[hidden] { display: none; }
+@keyframes coachGlow { 50% { opacity: .35; } }
 /* Die Fee spricht jeden Hinweis (08-erlebnis-plan.md, 3.12) */
 .coach-bubble { padding-left: 44px; }
 .coach-fee { position: absolute; left: 4px; top: 50%; width: 36px; height: auto; margin-top: -20px; pointer-events: none; filter: drop-shadow(0 0 6px rgba(160,220,255,.9)); animation: feeHover 2.2s ease-in-out infinite; }
@@ -708,12 +717,14 @@ html.probe body::after { content: ""; position: fixed; inset: 0; z-index: 9999; 
 /* Willkommen: Titel wie ein Gebietsname im Spiel (Hylia Serif hat keine Umlaute, der Titel braucht keine) */
 .pb-titel { display: grid; justify-items: center; gap: 4px; text-align: center; }
 .pb-titel small { color: #cfd5e8; font: 800 var(--fs-small)/1 "Courier New", monospace; letter-spacing: .22em; text-transform: uppercase; }
-.pb-titel b { position: relative; margin: 0 1.1em; padding: 0 .4em; color: #fff1a8; font: 400 clamp(28px, 11vh, 52px)/1.1 "Hylia Serif", Georgia, serif; letter-spacing: .06em;
-  text-shadow: 0 0 14px rgba(242,201,76,.75), 0 0 3px #000, 2px 3px 0 #3c2600; animation: titelLicht 3.2s ease-in-out infinite alternate; }
+.pb-titel b { position: relative; isolation: isolate; margin: 0 1.1em; padding: 0 .4em; color: #fff1a8; font: 400 clamp(28px, 11vh, 52px)/1.1 "Hylia Serif", Georgia, serif; letter-spacing: .06em;
+  text-shadow: 0 0 14px rgba(242,201,76,.75), 0 0 3px #000, 2px 3px 0 #3c2600; }
+.pb-titel b span { position: absolute; inset: -.3em -.2em; z-index: -1; pointer-events: none; border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(255,236,160,.32), transparent 70%); opacity: 0; animation: titelLicht 3.2s ease-in-out infinite alternate; }
 .pb-titel b::before, .pb-titel b::after { content: ""; position: absolute; top: 55%; width: 1.1em; height: 2px; background: linear-gradient(90deg, transparent, var(--gold)); }
 .pb-titel b::before { right: 100%; }
 .pb-titel b::after { left: 100%; transform: scaleX(-1); }
-@keyframes titelLicht { to { text-shadow: 0 0 22px rgba(255,236,160,.95), 0 0 3px #000, 2px 3px 0 #3c2600; } }
+@keyframes titelLicht { to { opacity: 1; } }
 /* Die Reise: vom Zug über die Prüfungen (noch im Nebel) hinauf zum Gipfel */
 .pb-reise { display: flex; align-items: flex-end; gap: clamp(6px, 1.6vw, 14px); --stufe: clamp(4px, 1.6vh, 8px); }
 .pb-reise > * { margin-bottom: calc(var(--k, 0) * var(--stufe)); animation: bildIn 380ms ease-out calc(var(--k, 0) * 90ms + 120ms) both; }
@@ -728,7 +739,7 @@ html.probe body::after { content: ""; position: fixed; inset: 0; z-index: 9999; 
 .prolog-dots i.done { background: rgba(242,201,76,.55); }
 .prolog-dots i.on { background: var(--gold); box-shadow: 0 0 6px rgba(242,201,76,.8); }
 @media (prefers-reduced-motion: reduce) {
-  .prolog, .prolog-fee, .prolog-bild, .coach-fee, .pb-titel b, .pb-reise > * { animation: none !important; }
+  .prolog, .prolog-fee, .prolog-bild, .coach-fee, .pb-titel b span, .pb-reise > * { animation: none !important; }
 }
 
 /* ---------- v1: Einsetzbar, laufende Quests (07-spiele-und-items.md) ---------- */
@@ -774,8 +785,10 @@ html.probe body::after { content: ""; position: fixed; inset: 0; z-index: 9999; 
 .result-head .big.glanz { color: #fff1a8; text-shadow: 2px 2px 0 #3a2a05, 0 0 14px rgba(255,226,122,.8); }
 /* Ausrüsten beim Spiel (29.09.): AUSRÜSTEN mit den Symbolen dessen, was hilft, danach DABEI mit Namen */
 .quest-card .ruesten { display: flex; align-items: center; gap: 9px; margin-top: 7px; }
-.quest-card .ruesten .qc-action { margin-top: 0; animation: ruestenPuls 1.8s ease-in-out infinite; }
-@keyframes ruestenPuls { 50% { box-shadow: inset 2px 2px 0 rgba(255,255,255,.4), 2px 3px 0 #000, 0 0 14px rgba(255,226,122,.7); } }
+.quest-card .ruesten .qc-action { margin-top: 0; position: relative; }
+/* Leuchten als eigene Ebene, die nur ihre Deckkraft ändert: das rechnet die Grafik allein, ohne Neumalen (01.10.) */
+.quest-card .ruesten .qc-action::after { content: ""; position: absolute; inset: -2px; pointer-events: none; box-shadow: 0 0 14px rgba(255,226,122,.7); opacity: 0; animation: ruestenPuls 1.8s ease-in-out infinite; }
+@keyframes ruestenPuls { 50% { opacity: 1; } }
 .ruest-minis, .dabei-zeile .noch { display: flex; align-items: center; gap: 5px; }
 .ruest-minis .well.mini, .dabei-zeile .well.mini { width: clamp(22px, 7vh, 27px); height: clamp(22px, 7vh, 27px); border-radius: 4px; }
 .dabei-zeile { display: flex; align-items: center; gap: 4px 9px; width: 100%; min-height: 28px; margin: 7px 0 0; padding: 0; border: 0; background: none; text-align: left; color: #f4f0dc; }
@@ -979,10 +992,10 @@ button.dabei-zeile { cursor: pointer; }
   background: radial-gradient(circle at 35% 30%, #ff9cc6, #d0467f 60%, #7d1e45); color: #fff; box-shadow: 2px 3px 0 #000; }
 .lb-play svg { width: 55%; height: 55%; }
 .lb-wave { display: flex; align-items: center; gap: 3px; height: 30px; flex: 1; }
-.lb-wave i { width: 4px; height: 20%; border-radius: 2px; background: #e56aa0; opacity: .55; }
+.lb-wave i { width: 4px; height: 95%; border-radius: 2px; background: #e56aa0; opacity: .55; transform: scaleY(.21); }
 .logbuch.playing .lb-wave i { opacity: 1; animation: wave 700ms ease-in-out infinite alternate; }
 .lb-wave i:nth-child(2n) { animation-delay: -.3s; } .lb-wave i:nth-child(3n) { animation-delay: -.55s; } .lb-wave i:nth-child(5n) { animation-delay: -.15s; }
-@keyframes wave { to { height: 95%; } }
+@keyframes wave { from { transform: scaleY(.21); } to { transform: scaleY(1); } }   /* transform statt height (01.10.) */
 .lb-who { color: #ffc2dc; font: 800 var(--fs-tiny)/1 "Courier New", monospace; letter-spacing: .08em; white-space: nowrap; }
 
 /* ---------- Buu Huu im Tagebuch (30.09.), vom Bund angeheuert, hieß zuerst Schattendieb ----------
@@ -1046,7 +1059,7 @@ html.schwach .face { box-shadow: inset 0 0 0 4px rgba(220,222,171,.1), 4px 5px 0
 .ab-triforce { width: clamp(56px, 22vh, 104px); aspect-ratio: 1; color: var(--gold); filter: drop-shadow(0 0 16px rgba(242,201,76,.8)); animation: triforceGlanz 2.6s ease-in-out infinite; }
 .ab-triforce svg { width: 100%; height: 100%; }
 .ab-triforce.matt { color: #a8966a; filter: drop-shadow(0 0 6px rgba(242,201,76,.3)); animation: none; }
-@keyframes triforceGlanz { 50% { transform: scale(1.05); filter: drop-shadow(0 0 28px rgba(255,226,122,1)); } }
+@keyframes triforceGlanz { 50% { transform: scale(1.05); } }   /* ohne pulsierenden Filter (01.10.): das wäre jedes Bild neu gemalt */
 .ab-sieg-titel { margin: 2px 0 0; color: #fff1a8; font: 400 clamp(19px, 7.6vh, 36px)/1.1 "Hylia Serif", Georgia, serif; letter-spacing: .06em; text-shadow: 0 0 14px rgba(242,201,76,.6), 2px 2px 0 #3a2a05; }
 .ab-sieg-sub { margin: 0; color: #d9dcea; font: 700 clamp(12px, 3.9vh, 15px)/1.3 "Trebuchet MS", sans-serif; }
 .ab-sieg-packs { display: flex; align-items: center; gap: 8px; margin: 2px 0 0; font: 700 clamp(12px, 3.9vh, 15px)/1 "Trebuchet MS", sans-serif; }
@@ -1167,8 +1180,6 @@ html.schwach .face { box-shadow: inset 0 0 0 4px rgba(220,222,171,.1), 4px 5px 0
 
 /* Rundgang (30.09.): Zeigt die Fee auf Z oder R, liegt die Taste über dem Hinweis und lässt sich direkt antippen */
 .shoulder.coach-focus { z-index: 56; outline: none; --s1: #ffe98a; --s2: #e0b43a; --s3: #9c7414; --hl: #fff6c8; --rand: #fff2b0;
-  animation: schulterRuft 900ms ease-in-out infinite; }   /* die Taste selbst wird golden */
-@keyframes schulterRuft { 50% { filter: brightness(1.3); } }
-@media (prefers-reduced-motion: reduce) { .shoulder.coach-focus { animation: none; } }
+  }   /* die Taste selbst wird golden, das Pulsieren macht der Ring */
 /* Fenster ohne Untertitel (erstes Item): Titel mittig neben dem Medaillon */
 .result-head .big:last-child { grid-row: span 2; }
