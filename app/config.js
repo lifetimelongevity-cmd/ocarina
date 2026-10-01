@@ -87,13 +87,14 @@
         tarn: { name: "Uralter Dorn", kurz: "Dorn", text: "Hart wie altes Holz. Durch ein Loch fällt Licht." } },
       // Hieß bis 28.09. Spruchrolle (id bleibt, damit gespeicherte Stände passen).
       // Seit 29.09. zweischneidig: Vor einem Spiel gesprochen bringt er dort einen Vorteil (fluch bei der Quest),
-      // danach dreht Buu Huu am Rad: 0 bis 3 Packs (gewichtet 30/35/25/10), ab dem zweiten Fluch auch ALLES (01.10.).
+      // danach dreht Buu Huu am Rad: 0 bis 3 Packs (gewichtet 30/35/25/10), ab dem zweiten Fluch auch ALLES mit 30 %
+      // (01.10., höchstens 30 %, Wunsch des Nutzers: mehr wäre zu viel fürs Alles-Wegnehmen).
       // Seit 01.10. etwa drei am Tag, erst ab der dritten Aufgabe: Bei Die drei Zeichen schenkt Buu Huu einen, dazu einer je
       // geschlagenem Gegner, einer beim Sieg im Kartenwurf und einer bei Hüter der Flamme.
       { id: "spruchrolle", nr: "F1", gruppe: "faehigkeit", stapel: true, einmalig: true, geheim: true, name: "Fluch", kurz: "Fluch", farbe: "#c9a4ff", symbol: "i-fluch",
         text: "Ein Vorteil bei einem Spiel. Doch jeder Fluch hat seinen Preis.",
         gefunden: { titel: "Du hast etwas gefunden …", warnung: "Vorsicht, Flüche haben es in sich." },
-        dieb: { name: "Buu Huu", gewichte: [30, 35, 25, 10], alles: [0, 30, 60, 100], allesMin: 3 },   // hieß bis 30.09. Schattendieb
+        dieb: { name: "Buu Huu", gewichte: [30, 35, 25, 10], alles: [0, 30], allesMin: 3 },   // hieß bis 30.09. Schattendieb
         tarn: { name: "Versiegeltes Pergament", kurz: "Pergament", text: "Niemand weiß, was darauf steht." } },
       { id: "segen", nr: "F6", gruppe: "faehigkeit", einmalig: true, tor: true, name: "Rikes Segen", kurz: "Segen", farbe: "#f08cbc", symbol: "i-segen",
         text: "Rike wacht über dich. Am Tor schenkt sie dir eine fehlende Ziffer.",

@@ -740,7 +740,7 @@ Wunsch des Nutzers: Rike sagt in ihrer Sprachnachricht zu Frage 1, dass Dennis G
 
 Wunsch des Nutzers: Der Moment, in dem Dennis einen Fluch spricht, war zu schnell und zu kurz. Er soll ausgekostet werden, eine lange Sequenz, bei der alle zusammen draufschauen: „Oh mein Gott, was passiert jetzt? Kriegt er welche oder nicht?“ Gut acht Sekunden bis zur Auflösung. Dazu mehr Flüche über den Tag (etwa drei, erst ab der dritten Aufgabe) und ein Feld ALLES, damit es einmal am Tag richtig weh tut (Regeln in `07-spiele-und-items.md`, Abschnitt Buu Huus Rad).
 
-- **Vorher:** Tippt Dennis in der Ausrüstung den Fluch an, steht in der Textbox neben dem Vorteil ein kleines Rad: „Buu Huu dreht am Rad: 0 bis 3 Packs.“ Ab dem zweiten Fluch „… oder ALLES!“, das rote Feld ist zu sehen und wächst von Fluch zu Fluch. Dasselbe Rad steht im Siegel-Fenster unter PREIS, darunter „Ohne Packs zieht er blind aus deinen glänzenden und seltenen Karten.“ Prozente nennt die App nicht.
+- **Vorher:** Tippt Dennis in der Ausrüstung den Fluch an, steht in der Textbox neben dem Vorteil ein kleines Rad: „Buu Huu dreht am Rad: 0 bis 3 Packs.“ Ab dem zweiten Fluch „… oder ALLES!“, das rote Feld ist zu sehen (immer knapp ein Drittel des Rads, höchstens 30 %). Dasselbe Rad steht im Siegel-Fenster unter PREIS, darunter „Ohne Packs zieht er blind aus deinen glänzenden und seltenen Karten.“ Prozente nennt die App nicht.
 - **Die Szene** (nach dem Siegel):
   1. *Der Fluch greift* (knapp 2 s): violette Ringe um das Symbol, der Vorteil steht darunter.
   2. *Licht aus* (gut 2 s): „DOCH JEDER FLUCH HAT SEINEN PREIS …“, alles wird dunkel, nur Dennis' Pack-Leiste bleibt hell und leuchtet golden. Buu Huu taucht kichernd aus dem Dunkeln auf und kreist um die Packs.

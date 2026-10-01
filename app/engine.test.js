@@ -370,7 +370,7 @@ assert.strictEqual(mit({}, { q_kartenwurf: { status: "verloren", glanz: true, ze
 // 20. Fluch mit Kehrseite (29.09.): Vorteil je Spiel, danach dreht Buu Huu am Rad: 0 bis 3 Packs, ab dem zweiten Fluch auch ALLES
 const fluch = config.items.find(i => i.id === "spruchrolle");
 assert.deepStrictEqual(fluch.dieb.gewichte, [30, 35, 25, 10]);
-assert.deepStrictEqual(fluch.dieb.alles, [0, 30, 60, 100]);
+assert.deepStrictEqual(fluch.dieb.alles, [0, 30]);                                   // höchstens 30 % (Wunsch des Nutzers)
 // Rad ohne ALLES: Felder so groß wie die Gewichte, die Ränder stimmen
 assert.deepStrictEqual(radFelder(config, 0).map(f => [f.wert, +f.bis.toFixed(4)]), [[0, .3], [1, .65], [2, .9], [3, 1]]);
 assert.strictEqual(diebWurf(config, () => 0).raub, 0);
@@ -491,7 +491,7 @@ assert.strictEqual(zeichen("bestanden", true).anzahl.spruchrolle, 3);
 assert.strictEqual(zeichen("bestanden", true).glanz.klingen, true);
 assert.strictEqual(zeichen("bestanden", true).packs, zeichen("bestanden").packs);
 
-// 23. Buu Huus Rad (01.10.): Der erste Fluch kann kein ALLES, danach 30, 60, 100 %, bis ALLES kommt, dann wieder 30.
+// 23. Buu Huus Rad (01.10.): Der erste Fluch kann kein ALLES, danach immer 30 %, auch nach einem ALLES (höchstens 30 %).
 // ALLES nimmt alle geschlossenen Packs, mindestens 3, den Rest in Karten. Zurückgenommen ist alles wieder da.
 const radDoc = { quests: { logbuch: "bestanden", wirbel: "bestanden", klingen: "bestanden" }, zeiten: { logbuch: 1, wirbel: 2, klingen: 3 },
   buchungen: [{ id: "g", packs: 0, grund: "x", item: "spruchrolle", menge: 3, zeit: 3.5 }] };   // 3 Packs, 5 Flüche
@@ -501,11 +501,11 @@ assert.deepStrictEqual([s.packs, allesStufe(config, s), allesChance(config, s)],
 s = derive(config, { ...radDoc, einsaetze: [fl("f1", 4, { raub: 0 })] });
 assert.deepStrictEqual([allesStufe(config, s), allesChance(config, s)], [1, 30]);
 s = derive(config, { ...radDoc, einsaetze: [fl("f1", 4, { raub: 0 }), fl("f2", 5, { raub: 1 })] });
-assert.deepStrictEqual([s.packs, allesStufe(config, s), allesChance(config, s)], [2, 2, 60]);
+assert.deepStrictEqual([s.packs, allesStufe(config, s), allesChance(config, s)], [2, 2, 30]);
 s = derive(config, { ...radDoc, einsaetze: [fl("f1", 4, { raub: 0 }), fl("f2", 5, { raub: 0 }), fl("f3", 6, { raub: 0 })] });
-assert.deepStrictEqual([allesStufe(config, s), allesChance(config, s)], [3, 100]);
+assert.deepStrictEqual([allesStufe(config, s), allesChance(config, s)], [3, 30]);
 s = derive(config, { ...radDoc, einsaetze: [fl("f1", 4, { raub: 0 }), fl("f2", 5, { raub: 0 }), fl("f3", 6, { raub: 0 }), fl("f4", 7, { raub: 0 }), fl("f5", 8, { raub: 0 })] });
-assert.strictEqual(allesChance(config, s), 100);                                       // bleibt beim letzten Wert
+assert.strictEqual(allesChance(config, s), 30);                                        // bleibt beim letzten Wert, nie mehr als 30 %
 // ALLES mit 5 Packs: alle 5
 const fuenf = { ...radDoc, buchungen: [...radDoc.buchungen, { id: "b", packs: 2, grund: "Bonus", zeit: 3.6 }] };
 s = derive(config, { ...fuenf, einsaetze: [fl("f1", 4, { raub: 0 }), fl("f2", 5, { alles: true })] });

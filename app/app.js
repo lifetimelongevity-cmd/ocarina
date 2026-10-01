@@ -1187,7 +1187,7 @@
       diebHalt = prev.packs;
       renderHud(); renderQuests();
       fluchSzene({ id: fluchE.id, it: itemById(fluchE.item), v: E.fluchVorteil(C, prev, fluchE.quest), r: raubVon(next, fluchE), vorher: prev.packs,
-        offen: prev.geoeffnet || 0, rad: fluchE.rad, quote: fluchE.quote ?? E.allesChance(C, prev), stufe: E.allesStufe(C, prev) }, zeigen);
+        offen: prev.geoeffnet || 0, rad: fluchE.rad, quote: fluchE.quote ?? E.allesChance(C, prev), erstesAlles: prev.raube.length === 1 }, zeigen);
     } else zeigen();
     return true;
   }
@@ -1273,7 +1273,7 @@
      Karten einzeln aus der Leiste) oder ALLES (Bild wackelt, rot, er räumt die ganze Leiste leer). Fehlen geschlossene Packs,
      holt er Karten. Überspringen erst nach der Auflösung, damit niemand den Moment aus Versehen wegtippt.
      o: { it, v (Vorteil), r (Raub aus state.raube), vorher (geschlossene Packs davor), offen (geöffnete), rad (Stelle 0 bis 1,
-     sonst zufällig im Feld), quote (Chance auf ALLES in %), stufe (allesStufe vor diesem Fluch) } */
+     sonst zufällig im Feld), quote (Chance auf ALLES in %), erstesAlles (der erste Fluch, bei dem ALLES möglich ist) } */
   let szene = null;                            // laufende Szene: { id des Einsatzes, still() bricht sie ohne Fenster ab }
   function fluchSzene(o, fertig) {
     const el = $("#fluchSzene"), txt = $("#fsText"), radEl = $("#fsRad"), scheibe = $("#fsScheibe"), erg = $("#fsErgebnis");
@@ -1416,7 +1416,7 @@
         for (const [dx, dy] of bahn) { setzen(sx + dx * sw, sy + dy * sh + 18, 400); await warte(360); }
         // 3. Das Rad
         el.classList.add("rad-da");
-        const erstmals = o.quote > 0 && o.stufe === 1;
+        const erstmals = o.quote > 0 && o.erstesAlles;
         sag(`<b>${esc(diebName().toUpperCase())} DREHT AM RAD …</b>${erstmals ? "<span>Diesmal will er mehr …</span>" : ""}`, "oben");
         await warte(350);
         const rm = radMitte();
