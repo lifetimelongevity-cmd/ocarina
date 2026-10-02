@@ -282,14 +282,15 @@
         fluch: "Sabotage! Der Bund fährt mit einem Stein auf dem Dach.",
         einsetzbar: ["spruchrolle"], revanche: true },
 
+      // Seit 02.10. auf Zeit wie Speed Flip (Wunsch des Nutzers): erst Fabio und Bene, dann Dennis. Vorher ein Duell um die meisten Karten
       { id: "kartenwurf", nr: 9, typ: "side", name: "Kartenwurf", ort: "Entdeckerpfad", station: "wald",
-        text: "Karten aus deinen Packs ins Ziel. Mehr als dein Gegner.",
-        qm: "Duell mit Karten aus schon geöffneten Packs, fester Abstand, je 3 Karten. Gleichstand zählt als verloren. Mit der Leeren Hülle wirft Dennis nur nackte Karten (die Hülle bringt nichts), mit der Gepanzerten Karte darf eine seiner Karten in die Hülle. Glanzsieg: mindestens 2 Karten mehr im Ziel als der Gegner, bringt die Große Wasserpistole.",
+        text: "Drei Karten aus deinen Packs ins Ziel, schneller als der Bund.",
+        qm: "Auf Zeit, das Ziel sucht ihr vor Ort aus (Kamin, Eimer oder Kreis), fester Abstand. Erst werfen Fabio und du, dann Dennis, alle vom selben Stapel aus schon geöffneten Packs (etwa 10 Karten). Die Uhr läuft, bis 3 Karten im Ziel sind. Ist der Stapel leer, sammelt der Werfer seine Fehlwürfe ein, die Uhr läuft weiter. Dennis muss die bessere eurer beiden Zeiten schlagen, gleich schnell zählt als verloren. Mit der Leeren Hülle wirft er nur nackte Karten (die Hülle bringt nichts), mit der Gepanzerten Karte darf eine seiner Karten in die Hülle. Glanzsieg: höchstens die halbe Zeit, bringt die Große Wasserpistole.",
         win:  { items: ["spruchrolle"] },
-        glanz: { bedingung: "2 Karten Vorsprung", items: ["pistole_gross"] },   // einzige Sidequest mit Item, nur als Glanzsieg
+        glanz: { bedingung: "halbe Zeit", items: ["pistole_gross"] },   // einzige Sidequest mit Item, nur als Glanzsieg
         lose: { packs: -2 },
-        fluch: "5 Karten statt 3.",
-        einsetzbar: ["huelle", "karten_gepanzert", "spruchrolle"], duell: true, revanche: true },
+        fluch: "Dir reichen 2 Karten im Ziel statt 3.",
+        einsetzbar: ["huelle", "karten_gepanzert", "spruchrolle"], revanche: true },
 
       { id: "auge", nr: 2, typ: "kern", name: "Auge des Jägers", ort: "Entdeckerpfad", station: "wald",
         farbe: "#e2472f", emblem: "e-flame",

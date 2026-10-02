@@ -2449,7 +2449,7 @@
     const q = questById(qid), glanz = status === "glanz", won = status === "bestanden" || glanz;
     if (!(eintragbar(qid).ergebnis || []).includes(status)) return;
     const folgen = [fxZeile(won ? "SIEG" : "NIEDERLAGE", won ? "win" : "lose", fxChips(won ? q.win : q.lose, won))];
-    if (glanz) folgen.push(fxZeile("GLANZSIEG", "win", fxChips(q.glanz, true)), `<span class="fx dim">Nur mit ${esc(q.glanz.bedingung)}.</span>`);
+    if (glanz) folgen.push(fxZeile("GLANZSIEG", "win", fxChips(q.glanz, true)), `<span class="fx dim">Bedingung: ${esc(q.glanz.bedingung)}.</span>`);
     const schild = !won && !q.showdown ? E.rettung(C, state, qid) : null;
     schwur.oeffnen({
       art: q.typ === "kern" ? "PRÜFUNG" : q.typ === "side" ? "SIDEQUEST" : "QUEST",
