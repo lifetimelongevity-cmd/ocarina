@@ -87,11 +87,11 @@ await frei();
 // Kartenwurf: Zeile GLANZSIEG mit Bedingung und getarnter Belohnung
 await dennis.evaluate(() => document.querySelector('.q-row[data-id="kartenwurf"]').click()); await warte(300);
 const karte = (await dennis.textContent('#questCard')).replace(/\s+/g, ' ');
-pruefe(karte.includes('GLANZSIEG') && karte.includes('halbe Zeit') && karte.includes('Quellstab'), 'Kartenwurf: Zeile GLANZSIEG, Bedingung, Belohnung getarnt');
+pruefe(karte.includes('GLANZSIEG') && karte.includes('beide geschlagen') && karte.includes('Quellstab'), 'Kartenwurf: Zeile GLANZSIEG, Bedingung, Belohnung getarnt');
 pruefe(await dennis.isVisible('#questCard [data-ergebnis="glanz"]'), 'Knopf GLANZSIEG');
 await dennis.screenshot({ path: `${OUT}/glanz-3-karte.png` });
 await dennis.tap('#questCard [data-ergebnis="glanz"]'); await warte(400);
-pruefe((await dennis.textContent('#swKopf')).includes('GLANZSIEG') && (await dennis.textContent('#swFolgen')).includes('Bedingung: halbe Zeit'), 'Siegel: Glanzsieg mit Bedingung');
+pruefe((await dennis.textContent('#swKopf')).includes('GLANZSIEG') && (await dennis.textContent('#swFolgen')).includes('Bedingung: beide geschlagen'), 'Siegel: Glanzsieg mit Bedingung');
 await dennis.screenshot({ path: `${OUT}/glanz-4-siegel.png` });
 await halten(dennis);
 const moment = await fenster(dennis);

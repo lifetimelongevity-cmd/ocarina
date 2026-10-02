@@ -16,7 +16,7 @@ Stand 25.09.2026, Namen und Aussichtspunkt geändert am 28.09. Sammelt, was der 
 | 6 | Prophezeiung | **Bleibt** (25.09.). Morgens sagt Dennis 2 bis 3 Dinge voraus, die der Bund heute tun wird („Bene wird sich dehnen"). Jede, die in Erfüllung geht, bringt ihm einen **Fluch** (F1, früher Spruchrolle). Läuft den ganzen Tag, der Quest Master bucht, sobald sich eine erfüllt. | Anzahl Vorhersagen, Rolle oder Pack pro Treffer |
 | 7 | **Speed Flip** (bis 01.10. „Das Podrennen“, RC-Auto, ersetzt Waffenschmied) | Name seit 01.10. nach Rocket League, id bleibt `podrennen`. Kleines ferngesteuertes Auto, Parcours auf Zeit. Wird eine Prüfung. | Parcours |
 | 8 | ~~Ringschmied~~ | **Gestrichen** (25.09.), mit dem Großen Ring. | |
-| 9 | Kartenwurf | Bleibt, seit 02.10. **auf Zeit** (vorher Duell): erst Fabio und Bene, dann Dennis, bis 3 Karten aus schon geöffneten Packs im Ziel sind, fester Abstand. Er muss die bessere Zeit schlagen. | Abstand, Ziel (vor Ort: Kamin, Eimer oder Kreis) |
+| 9 | Kartenwurf | Bleibt, seit 02.10. **auf Zeit** (vorher Duell): erst Fabio und Bene, dann Dennis, bis 3 Karten aus schon geöffneten Packs im Ziel sind, fester Abstand. Schneller als einer: bestanden, als beide: Glanzsieg. | Abstand, Ziel (vor Ort: Kamin, Eimer oder Kreis) |
 | 10 | ~~Nakama-Quiz~~ | **Gestrichen.** | |
 | 11 | ~~Schnick Schnack Schnuck~~ | Steckt jetzt in 4, als eigene Sidequest gestrichen (25.09.). | |
 | 12 | **Klingen des Deku-Baums** (Schwertwurf, ersetzt Steinwurf) | 4 Mini-Schwerter (Brieföffner, 20 cm) auf einen Baum werfen, sie müssen stecken bleiben. Wie viele Schwerter Dennis bekommt (1 bis 4 = Versuche), hängt davon ab, wie gut er ein anderes Spiel gemacht hat. | Name, welches Spiel die Schwerter vergibt |
@@ -83,11 +83,11 @@ Stand 25.09.2026, Namen und Aussichtspunkt geändert am 28.09. Sammelt, was der 
 |---|---|
 | Wirbel der Götter | Dennis darf vorher üben (01.10., vorher: Gegner mit der schwachen Hand) |
 | Speed Flip (bis 01.10. Das Podrennen) | Sabotage: Der Bund klebt sich vor seinen Runden einen kleinen Stein aufs Auto, Dennis fährt ohne (01.10.) |
-| Rikes Rache | Mehr Zeit auf der Uhr, wie viel, legt der Quest Master fest (01.10., vorher 30 Sekunden) |
+| Rikes Rache | Eine Minute mehr auf der Uhr (02.10., vorher legte der Quest Master es fest) |
 | Kartenwurf | Dennis reichen 2 Karten im Ziel statt 3 (02.10., vorher 5 Karten statt 3) |
 | Auge des Jägers | Die Wasserwaffe wird für dieses Spiel eine Stufe stärker, mit der großen Pistole 1 m näher |
 | Klingen des Deku-Baums | Ein Schwert mehr |
-| Hüter der Flamme | Nur die halbe Strecke, 50 statt 100 Schritte |
+| Hüter der Flamme | Dennis' Schritte zählen doppelt (02.10., vorher halbe Strecke) |
 | Rikes Amulett | Ein Tipp vom Quest Master zum Knobelspiel |
 | Prüfung des Bundes | Der Vorteil des Spiels im aktuellen Duell |
 
@@ -135,14 +135,14 @@ Wunsch des Nutzers: mehr Hin und Her mit den Packs, aber kein zweiter Mechanismu
 |---|---|---|---|---|---|---|---|
 | 1 | 1 | Rikes Tagebuch | Hauptquest | Zug | +1, Ziffer 1 (seit 01.10. ohne Item) | 0 | 5 von 7 Antworten treffen |
 | Morgen | | Zwischensequenz | | Samstag früh | Rikes Fee bringt Stufe 1 aller vier Items | | |
-| 2 | 14 | Wirbel der Götter | Hauptquest | Wiese | +2, Gepanzerte Karte (I4) | −2 | 2 von 3 gegen den besten Blader |
+| 2 | 14 | Wirbel der Götter | Hauptquest | Wiese | +2, Gepanzerte Karte (I4) | −2 | seit 02.10. nacheinander gegen Fabio und Bene, je Best of 3, alle Runden zusammen: mehr gewonnen als die beiden (vorher 2 von 3 gegen den besten Blader) |
 | 3 | 4 | Die drei Zeichen (seit 01.10. nach dem Wirbel) | Sidequest | Wiese | Fluch (F1), **Glanzsieg** (beide geschlagen): noch einer. In jedem Fall schenkt Buu Huu einen | −1 | er einen der beiden schlägt, jeweils Best of 3 |
-| 4 | 7 | Speed Flip (bis 01.10. Das Podrennen) | Hauptquest | Wiese | +2, Ziffer 2, Kleine Wasserpistole (I8) | −2 | ein Versuch, schneller als die bessere Runde von Fabio und Bene (01.10.) |
-| 5 | 9 | Kartenwurf | Sidequest | Wald | Fluch (F1), **Glanzsieg** (halbe Zeit, bis 02.10. 2 Karten Vorsprung): dazu Große Wasserpistole (I2) | −2 | auf Zeit (02.10.): 3 Karten im Ziel, schneller als die bessere Zeit von Fabio und Bene, gleich schnell zählt als verloren |
-| 6 | 2 | Auge des Jägers | Hauptquest | Wald | +3, Ziffer 3, Stich (I6) | −2 | alle 5 Flammen aus 4 m mit einem Tank |
-| 7 | 12 | Klingen des Deku-Baums | Hauptquest | Wald | +3, Dicke Nadel (I10), Ziffer 4 seit 29.09. bei Rikes Rache | −2 | mindestens ein Schwert bleibt stecken, aus 4 m (Vorschlag 01.10., testen): Verrostete Klinge 2 Würfe, Stich 4 |
-| 8 | 3 | Hüter der Flamme | Sidequest | Aussicht | Fluch (F1), bis 01.10. der Schild | −2 | das Teelicht 100 Schritte bergauf brennt |
-| 9 | 16 | **Rikes Rache** | Hauptquest | Aussicht | +4, Ziffer 4 | −2 | Faden durchs Nadelöhr auf Zeit, genaues Spiel legt der Quest Master fest (Vorschlag unten), die dickste Nadel zählt |
+| 4 | 7 | Speed Flip (bis 01.10. Das Podrennen) | Hauptquest | Wiese | +2, Ziffer 2, Kleine Wasserpistole (I8) | −2 | erst eine Proberunde für jeden, auch Dennis (02.10.), dann ein Versuch, schneller als die bessere Runde von Fabio und Bene |
+| 5 | 9 | Kartenwurf | Sidequest | Wald | Fluch (F1), **Glanzsieg** (beide geschlagen, bis 02.10. 2 Karten Vorsprung): dazu Große Wasserpistole (I2) | −2 | auf Zeit (02.10.): erst Fabio und Bene, dann Dennis, bis 3 Karten im Ziel sind. Schneller als einer: bestanden, als beide: Glanzsieg, gleich schnell zählt nicht |
+| 6 | 2 | Auge des Jägers | Hauptquest | Wald | +3, Ziffer 3, Stich (I6) | −2 | seit 02.10. gegen den Bund: Fabio und Bene legen mit der großen Pistole ohne Automatik vor, Dennis muss mehr Flammen löschen als der Bessere, bei Gleichstand zählt die Zeit (vorher alle 5) |
+| 7 | 12 | Klingen des Deku-Baums | Hauptquest | Wald | +3, Dicke Nadel (I10), Ziffer 4 seit 29.09. bei Rikes Rache | −2 | seit 02.10. gegen den Bund: Fabio und Bene je 2 Würfe, Dennis 2 (Verrostete Klinge) oder 4 (Stich), bei ihm müssen mehr stecken als beim Besseren, Gleichstand: Stechen |
+| 8 | 3 | Hüter der Flamme | Sidequest | Aussicht | Fluch (F1), bis 01.10. der Schild | −2 | seit 02.10. gegen den Bund: jeder trägt sein Teelicht bergauf, bis es ausgeht, Dennis muss weiter kommen als der Bessere (Schluss bei 200 Schritten, vorher 100 Schritte allein) |
+| 9 | 16 | **Rikes Rache** | Hauptquest | Aussicht | +4, Ziffer 4 | −2 | seit 02.10.: nur Dennis, 4 Fäden auf einer Bank 10 m entfernt, einzeln holen und einfädeln, alle 4 in 3 Minuten (geschätzt: dick gut 2 Minuten, fein knapp 4), die dickste Nadel zählt |
 | Tor | | fehlende Ziffern | | Gipfel | je Ziffer 2 Packs, Rikes Segen oder Bußprüfung | | |
 | 10 | 5 | Prüfung des Bundes | Hauptquest | Gipfel | +5 | −4 | 2 von 3 Duellen |
 | läuft | 15 | Rikes Amulett | Schritt „Gefunden“ | bis zum Gipfel | Rikes Segen (F6) | 0 | gefunden und zusammengesetzt |
@@ -219,7 +219,7 @@ Wie Zoras Schuppe in Ocarina of Time (erst Silber, dann Gold): Im Auge des Jäge
 |---|---|---|---|
 | 0 | Wasserspritze (I7) | Heiliger Beutel des Helden | **Startitem.** Beim ersten Besuch der Ausrüstung entpuppt sich der Beutel als Spritze, im selben Feld (28.09., kein zusätzlicher Platz). Dabei erklärt die App die Stufen |
 | 1 | Kleine Wasserpistole (I8) | Silberne Schuppe | Sieg im Podrennen (die erste Chance) |
-| 2 | Große Wasserpistole, die Monsterpistole (I2) | Zoras Quellstab | **Glanzsieg im Kartenwurf**: seit 02.10. höchstens die halbe Zeit des Bundes (vorher mindestens 2 Karten mehr im Ziel als der Gegner). Der Kartenwurf ist das einzige Spiel zwischen Podrennen und Auge des Jägers. Gepanzerte Karte und Fluch (2 Karten statt 3) machen den Glanzsieg leichter. Auch ohne kleine Pistole bringt der Glanzsieg die große |
+| 2 | Große Wasserpistole, die Monsterpistole (I2) | Zoras Quellstab | **Glanzsieg im Kartenwurf**: seit 02.10. schneller als Fabio und Bene (vorher mindestens 2 Karten mehr im Ziel als der Gegner). Der Kartenwurf ist das einzige Spiel zwischen Podrennen und Auge des Jägers. Gepanzerte Karte und Fluch (2 Karten statt 3) machen ihn leichter. Auch ohne kleine Pistole bringt der Glanzsieg die große |
 
 **Glanzsieg:** ein dritter Ausgang neben bestanden und verloren, nur wo `glanz` in `config.js` steht. Er zählt als bestanden (gleiche Packs) und bringt zusätzlich, was unter `glanz` steht. Dennis sieht auf der Quest-Karte eine eigene Zeile GLANZSIEG mit Bedingung und getarnter Belohnung und trägt ihn selbst ein (Siegel halten). Der Quest Master sieht „Kartenwurf: Glanzsieg“, kann im Admin auf Bestanden zurückstufen (die Fee sagt Dennis, dass ein Sieg bleibt) oder den Glanzsieg selbst buchen. In der Quest-Liste steht dann ein Stern. Weitere Glanzsiege: in `config.js` bei einer Quest `glanz: { bedingung, items }` ergänzen.
 

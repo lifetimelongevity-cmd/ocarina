@@ -38,7 +38,7 @@ const minis = await p.$$eval('#questCard .ruest-minis [data-item]', xs => xs.map
 pruefe(await p.isVisible('#questCard [data-ausruesten="auge"]') && JSON.stringify(minis) === '["pistole_klein","spruchrolle"]', 'Quest-Karte: AUSRÜSTEN mit kleiner Pistole und Fluch (' + minis.join(', ') + ')');
 pruefe(!(await p.$('#questCard [data-einsetzen]')), 'Keine Einsatz-Knöpfe mehr auf der Quest-Karte');
 pruefe(await p.$eval('#questCard', e => e.classList.contains('vor-dem-spiel')) && await p.isVisible('#questCard [data-ergebnis="bestanden"]'), 'Eine Farbe pro Schritt: AUSRÜSTEN leuchtet, BESTANDEN ist nur umrandet, aber da');
-pruefe((await text(p, '#questCard .tb-text')) === 'Lösch fünf Flammen mit einem Tank.', 'Quest-Text in einem Satz');
+pruefe((await text(p, '#questCard .tb-text')) === 'Fünf Flammen, ein Tank. Lösch mehr als der Bund.', 'Quest-Text in einem Satz');
 await p.screenshot({ path: `${OUT}/ausruesten-1-quest.png` });
 
 await p.tap('#questCard [data-ausruesten="auge"]'); await warte(1300);

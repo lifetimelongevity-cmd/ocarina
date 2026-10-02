@@ -246,7 +246,7 @@
       { id: "logbuch", nr: 1, typ: "kern", name: "Rikes Tagebuch", ort: "Zug Düsseldorf nach München", station: "zug",
         farbe: "#4a8fe8", emblem: "z-water",
         text: "Sieben Fragen über dich. Was hat Rike geantwortet?",
-        qm: "Bestanden ab 5 von 7 Treffern, du urteilst, ob sinngemäß. Dennis tippt seine Antworten im Menü, danach spielt Rikes Sprachnachricht. Seine Antworten stehen unten im Admin. Das Ergebnis trägt er danach selbst ein.",
+        qm: "Bestanden ab 5 von 7 Treffern, du urteilst nach Augenmaß, ob sinngemäß. Dennis tippt seine Antworten im Menü, danach spielt Rikes Sprachnachricht. Seine Antworten stehen unten im Admin. Das Ergebnis trägt er danach selbst ein.",
         win:  { packs: 1, ziffer: 1 },           // seit 01.10. ohne Item: Am Freitag gibt es keins, die Fee bringt sie Samstag früh
         lose: { packs: 0 },
         einsetzbar: [], logbuch: true },
@@ -254,8 +254,8 @@
       // Seit 01.10. das erste Spiel am Samstag, gleich nach der Zwischensequenz (morgen), vor Die drei Zeichen
       { id: "wirbel", nr: 14, typ: "kern", name: "Wirbel der Götter", ort: "Wiese an der Talstation", station: "wiese",
         farbe: "#ec8f2e", emblem: "z-spirit",
-        text: "Zwei Kreisel, eine Arena. Wer sich länger dreht, gewinnt.",
-        qm: "Beyblade gegen den besten Blader des Bundes, bestanden bei 2 von 3. Die Kreisel gibt es vor Ort, kein Item. Füllt auch den Showdown auf. Der Sieg bringt die Gepanzerte Karte für den Kartenwurf.",
+        text: "Zwei Kreisel, eine Arena, nacheinander gegen beide. Hol mehr Runden als sie.",
+        qm: "Beyblade, Dennis spielt nacheinander gegen Fabio und dich, je Best of 3. Alle Runden zählen zusammen: Hat Dennis mehr gewonnen als ihr beide zusammen, ist bestanden. Im Showdown ein Duell gegen einen von euch, Best of 3. Die Kreisel gibt es vor Ort, kein Item. Füllt auch den Showdown auf. Der Sieg bringt die Gepanzerte Karte für den Kartenwurf.",
         win:  { packs: 2, items: ["karten_gepanzert"] },
         lose: { packs: -2 },
         fluch: "Du darfst vorher üben.",
@@ -276,26 +276,26 @@
       { id: "podrennen", nr: 7, typ: "kern", name: "Speed Flip", ort: "Wiese an der Talstation", station: "wiese",
         farbe: "#a468e6", emblem: "z-shadow",
         text: "Fahr deinen Octane durch den Parcours, schneller als der Bund.",
-        qm: "RC-Auto auf Zeit, ein Versuch, auf festem Boden (auf Gras bleibt das kleine Auto hängen). Erst fahren Fabio und du je eine Runde, Dennis muss die bessere der beiden Zeiten schlagen. Mit Fluch sabotiert Dennis den Bund: Ihr klebt euch vor euren Runden einen kleinen Stein aufs Auto (Klebeband mitnehmen), danach fährt Dennis ohne.",
+        qm: "RC-Auto auf Zeit, auf festem Boden (auf Gras bleibt das kleine Auto hängen). Erst fährt jeder eine Proberunde ohne Zeit, auch Dennis, dann zählt es: Fabio und du fahren je eine Runde, Dennis muss die bessere der beiden Zeiten schlagen. Mit Fluch sabotiert Dennis den Bund: Ihr klebt euch vor euren Runden einen kleinen Stein aufs Auto (Klebeband mitnehmen), danach fährt Dennis ohne.",
         win:  { packs: 2, ziffer: 2, items: ["pistole_klein"] },
         lose: { packs: -2 },
         fluch: "Sabotage! Der Bund fährt mit einem Stein auf dem Dach.",
         einsetzbar: ["spruchrolle"], revanche: true },
 
-      // Seit 02.10. auf Zeit wie Speed Flip (Wunsch des Nutzers): erst Fabio und Bene, dann Dennis. Vorher ein Duell um die meisten Karten
+      // Seit 02.10. auf Zeit (Wunsch des Nutzers): erst Fabio und Bene, dann Dennis. Einen geschlagen = Sieg, beide = Glanzsieg. Vorher ein Duell
       { id: "kartenwurf", nr: 9, typ: "side", name: "Kartenwurf", ort: "Entdeckerpfad", station: "wald",
         text: "Drei Karten aus deinen Packs ins Ziel, schneller als der Bund.",
-        qm: "Auf Zeit, das Ziel sucht ihr vor Ort aus (Kamin, Eimer oder Kreis), fester Abstand. Erst werfen Fabio und du, dann Dennis, alle vom selben Stapel aus schon geöffneten Packs (etwa 10 Karten). Die Uhr läuft, bis 3 Karten im Ziel sind. Ist der Stapel leer, sammelt der Werfer seine Fehlwürfe ein, die Uhr läuft weiter. Dennis muss die bessere eurer beiden Zeiten schlagen, gleich schnell zählt als verloren. Mit der Leeren Hülle wirft er nur nackte Karten (die Hülle bringt nichts), mit der Gepanzerten Karte darf eine seiner Karten in die Hülle. Glanzsieg: höchstens die halbe Zeit, bringt die Große Wasserpistole.",
+        qm: "Auf Zeit, das Ziel sucht ihr vor Ort aus (Kamin, Eimer oder Kreis), fester Abstand. Erst werfen Fabio und du, dann Dennis, alle vom selben Stapel aus schon geöffneten Packs (etwa 10 Karten). Die Uhr läuft, bis 3 Karten im Ziel sind. Ist der Stapel leer, sammelt der Werfer seine Fehlwürfe ein, die Uhr läuft weiter. Schneller als einer von euch: bestanden, schneller als beide: Glanzsieg, gleich schnell zählt nicht. Mit der Leeren Hülle wirft er nur nackte Karten (die Hülle bringt nichts), mit der Gepanzerten Karte darf eine seiner Karten in die Hülle. Der Glanzsieg bringt die Große Wasserpistole.",
         win:  { items: ["spruchrolle"] },
-        glanz: { bedingung: "halbe Zeit", items: ["pistole_gross"] },   // einzige Sidequest mit Item, nur als Glanzsieg
+        glanz: { bedingung: "beide geschlagen", items: ["pistole_gross"] },   // einzige Sidequest mit Item, nur als Glanzsieg
         lose: { packs: -2 },
         fluch: "Dir reichen 2 Karten im Ziel statt 3.",
         einsetzbar: ["huelle", "karten_gepanzert", "spruchrolle"], revanche: true },
 
       { id: "auge", nr: 2, typ: "kern", name: "Auge des Jägers", ort: "Entdeckerpfad", station: "wald",
         farbe: "#e2472f", emblem: "e-flame",
-        text: "Lösch fünf Flammen mit einem Tank.",
-        qm: "5 Teelichter aus 4 m, ein Tank. Bestanden nur, wenn alle 5 aus sind. Es zählt die stärkste Wasserwaffe, die Dennis hat: Spritze, kleine Pistole oder große Pistole.",
+        text: "Fünf Flammen, ein Tank. Lösch mehr als der Bund.",
+        qm: "5 Teelichter aus 4 m, ein Tank. Erst legen Fabio und du vor, mit der großen Pistole, aber ohne Automatik, dann Dennis. Er muss mehr Flammen löschen als der Bessere von euch, bei Gleichstand zählt die Zeit bis zur letzten Flamme. Dennis nimmt die stärkste Wasserwaffe, die er hat: Spritze, kleine Pistole oder große Pistole (mit Automatik).",
         win:  { packs: 3, ziffer: 3, items: ["stich"] },
         lose: { packs: -2 },
         fluch: { stufen: ["spritze", "pistole_klein", "pistole_gross"], sonst: "1 m näher ran." },
@@ -303,8 +303,8 @@
 
       { id: "deku", nr: 12, typ: "kern", name: "Klingen des Deku-Baums", ort: "Entdeckerpfad", station: "wald",
         farbe: "#48b454", emblem: "z-forest",
-        text: "Wirf deine Klingen in den alten Baum. Nur was stecken bleibt, zählt.",
-        qm: "Mini-Schwerter aus 4 m auf einen Baum, es zählen Würfe: mit der Verrosteten Klinge 2, mit Stich 4 (es gibt 4 Schwerter, für mehr Würfe sammelt ihr sie wieder ein). Bestanden, wenn mindestens eins stecken bleibt (Vorschlag, vorher testen). Der Sieg bringt die Dicke Nadel für Rikes Rache.",
+        text: "Wirf deine Klingen in den alten Baum. Bei dir müssen mehr stecken als beim Bund.",
+        qm: "Mini-Schwerter aus 4 m auf einen Baum (Abstand vor Ort anpassen). Erst werfen Fabio und du je 2 Mal, dann Dennis: mit der Verrosteten Klinge 2 Würfe, mit Stich 4 (es gibt 4 Schwerter, für mehr Würfe sammelt ihr sie wieder ein). Bestanden, wenn bei Dennis mehr stecken bleiben als beim Besseren von euch. Gleichstand: Stechen, jeder noch ein Wurf. Der Sieg bringt die Dicke Nadel für Rikes Rache.",
         win:  { packs: 3, items: ["nadel_dick"] },
         lose: { packs: -2 },
         fluch: "Ein Wurf mehr.",
@@ -312,21 +312,21 @@
 
       // Ersetzt am 28.09. die Feuerprobe („Der Ruf“) und ist eine Sidequest, id bleibt. Gibt seit 01.10. einen Fluch statt des Schilds
       { id: "feuerprobe", nr: 3, typ: "side", name: "Hüter der Flamme", ort: "Mittelstation", station: "aussicht",
-        text: "Ein Teelicht, 100 Schritte bergauf. Es darf nicht ausgehen.",
-        qm: "Offenes Teelicht ohne Glas, 100 Schritte bergauf. Erlischt es, verloren. Der Bund lenkt ab, pustet nicht, berührt nicht. Feuerzeug und Ersatzlicht mitnehmen.",
+        text: "Trag ein Teelicht bergauf, weiter als der Bund. Es darf nicht ausgehen.",
+        qm: "Offenes Teelicht ohne Glas, bergauf, Schritte zählen, bis es ausgeht. Erst gehen Fabio und du, dann Dennis. Er muss weiter kommen als der Bessere von euch. Bei 200 Schritten ist Schluss, schafft einer von euch 200, muss Dennis auch 200 schaffen. Bei Dennis lenkt der Bund ab, pustet nicht, berührt nicht. Feuerzeug und Ersatzlichter mitnehmen.",
         win:  { items: ["spruchrolle"] },
         lose: { packs: -2 },
-        fluch: "Halbe Strecke: 50 statt 100 Schritte.",
+        fluch: "Deine Schritte zählen doppelt.",
         einsetzbar: ["spruchrolle"] },
 
       // Neu am 29.09.: Rike hat im Tagebuch verraten, dass Dennis keine Nadel einfädeln kann. Trägt Ziffer 4.
       { id: "rache", nr: 16, typ: "kern", name: "Rikes Rache", ort: "Mittelstation", station: "aussicht",
         farbe: "#d8405e", emblem: "i-nadel",
-        text: "Rike hat verraten, was du gar nicht kannst. Einfädeln, bevor die Zeit abläuft.",
-        qm: "Faden durchs Nadelöhr auf Zeit, das genaue Spiel legst du fest. Vorschlag: fünf Nadeln an fünf Stellen rund um die Mittelstation, eine Uhr für alle, 20 Sekunden je Treffer im Tagebuch (mindestens 60). Es zählt die dickste Nadel, die Dennis hat: feine Nadeln, mit der Dicken Nadel dicke. Anlecken und Zwirbeln erlaubt, keine Einfädelhilfe.",
+        text: "Rike hat verraten, was du gar nicht kannst. Vier Fäden, bevor die Zeit abläuft.",
+        qm: "Nur Dennis spielt. 4 Fäden liegen auf einer Bank 10 m entfernt, 4 Nadeln bei ihm. Er holt einen Faden, läuft zurück, fädelt ein, dann den nächsten. Bestanden, wenn alle 4 in 3 Minuten eingefädelt sind (geschätzt: je Faden gut 10 s Laufen, mit dicker Nadel 15 bis 30 s Einfädeln, mit feiner 40 s und mehr, also dick gut 2 Minuten, fein eher knapp 4). Es zählt die dickste Nadel, die Dennis hat: feine Nadeln, mit der Dicken Nadel dicke. Anlecken und Zwirbeln erlaubt, keine Einfädelhilfe.",
         win:  { packs: 4, ziffer: 4 },
         lose: { packs: -2 },
-        fluch: "Mehr Zeit auf der Uhr.",
+        fluch: "Eine Minute mehr auf der Uhr.",
         einsetzbar: ["nadel_fein", "nadel_dick", "spruchrolle"], revanche: true },
 
       { id: "bund", nr: 5, typ: "kern", name: "Prüfung des Bundes", ort: "Blombergkreuz", station: "gipfel",
