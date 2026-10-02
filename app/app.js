@@ -650,7 +650,7 @@
 
   function logbuchKnopf() {
     const n = C.logbuch.fragen.length, fertig = Object.keys(antworten).filter(k => +k >= 1 && +k <= n).length;
-    const text = fertig >= n ? `ALLE ${n} BESIEGELT` : fertig ? `WEITER SCHREIBEN · ${fertig}/${n}` : "TAGEBUCH ÖFFNEN";
+    const text = fertig >= n ? `ALLE ${n} BESIEGELT` : fertig ? `WEITERSCHREIBEN · ${fertig}/${n}` : "TAGEBUCH ÖFFNEN";
     return `<button type="button" class="qc-action" data-logbuch>${useSvg("i-scroll")}${text}</button>`;
   }
 
@@ -793,7 +793,7 @@
     if (imNebel) zeilen.push(`<button type="button" class="sc-row nebel" data-quest="${NEBEL}"><span class="ic">${coveredMedal()}</span><span class="sc-name">${pruefungen(imNebel)} im Nebel</span></button>`);
     if (!qs.length) {
       const fehlt = state.ziffern.filter(v => v == null).length;
-      zeilen.push(`<button type="button" class="sc-row sc-chest" data-code><span class="ic">${useSvg("i-chest")}</span><span class="sc-name">Das Kästchen<small>${fehlt ? `Verschlossen, noch ${fehlt === 1 ? "eine Ziffer" : fehlt + " Ziffern"}` : "Code komplett"}</small></span>`
+      zeilen.push(`<button type="button" class="sc-row sc-chest" data-code><span class="ic">${useSvg("i-chest")}</span><span class="sc-name">Das Kästchen<small>${fehlt ? `Verschlossen, noch ${fehlt === 1 ? "eine Ziffer" : fehlt + " Ziffern"}` : "Alle Ziffern gefunden"}</small></span>`
         + `<span class="sc-code">${state.ziffern.map(v => `<span class="tumbler${v == null ? "" : " known"}">${v == null ? "?" : v}</span>`).join("")}</span></button>`);
     }
     // Die Tafel liegt auf der anderen Seite als die Station, damit sie die Station nicht verdeckt
@@ -923,9 +923,9 @@
       // Fluch (01.10.): immer das kleine Rad, wie groß ALLES gerade ist
       const quote = E.allesChance(C, state);
       extra = `${cWahl.includes(id) ? "Kommt mit. " : schon.includes(id) ? "Dabei. " : ""}${radMini(quote)}${esc(radSatz(quote))}`;
-    } else if (cWahl.includes(id)) extra = v ? "Kommt mit." : "Kommt mit. Nochmal tippen: zurück.";
+    } else if (cWahl.includes(id)) extra = v ? "Kommt mit." : "Kommt mit. Tipp noch mal, dann bleibt es hier.";
     else if (schon.includes(id)) extra = `Dabei bei ${em(spielVon(fq).spiel.id)}.`;
-    else if (mit.includes(id)) extra = v ? "Jeder Fluch hat seinen Preis." : "Hilft hier. Antippen zum Mitnehmen.";
+    else if (mit.includes(id)) extra = v ? "Jeder Fluch hat seinen Preis." : "Hilft hier. Tipp drauf, dann kommt es mit.";
     else if (x.rettung) extra = "Meldet sich, wenn du ein Duell verlierst.";
     else if (x.tor) extra = "Meldet sich am Tor zum Gipfel.";
     else if (E.abgeloest(C, state, id)) extra = `Abgelöst von ${esc(itemById(E.abgeloest(C, state, id)).name)}.`;
@@ -1205,7 +1205,7 @@
       gross = true;
       head = `${stage(q, won, farbe)}<p class="big${won ? "" : " lost"}${glanz ? " glanz" : ""}">${glanz ? "GLANZSIEG" : `${art} ${st === "beendet" ? "BEENDET" : won ? "BESTANDEN" : "VERLOREN"}`}</p>
               <p class="sub">${esc(q.name)}${fertig.length > 1 ? ` und ${fertig.length - 1} weitere` : ""}</p>`;
-      if (!lines.length) lines.push(`<li><span class="ri"></span>Keine Folgen</li>`);
+      if (!lines.length) lines.push(`<li><span class="ri"></span>Nichts gewonnen, nichts verloren.</li>`);
     } else if (gestartet.length) {
       const q = gestartet[0];
       klang = "side"; gross = true;
@@ -1262,11 +1262,11 @@
     } else if (neueB.length) {
       const b = neueB[neueB.length - 1];
       const weniger = dPacks < 0 || dKarten > 0;
-      const titel = b.ziffer ? "ZIFFER GEKAUFT" : b.item ? "GESCHENK" : weniger ? "PACKS WEG" : dPacks > 0 ? "PACKS DAZU" : "BUCHUNG";
-      head = `<span class="ri-big">${cardSvg()}</span><p class="big${weniger && !b.ziffer ? " lost" : ""}">${titel}</p><p class="sub">${esc(b.grund || "Buchung vom Quest Master")}</p>`;
+      const titel = b.ziffer ? "ZIFFER GEKAUFT" : b.item ? "GESCHENK" : weniger ? "PACKS WEG" : dPacks > 0 ? "PACKS DAZU" : "URTEIL";
+      head = `<span class="ri-big">${cardSvg()}</span><p class="big${weniger && !b.ziffer ? " lost" : ""}">${titel}</p><p class="sub">${esc(b.grund || "Der Quest Master hat entschieden.")}</p>`;
       if (!lines.length) lines.push(`<li><span class="ri"></span>Keine Packs mehr, es bleibt bei 0.</li>`);
     } else {
-      head = `<span class="ri-big">${useSvg("i-beutel")}</span><p class="big">DEIN BEUTEL</p><p class="sub">Der Quest Master hat etwas geändert.</p>`;
+      head = `<span class="ri-big">${useSvg("i-beutel")}</span><p class="big">DEIN BEUTEL</p><p class="sub">Der Quest Master hat in deinen Beutel gegriffen.</p>`;
       if (!lines.length) return false;
     }
     // Die nächste Quest wird erst nach dem Fenster aufgedeckt, darum steht ihr Name hier nicht
@@ -1635,12 +1635,12 @@
     weg.d.forEach(k => zeilen.push([useSvg("z-triforce"), `Duell ${esc(k)} ist wieder offen. Trag es neu ein.`]));
     weg.s.forEach(q => q.schritte.filter(sx => prev.schritte[q.id][sx.id] && !next.schritte[q.id][sx.id])
       .forEach(sx => zeilen.push([questIcon(q, "laeuft", false), `${esc(q.name)}: „${esc(sx.name)}“.`])));
-    weg.e.forEach(e => { const it = itemById(e.item); if (it) zeilen.push([`<span style="color:${it.farbe}">${useSvg(it.symbol)}</span>`, `Einsatz von <b>${esc(it.name)}</b>.`
+    weg.e.forEach(e => { const it = itemById(e.item); if (it) zeilen.push([`<span style="color:${it.farbe}">${useSvg(it.symbol)}</span>`, `<b>${esc(it.name)}</b> liegt wieder im Beutel.`
       + (it.dieb && (Number(e.raub) > 0 || e.alles) ? ` Was ${esc(it.dieb.name)} stahl, ist zurück.` : "")]); });
-    weg.b.forEach(b => zeilen.push([cardSvg(), b.ziffer ? `Kauf von Ziffer ${esc(b.ziffer)}.` : `„${esc(b.grund || "Buchung")}“.`]));
+    weg.b.forEach(b => zeilen.push([cardSvg(), b.ziffer ? `Ziffer ${esc(b.ziffer)} ist wieder offen.` : `„${esc(b.grund || "Packs vom Quest Master")}“.`]));
     const mehr = zeilen.length > 4 ? zeilen.length - 3 : 0;
     const lines = zeilen.slice(0, mehr ? 3 : 4).map(([ic, t]) => `<li><span class="ri">${ic}</span><span>${t}</span></li>`).join("")
-      + (mehr ? `<li><span class="ri"></span><span>und ${mehr} weitere Einträge</span></li>` : "");
+      + (mehr ? `<li><span class="ri"></span><span>und noch ${mehr} mehr</span></li>` : "");
     melody("minus");
     showOverlay({ head: `<span class="ri-big fee"><img src="assets/fee.png" alt=""></span><p class="big">ZURÜCKGENOMMEN</p><p class="sub">vom Quest Master</p>`, lines, next: "" });
     renderHud(); renderQuests();
@@ -1850,7 +1850,7 @@
           text: `Der Bund hütet ${max} Packs. Ja, richtig gehört: ${max}! Aber dir wird nichts geschenkt. Jedes Pack ist umkämpft, und im Zweifel kriegst du keins.` },
         // Was die Quests bringen (eigene Tafel seit 01.10., Wunsch des Nutzers)
         { bild: `<span class="pb-arten"><span class="pb-split">${medalHtml(C.quests.find(q => q.typ === "kern"), "bestanden", false)}<small>Hauptquest</small></span><span class="pb-split">${gemHtml("bestanden", false)}<small>Sidequest</small></span></span>`,
-          text: "Hauptquests bringen dir Packs und Ziffern, Sidequests Fähigkeiten." },
+          text: "Hauptquests bringen dir Packs, Ziffern und Ausrüstung. Sidequests verborgene Kräfte." },
         { bild: `<span class="pb-chest">${useSvg("i-chest")}${useSvg("i-lock", "pb-lock")}</span><span class="pb-tumblers">${C.code.map(() => `<span class="tumbler">?</span>`).join("")}</span>`,
           text: "Die vier Ziffern öffnen am Ende ein verschlossenes Kästchen. Was darin liegt, verrät dir niemand. Ohne alle vier kein Gipfel." },
         { bild: `<span class="pb-split"><span class="pb-cards mine" style="--n:${Math.min(halb, 10)}">${karten(halb)}</span><small>deins</small></span><span class="pb-split"><span class="pb-cards" style="--n:${Math.min(max - halb, 10)}">${karten(max - halb, "empty")}</span><small>beim Bund</small></span>`,
@@ -2280,7 +2280,7 @@
       const fertig = nr > fragen.length;
       $("#lbStep").textContent = fertig ? "" : `${nr} / ${fragen.length}`;
       if (fertig) {
-        $("#lbFrage").textContent = "Alle sieben besiegelt. Trag dein Ergebnis auf der Quest-Karte ein.";
+        $("#lbFrage").textContent = "Alle sieben besiegelt! Verkünde dein Ergebnis auf der Quest-Karte.";
         $("#lbForm").hidden = true; $("#lbSealed").hidden = true;
         return;
       }
@@ -2315,7 +2315,7 @@
         spieler.play().catch(() => { if (w !== wiedergabe) return; ende(false); $("#lbWho").textContent = "RIKE · TIPP AUF ▶"; });
       } else {
         // Platzhalter, solange Rikes Sprachnachricht fehlt (oder noch lädt)
-        $("#lbWho").textContent = quellen[nr] === null ? "RIKE · LÄDT NOCH" : "RIKE · FOLGT NOCH";
+        $("#lbWho").textContent = quellen[nr] === null ? "RIKE · GLEICH" : "RIKE · FOLGT NOCH";
         const ms = melody("stimme");
         setTimeout(() => ende(true), ms + 300);
       }
@@ -2575,7 +2575,7 @@
     if (!state.ende || state.ziffern[nr - 1] != null || E.zahlkraft(state) < C.ziffer_preis) return;
     schwur.oeffnen({
       art: "AM KÄSTCHEN", icon: `<span class="sw-item lock">${useSvg("i-lock")}</span>`, titel: `Ziffer ${nr} kaufen`,
-      sub: `für ${C.ziffer_preis} ${packsWort(C.ziffer_preis)}`, ton: "win",
+      sub: `FÜR ${C.ziffer_preis} ${packsWort(C.ziffer_preis).toUpperCase()}`, ton: "win",
       folgen: [`<span class="fx">${preisChips(C.ziffer_preis)}<span class="chip plus"><span class="mini-tumbler">?</span>Ziffer ${nr}</span></span>`],
       gueltig: () => state.ende && state.ziffern[nr - 1] == null && E.zahlkraft(state) >= C.ziffer_preis,
       ausfuehren: () => eintrag("z_" + nr, {})
@@ -2863,7 +2863,7 @@
   }
   async function toggleFs() {
     const hinweis = () => showOverlay({ head: `<p class="big">VOLLBILD</p><p class="sub">Auf dem iPhone geht das so:</p>`,
-      lines: `<li><span class="ri">1</span>In Safari unten auf Teilen tippen.</li><li><span class="ri">2</span>Zum Home-Bildschirm wählen.</li><li><span class="ri">3</span>Dennis Quest dort öffnen und quer halten.</li>` });
+      lines: `<li><span class="ri">1</span>In Safari unten auf Teilen tippen.</li><li><span class="ri">2</span>„Zum Home-Bildschirm“ wählen.</li><li><span class="ri">3</span>Dennis Quest dort öffnen und quer halten.</li>` });
     try {
       if (fsElement()) { const x = document.exitFullscreen || document.webkitExitFullscreen; if (x) await Promise.resolve(x.call(document)); return; }
       const el = document.documentElement, req = el.requestFullscreen || el.webkitRequestFullscreen;
@@ -2885,12 +2885,12 @@
   try { installiert = localStorage.getItem(INST_KEY) === "1"; } catch (_) {}
   function updateInstall() { installBtn.hidden = isStandalone() || (installiert && !installEvent) || !(installEvent || IOS || ANDROID); }
   const iosAnleitung = () => showOverlay({
-    head: `<span class="ri-big">${useSvg("i-star")}</span><p class="big">APP INSTALLIEREN</p><p class="sub">Auf dem iPhone in Safari:</p>`,
+    head: `<span class="ri-big">${useSvg("i-star")}</span><p class="big">ZUM STARTBILDSCHIRM</p><p class="sub">Auf dem iPhone in Safari:</p>`,
     lines: `<li><span class="ri">1</span>Unten auf Teilen tippen (bei neuem iOS erst auf „…“).</li><li><span class="ri">2</span>„Zum Home-Bildschirm“ wählen, dann „Hinzufügen“.</li><li><span class="ri">3</span>Dennis Quest dort öffnen und quer halten.</li>` });
   // Ersatz, falls Android das Fenster gerade nicht anbietet (zum Beispiel nach einmal Abbrechen)
   const androidAnleitung = () => showOverlay({
-    head: `<span class="ri-big">${useSvg("i-star")}</span><p class="big">APP INSTALLIEREN</p><p class="sub">So geht es von Hand:</p>`,
-    lines: `<li><span class="ri">1</span>Chrome: oben rechts auf ⋮ tippen. Samsung Internet: unten auf ≡.</li><li><span class="ri">2</span>„Zum Startbildschirm hinzufügen“ bzw. „Seite hinzufügen zu“, dann „Startbildschirm“.</li><li><span class="ri">3</span>Dennis Quest dort öffnen.</li>` });
+    head: `<span class="ri-big">${useSvg("i-star")}</span><p class="big">ZUM STARTBILDSCHIRM</p><p class="sub">So geht es von Hand:</p>`,
+    lines: `<li><span class="ri">1</span>Chrome: oben rechts auf ⋮ tippen. Samsung Internet: unten auf ≡.</li><li><span class="ri">2</span>„Zum Startbildschirm hinzufügen“ oder „Seite hinzufügen zu“, dann „Startbildschirm“.</li><li><span class="ri">3</span>Dennis Quest dort öffnen.</li>` });
   addEventListener("beforeinstallprompt", e => { e.preventDefault(); installEvent = e; updateInstall(); });
   addEventListener("appinstalled", () => {
     installEvent = null; installiert = true;
@@ -2898,7 +2898,7 @@
     updateInstall();
     if (briefOffen) return brief.installiert();          // im Brief sagt es das P.S.
     melody("side");
-    showOverlay({ head: `<span class="ri-big">${useSvg("i-check")}</span><p class="big">INSTALLIERT</p><p class="sub">Dennis Quest liegt jetzt auf deinem Startbildschirm.</p>`,
+    showOverlay({ head: `<span class="ri-big">${useSvg("i-check")}</span><p class="big">GESCHAFFT!</p><p class="sub">Dennis Quest liegt jetzt auf deinem Startbildschirm.</p>`,
       lines: `<li><span class="ri">▶</span>Ab jetzt dort öffnen, dann läuft es im Vollbild.</li>` });
   });
   installBtn.addEventListener("click", async e => {
@@ -3170,7 +3170,7 @@
     const el = $("#sync");
     const t = state && state.stand ? new Date(state.stand).toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" }) : "";
     // Mit Netz ist der Stand aktuell, dann steht hier nichts
-    el.textContent = syncInfo.online || syncInfo.demo ? "" : t ? "Offline · Stand " + t : "Offline";
+    el.textContent = syncInfo.online || syncInfo.demo ? "" : t ? "Funkloch · Stand " + t : "Funkloch";
     el.classList.toggle("offline", !syncInfo.online && !syncInfo.demo);
   }
   store.onStatus(st => { syncInfo = st; renderSync(); });
@@ -3260,7 +3260,7 @@
     melody("zauber");
     showOverlay({
       head: `<span class="ri-big fee"><img src="assets/fee.png" alt=""></span><p class="big">NEUER ANFANG</p><p class="sub">vom Quest Master</p>`,
-      lines: `<li><span class="ri"></span><span>Alles zurückgesetzt. Die Reise beginnt von vorn.</span></li>`,
+      lines: `<li><span class="ri"></span><span>Die Zeit dreht sich zurück. Die Reise beginnt von vorn.</span></li>`,
       next: ""
     }, () => { if (!DEMO) location.reload(); });
     renderHud(); renderQuests();

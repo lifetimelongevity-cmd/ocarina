@@ -265,7 +265,7 @@
       // Seit 01.10. die dritte Aufgabe (nach dem Wirbel), hier beginnen die Flüche: Buu Huu spielt mit und schenkt Dennis
       // in jedem Fall einen, dazu einen je geschlagenem Gegner (einer = Sieg, beide = Glanzsieg).
       { id: "klingen", nr: 4, typ: "side", name: "Die drei Zeichen", ort: "Wiese an der Talstation", station: "wiese",
-        text: "Schnick Schnack Schnuck gegen beide aus dem Bund. Je Best of 3.",
+        text: "Schnick Schnack Schnuck gegen beide aus dem Bund. Wer zuerst zwei Runden holt, gewinnt.",
         qm: "Dennis spielt gegen beide, je Best of 3, er wählt die Reihenfolge. Einen geschlagen: bestanden. Beide: Glanzsieg. Keinen: verloren. Buu Huu schenkt ihm in jedem Fall einen Fluch, dazu einen je geschlagenem Gegner (bis zu drei). Der erste Fluch des Tages kann noch kein ALLES.",
         win:  { items: ["spruchrolle"] },
         glanz: { bedingung: "beide geschlagen", items: ["spruchrolle"] },
