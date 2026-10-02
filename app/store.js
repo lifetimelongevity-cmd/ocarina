@@ -87,6 +87,17 @@
     return { offen: () => offen };
   }
 
+  /* Anfrage mit Frist (02.10.): Auf dem Handy bleibt eine Anfrage nach dem Entsperren oder einem Netzwechsel manchmal
+     minutenlang hängen, ohne zu scheitern. Solange sie hängt, wartet alles Ungesendete dahinter (im Admin steht
+     „Nicht gesendet“, die Freigabe kommt bei Dennis nicht an). Nach 8 s abbrechen, dann versucht die App es neu.
+     Geschrieben wird immer ganz (PUT des Dokuments oder eines Eintrags), darum schadet es nicht, wenn die abgebrochene
+     Anfrage doch angekommen ist. */
+  function senden(url, opt) {
+    if (typeof AbortController === "undefined") return fetch(url, opt);
+    const ab = new AbortController(), t = setTimeout(() => ab.abort(), 8000);
+    return fetch(url, { ...opt, signal: ab.signal }).finally(() => clearTimeout(t));
+  }
+
   function firebaseStore(cfg, opts) {
     const b = base(cfg);
     const url = cfg.speicher.databaseURL.replace(/\/+$/, "") + "/spiele/" + encodeURIComponent(cfg.speicher.spielId) + ".json";
@@ -123,7 +134,7 @@
       const sending = pending;
       try {
         // Ohne Content-Type-Header: einfacher Request ohne CORS-Vorabfrage, Firebase liest den Body trotzdem als JSON
-        const res = await fetch(url + auth, { method: "PUT", body: JSON.stringify(sending) });
+        const res = await senden(url + auth, { method: "PUT", body: JSON.stringify(sending) });
         if (!res.ok) throw new Error("HTTP " + res.status);
         if (pending === sending) {                   // nur löschen, wenn in der Zwischenzeit nichts Neues kam
           pending = null;
@@ -144,7 +155,7 @@
     async function poll() {
       if (live && live.offen()) return;
       try {
-        const res = await fetch(url, { cache: "no-store" });
+        const res = await senden(url, { cache: "no-store" });
         if (!res.ok) throw new Error("HTTP " + res.status);
         const data = await res.json();
         if (live && live.offen()) return;            // inzwischen steht der Stream, sein Stand ist frischer
@@ -239,7 +250,7 @@
       try {
         for (const n of offen) {
           const e = pending[n];
-          const res = await fetch(base + "/" + encodeURIComponent(n) + ".json", { method: "PUT", body: JSON.stringify(e) });
+          const res = await senden(base + "/" + encodeURIComponent(n) + ".json", { method: "PUT", body: JSON.stringify(e) });
           if (!res.ok) throw new Error("HTTP " + res.status);
           remote = { ...remote, [n]: e };
           if (gleich(pending[n], e)) delete pending[n];
@@ -263,7 +274,7 @@
       let live = null;
       const poll = async () => {
         if (live && live.offen()) return;
-        try { const res = await fetch(base + ".json", { cache: "no-store" }); if (res.ok) { const data = await res.json(); if (!(live && live.offen())) uebernehmen(data); flush(); } } catch (_) {}
+        try { const res = await senden(base + ".json", { cache: "no-store" }); if (res.ok) { const data = await res.json(); if (!(live && live.offen())) uebernehmen(data); flush(); } } catch (_) {}
       };
       live = strom(base + ".json", { onEvent, onOpen: flush, onDown: () => { if (live) poll(); } });
       setInterval(poll, 5000); poll();
@@ -291,7 +302,7 @@
       loeschen(n) {
         n = String(n);
         if (!firebase) { const r = { ...remote }; delete r[n]; delete pending[n]; remote = r; schreiben(key, remote); schreiben(pendingKey, pending); melden(); return Promise.resolve(); }
-        return fetch(base + "/" + encodeURIComponent(n) + ".json", { method: "DELETE" }).then(res => {
+        return senden(base + "/" + encodeURIComponent(n) + ".json", { method: "DELETE" }).then(res => {
           if (!res.ok) throw new Error("HTTP " + res.status);
           const r = { ...remote }; delete r[n]; delete pending[n]; remote = r;
           schreiben(key, remote); schreiben(pendingKey, pending); melden();
@@ -305,7 +316,7 @@
       zuruecksetzen() {
         pending = {}; schreiben(pendingKey, pending);
         remote = {}; schreiben(key, remote); melden();
-        if (firebase) return fetch(base + ".json", { method: "DELETE" }).then(res => { if (!res.ok) throw new Error("HTTP " + res.status); });
+        if (firebase) return senden(base + ".json", { method: "DELETE" }).then(res => { if (!res.ok) throw new Error("HTTP " + res.status); });
         return Promise.resolve();
       }
     };

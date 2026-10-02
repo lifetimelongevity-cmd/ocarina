@@ -43,8 +43,13 @@ const aktiv = () => quellen.filter(q => !q.zu);
 // Server-Stand und fetch
 let server = { quests: {}, frei: {}, stand: 1 };
 let abfragen = 0;
+// haengt: Schreiben bleibt hängen wie auf dem Handy nach dem Entsperren (kein Fehler, keine Antwort), bis abgebrochen wird
+let haengt = false, haengend = 0;
+const geschrieben = [];
 const fetchF = async (url, opt = {}) => {
   if ((opt.method || 'GET') === 'GET') { abfragen++; return { ok: true, json: async () => url.includes('-dennis') ? {} : JSON.parse(JSON.stringify(server)) }; }
+  if (haengt) { haengend++; return new Promise((_, nein) => opt.signal && opt.signal.addEventListener('abort', () => nein(new Error('abgebrochen')))); }
+  geschrieben.push({ url, body: opt.body ? JSON.parse(opt.body) : null });
   return { ok: true, json: async () => ({}) };
 };
 
@@ -58,7 +63,7 @@ const speicher = {};
 const ctx = {
   window: win, document: doc, location: { search: '' }, URLSearchParams,
   localStorage: { getItem: k => speicher[k] ?? null, setItem: (k, v) => { speicher[k] = String(v); }, removeItem: k => { delete speicher[k]; } },
-  EventSource: FakeES, fetch: fetchF, setInterval: setIntervalF, setTimeout: setTimeoutF, clearTimeout: () => {}, console,
+  EventSource: FakeES, fetch: fetchF, AbortController, setInterval: setIntervalF, setTimeout: setTimeoutF, clearTimeout: () => {}, console,
   Date: class extends Date { static now() { return jetzt; } }, JSON, Object, Array, String, Promise, encodeURIComponent,
 };
 ctx.window = Object.assign(win, ctx);
@@ -118,6 +123,32 @@ es.oeffnen();
 server = { ...server, frei: { ...server.frei, wald: jetzt }, stand: 4 };
 es.melde('put', { path: '/', data: server });
 pruefe(letzter.frei.wald, 'Stream liefert den neuesten Stand');
+
+// Schreiben hängt (02.10., beim Test im Admin: „Nicht gesendet“, die erste Quest kam bei Dennis nicht an):
+// Nach 8 s bricht die App ab und schickt es neu, statt minutenlang hinter der hängenden Anfrage zu warten
+let status = null;
+store.onStatus(st => { status = st; });
+haengt = true;
+store.save({ ...letzter, frei: { ...letzter.frei, gipfel: jetzt } });
+await spule(1000);
+pruefe(status.pending && haengend >= 1, 'Freigabe hängt: im Admin steht „Nicht gesendet“');
+await spule(15_000);
+pruefe(haengend >= 2, `Hängende Anfrage abgebrochen und neu versucht (${haengend} Versuche in 16 s, vorher einer)`);
+haengt = false;
+let angekommen = null;
+for (let s = 0; s < 30 && angekommen == null; s++) { await spule(1000); if (!status.pending) angekommen = s + 1; }
+pruefe(angekommen != null && angekommen <= 20, `Netz wieder gut: Freigabe nach ${angekommen} s gesendet (höchstens 20)`);
+pruefe(geschrieben.some(g => g.body && g.body.frei && g.body.frei.gipfel), 'Server hat die Freigabe');
+
+// Dasselbe für Dennis' Einträge (sein Siegel)
+const ein = ctx.window.QuestStore.eintraege(cfg);
+haengt = true; haengend = 0;
+ein.setzen('q_zug', { status: 'bestanden', zeit: jetzt });
+await spule(20_000);
+pruefe(haengend >= 2, `Dennis' Eintrag: hängende Anfrage abgebrochen und neu versucht (${haengend} Versuche)`);
+haengt = false;
+await spule(20_000);
+pruefe(geschrieben.some(g => g.url.includes('-dennis/q_zug')), 'Dennis\' Eintrag kommt an, sobald das Netz wieder geht');
 
 pruefe(aktiv().length <= 3, `Nie mehr als eine Verbindung je Kanal offen (${aktiv().length})`);
 
